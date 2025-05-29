@@ -47,8 +47,8 @@ public class SwaggerConfig {
 
 	private Info apiInfo() {
 		return new Info()
-			.title("Ticketing 911")
-			.description("Ticketing 911 팀 프로젝트 과제")
+			.title("NebulaZone")
+			.description("NebulaZone 최종 팀 프로젝트")
 			.version("1.0");
 	}
 }
