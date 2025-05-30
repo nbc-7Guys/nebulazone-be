@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Getter
 @Builder
-@AllArgsConstructor(access = lombok.AccessLevel.PROTECTED)
+@AllArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 public class Address {
 	private String roadAddress;
