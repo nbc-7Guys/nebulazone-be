@@ -14,7 +14,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 @Getter
 @Builder
 public class AuthUser {
-	private String id;
+	private Long id;
 	private String email;
 	private Set<UserRole> roles;
 

@@ -60,12 +60,34 @@ public class Post extends BaseEntity {
 	@Column(name = "image_url")
 	private List<PostImage> postImages = new ArrayList<>();
 
-
 	@Builder
-	public Post(String title, String content, PostType type, User user) {
+	private Post(String title, String content, PostType type, User user) {
 		this.title = title;
 		this.content = content;
 		this.type = type;
 		this.user = user;
+	}
+
+	public static Post of(String title, String content, PostType type, User user) {
+		return Post.builder()
+			.title(title)
+			.content(content)
+			.type(type)
+			.user(user)
+			.build();
+	}
+
+	public void addPostImages(List<String> postImagesUrl) {
+		if (postImagesUrl != null) {
+			this.postImages.addAll(postImagesUrl.stream()
+				.map(PostImage::new)
+				.toList());
+		}
+
+	}
+
+	public void delete() {
+		this.isDeleted = true;
+		this.deletedAt = LocalDateTime.now();
 	}
 }
