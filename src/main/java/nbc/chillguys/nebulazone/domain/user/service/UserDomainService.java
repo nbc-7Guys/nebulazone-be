@@ -25,7 +25,7 @@ public class UserDomainService {
 	 * 조회 시 roles도 함께 fetch
 	 * @param email 이메일
 	 * @throws UserException 없을 시 예외 발생
-	 * @return id, email, password, roles
+	 * @return user
 	 * @author 이승현
 	 */
 	public User findActiveUserByEmail(String email) {
@@ -50,7 +50,7 @@ public class UserDomainService {
 	 * 조회 시 address도 함께 fetch
 	 * @param userId 유저 id
 	 * @throws UserException 없을 시 예외 발생
-	 * @return 유저의 모든 정보
+	 * @return user
 	 * @author 이승현
 	 */
 	public User findActiveUserById(Long userId) {
@@ -62,7 +62,7 @@ public class UserDomainService {
 	 * 유저 생성<br>
 	 * domain 가입 유형
 	 * @param userSignUpCommand 유저 가입 정보
-	 * @return 유저의 모든 정보
+	 * @return user
 	 * @author 이승현
 	 */
 	public User createUser(UserSignUpCommand userSignUpCommand) {
