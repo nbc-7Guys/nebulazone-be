@@ -9,18 +9,32 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import nbc.chillguys.nebulazone.infra.security.jwt.JwtUtil;
+import nbc.chillguys.nebulazone.infra.security.jwt.filter.CustomAuthenticationEntryPoint;
+import nbc.chillguys.nebulazone.infra.security.jwt.filter.JwtAuthenticationFilter;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+	private final CustomAuthenticationEntryPoint entryPoint;
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+	public SecurityConfig(ObjectMapper objectMapper, JwtUtil jwtUtil) {
+		this.entryPoint = new CustomAuthenticationEntryPoint(objectMapper);
+		this.jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, entryPoint);
+	}
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		return httpSecurity
@@ -28,7 +42,24 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> auth
-				.anyRequest().permitAll())
+				.requestMatchers(
+					"/v3/api-docs/**",
+					"/swagger-ui/**",
+					"/swagger-ui.html",
+					"/favicon.ico",
+					"/error",
+					"/actuator/**",
+					"/metrics/**",
+					"/api/v1/**"
+				).permitAll()
+				.requestMatchers(
+					"/auth/signin",
+					"/users/signup"
+				).permitAll()
+				.anyRequest().authenticated())
+			.exceptionHandling(exception ->
+				exception.authenticationEntryPoint(entryPoint))
+			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.build();
 	}
 

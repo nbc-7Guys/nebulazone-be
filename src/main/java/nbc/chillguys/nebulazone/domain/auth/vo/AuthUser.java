@@ -9,12 +9,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import lombok.Builder;
 import lombok.Getter;
+import nbc.chillguys.nebulazone.domain.user.dto.UserSignInInfo;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 
 @Getter
 @Builder
 public class AuthUser {
-	private String id;
+	private Long id;
 	private String email;
 	private Set<UserRole> roles;
 
@@ -22,5 +23,13 @@ public class AuthUser {
 		return this.roles.stream()
 			.map(role -> new SimpleGrantedAuthority(role.name()))
 			.collect(Collectors.toSet());
+	}
+
+	public static AuthUser from(UserSignInInfo userInfo) {
+		return AuthUser.builder()
+			.id(userInfo.id())
+			.email(userInfo.email())
+			.roles(userInfo.roles())
+			.build();
 	}
 }
