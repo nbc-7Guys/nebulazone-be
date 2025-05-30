@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auth.dto.request.SignInRequest;
 import nbc.chillguys.nebulazone.application.auth.dto.response.SignInResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
-import nbc.chillguys.nebulazone.domain.user.dto.UserSignInInfo;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.security.jwt.JwtUtil;
 
@@ -17,11 +17,11 @@ public class AuthService {
 	private final JwtUtil jwtUtil;
 
 	public SignInResponse signIn(SignInRequest signInRequest) {
-		UserSignInInfo userSignInInfo = userDomainService.findActiveUserByEmail(signInRequest.email());
+		User user = userDomainService.findActiveUserByEmail(signInRequest.email());
 
-		userDomainService.validPassword(signInRequest.password(), userSignInInfo.password());
+		userDomainService.validPassword(signInRequest.password(), user.getPassword());
 
-		AuthUser authUser = AuthUser.from(userSignInInfo);
+		AuthUser authUser = AuthUser.from(user);
 
 		String accessToken = jwtUtil.generateAccessToken(authUser);
 		String refreshToken = jwtUtil.generateRefreshToken(authUser);

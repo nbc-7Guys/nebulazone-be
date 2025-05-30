@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
-import nbc.chillguys.nebulazone.domain.user.dto.UserInfo;
 import nbc.chillguys.nebulazone.domain.user.dto.UserSignUpCommand;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @Service
@@ -21,8 +21,8 @@ public class UserService {
 
 		userDomainService.validNickname(signUpUserRequest.nickname());
 
-		UserInfo userInfo = userDomainService.createUser(UserSignUpCommand.from(signUpUserRequest));
+		User user = userDomainService.createUser(UserSignUpCommand.from(signUpUserRequest));
 
-		return UserResponse.from(userInfo);
+		return UserResponse.from(user);
 	}
 }

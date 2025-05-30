@@ -5,9 +5,9 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import nbc.chillguys.nebulazone.domain.user.dto.UserInfo;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record UserResponse(
@@ -24,20 +24,20 @@ public record UserResponse(
 	LocalDateTime createdAt,
 	LocalDateTime modifiedAt
 ) {
-	public static UserResponse from(UserInfo userInfo) {
+	public static UserResponse from(User user) {
 		return new UserResponse(
-			userInfo.id(),
-			userInfo.email(),
-			userInfo.phone(),
-			userInfo.nickname(),
-			userInfo.profileImageUrl(),
-			userInfo.point(),
-			userInfo.oauthType(),
-			userInfo.oauthId(),
-			userInfo.providerId(),
-			userInfo.addresses(),
-			userInfo.createdAt(),
-			userInfo.modifiedAt()
+			user.getId(),
+			user.getEmail(),
+			user.getPhone(),
+			user.getNickname(),
+			user.getProfileImage(),
+			user.getPoint(),
+			user.getOauthType(),
+			user.getOauthId(),
+			user.getProviderId(),
+			user.getAddresses(),
+			user.getCreatedAt(),
+			user.getModifiedAt()
 		);
 	}
 }

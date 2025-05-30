@@ -6,8 +6,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.user.dto.UserInfo;
-import nbc.chillguys.nebulazone.domain.user.dto.UserSignInInfo;
 import nbc.chillguys.nebulazone.domain.user.dto.UserSignUpCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -30,11 +28,9 @@ public class UserDomainService {
 	 * @return id, email, password, roles
 	 * @author 이승현
 	 */
-	public UserSignInInfo findActiveUserByEmail(String email) {
-		User user = userRepository.findActiveUserByEmail(email)
+	public User findActiveUserByEmail(String email) {
+		return userRepository.findActiveUserByEmail(email)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-
-		return UserSignInInfo.from(user);
 	}
 
 	/**
@@ -57,11 +53,9 @@ public class UserDomainService {
 	 * @return 유저의 모든 정보
 	 * @author 이승현
 	 */
-	public UserInfo findActiveUserById(Long userId) {
-		User user = userRepository.findActiveUserById(userId)
+	public User findActiveUserById(Long userId) {
+		return userRepository.findActiveUserById(userId)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-
-		return UserInfo.from(user);
 	}
 
 	/**
@@ -71,7 +65,7 @@ public class UserDomainService {
 	 * @return 유저의 모든 정보
 	 * @author 이승현
 	 */
-	public UserInfo createUser(UserSignUpCommand userSignUpCommand) {
+	public User createUser(UserSignUpCommand userSignUpCommand) {
 		User user = User.builder()
 			.email(userSignUpCommand.email())
 			.password(passwordEncoder.encode(userSignUpCommand.password()))
@@ -84,9 +78,7 @@ public class UserDomainService {
 			.addresses(userSignUpCommand.addresses())
 			.build();
 
-		User savedUser = userRepository.save(user);
-
-		return UserInfo.from(savedUser);
+		return userRepository.save(user);
 	}
 
 	/**
