@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -12,6 +13,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -57,9 +59,17 @@ public class User extends BaseEntity {
 	private UserStatus status;
 
 	@ElementCollection
+	@CollectionTable(
+		name = "user_roles",
+		joinColumns = @JoinColumn(name = "user_id")
+	)
 	private Set<UserRole> roles;
 
 	@ElementCollection
+	@CollectionTable(
+		name = "user_addresses",
+		joinColumns = @JoinColumn(name = "user_id")
+	)
 	private Set<Address> addresses;
 
 	private LocalDateTime deletedAt;
@@ -77,7 +87,8 @@ public class User extends BaseEntity {
 		this.oauthId = oauthId;
 		this.providerId = providerId;
 		this.roles = roles != null ? roles : new HashSet<>();
-		this.addresses = this.addresses != null ? addresses : new HashSet<>();
+		this.addresses = addresses != null ? addresses : new HashSet<>();
+		this.status = UserStatus.ACTIVE;
 	}
 
 	public void addRole(UserRole role) {
