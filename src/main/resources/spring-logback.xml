@@ -42,7 +42,7 @@
 
     <logger name="org.springframework" level="info"/>
     <logger name="org.hibernate" level="warn"/>
-    <logger name=".." level="info"/>
+    <logger name="nbc.chillguys.nebulazone" level="info"/>
 
     <root level="warn">
         <appender-ref ref="CONSOLE"/>
