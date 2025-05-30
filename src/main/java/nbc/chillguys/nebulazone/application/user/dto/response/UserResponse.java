@@ -11,7 +11,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record UserResponse(
-	Long id,
+	Long userId,
 	String email,
 	String phone,
 	String nickname,
