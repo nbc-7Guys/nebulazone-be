@@ -20,7 +20,7 @@ public record UserSignUpCommand(
 			signUpUserRequest.password(),
 			signUpUserRequest.phone(),
 			signUpUserRequest.nickname(),
-			signUpUserRequest.profileImageUrl(),
+			signUpUserRequest.profileImage(),
 			signUpUserRequest.addresses().stream()
 				.map(a -> Address.builder()
 					.roadAddress(a.roadAddress())
