@@ -2,7 +2,6 @@ package nbc.chillguys.nebulazone.common.response;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,20 +22,20 @@ public class CommonResponse {
 	private final int status;
 	private final String message;
 	private final LocalDateTime timestamp;
-	private final List<FieldError> errors;
+	@Builder.Default
+	private final List<FieldError> errors = new ArrayList<>();
 
-	public static CommonResponse of(ErrorCode errorCode) {
+	public static CommonResponse of(int status, String message) {
 		return CommonResponse.builder()
-			.status(errorCode.getStatus())
-			.message(errorCode.getMessage())
+			.status(status)
+			.message(message)
 			.timestamp(LocalDateTime.now())
-			.errors(Collections.emptyList())
 			.build();
 	}
 
 	public static CommonResponse of(ErrorCode errorCode, BindingResult bindingResult) {
 		return CommonResponse.builder()
-			.status(errorCode.getStatus())
+			.status(errorCode.getStatus().value())
 			.message(errorCode.getMessage())
 			.timestamp(LocalDateTime.now())
 			.errors(FieldError.of(bindingResult))
