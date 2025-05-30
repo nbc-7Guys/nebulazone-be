@@ -1,0 +1,43 @@
+package nbc.chillguys.nebulazone.application.user.dto.response;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import nbc.chillguys.nebulazone.domain.user.entity.Address;
+import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record UserResponse(
+	Long userId,
+	String email,
+	String phone,
+	String nickname,
+	String profileImageUrl,
+	int point,
+	OAuthType oauthType,
+	Long oauthId,
+	String providerId,
+	Set<Address> addresses,
+	LocalDateTime createdAt,
+	LocalDateTime modifiedAt
+) {
+	public static UserResponse from(User user) {
+		return new UserResponse(
+			user.getId(),
+			user.getEmail(),
+			user.getPhone(),
+			user.getNickname(),
+			user.getProfileImage(),
+			user.getPoint(),
+			user.getOauthType(),
+			user.getOauthId(),
+			user.getProviderId(),
+			user.getAddresses(),
+			user.getCreatedAt(),
+			user.getModifiedAt()
+		);
+	}
+}

@@ -28,6 +28,20 @@ spring:
       host: localhost
       port: 6379
 
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
+
+  token:
+    access:
+      second: 60
+      minute: 60
+      hour: 12
+    refresh:
+      second: 60
+      minute: 60
+      hour: 24
+
 management:
   endpoints:
     web:
