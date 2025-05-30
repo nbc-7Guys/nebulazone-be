@@ -47,7 +47,12 @@ public class PointHistory extends BaseEntity {
 	private PointHistoryStatus pointHistoryStatus;
 
 	@Builder
-	public PointHistory(int price, String account, PointHistoryType pointHistoryType, PointHistoryStatus pointHistoryStatus) {
+	public PointHistory(
+		int price,
+		String account,
+		PointHistoryType pointHistoryType,
+		PointHistoryStatus pointHistoryStatus
+	) {
 		this.price = price;
 		this.account = account;
 		this.pointHistoryType = pointHistoryType;

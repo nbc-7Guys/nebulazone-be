@@ -32,7 +32,7 @@ public class ProductService {
 	public CreateProductResponse createProduct(AuthUser authUser, Long catalogId, CreateProductRequest request,
 		List<MultipartFile> multipartFiles) {
 
-		User findUser = userDomainService.getUserById(authUser.getId());
+		User findUser = userDomainService.findActiveUserById(authUser.getId());
 
 		// todo: controller에서 넘어온 이미지들을 url 리스트로 변환한 다음 Product를 생성
 		// List<String> productImageUrls = s3Service.createImageUrls(multipartFiles);

@@ -26,7 +26,7 @@ public class PostService {
 	public CreatePostResponse createPost(AuthUser authUser, CreatePostRequest request,
 		List<MultipartFile> multipartFiles) {
 
-		User findUser = userDomainService.getUserById(authUser.getId());
+		User findUser = userDomainService.findActiveUserById(authUser.getId());
 		PostCreateCommand postCreateDto = PostCreateCommand.of(findUser, request);
 
 		// todo: controller에서 넘어온 이미지들을 url 리스트로 변환한 다음 Post를 생성
