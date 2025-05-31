@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.domain.chat.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -37,10 +39,14 @@ public class ChatHistory extends BaseEntity {
 	@Column(nullable = false)
 	private String message;
 
+	@Column(nullable = false)
+	private LocalDateTime sendtime;
+
 	@Builder
-	public ChatHistory(ChatRoom chatRoom, User user, String message) {
+	public ChatHistory(ChatRoom chatRoom, Long userId, String message, LocalDateTime sendtime) {
 		this.chatRoom = chatRoom;
-		this.userId = user.getId();
+		this.userId = userId;
 		this.message = message;
+		this.sendtime = sendtime;
 	}
 }
