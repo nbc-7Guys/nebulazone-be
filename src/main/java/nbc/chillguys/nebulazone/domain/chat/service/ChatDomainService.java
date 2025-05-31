@@ -20,7 +20,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 public class ChatDomainService {
 
 	/**
-	 * 채팅방 생성과 동시에 참가자 생성 및 할당
+	 * 채팅방 및 참가자 객체 생성
 	 */
 	public ChatRoomCreationInfo createChatRoom(Product product, User buyer, User seller) {
 		ChatRoom chatRoom = ChatRoom.builder()

@@ -54,6 +54,7 @@ public class ChatService {
 	@Transactional
 	public CreateChatRoomResponse createOrGet(AuthUser authUser, CreateChatRoomRequest request) {
 
+		// 기존에 참가했던 채팅방이 있는지 확인
 		Optional<ChatRoom> room = chatRoomRepository.findChatRoom(request.productId(), authUser.getId(),
 			request.sellerId());
 		if (room.isPresent()) {
@@ -68,8 +69,10 @@ public class ChatService {
 
 		User seller = product.getSeller();
 
+		// 채팅방 및 참가자 객체 생성
 		ChatRoomCreationInfo result = chatDomainService.createChatRoom(product, buyer, seller);
 
+		// 참가자 저장
 		chatRoomUserRepository.saveAll(result.participants());
 
 		return CreateChatRoomResponse.of(result.chatRoom());
@@ -121,12 +124,13 @@ public class ChatService {
 		chatMessageRedisService.saveMessageToRedis(roomId, message);
 	}
 
-	/** 레디스에서 채팅기록 꺼내와서 db에 저장
+	/** 채팅방 Id를 기준으로 레디스에서 채팅기록 꺼내와서 db에 저장
 	 *
 	 * @param roomId 채팅방 id
 	 */
 	@Transactional
 	public void saveMessagesToDb(Long roomId) {
+		// 채팅방Id를 기준으로 레디스에 있는 채팅기록들 불러오기
 		List<ChatMessageInfo> messagesFromRedis = chatMessageRedisService.getMessagesFromRedis(roomId);
 		if (messagesFromRedis.isEmpty()) return;
 
@@ -135,6 +139,7 @@ public class ChatService {
 
 		List<ChatHistory> histories = new ArrayList<>();
 
+		// 레디스에서 불러온 채팅기록들을 for문을 돌면서 채팅기록 테이블에 저장할 리스트에 추가
 		for (ChatMessageInfo messages : messagesFromRedis) {
 
 			User sender = userRepository.findById(messages.senderId())
@@ -151,7 +156,8 @@ public class ChatService {
 		}
 
 		chatRoomHistoryRepository.saveAll(histories);
-		chatMessageRedisService.deleteMessagesInRedis(roomId);
 
+		// db에 저장이 끝난 레디스 데이터 삭제
+		chatMessageRedisService.deleteMessagesInRedis(roomId);
 	}
 }
