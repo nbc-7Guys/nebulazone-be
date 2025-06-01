@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.domain.chat.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,5 +22,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 		""")
 	Optional<ChatRoom> findChatRoom(@Param("productId") Long productId, @Param("sellerId") Long sellerId,
 		@Param("buyerId") Long buyerId);
+
+	boolean existsChatRoomById(Long id);
 
 }
