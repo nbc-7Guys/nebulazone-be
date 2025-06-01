@@ -20,11 +20,11 @@ import nbc.chillguys.nebulazone.application.post.service.PostService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 
 @RestController
-@RequestMapping("/post")
+@RequestMapping("/posts")
 @RequiredArgsConstructor
 public class PostController {
 
-	private final PostService postFacade;
+	private final PostService postService;
 
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<CreatePostResponse> createPost(
@@ -32,7 +32,7 @@ public class PostController {
 		@Valid @RequestPart("post") CreatePostRequest request,
 		@RequestPart("images") List<MultipartFile> multipartFiles) {
 
-		CreatePostResponse postResponse = postFacade.createPost(authUser, request, multipartFiles);
+		CreatePostResponse postResponse = postService.createPost(authUser, request, multipartFiles);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(postResponse);
 	}
