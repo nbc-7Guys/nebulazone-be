@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.infra.security.jwt;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -77,7 +78,7 @@ public class JwtUtil {
 	public AuthUser getAuthUserFromToken(String token) {
 		Claims claims = parseToken(token);
 
-		Set<?> objects = claims.get("roles", Set.class);
+		List<?> objects = claims.get("roles", List.class);
 		Set<UserRole> roles = objects.stream()
 			.map(String::valueOf)
 			.map(UserRole::from)
