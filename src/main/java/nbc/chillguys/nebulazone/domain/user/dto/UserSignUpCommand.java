@@ -14,13 +14,13 @@ public record UserSignUpCommand(
 	String profileImageUrl,
 	Set<Address> addresses
 ) {
-	public static UserSignUpCommand from(SignUpUserRequest signUpUserRequest) {
+	public static UserSignUpCommand of(SignUpUserRequest signUpUserRequest, String profileImageUrl) {
 		return new UserSignUpCommand(
 			signUpUserRequest.email(),
 			signUpUserRequest.password(),
 			signUpUserRequest.phone(),
 			signUpUserRequest.nickname(),
-			signUpUserRequest.profileImage(),
+			profileImageUrl,
 			signUpUserRequest.addresses().stream()
 				.map(a -> Address.builder()
 					.roadAddress(a.roadAddress())
