@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.domain.post.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,8 @@ public class PostDomainService {
 	public Post updatePost(PostUpdateCommand command) {
 		Post post = findActivePost(command.postId());
 
+		validatePostOwner(post, command.userId());
+
 		post.update(command.title(), command.content(), command.imageUrls());
 
 		return post;
@@ -49,8 +52,16 @@ public class PostDomainService {
 	public Long deletePost(PostDeleteCommand command) {
 		Post post = findActivePost(command.postId());
 
+		validatePostOwner(post, command.userId());
+
 		post.delete();
 
 		return post.getId();
+	}
+
+	private void validatePostOwner(Post post, Long userId) {
+		if (Objects.equals(post.getUser().getId(), userId)) {
+			throw new PostException(PostErrorCode.NOT_POST_OWNER);
+		}
 	}
 }
