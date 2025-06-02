@@ -29,7 +29,7 @@ public class ProductController {
 		consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<CreateProductResponse> createProduct(
 		@AuthenticationPrincipal AuthUser authUser,
-		@PathVariable Long catalogId,
+		@PathVariable("catalogId") Long catalogId,
 		@Valid @RequestPart("product") CreateProductRequest request,
 		@RequestPart("images") List<MultipartFile> multipartFiles) {
 

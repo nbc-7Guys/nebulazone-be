@@ -51,9 +51,6 @@ public class Product extends BaseEntity {
 	@Column(nullable = false)
 	private ProductTxMethod txMethod;
 
-	@Enumerated(EnumType.STRING)
-	private ProductEndTime endTime;
-
 	private boolean isSold;
 
 	private boolean isDeleted;
@@ -79,7 +76,6 @@ public class Product extends BaseEntity {
 		String description,
 		Long price,
 		ProductTxMethod txMethod,
-		ProductEndTime endTime,
 		boolean isSold,
 		boolean isDeleted,
 		LocalDateTime deletedAt,
@@ -90,7 +86,6 @@ public class Product extends BaseEntity {
 		this.description = description;
 		this.price = price;
 		this.txMethod = txMethod;
-		this.endTime = endTime;
 		this.isSold = isSold;
 		this.isDeleted = isDeleted;
 		this.deletedAt = deletedAt;
@@ -99,13 +94,12 @@ public class Product extends BaseEntity {
 	}
 
 	public static Product of(String name, String description, Long price, ProductTxMethod txMethod,
-		ProductEndTime endTime, User seller, Catalog catalog) {
+		User seller, Catalog catalog) {
 		return Product.builder()
 			.name(name)
 			.description(description)
 			.price(price)
 			.txMethod(txMethod)
-			.endTime(endTime)
 			.seller(seller)
 			.catalog(catalog)
 			.build();

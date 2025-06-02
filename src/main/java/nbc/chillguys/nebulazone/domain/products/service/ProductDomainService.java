@@ -20,7 +20,7 @@ public class ProductDomainService {
 	@Transactional
 	public Product createProduct(ProductCreateCommand command, List<String> productImageUrls) {
 		Product product = Product.of(command.name(), command.description(), command.price(),
-			command.txMethod(), command.endTime(), command.user(), command.catalog());
+			command.txMethod(), command.user(), command.catalog());
 
 		Product saveProduct = productRepository.save(product);
 		product.addProductImages(productImageUrls);
