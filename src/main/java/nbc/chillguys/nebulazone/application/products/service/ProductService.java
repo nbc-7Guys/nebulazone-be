@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.application.products.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -42,13 +43,13 @@ public class ProductService {
 
 		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(findUser, null, request);
 
-		Product createProduct = productDomainService.createProduct(productCreateCommand, null);
+		Product createProduct = productDomainService.createProduct(productCreateCommand, new ArrayList<>());
 
 		if (createProduct.getTxMethod() == ProductTxMethod.AUCTION) {
 			// todo: 메서드 타입이 옥션이면 자동으로 옥션 생성할 예정.....
 			// auctionDomainService.createProduct(...);
 		}
 
-		return CreateProductResponse.from(createProduct);
+		return CreateProductResponse.from(createProduct, new ArrayList<>());
 	}
 }
