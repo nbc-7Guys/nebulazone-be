@@ -50,11 +50,9 @@ public class PostController {
 	public ResponseEntity<UpdatePostResponse> updatePost(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("postId") Long postId,
-		@Valid @RequestBody UpdatePostRequest req
+		@Valid @RequestBody UpdatePostRequest request
 	) {
-		PostUpdateCommand command = req.toCommand(authUser.getId(), postId);
-
-		UpdatePostResponse res = postService.updatePost(command);
+		UpdatePostResponse res = postService.updatePost(authUser.getId(), postId, request);
 
 		return ResponseEntity.ok(res);
 	}
@@ -64,9 +62,7 @@ public class PostController {
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("postId") Long postId
 	) {
-		PostDeleteCommand command = PostDeleteCommand.of(authUser.getId(), postId);
-
-		DeletePostResponse res = postService.deletePost(command);
+		DeletePostResponse res = postService.deletePost(authUser.getId(), postId);
 
 		return ResponseEntity.ok(res);
 	}

@@ -49,14 +49,12 @@ public class PostDomainService {
 	}
 
 	@Transactional
-	public Long deletePost(PostDeleteCommand command) {
+	public void deletePost(PostDeleteCommand command) {
 		Post post = findActivePost(command.postId());
 
 		validatePostOwner(post, command.userId());
 
 		post.delete();
-
-		return post.getId();
 	}
 
 	private void validatePostOwner(Post post, Long userId) {

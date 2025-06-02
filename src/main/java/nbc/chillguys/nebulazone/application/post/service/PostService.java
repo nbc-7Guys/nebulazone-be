@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
+import nbc.chillguys.nebulazone.application.post.dto.request.UpdatePostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.response.CreatePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.DeletePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse;
@@ -44,14 +45,18 @@ public class PostService {
 
 	}
 
-	public UpdatePostResponse updatePost(PostUpdateCommand command) {
+	public UpdatePostResponse updatePost(Long userId, Long postId, UpdatePostRequest request) {
+		PostUpdateCommand command = request.toCommand(userId, postId);
+
 		Post post = postDomainService.updatePost(command);
 
 		return UpdatePostResponse.from(post);
 	}
 
-	public DeletePostResponse deletePost(PostDeleteCommand command) {
-		Long postId = postDomainService.deletePost(command);
+	public DeletePostResponse deletePost(Long userId, Long postId) {
+		PostDeleteCommand command = PostDeleteCommand.of(userId, postId);
+
+		postDomainService.deletePost(command);
 
 		return DeletePostResponse.from(postId);
 	}
