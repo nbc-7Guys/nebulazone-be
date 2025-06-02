@@ -35,6 +35,6 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=nbc-7Guys_nebulazone
-            -Dsonar.organization=nbc-7Guys
+            -Dsonar.organization=nbc-7guys
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.qualitygate.wait=true
