@@ -39,7 +39,7 @@ public class UserController {
 	)
 	@PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<UserResponse> signup(
-		@Valid @RequestPart SignUpUserRequest signUpUserRequest,
+		@Valid @RequestPart("signUpUserRequest") SignUpUserRequest signUpUserRequest,
 		@ImageFile @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
 	) {
 		UserResponse responseDto = userService.signUp(signUpUserRequest, profileImage);
