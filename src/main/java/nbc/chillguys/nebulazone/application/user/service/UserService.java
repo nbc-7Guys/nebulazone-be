@@ -84,7 +84,7 @@ public class UserService {
 	public Long withdrawUser(WithdrawUserRequest withdrawUserRequest, AuthUser authUser) {
 		User user = userDomainService.findActiveUserById(authUser.getId());
 
-		userDomainService.validPassword(withdrawUserRequest.oldPassword(), user.getPassword());
+		userDomainService.validPassword(withdrawUserRequest.password(), user.getPassword());
 
 		userDomainService.withdrawUser(user);
 
