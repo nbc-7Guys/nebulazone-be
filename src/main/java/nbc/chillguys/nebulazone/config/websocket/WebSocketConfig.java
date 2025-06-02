@@ -11,7 +11,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
 	// 메시지 브로커 어디로 보낼것인지, 받을 것인지
-	// @Override
+	@Override
 	public void configureMessageBroker(MessageBrokerRegistry registry) {
 		// 메시지를 보낼 prefix
 		registry.setApplicationDestinationPrefixes("/chat");
