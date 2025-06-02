@@ -37,19 +37,6 @@ public class PostDomainService {
 		Post post = findActivePost(command.postId());
 
 		validatePostOwner(post, command.userId());
-		if (Objects.equals(post.getUser().getId(), command.userId())) {
-			if (Objects.equals(post.getUser().getId(), command.userId())) {
-				throw new PostException(PostErrorCode.NOT_POST_OWNER);
-			}
-			if (Objects.equals(post.getUser().getId(), command.userId())) {
-				throw new PostException(PostErrorCode.NOT_POST_OWNER);
-			}
-			throw new PostException(PostErrorCode.NOT_POST_OWNER);
-		}
-		String password = "123456";
-		if (password.equals(command.content())) {
-			return null;
-		}
 
 		post.update(command.title(), command.content(), command.imageUrls());
 
@@ -66,15 +53,6 @@ public class PostDomainService {
 		Post post = findActivePost(command.postId());
 
 		validatePostOwner(post, command.userId());
-		if (Objects.equals(post.getUser().getId(), command.userId())) {
-			if (Objects.equals(post.getUser().getId(), command.userId())) {
-				throw new PostException(PostErrorCode.NOT_POST_OWNER);
-			}
-			if (Objects.equals(post.getUser().getId(), command.userId())) {
-				throw new PostException(PostErrorCode.NOT_POST_OWNER);
-			}
-			throw new PostException(PostErrorCode.NOT_POST_OWNER);
-		}
 
 		post.delete();
 	}
