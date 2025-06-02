@@ -2,6 +2,7 @@ package nbc.chillguys.nebulazone.application.user.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -20,10 +21,24 @@ public record UserResponse(
 	OAuthType oauthType,
 	Long oauthId,
 	String providerId,
-	Set<Address> addresses,
+	Set<AddressResponse> addresses,
 	LocalDateTime createdAt,
 	LocalDateTime modifiedAt
 ) {
+	public record AddressResponse(
+		String roadAddress,
+		String detailAddress,
+		String addressNickname
+	) {
+		public static AddressResponse from(Address address) {
+			return new AddressResponse(
+				address.getRoadAddress(),
+				address.getDetailAddress(),
+				address.getAddressNickname()
+			);
+		}
+	}
+
 	public static UserResponse from(User user) {
 		return new UserResponse(
 			user.getId(),
@@ -35,7 +50,9 @@ public record UserResponse(
 			user.getOauthType(),
 			user.getOauthId(),
 			user.getProviderId(),
-			user.getAddresses(),
+			user.getAddresses().stream()
+				.map(AddressResponse::from)
+				.collect(Collectors.toSet()),
 			user.getCreatedAt(),
 			user.getModifiedAt()
 		);
