@@ -7,7 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
+import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
+import nbc.chillguys.nebulazone.domain.post.exception.PostErrorCode;
+import nbc.chillguys.nebulazone.domain.post.exception.PostException;
 import nbc.chillguys.nebulazone.domain.post.repository.PostRepository;
 
 @Service
@@ -27,4 +30,17 @@ public class PostDomainService {
 		return savePost;
 	}
 
+	@Transactional
+	public Post updatePost(PostUpdateCommand command) {
+		Post post = findActivePost(command.postId());
+
+		post.update(command.title(), command.content(), command.imageUrls());
+
+		return post;
+	}
+
+	public Post findActivePost(Long postId) {
+		return postRepository.findById(postId)
+			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+	}
 }

@@ -86,6 +86,17 @@ public class Post extends BaseEntity {
 
 	}
 
+	public void update(String title, String content, List<String> imageUrls) {
+		this.title = title;
+		this.content = content;
+
+		this.postImages.addAll(
+			imageUrls.stream()
+				.map(PostImage::new)
+				.toList()
+		);
+	}
+
 	public void delete() {
 		this.isDeleted = true;
 		this.deletedAt = LocalDateTime.now();

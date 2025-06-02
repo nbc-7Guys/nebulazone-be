@@ -6,7 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,9 +18,12 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
+import nbc.chillguys.nebulazone.application.post.dto.request.UpdatePostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.response.CreatePostResponse;
+import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse;
 import nbc.chillguys.nebulazone.application.post.service.PostService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 
 @RestController
 @RequestMapping("/posts")
@@ -35,6 +41,19 @@ public class PostController {
 		CreatePostResponse postResponse = postService.createPost(authUser, request, multipartFiles);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(postResponse);
+	}
+
+	@PutMapping("/{postId}")
+	public ResponseEntity<UpdatePostResponse> updatePost(
+		@AuthenticationPrincipal AuthUser authUser,
+		@PathVariable("postId") Long postId,
+		@Valid @RequestBody UpdatePostRequest req
+	) {
+		PostUpdateCommand command = req.toCommand(authUser.getId(), postId);
+
+		UpdatePostResponse res = postService.updatePost(command);
+
+		return ResponseEntity.ok(res);
 	}
 
 }
