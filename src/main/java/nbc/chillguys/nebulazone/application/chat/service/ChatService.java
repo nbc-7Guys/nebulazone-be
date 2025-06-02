@@ -59,13 +59,22 @@ public class ChatService {
 	@Transactional
 	public CreateChatRoomResponse createOrGet(AuthUser authUser, CreateChatRoomRequest request) {
 
-		// 기존에 참가했던 채팅방이 있는지 확인
-		Optional<ChatRoom> room = chatRoomRepository.findChatRoom(request.productId(), authUser.getId(),
-			request.sellerId());
-		if (room.isPresent()) {
-			return CreateChatRoomResponse.of(room.get());
+		/**
+		 * 구매자가 채팅을 한 후 채팅방을 나가지 않고 다시 거래페이지에서 채팅하기 버튼을 눌렀을 경우
+		 * 1. 채팅방 존재 확인
+		 * 2. 존재하면 현재 유저가 참여중인지 확인
+		 * 3. 참여 중이면 -> 기존 방 반환
+		 * 4. 존재하지 않거나 참여 중이 아니면 -> 새 채팅방 생성 및 참여자 등록
+		 */
+
+		// 로그인한 유저가 특정 상품에 대해 참여중인 채팅방이 있는지 확인
+		Optional<ChatRoomUser> existingChatRoomUser = chatRoomUserRepository.findByIdUserIdAndChatRoomProductId(
+			authUser.getId(), request.productId());
+		if (existingChatRoomUser.isPresent()) {
+			return CreateChatRoomResponse.of(existingChatRoomUser.get().getChatRoom());
 		}
 
+		// 기존에 참여중인 방이 없다면 새 채팅방 생성
 		Product product = productRepository.findById(request.productId())
 			.orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다."));
 
@@ -87,15 +96,12 @@ public class ChatService {
 	 * 유저가 참여중인 모든 채팅방 조회
 	 *
 	 * @param authUser the auth user
-	 * @return the find chat room response
 	 */
 	public FindChatRoomResponse findChatRooms(AuthUser authUser) {
 		// 로그인한 유저 ID를 기반으로 해당 유저가 참여중인 모든 채팅방 찾기
 		List<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findAllByUserId(authUser.getId());
 
-		List<ChatRoom> chatRooms = chatRoomUsers.stream()
-			.map(ChatRoomUser::getChatRoom)
-			.toList();
+		List<ChatRoom> chatRooms = chatRoomUsers.stream().map(ChatRoomUser::getChatRoom).toList();
 
 		return FindChatRoomResponse.of(chatRooms);
 	}
@@ -110,18 +116,13 @@ public class ChatService {
 	 */
 	public List<FindChatHistoryResponse> findChatRoomHistories(AuthUser authUser, Long roomId) {
 		// 채팅기록 조회
-
-		boolean existsed = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId, authUser.getId());
-		if (!existsed) {
+		if (!chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId, authUser.getId())) {
 			throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 		}
 
 		List<ChatHistory> chatHistory = chatRoomHistoryRepository.findAllByChatRoomId(roomId);
 
-		List<Long> senderIdList = chatHistory.stream()
-			.map(ChatHistory::getUserId)
-			.distinct()
-			.toList();
+		List<Long> senderIdList = chatHistory.stream().map(ChatHistory::getUserId).distinct().toList();
 
 		Map<Long, String> userNicknames = userRepository.findAllById(senderIdList)
 			.stream()
@@ -145,8 +146,12 @@ public class ChatService {
 	 */
 	@Transactional
 	public void leaveChatRoom(AuthUser authUser, Long roomId) {
-		// TODO - softDelete로 할지 말지 정하기
+		ChatRoomUser user = chatRoomUserRepository.findByIdUserIdAndIdChatRoomId(authUser.getId(), roomId)
+			.orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED));
 
+		chatRoomUserRepository.delete(user);
+
+		messagingTemplate.convertAndSend("/topic/chat/" + roomId, "상대방이 채팅방을 나갔습니다.");
 	}
 
 	/**
@@ -166,7 +171,8 @@ public class ChatService {
 		}
 
 		// 참가자 확인
-		boolean isParticipant = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId, authUser.getId());
+		boolean isParticipant = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId,
+			authUser.getId());
 		if (!isParticipant) {
 			throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 		}
@@ -193,7 +199,8 @@ public class ChatService {
 	public void saveMessagesToDb(Long roomId) {
 		// 채팅방Id를 기준으로 레디스에 있는 채팅기록들 불러오기
 		List<ChatMessageInfo> messagesFromRedis = chatMessageRedisService.getMessagesFromRedis(roomId);
-		if (messagesFromRedis.isEmpty()) return;
+		if (messagesFromRedis.isEmpty())
+			return;
 
 		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
 			.orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
@@ -206,12 +213,8 @@ public class ChatService {
 			User sender = userRepository.findById(messages.senderId())
 				.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-			ChatHistory history = ChatHistory.builder()
-				.chatRoom(chatRoom)
-				.userId(sender.getId()) // N + 1 문제 발생
-				.message(messages.message())
-				.sendtime(messages.sendTime())
-				.build();
+			ChatHistory history = ChatHistory.builder().chatRoom(chatRoom).userId(sender.getId()) // N + 1 문제 발생
+				.message(messages.message()).sendtime(messages.sendTime()).build();
 
 			histories.add(history);
 		}
