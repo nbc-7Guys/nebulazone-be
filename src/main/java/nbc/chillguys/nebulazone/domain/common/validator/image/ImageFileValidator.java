@@ -15,7 +15,7 @@ import jakarta.validation.ConstraintValidatorContext;
 public class ImageFileValidator implements ConstraintValidator<ImageFile, Object> {
 
 	private static final Tika tika = new Tika();
-	private static final List<String> validTypeList
+	private static final List<String> VALID_TYPE_LIST
 		= Arrays.asList("image/jpeg", "image/pjpeg", "image/png", "image/gif", "image/bmp", "image/x-windows-bmp");
 
 	@Override
@@ -46,7 +46,7 @@ public class ImageFileValidator implements ConstraintValidator<ImageFile, Object
 		try (InputStream inputStream = file.getInputStream()) {
 			String mimeType = tika.detect(inputStream);
 
-			return validTypeList.stream().anyMatch(validType -> validType.equalsIgnoreCase(mimeType));
+			return VALID_TYPE_LIST.stream().anyMatch(validType -> validType.equalsIgnoreCase(mimeType));
 		} catch (IOException e) {
 			return false;
 		}
