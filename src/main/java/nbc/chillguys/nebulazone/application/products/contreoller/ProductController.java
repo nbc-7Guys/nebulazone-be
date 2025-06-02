@@ -31,7 +31,7 @@ public class ProductController {
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("catalogId") Long catalogId,
 		@Valid @RequestPart("product") CreateProductRequest request,
-		@RequestPart("images") List<MultipartFile> multipartFiles) {
+		@RequestPart(value = "images", required = false) List<MultipartFile> multipartFiles) {
 
 		CreateProductResponse productResponse = productService.createProduct(authUser, catalogId, request,
 			multipartFiles);

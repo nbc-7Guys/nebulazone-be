@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.application.post.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -33,9 +34,9 @@ public class PostService {
 		// List<String> postImageUrls = s3Service.createImageUrls(multipartFiles);
 		// Post createPost = postDomainService.createPost(findUser, postCreateDto, postImageUrls);
 
-		Post createPost = postDomainService.createPost(postCreateDto, null);
+		Post createPost = postDomainService.createPost(postCreateDto, new ArrayList<>());
 
-		return CreatePostResponse.from(createPost);
+		return CreatePostResponse.from(createPost, new ArrayList<>());
 
 	}
 
