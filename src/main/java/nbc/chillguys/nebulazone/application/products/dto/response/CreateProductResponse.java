@@ -23,7 +23,6 @@ public record CreateProductResponse(
 			.description(product.getDescription())
 			.price(product.getPrice())
 			.txMethod(product.getTxMethod())
-			.endTime(product.getEndTime())
 			.modifiedAt(product.getModifiedAt())
 			.build();
 	}
