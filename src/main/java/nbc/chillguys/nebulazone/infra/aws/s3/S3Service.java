@@ -31,6 +31,10 @@ public class S3Service {
 	private String bucket;
 
 	public String generateUploadUrlAndUploadFile(MultipartFile file) {
+		if (file.isEmpty()) {
+			return null;
+		}
+
 		String fileName = getFileName(file);
 
 		String contentType = file.getContentType();
@@ -67,7 +71,7 @@ public class S3Service {
 				.put()
 				.uri(URI.create(presignedUrl))
 				.headers(httpHeaders -> {
-					httpHeaders.setContentType(MediaType.valueOf(Objects.requireNonNull(contentType)));
+					httpHeaders.setContentType(MediaType.valueOf(contentType));
 					httpHeaders.setContentLength(file.getSize());
 				})
 				.body(file.getBytes())
