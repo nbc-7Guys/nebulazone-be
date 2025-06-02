@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import nbc.chillguys.nebulazone.common.exception.ErrorCode;
 
 @Getter
 @Builder
@@ -33,10 +32,10 @@ public class CommonResponse {
 			.build();
 	}
 
-	public static CommonResponse of(ErrorCode errorCode, BindingResult bindingResult) {
+	public static CommonResponse of(int status, String message, BindingResult bindingResult) {
 		return CommonResponse.builder()
-			.status(errorCode.getStatus().value())
-			.message(errorCode.getMessage())
+			.status(status)
+			.message(message)
 			.timestamp(LocalDateTime.now())
 			.errors(FieldError.of(bindingResult))
 			.build();

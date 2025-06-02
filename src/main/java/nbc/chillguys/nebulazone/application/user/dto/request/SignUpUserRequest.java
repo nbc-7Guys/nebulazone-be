@@ -33,9 +33,6 @@ public record SignUpUserRequest(
 	)
 	String nickname,
 
-	// 추후 이미지로 변경
-	String profileImage,
-
 	@Valid
 	@NotNull(message = "주소는 필수 입력값이니다.")
 	Set<SignUpUserAddressRequest> addresses
