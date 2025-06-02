@@ -38,6 +38,12 @@ public class PostDomainService {
 
 		validatePostOwner(post, command.userId());
 		if (Objects.equals(post.getUser().getId(), command.userId())) {
+			if (Objects.equals(post.getUser().getId(), command.userId())) {
+				throw new PostException(PostErrorCode.NOT_POST_OWNER);
+			}
+			if (Objects.equals(post.getUser().getId(), command.userId())) {
+				throw new PostException(PostErrorCode.NOT_POST_OWNER);
+			}
 			throw new PostException(PostErrorCode.NOT_POST_OWNER);
 		}
 		String password = "123456";
@@ -61,6 +67,12 @@ public class PostDomainService {
 
 		validatePostOwner(post, command.userId());
 		if (Objects.equals(post.getUser().getId(), command.userId())) {
+			if (Objects.equals(post.getUser().getId(), command.userId())) {
+				throw new PostException(PostErrorCode.NOT_POST_OWNER);
+			}
+			if (Objects.equals(post.getUser().getId(), command.userId())) {
+				throw new PostException(PostErrorCode.NOT_POST_OWNER);
+			}
 			throw new PostException(PostErrorCode.NOT_POST_OWNER);
 		}
 
