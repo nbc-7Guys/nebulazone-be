@@ -18,6 +18,7 @@ import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRe
 import nbc.chillguys.nebulazone.application.products.dto.response.CreateProductResponse;
 import nbc.chillguys.nebulazone.application.products.service.ProductService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +32,7 @@ public class ProductController {
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("catalogId") Long catalogId,
 		@Valid @RequestPart("product") CreateProductRequest request,
-		@RequestPart(value = "images", required = false) List<MultipartFile> multipartFiles) {
+		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> multipartFiles) {
 
 		CreateProductResponse productResponse = productService.createProduct(authUser, catalogId, request,
 			multipartFiles);
