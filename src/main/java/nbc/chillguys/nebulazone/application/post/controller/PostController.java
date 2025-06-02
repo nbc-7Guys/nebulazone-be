@@ -30,7 +30,7 @@ public class PostController {
 	public ResponseEntity<CreatePostResponse> createPost(
 		@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestPart("post") CreatePostRequest request,
-		@RequestPart("images") List<MultipartFile> multipartFiles) {
+		@RequestPart(value = "images", required = false) List<MultipartFile> multipartFiles) {
 
 		CreatePostResponse postResponse = postService.createPost(authUser, request, multipartFiles);
 
