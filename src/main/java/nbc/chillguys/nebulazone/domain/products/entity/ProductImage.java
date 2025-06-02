@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.domain.post.entity;
+package nbc.chillguys.nebulazone.domain.products.entity;
 
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @Embeddable
 @NoArgsConstructor
-public class PostImage {
+public class ProductImage {
 
 	private String url;
 
-	public PostImage(String url) {
+	public ProductImage(String url) {
 		this.url = url;
 	}
 

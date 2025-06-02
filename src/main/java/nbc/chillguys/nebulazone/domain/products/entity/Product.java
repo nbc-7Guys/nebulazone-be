@@ -1,8 +1,12 @@
 package nbc.chillguys.nebulazone.domain.products.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,7 +24,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
-import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Getter
@@ -46,7 +49,7 @@ public class Product extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private TransactionMethod method;
+	private ProductTxMethod txMethod;
 
 	private boolean isSold;
 
@@ -55,19 +58,24 @@ public class Product extends BaseEntity {
 	private LocalDateTime deletedAt;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "seller_user_id")
+	@JoinColumn(name = "seller_user_id", nullable = false)
 	private User seller;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "catalog_id")
+	@JoinColumn(name = "catalog_id")    // todo: 카탈로그 생성코드가 완성되면 추후 nullable = false 작성
 	private Catalog catalog;
+
+	@ElementCollection
+	@CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
+	@Column(name = "image_url")
+	private List<ProductImage> productImages = new ArrayList<>();
 
 	@Builder
 	public Product(
 		String name,
 		String description,
 		Long price,
-		TransactionMethod method,
+		ProductTxMethod txMethod,
 		boolean isSold,
 		boolean isDeleted,
 		LocalDateTime deletedAt,
@@ -77,11 +85,32 @@ public class Product extends BaseEntity {
 		this.name = name;
 		this.description = description;
 		this.price = price;
-		this.method = method;
+		this.txMethod = txMethod;
 		this.isSold = isSold;
 		this.isDeleted = isDeleted;
 		this.deletedAt = deletedAt;
 		this.seller = seller;
 		this.catalog = catalog;
+	}
+
+	public static Product of(String name, String description, Long price, ProductTxMethod txMethod,
+		User seller, Catalog catalog) {
+		return Product.builder()
+			.name(name)
+			.description(description)
+			.price(price)
+			.txMethod(txMethod)
+			.seller(seller)
+			.catalog(catalog)
+			.build();
+	}
+
+	public void addProductImages(List<String> productImageUrls) {
+		if (productImageUrls != null) {
+			this.productImages.addAll(productImageUrls.stream()
+				.map(ProductImage::new)
+				.toList());
+		}
+
 	}
 }
