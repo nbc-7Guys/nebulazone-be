@@ -17,6 +17,10 @@ public enum ProductEndTime {
 	private final long millis;
 
 	public static ProductEndTime of(String endTime) {
+		if (endTime == null || endTime.isBlank()) {
+			return null;
+		}
+
 		return Arrays.stream(ProductEndTime.values())
 			.filter(t -> t.name().equalsIgnoreCase(endTime))
 			.findFirst()
