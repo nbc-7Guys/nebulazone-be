@@ -9,9 +9,11 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.response.CreatePostResponse;
+import nbc.chillguys.nebulazone.application.post.dto.response.DeletePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
+import nbc.chillguys.nebulazone.domain.post.dto.PostDeleteCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
@@ -46,5 +48,11 @@ public class PostService {
 		Post post = postDomainService.updatePost(command);
 
 		return UpdatePostResponse.from(post);
+	}
+
+	public DeletePostResponse deletePost(PostDeleteCommand command) {
+		Long postId = postDomainService.deletePost(command);
+
+		return DeletePostResponse.from(postId);
 	}
 }

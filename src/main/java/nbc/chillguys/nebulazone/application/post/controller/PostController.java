@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -20,9 +21,11 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.request.UpdatePostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.response.CreatePostResponse;
+import nbc.chillguys.nebulazone.application.post.dto.response.DeletePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse;
 import nbc.chillguys.nebulazone.application.post.service.PostService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.post.dto.PostDeleteCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 
 @RestController
@@ -52,6 +55,18 @@ public class PostController {
 		PostUpdateCommand command = req.toCommand(authUser.getId(), postId);
 
 		UpdatePostResponse res = postService.updatePost(command);
+
+		return ResponseEntity.ok(res);
+	}
+
+	@DeleteMapping("/{postId}")
+	public ResponseEntity<DeletePostResponse> deletePost(
+		@AuthenticationPrincipal AuthUser authUser,
+		@PathVariable("postId") Long postId
+	) {
+		PostDeleteCommand command = PostDeleteCommand.of(authUser.getId(), postId);
+
+		DeletePostResponse res = postService.deletePost(command);
 
 		return ResponseEntity.ok(res);
 	}

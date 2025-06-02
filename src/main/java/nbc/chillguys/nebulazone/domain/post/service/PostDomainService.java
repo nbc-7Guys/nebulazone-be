@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
+import nbc.chillguys.nebulazone.domain.post.dto.PostDeleteCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.exception.PostErrorCode;
@@ -42,5 +43,14 @@ public class PostDomainService {
 	public Post findActivePost(Long postId) {
 		return postRepository.findById(postId)
 			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+	}
+
+	@Transactional
+	public Long deletePost(PostDeleteCommand command) {
+		Post post = findActivePost(command.postId());
+
+		post.delete();
+
+		return post.getId();
 	}
 }
