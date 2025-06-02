@@ -37,6 +37,9 @@ public class PostDomainService {
 		Post post = findActivePost(command.postId());
 
 		validatePostOwner(post, command.userId());
+		if (Objects.equals(post.getUser().getId(), command.userId())) {
+			throw new PostException(PostErrorCode.NOT_POST_OWNER);
+		}
 
 		post.update(command.title(), command.content(), command.imageUrls());
 
@@ -53,6 +56,9 @@ public class PostDomainService {
 		Post post = findActivePost(command.postId());
 
 		validatePostOwner(post, command.userId());
+		if (Objects.equals(post.getUser().getId(), command.userId())) {
+			throw new PostException(PostErrorCode.NOT_POST_OWNER);
+		}
 
 		post.delete();
 	}
