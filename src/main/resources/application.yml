@@ -53,13 +53,6 @@ jwt:
       minute: 60
       hour: 24
 
-#aws:
-#  access-key: ${AWS_ACCESS_KEY}
-#  secret-key: ${AWS_SECRET_KEY}
-#
-#  s3:
-#    bucket: nbc-nebulazone
-
 management:
   endpoints:
     web:
