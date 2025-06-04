@@ -15,7 +15,7 @@ import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 public class ChatMessageRedisService {
 
 	private final RedisTemplate<String, Object> redisTemplate;
-	private static final String CHAT_MESSAGE_KEY_PREFIX = "chat:history:";
+	private static final String CHAT_MESSAGE_KEY_PREFIX = "chat:message:";
 
 	/**
      * 채팅 메시지 Redis에 저장
@@ -25,7 +25,7 @@ public class ChatMessageRedisService {
 			String key = CHAT_MESSAGE_KEY_PREFIX + roomId;
 			redisTemplate.opsForList().rightPush(key, messageInfo);
 		} catch (Exception e) {
-			throw new RuntimeException("Redis에 저장 중 오류 발생");
+			throw new RuntimeException("Redis에 저장 중 오류 발생", e);
 		}
 	}
 
