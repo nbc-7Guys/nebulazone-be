@@ -11,3 +11,12 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  cloud:
+    aws:
+      s3:
+        bucket: test-bucket
+
+jwt:
+  secret:
+    key: test-secret-key-test-secret-key-test-secret-key
