@@ -38,7 +38,9 @@ public class ProductService {
 
 		User findUser = userDomainService.findActiveUserById(authUser.getId());
 
-		List<String> productImageUrls = multipartFiles.stream()
+		List<String> productImageUrls = multipartFiles == null
+			? List.of()
+			: multipartFiles.stream()
 			.map(s3Service::generateUploadUrlAndUploadFile)
 			.toList();
 

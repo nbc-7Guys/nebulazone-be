@@ -35,13 +35,15 @@ public class PostService {
 		User findUser = userDomainService.findActiveUserById(authUser.getId());
 		PostCreateCommand postCreateDto = PostCreateCommand.of(findUser, request);
 
-		List<String> productImageUrls = multipartFiles.stream()
+		List<String> postImageUrls = multipartFiles == null
+			? List.of()
+			: multipartFiles.stream()
 			.map(s3Service::generateUploadUrlAndUploadFile)
 			.toList();
 
-		Post createPost = postDomainService.createPost(postCreateDto, productImageUrls);
+		Post createPost = postDomainService.createPost(postCreateDto, postImageUrls);
 
-		return CreatePostResponse.from(createPost, productImageUrls);
+		return CreatePostResponse.from(createPost, postImageUrls);
 
 	}
 
