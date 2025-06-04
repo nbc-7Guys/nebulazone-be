@@ -1,31 +1,26 @@
 package nbc.chillguys.nebulazone.application.comment.dto.response;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-import nbc.chillguys.nebulazone.domain.comment.dto.CommentWithUserDto;
+import nbc.chillguys.nebulazone.domain.comment.entity.Comment;
 
 public record CommentResponse(
 	Long commentId,
+	Long postId,
 	Long parentId,
-	String author,
 	String content,
 	LocalDateTime createdAt,
-	LocalDateTime modifiedAt,
-	List<CommentResponse> children
+	LocalDateTime modifiedAt
 ) {
 
-	public static CommentResponse from(CommentWithUserDto comment) {
+	public static CommentResponse from(Comment comment) {
 		return new CommentResponse(
-			comment.commentId(),
-			comment.parentId(),
-			comment.author(),
-			comment.content(),
-			comment.createdAt(),
-			comment.modifiedAt(),
-			comment.children().stream()
-				.map(CommentResponse::from)
-				.toList()
+			comment.getId(),
+			comment.getPost().getId(),
+			comment.getParent() != null ? comment.getParent().getId() : null,
+			comment.getContent(),
+			comment.getCreatedAt(),
+			comment.getModifiedAt()
 		);
 	}
 }

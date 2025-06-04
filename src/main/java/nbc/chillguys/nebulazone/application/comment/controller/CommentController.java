@@ -1,7 +1,5 @@
 package nbc.chillguys.nebulazone.application.comment.controller;
 
-import static nbc.chillguys.nebulazone.application.comment.service.CommentService.*;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -9,6 +7,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.comment.dto.request.CreateCommentRequest;
-import nbc.chillguys.nebulazone.application.comment.dto.response.CreateCommentResponse;
+import nbc.chillguys.nebulazone.application.comment.dto.request.UpdateCommentRequest;
+import nbc.chillguys.nebulazone.application.comment.dto.response.CommentResponse;
 import nbc.chillguys.nebulazone.application.comment.dto.response.DeleteCommentResponse;
 import nbc.chillguys.nebulazone.application.comment.dto.response.FindCommentListResponse;
 import nbc.chillguys.nebulazone.application.comment.service.CommentService;
@@ -31,12 +31,12 @@ public class CommentController {
 	private final CommentService commentService;
 
 	@PostMapping
-	public ResponseEntity<CreateCommentResponse> createComment(
+	public ResponseEntity<CommentResponse> createComment(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("postId") Long postId,
 		@Valid @RequestBody CreateCommentRequest request
 	) {
-		CreateCommentResponse response = commentService.createComment(authUser.getId(), postId, request);
+		CommentResponse response = commentService.createComment(authUser.getId(), postId, request);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
@@ -48,6 +48,18 @@ public class CommentController {
 		@RequestParam(defaultValue = "20", required = false) int size
 	) {
 		FindCommentListResponse response = commentService.findComments(postId, page, size);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PutMapping("/{commentId}")
+	public ResponseEntity<CommentResponse> updateComment(
+		@AuthenticationPrincipal AuthUser authUser,
+		@PathVariable("postId") Long postId,
+		@PathVariable("commentId") Long commentId,
+		@Valid @RequestBody UpdateCommentRequest request
+	) {
+		CommentResponse response = commentService.updateComment(authUser.getId(), postId, commentId, request);
 
 		return ResponseEntity.ok(response);
 	}

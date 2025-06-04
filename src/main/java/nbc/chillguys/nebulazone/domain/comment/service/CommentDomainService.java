@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentCreateCommand;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentDeleteCommand;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentListFindQuery;
+import nbc.chillguys.nebulazone.domain.comment.dto.CommentUpdateCommand;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentWithUserDto;
 import nbc.chillguys.nebulazone.domain.comment.entity.Comment;
 import nbc.chillguys.nebulazone.domain.comment.exception.CommentErrorCode;
@@ -49,6 +50,18 @@ public class CommentDomainService {
 
 	public Page<CommentWithUserDto> findComments(CommentListFindQuery query) {
 		return commentRepository.findComments(query.post().getId(), query.page(), query.size());
+	}
+
+	@Transactional
+	public Comment updateComment(CommentUpdateCommand command) {
+		Comment comment = findActiveComment(command.commentId());
+
+		validateBelongsToPost(comment, command.post().getId());
+		validateCommentOwner(comment, command.user().getId());
+
+		comment.update(command.content());
+
+		return comment;
 	}
 
 	@Transactional
