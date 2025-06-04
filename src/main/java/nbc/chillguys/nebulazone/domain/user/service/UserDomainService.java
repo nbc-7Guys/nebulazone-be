@@ -69,12 +69,14 @@ public class UserDomainService {
 	public User createUser(UserSignUpCommand userSignUpCommand) {
 		User user = User.builder()
 			.email(userSignUpCommand.email())
-			.password(passwordEncoder.encode(userSignUpCommand.password()))
+			.password(userSignUpCommand.password() != null
+				? passwordEncoder.encode(userSignUpCommand.password()) : null)
 			.phone(userSignUpCommand.phone())
 			.nickname(userSignUpCommand.nickname())
 			.profileImage(userSignUpCommand.profileImageUrl())
 			.point(0)
-			.oauthType(OAuthType.DOMAIN)
+			.oAuthType(userSignUpCommand.oAuthType())
+			.oAuthId(userSignUpCommand.oauthId())
 			.roles(Set.of(UserRole.ROLE_USER))
 			.addresses(userSignUpCommand.addresses())
 			.build();
@@ -157,5 +159,17 @@ public class UserDomainService {
 	 */
 	public void withdrawUser(User user) {
 		user.withdraw();
+	}
+
+	/**
+	 * 소셜 로그인 시 해당 provider로 존재하는 user 조회
+	 * @param email 이메일
+	 * @param oAuthType 소셜 로그인 타입
+	 * @return user
+	 * @author 이승현
+	 */
+	public User findActiveUserByEmailAndOAuthType(String email, OAuthType oAuthType) {
+		return userRepository.findActiveUserByEmailAndOAuthType(email, oAuthType)
+			.orElseThrow(() -> new UserException(UserErrorCode.ALREADY_EXISTS_EMAIL));
 	}
 }
