@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,6 +29,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 
+@DisplayName("커뮤니티 게시글 도메인 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
 class PostDomainServiceUnitTest {
 
@@ -66,40 +69,46 @@ class PostDomainServiceUnitTest {
 
 	private User user;
 
-	@Test
-	void create_post_success() {
-		// given
-		PostCreateCommand postCreateCommand = PostCreateCommand.of(user,
-			new CreatePostRequest("테스트 제목1", "테스트 본문1", "free"));
+	@Nested
+	@DisplayName("게시글 생성 테스트")
+	class CreatePostTest {
 
-		List<String> imageUrls = List.of("image1.jpg, image2.jpg");
+		@Test
+		@DisplayName("게시글 생성 성공")
+		void success_createPost() {
+			// given
+			PostCreateCommand postCreateCommand = PostCreateCommand.of(user,
+				new CreatePostRequest("테스트 제목1", "테스트 본문1", "free"));
 
-		Post savedPost = Post.builder()
-			.title("테스트 제목1")
-			.content("테스트 본문1")
-			.type(PostType.FREE)
-			.user(user)
-			.build();
-		ReflectionTestUtils.setField(savedPost, "id", 1L);
+			List<String> imageUrls = List.of("image1.jpg, image2.jpg");
 
-		given(postRepository.save(any(Post.class))).will(i -> {
-			Post post = i.getArgument(0);
-			post.addPostImages(imageUrls);
-			return post;
-		});
+			Post savedPost = Post.builder()
+				.title("테스트 제목1")
+				.content("테스트 본문1")
+				.type(PostType.FREE)
+				.user(user)
+				.build();
+			ReflectionTestUtils.setField(savedPost, "id", 1L);
 
-		// when
-		Post result = postDomainService.createPost(postCreateCommand, imageUrls);
+			given(postRepository.save(any(Post.class))).will(i -> {
+				Post post = i.getArgument(0);
+				post.addPostImages(imageUrls);
+				return post;
+			});
 
-		// then
-		assertThat(result.getTitle()).isEqualTo(postCreateCommand.title());
-		assertThat(result.getContent()).isEqualTo(postCreateCommand.content());
-		assertThat(result.getType()).isEqualTo(PostType.FREE);
-		assertThat(result.getPostImages().size()).isEqualTo(2);
-		assertThat(result.getUser().getNickname()).isEqualTo(user.getNickname());
-		assertThat(result.getUser().getAddresses().size()).isEqualTo(3);
+			// when
+			Post result = postDomainService.createPost(postCreateCommand, imageUrls);
 
-		verify(postRepository, times(1)).save(any(Post.class));
+			// then
+			assertThat(result.getTitle()).isEqualTo(postCreateCommand.title());
+			assertThat(result.getContent()).isEqualTo(postCreateCommand.content());
+			assertThat(result.getType()).isEqualTo(PostType.FREE);
+			assertThat(result.getPostImages().size()).isEqualTo(2);
+			assertThat(result.getUser().getNickname()).isEqualTo(user.getNickname());
+			assertThat(result.getUser().getAddresses().size()).isEqualTo(3);
+
+			verify(postRepository, times(1)).save(any(Post.class));
+		}
 	}
 
 }

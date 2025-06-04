@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +28,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 
+@DisplayName("판매글 도메인 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
 class ProductDomainServiceUnitTest {
 
@@ -65,38 +68,45 @@ class ProductDomainServiceUnitTest {
 
 	private User user;
 
-	@Test
-	void create_product_auction_success() {
-		// given
-		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(user, null,
-			new CreateProductRequest("경매 판매글 제목1", "경매 판매글 내용1", "auction",
-				2_000_000L, "hour_24"));
+	@Nested
+	@DisplayName("판매글 생성 테스트")
+	class CreateProductTest {
 
-		List<String> imageUrls = List.of("image1.jpg, image2.jpg");
+		@Test
+		@DisplayName("경매 판매글 등록 성공")
+		void success_createProduct_auction() {
+			// given
+			ProductCreateCommand productCreateCommand = ProductCreateCommand.of(user, null,
+				new CreateProductRequest("경매 판매글 제목1", "경매 판매글 내용1", "auction",
+					2_000_000L, "hour_24"));
 
-		Product savedProduct = Product.of(
-			"경매 판매글 제목1",
-			"경매 판매글 내용1",
-			2_000_000L,
-			ProductTxMethod.AUCTION,
-			user,
-			null);
-		ReflectionTestUtils.setField(savedProduct, "id", 1L);
+			List<String> imageUrls = List.of("image1.jpg, image2.jpg");
 
-		given(productRepository.save(any(Product.class))).will(i -> {
-			Product product = i.getArgument(0);
-			product.addProductImages(imageUrls);
-			return product;
-		});
+			Product savedProduct = Product.of(
+				"경매 판매글 제목1",
+				"경매 판매글 내용1",
+				2_000_000L,
+				ProductTxMethod.AUCTION,
+				user,
+				null);
+			ReflectionTestUtils.setField(savedProduct, "id", 1L);
 
-		// when
-		Product result = productDomainService.createProduct(productCreateCommand, imageUrls);
+			given(productRepository.save(any(Product.class))).will(i -> {
+				Product product = i.getArgument(0);
+				product.addProductImages(imageUrls);
+				return product;
+			});
 
-		// then
-		assertThat(result.getName()).isEqualTo(productCreateCommand.name());
-		assertThat(result.getDescription()).isEqualTo(productCreateCommand.description());
-		assertThat(result.getPrice()).isEqualTo(productCreateCommand.price());
+			// when
+			Product result = productDomainService.createProduct(productCreateCommand, imageUrls);
 
-		verify(productRepository).save(any(Product.class));
+			// then
+			assertThat(result.getName()).isEqualTo(productCreateCommand.name());
+			assertThat(result.getDescription()).isEqualTo(productCreateCommand.description());
+			assertThat(result.getPrice()).isEqualTo(productCreateCommand.price());
+
+			verify(productRepository).save(any(Product.class));
+		}
+
 	}
 }
