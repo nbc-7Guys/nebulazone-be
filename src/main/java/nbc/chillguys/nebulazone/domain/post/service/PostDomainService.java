@@ -57,8 +57,16 @@ public class PostDomainService {
 		post.delete();
 	}
 
+	public Post findMyActivePost(Long postId, Long userId) {
+		Post post = findActivePost(postId);
+
+		validatePostOwner(post, userId);
+
+		return post;
+	}
+
 	private void validatePostOwner(Post post, Long userId) {
-		if (Objects.equals(post.getUser().getId(), userId)) {
+		if (!Objects.equals(post.getUser().getId(), userId)) {
 			throw new PostException(PostErrorCode.NOT_POST_OWNER);
 		}
 	}
