@@ -45,7 +45,6 @@ public class ChatService {
 	private final ProductRepository productRepository;
 	private final UserRepository userRepository;
 	private final ChatRoomUserRepository chatRoomUserRepository;
-	private final ChatMessageRedisService chatMessageRedisService;
 	private final SimpMessagingTemplate messagingTemplate;
 	private final ChatDomainService chatDomainService;
 	private final ChatRoomHistoryRepository chatRoomHistoryRepository;
@@ -162,74 +161,4 @@ public class ChatService {
 		messagingTemplate.convertAndSend("/topic/chat/" + roomId, "상대방이 채팅방을 나갔습니다.");
 	}
 
-	/**
-	 * 메세지 전송.
-	 *
-	 * @param authUser the auth user
-	 * @param roomId the room id
-	 * @param command the command
-	 */
-	@Transactional
-	public void sendMessage(AuthUser authUser, Long roomId, ChatSendMessageCommand command) {
-
-		// 채팅방 존재 확인
-		boolean existsed = chatRoomRepository.existsChatRoomById(roomId);
-		if (!existsed) {
-			throw new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND);
-		}
-
-		// 참가자 확인
-		boolean isParticipant = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId,
-			authUser.getId());
-		if (!isParticipant) {
-			throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
-		}
-
-		// 발신자 정보 조회
-		User sender = userRepository.findById(authUser.getId())
-			.orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다."));
-
-		// 메시지 본문 작성
-		ChatMessageInfo message = chatDomainService.createMessage(roomId, sender, command.message(), command.type());
-
-		// 메시지 전송
-		messagingTemplate.convertAndSend("/topic/chat/" + roomId, message);
-
-		// 레디스 저장
-		chatMessageRedisService.saveMessageToRedis(roomId, message);
-	}
-
-	/** 채팅방 Id를 기준으로 레디스에서 채팅기록 꺼내와서 db에 저장
-	 *
-	 * @param roomId 채팅방 id
-	 */
-	@Transactional
-	public void saveMessagesToDb(Long roomId) {
-		// 채팅방Id를 기준으로 레디스에 있는 채팅기록들 불러오기
-		List<ChatMessageInfo> messagesFromRedis = chatMessageRedisService.getMessagesFromRedis(roomId);
-		if (messagesFromRedis.isEmpty())
-			return;
-
-		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-			.orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
-
-		List<ChatHistory> histories = new ArrayList<>();
-
-		// 레디스에서 불러온 채팅기록들을 for문을 돌면서 채팅기록 테이블에 저장할 리스트에 추가
-		for (ChatMessageInfo messages : messagesFromRedis) {
-
-			User sender = userRepository.findById(messages.senderId())
-				.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
-
-			ChatHistory history = ChatHistory.builder().chatRoom(chatRoom).userId(sender.getId()) // N + 1 문제 발생
-				.message(messages.message()).sendtime(messages.sendTime()).build();
-
-			histories.add(history);
-		}
-
-		chatRoomHistoryRepository.saveAll(histories);
-
-		// db에 저장이 끝난 레디스 데이터 삭제
-		chatMessageRedisService.deleteMessagesInRedis(roomId);
-	}
 }

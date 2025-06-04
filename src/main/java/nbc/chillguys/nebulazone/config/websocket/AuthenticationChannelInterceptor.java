@@ -25,45 +25,70 @@ import nbc.chillguys.nebulazone.infra.security.jwt.JwtUtil;
 @RequiredArgsConstructor
 public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 
-	private final JwtUtil jwtUtil;
-
 	public static final Map<String, Principal> sessionPrincipalMap = new ConcurrentHashMap<>();
+	private final JwtUtil jwtUtil;
 
 	@Override
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
 		StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-		// STOMP의 타입이 CONNECT 인지 확인
+
+		// STOMP CONNECT
 		if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+
 			// 헤더에서 토큰 꺼내기
 			String token = accessor.getFirstNativeHeader("Authorization");
 			log.info("CONNECT 프레임 Authorization 헤더: {}", token);
+
 			if (token == null) {
 				throw new IllegalArgumentException("No token provided");
 			}
+
 			// "Bearer " 제거
 			if (token.startsWith("Bearer ")) {
 				token = token.substring("Bearer ".length());
 			}
+
 			try {
 				// jWT 토큰 파싱 및 검증
 				AuthUser authUserFromToken = jwtUtil.getAuthUserFromToken(token);
+
 				// accessor.setUser에는 Principal 타입이 필요하기 때문에 UsernamePasswordAuthenticationToken으로 감싸기
-				Principal authentication = new UsernamePasswordAuthenticationToken(authUserFromToken, null,
-					authUserFromToken.getAuthorities());
-				// accessor.setUser(authentication);
-				sessionPrincipalMap.put(accessor.getSessionId(), authentication);
-				log.info("세팅 완료: {}",  authentication.getName());
+				Principal principal = new UsernamePasswordAuthenticationToken(String.valueOf(authUserFromToken.getId()),
+					null, authUserFromToken.getAuthorities());
+
+				accessor.setUser(principal);
+				// sessionPrincipalMap.put(accessor.getSessionId(), principal);
+
+				// CONNECT 단계 에서는 유저 정보만 매핑
+				SessionUtil.registerUser(accessor.getSessionId(), authUserFromToken.getId());
+
+				log.info("세션-유저 등록: sessionId={}, userId={}", accessor.getSessionId(), authUserFromToken.getId());
 			} catch (Exception e) {
-				System.out.println("JWT 파싱 또는 Principal 세팅 예외: " + e.getMessage());
+				log.warn("JWT 파싱 또는 Principal 세팅 예외: {}", e.getMessage());
 				throw e;
 			}
-			log.info("preSend: 세션 ID = {}, principal = {}",
-				accessor.getSessionId(),
-				accessor.getUser() == null ? "null" : accessor.getUser().getName()
-			);
+
 		}
-		// return ChannelInterceptor.super.preSend(message, channel);
+
+		// STOMP SUBSCRIBE
+		if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+
+			// 구독할 경로 추출
+			String destination = accessor.getDestination();
+
+			if (destination != null && destination.startsWith("/topic/chat/")) {
+				String roomIdStr = destination.substring("/topic/chat/".length());
+				try {
+					Long roomId = Long.valueOf(roomIdStr);
+					SessionUtil.registerRoom(accessor.getSessionId(), roomId);
+					log.info("세션-방 등록: sessionId={}, roomId={}", accessor.getSessionId(), roomId);
+				} catch (NumberFormatException e) {
+					log.warn("방번호 추출 실패: {}", roomIdStr);
+				}
+
+			}
+		}
+
 		return MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders());
-		// return message;
 	}
 }
