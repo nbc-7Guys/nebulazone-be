@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.products.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.response.DeleteProductResponse;
@@ -15,6 +16,7 @@ import nbc.chillguys.nebulazone.application.products.dto.response.ProductRespons
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
+import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
@@ -73,6 +75,25 @@ public class ProductService {
 
 		ProductUpdateCommand command = request.toCommand(user, catalog, productId);
 		Product product = productDomainService.updateProduct(command);
+
+		return ProductResponse.from(product);
+	}
+
+	public ProductResponse changeToAuctionType(
+		Long userId,
+		Long catalogId,
+		Long productId,
+		ChangeToAuctionTypeRequest request
+	) {
+		User user = userDomainService.findActiveUserById(userId);
+
+		// todo: 카탈로그 도메인 서비스 생성 후 작업
+		Catalog catalog = null;
+
+		ChangeToAuctionTypeCommand command = request.toCommand(user, catalog, productId);
+		Product product = productDomainService.changeToAuctionType(command);
+
+		// todo: 경매 생성하는 메서드 추가되면 작업
 
 		return ProductResponse.from(product);
 	}

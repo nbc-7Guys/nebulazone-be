@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
+import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
 import nbc.chillguys.nebulazone.domain.products.repository.ProductRepository;
@@ -51,6 +53,27 @@ public class ProductDomainService {
 		product.update(command.name(), command.description());
 
 		// todo: 수정된 상품명 ES에 갱신
+
+		return product;
+	}
+
+	/**
+	 * 판매 방식 옥션으로 변경
+	 * @param command 핀메 싱픔 정보
+	 * @return product
+	 * @author 윤정환
+	 */
+	@Transactional
+	public Product changeToAuctionType(ChangeToAuctionTypeCommand command) {
+		// todo: 판매 상품 상세 조회 메서드 추가되면 교체
+		Product product = productRepository.findById(command.productId())
+			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+
+		if (Objects.equals(product.getTxMethod(), ProductTxMethod.AUCTION)) {
+			throw new ProductException(ProductErrorCode.ALREADY_AUCTION_TYPE);
+		}
+
+		product.changeToAuctionType(command.price());
 
 		return product;
 	}

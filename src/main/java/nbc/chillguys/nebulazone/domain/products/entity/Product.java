@@ -119,6 +119,11 @@ public class Product extends BaseEntity {
 		this.description = description;
 	}
 
+	public void changeToAuctionType(Long price) {
+		this.price = price;
+		this.txMethod = ProductTxMethod.AUCTION;
+	}
+
 	public void delete() {
 		this.isDeleted = true;
 		this.deletedAt = LocalDateTime.now();

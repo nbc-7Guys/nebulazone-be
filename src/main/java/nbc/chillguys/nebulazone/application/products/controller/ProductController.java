@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.products.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.response.DeleteProductResponse;
@@ -53,6 +55,18 @@ public class ProductController {
 		@Valid @RequestBody UpdateProductRequest request
 	) {
 		ProductResponse response = productService.updateProduct(authUser.getId(), catalogId, productId, request);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PatchMapping("/{productId}/auction-type")
+	public ResponseEntity<ProductResponse> changeToAuctionType(
+		@AuthenticationPrincipal AuthUser authUser,
+		@PathVariable("catalogId") Long catalogId,
+		@PathVariable("productId") Long productId,
+		@Valid @RequestBody ChangeToAuctionTypeRequest request
+	) {
+		ProductResponse response = productService.changeToAuctionType(authUser.getId(), catalogId, productId, request);
 
 		return ResponseEntity.ok(response);
 	}
