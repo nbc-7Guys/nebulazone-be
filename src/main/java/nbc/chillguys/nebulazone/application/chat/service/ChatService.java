@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.application.chat.dto.request.CreateChatRoomRequest;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponse;
@@ -35,6 +36,7 @@ import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
 import nbc.chillguys.nebulazone.domain.user.exception.UserException;
 import nbc.chillguys.nebulazone.domain.user.repository.UserRepository;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatService {
@@ -76,7 +78,7 @@ public class ChatService {
 
 		// 기존에 참여중인 방이 없다면 새 채팅방 생성
 		Product product = productRepository.findById(request.productId())
-			.orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다."));
+			.orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다.")); // Todo - ProductException으로 변경
 
 		User buyer = userRepository.findById(authUser.getId())
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
@@ -86,7 +88,10 @@ public class ChatService {
 		// 채팅방 및 참가자 객체 생성
 		ChatRoomCreationInfo result = chatDomainService.createChatRoom(product, buyer, seller);
 
+		log.info("ChatRoomCreationInfo: {}", result);
+
 		// 참가자 저장
+		chatRoomRepository.save(result.chatRoom());
 		chatRoomUserRepository.saveAll(result.participants());
 
 		return CreateChatRoomResponse.of(result.chatRoom());
@@ -101,7 +106,11 @@ public class ChatService {
 		// 로그인한 유저 ID를 기반으로 해당 유저가 참여중인 모든 채팅방 찾기
 		List<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findAllByUserId(authUser.getId());
 
-		List<ChatRoom> chatRooms = chatRoomUsers.stream().map(ChatRoomUser::getChatRoom).toList();
+		log.info("ChatRoomUsers: {}", chatRoomUsers);
+
+		List<ChatRoom> chatRooms = chatRoomUsers.stream()
+			.map(ChatRoomUser::getChatRoom)
+			.toList();
 
 		return FindChatRoomResponse.of(chatRooms);
 	}
@@ -114,7 +123,7 @@ public class ChatService {
 	 * @param roomId the room id
 	 * @return the find chat room response
 	 */
-	public List<FindChatHistoryResponse> findChatRoomHistories(AuthUser authUser, Long roomId) {
+	public List<FindChatHistoryResponse> findChatHistories(AuthUser authUser, Long roomId) {
 		// 채팅기록 조회
 		if (!chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId, authUser.getId())) {
 			throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);

@@ -23,6 +23,7 @@ public class ChatDomainService {
 	 * 채팅방 및 참가자 객체 생성
 	 */
 	public ChatRoomCreationInfo createChatRoom(Product product, User buyer, User seller) {
+
 		ChatRoom chatRoom = ChatRoom.builder()
 			.product(product)
 			.build();

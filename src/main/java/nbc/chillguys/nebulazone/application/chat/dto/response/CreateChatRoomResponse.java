@@ -22,6 +22,7 @@ public record CreateChatRoomResponse(
 			.chatRoomId(chatRoom.getId())
 			.productId(product.getId())
 			.productName(product.getName())
+			.productPrice(product.getPrice())
 			.sellerId(seller.getId())
 			.sellerName(seller.getNickname())
 			.build();
