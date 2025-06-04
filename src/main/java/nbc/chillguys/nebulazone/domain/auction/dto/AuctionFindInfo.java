@@ -12,7 +12,8 @@ public record AuctionFindInfo(
 	LocalDateTime endTime,
 	LocalDateTime createdAt,
 	String productName,
-	String productImageUrl
+	String productImageUrl,
+	Long bidCount
 ) {
 
 	@QueryProjection

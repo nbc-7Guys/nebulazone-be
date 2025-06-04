@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.domain.auction.repository;
 
 import static nbc.chillguys.nebulazone.domain.auction.entity.QAuction.*;
+import static nbc.chillguys.nebulazone.domain.bid.entity.QBid.*;
 import static nbc.chillguys.nebulazone.domain.products.entity.QProduct.*;
 import static nbc.chillguys.nebulazone.domain.products.entity.QProductImage.*;
 
@@ -12,12 +13,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import jakarta.persistence.EntityManager;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.QAuctionFindInfo;
+import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 
 @Repository
 public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
@@ -29,7 +32,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 	}
 
 	@Override
-	public Page<AuctionFindInfo> findAllAuctionsWithProduct(int page, int size) {
+	public Page<AuctionFindInfo> findAuctionsWithProduct(int page, int size) {
 		Pageable pageable = PageRequest.of(Math.max(page, 0), size);
 
 		List<AuctionFindInfo> contents = jpaQueryFactory
@@ -41,11 +44,13 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 				auction.endTime,
 				auction.createdAt,
 				product.name,
-				productImage.url.min()
+				productImage.url.min(),
+				bid.auction.id.count()
 			))
 			.from(auction)
 			.join(auction.product, product)
 			.leftJoin(auction.product.productImages, productImage)
+			.leftJoin(bid).on(bid.auction.eq(auction))
 			.where(
 				auction.isDeleted.eq(false),
 				auction.deletedAt.isNull(),
@@ -63,4 +68,41 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 
 		return PageableExecutionUtils.getPage(contents, pageable, totalQuery::fetchOne);
 	}
+
+	@Override
+	public List<AuctionFindInfo> finAuctionsBySortType(AuctionSortType sortType) {
+
+		OrderSpecifier<?> orderType = switch (sortType) {
+			case POPULAR -> bid.id.count().desc();
+			case CLOSING -> auction.endTime.desc();
+		};
+
+		return jpaQueryFactory
+			.select(new QAuctionFindInfo(
+				auction.id,
+				auction.startPrice,
+				auction.currentPrice,
+				auction.isClosed,
+				auction.endTime,
+				auction.createdAt,
+				product.name,
+				productImage.url.min(),
+				bid.auction.id.count()
+			))
+			.from(auction)
+			.join(auction.product, product)
+			.leftJoin(auction.product.productImages, productImage)
+			.leftJoin(bid).on(bid.auction.eq(auction))
+			.where(
+				auction.isClosed.eq(false),
+				auction.isDeleted.eq(false),
+				auction.deletedAt.isNull(),
+				product.isDeleted.eq(false),
+				product.deletedAt.isNull())
+			.groupBy(auction.id, product.id)
+			.limit(5)
+			.orderBy(orderType)
+			.fetch();
+	}
+
 }

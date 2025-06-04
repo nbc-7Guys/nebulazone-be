@@ -13,7 +13,8 @@ public record FindAuctionResponse(
 	boolean isClosed,
 	LocalDateTime endTime,
 	String productName,
-	String productImageUrl) {
+	String productImageUrl,
+	Long bidCount) {
 
 	public static FindAuctionResponse from(AuctionFindInfo findInfo) {
 		return FindAuctionResponse.builder()
@@ -24,6 +25,7 @@ public record FindAuctionResponse(
 			.endTime(findInfo.endTime())
 			.productName(findInfo.productName())
 			.productImageUrl(findInfo.productImageUrl() != null ? findInfo.productImageUrl() : "이미지 없음")
+			.bidCount(findInfo.bidCount())
 			.build();
 	}
 

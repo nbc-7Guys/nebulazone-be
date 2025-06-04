@@ -23,12 +23,15 @@ public class AuctionService {
 	public CommonPageResponse<FindAuctionResponse> findAuctions(int page, int size) {
 
 		Page<AuctionFindInfo> findAuctions = auctionDomainService.findAuctions(page, size);
-		Page<FindAuctionResponse> map = findAuctions.map(FindAuctionResponse::from);
-		return CommonPageResponse.from(map);
+		Page<FindAuctionResponse> response = findAuctions.map(FindAuctionResponse::from);
+
+		return CommonPageResponse.from(response);
 	}
 
 	public List<FindAuctionResponse> findAuctionsBySortType(AuctionSortType sortType) {
 
-		return null;
+		List<AuctionFindInfo> findAuctionsBySortType = auctionDomainService.findAuctionsBySortType(sortType);
+
+		return findAuctionsBySortType.stream().map(FindAuctionResponse::from).toList();
 	}
 }
