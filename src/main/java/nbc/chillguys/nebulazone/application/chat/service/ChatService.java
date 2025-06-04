@@ -117,7 +117,6 @@ public class ChatService {
 
 	/**
 	 * 채팅 기록 조회
-	 * 채팅 기록이 없음 = 채팅을 한적이 없다는 것이기때문에 채팅방을 새로 만드는게 맞음
 	 *
 	 * @param authUser the auth user
 	 * @param roomId the room id
