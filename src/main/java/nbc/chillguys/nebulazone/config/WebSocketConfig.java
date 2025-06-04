@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.config.websocket;
+package nbc.chillguys.nebulazone.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -8,6 +8,7 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.infra.websocket.AuthenticationChannelInterceptor;
 
 @Configuration
 @EnableWebSocketMessageBroker

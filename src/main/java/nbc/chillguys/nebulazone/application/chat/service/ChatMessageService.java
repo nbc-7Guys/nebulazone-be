@@ -1,6 +1,5 @@
 package nbc.chillguys.nebulazone.application.chat.service;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,8 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nbc.chillguys.nebulazone.application.user.service.UserService;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.chat.dto.request.ChatSendMessageCommand;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatHistory;
@@ -23,8 +20,6 @@ import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomRepository;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomUserRepository;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
-import nbc.chillguys.nebulazone.domain.user.exception.UserException;
 import nbc.chillguys.nebulazone.domain.user.repository.UserRepository;
 
 @Slf4j

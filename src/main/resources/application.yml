@@ -14,7 +14,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: none
 
     properties:
       hibernate:
@@ -31,13 +31,13 @@ spring:
   cloud:
     aws:
       credentials:
-        access-key: ${AWS_ACCESS_KEY}
-        secret-key: ${AWS_SECRET_KEY}
+        access-key: 123
+        secret-key: 123
       region:
         static: ap-northeast-2
 
       s3:
-        bucket: ${AWS_S3_BUCKET}
+        bucket: 123
 
   security:
     oauth2:

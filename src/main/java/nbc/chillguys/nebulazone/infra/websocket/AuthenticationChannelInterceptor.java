@@ -1,8 +1,6 @@
-package nbc.chillguys.nebulazone.config.websocket;
+package nbc.chillguys.nebulazone.infra.websocket;
 
 import java.security.Principal;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -11,8 +9,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +21,6 @@ import nbc.chillguys.nebulazone.infra.security.jwt.JwtUtil;
 @RequiredArgsConstructor
 public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 
-	public static final Map<String, Principal> sessionPrincipalMap = new ConcurrentHashMap<>();
 	private final JwtUtil jwtUtil;
 
 	@Override
@@ -37,7 +32,6 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 
 			// 헤더에서 토큰 꺼내기
 			String token = accessor.getFirstNativeHeader("Authorization");
-			log.info("CONNECT 프레임 Authorization 헤더: {}", token);
 
 			if (token == null) {
 				throw new IllegalArgumentException("No token provided");
@@ -57,12 +51,10 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 					null, authUserFromToken.getAuthorities());
 
 				accessor.setUser(principal);
-				// sessionPrincipalMap.put(accessor.getSessionId(), principal);
 
 				// CONNECT 단계 에서는 유저 정보만 매핑
 				SessionUtil.registerUser(accessor.getSessionId(), authUserFromToken.getId());
 
-				log.info("세션-유저 등록: sessionId={}, userId={}", accessor.getSessionId(), authUserFromToken.getId());
 			} catch (Exception e) {
 				log.warn("JWT 파싱 또는 Principal 세팅 예외: {}", e.getMessage());
 				throw e;
@@ -81,7 +73,6 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 				try {
 					Long roomId = Long.valueOf(roomIdStr);
 					SessionUtil.registerRoom(accessor.getSessionId(), roomId);
-					log.info("세션-방 등록: sessionId={}, roomId={}", accessor.getSessionId(), roomId);
 				} catch (NumberFormatException e) {
 					log.warn("방번호 추출 실패: {}", roomIdStr);
 				}

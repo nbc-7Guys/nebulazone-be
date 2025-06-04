@@ -1,7 +1,5 @@
 package nbc.chillguys.nebulazone.application.chat.controller;
 
-import java.security.Principal;
-
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -10,9 +8,7 @@ import org.springframework.stereotype.Controller;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.chat.service.ChatMessageService;
-import nbc.chillguys.nebulazone.application.chat.service.ChatService;
-import nbc.chillguys.nebulazone.config.websocket.AuthenticationChannelInterceptor;
-import nbc.chillguys.nebulazone.config.websocket.SessionUtil;
+import nbc.chillguys.nebulazone.infra.websocket.SessionUtil;
 import nbc.chillguys.nebulazone.domain.chat.dto.request.ChatSendMessageCommand;
 
 @Controller

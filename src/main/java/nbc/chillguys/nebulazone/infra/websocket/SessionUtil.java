@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.config.websocket;
+package nbc.chillguys.nebulazone.infra.websocket;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

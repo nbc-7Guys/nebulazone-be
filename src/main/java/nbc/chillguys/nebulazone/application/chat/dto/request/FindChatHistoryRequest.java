@@ -1,6 +1,6 @@
 package nbc.chillguys.nebulazone.application.chat.dto.request;
 
-public record FindChatHistoryRequest (
+public record FindChatHistoryRequest(
 	String chatRoomId
 ) {
 }
