@@ -9,9 +9,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
-import nbc.chillguys.nebulazone.application.products.dto.response.CreateProductResponse;
+import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
+import nbc.chillguys.nebulazone.application.products.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
@@ -31,7 +34,7 @@ public class ProductService {
 	// todo: private final S3Service s3Service;
 
 	@Transactional
-	public CreateProductResponse createProduct(AuthUser authUser, Long catalogId, CreateProductRequest request,
+	public ProductResponse createProduct(AuthUser authUser, Long catalogId, CreateProductRequest request,
 		List<MultipartFile> multipartFiles) {
 
 		User findUser = userDomainService.findActiveUserById(authUser.getId());
@@ -51,6 +54,23 @@ public class ProductService {
 			// auctionDomainService.createProduct(...);
 		}
 
-		return CreateProductResponse.from(createProduct, new ArrayList<>());
+		return ProductResponse.from(createProduct);
+	}
+
+	public ProductResponse updateProduct(
+		Long userId,
+		Long catalogId,
+		Long productId,
+		UpdateProductRequest request
+	) {
+		User user = userDomainService.findActiveUserById(userId);
+
+		// todo: 카탈로그 도메인 서비스 생성 후 작업
+		Catalog catalog = null;
+
+		ProductUpdateCommand command = request.toCommand(user, catalog, productId);
+		Product product = productDomainService.updateProduct(command);
+
+		return ProductResponse.from(product);
 	}
 }
