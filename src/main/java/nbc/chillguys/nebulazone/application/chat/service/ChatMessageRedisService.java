@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.application.chat.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 public class ChatMessageRedisService {
 
 	private final RedisTemplate<String, Object> redisTemplate;
+	private final ObjectMapper objectMapper;
 	private static final String CHAT_MESSAGE_KEY_PREFIX = "chat:message:";
 
 	/**
@@ -34,16 +36,12 @@ public class ChatMessageRedisService {
      */
     public List<ChatMessageInfo> getMessagesFromRedis(Long roomId) {
         String key = CHAT_MESSAGE_KEY_PREFIX + roomId;
-        List<Object> raw = redisTemplate.opsForList().range(key, 0, -1);
 
-        if (raw == null || raw.isEmpty()) {
-            return List.of();
-        }
+		List<Object> raw = Optional.ofNullable(redisTemplate.opsForList().range(key, 0, -1)).orElse(List.of());
 
-        return raw.stream()
-            .filter(ChatMessageInfo.class::isInstance)
-            .map(ChatMessageInfo.class::cast)
-            .toList();
+		return raw.stream()
+			.map(o -> objectMapper.convertValue(o, ChatMessageInfo.class)) // ObjectMapper.convertValue를 통해 ChatMessageInfo객체로 변환
+			.toList();
     }
 
 	/**

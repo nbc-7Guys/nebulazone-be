@@ -40,7 +40,6 @@ public class ChatMessageService {
 	private final SimpMessagingTemplate messagingTemplate;
 	private final ChatRoomHistoryRepository chatRoomHistoryRepository;
 
-
 	/**
 	 * 메세지 전송.
 	 *
@@ -84,9 +83,17 @@ public class ChatMessageService {
 	@Transactional
 	public void saveMessagesToDb(Long roomId) {
 		// 채팅방Id를 기준으로 레디스에 있는 채팅기록들 불러오기
+		log.info("saveMessagesToDb 실행");
 		List<ChatMessageInfo> messagesFromRedis = chatMessageRedisService.getMessagesFromRedis(roomId);
-		if (messagesFromRedis.isEmpty())
+
+		log.info("message들");
+		for (ChatMessageInfo messagesFromRedi : messagesFromRedis) {
+			System.out.println("messagesFromRedi = " + messagesFromRedi.toString());
+		}
+
+		if (messagesFromRedis.isEmpty()) {
 			return;
+		}
 
 		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
 			.orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
@@ -96,7 +103,7 @@ public class ChatMessageService {
 		// 레디스에서 불러온 채팅기록들을 for문을 돌면서 채팅기록 테이블에 저장할 리스트에 추가
 		for (ChatMessageInfo messages : messagesFromRedis) {
 
-			ChatHistory history = ChatHistory.builder().chatRoom(chatRoom).userId(1L) // N + 1 문제 발생
+			ChatHistory history = ChatHistory.builder().chatRoom(chatRoom).userId(messages.senderId())
 				.message(messages.message()).sendtime(messages.sendTime()).build();
 
 			histories.add(history);

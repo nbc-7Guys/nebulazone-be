@@ -54,6 +54,7 @@ public class ChatDomainService {
 	public ChatMessageInfo createMessage(Long roomId, User sender, String content, String type) {
 		return ChatMessageInfo.builder()
             .roomId(roomId)
+			.senderId(sender.getId())
             .senderNickname(sender.getNickname())
             .message(content)
             .sendTime(LocalDateTime.now())

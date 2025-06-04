@@ -29,7 +29,8 @@ public class WebSocketEventListener {
 
 		if (roomId != null) {
 			// redis -> DB
-			// chatMessageService.saveMessagesToDb(roomId);
+			chatMessageService.saveMessagesToDb(roomId);
+			log.info("saveMessagesToDb 실행 완");
 		}
 
 		SessionUtil.unregisterSession(sessionId);
