@@ -5,7 +5,9 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.comment.dto.request.CreateCommentRequest;
 import nbc.chillguys.nebulazone.application.comment.dto.response.CreateCommentResponse;
+import nbc.chillguys.nebulazone.application.comment.dto.response.DeleteCommentResponse;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentCreateCommand;
+import nbc.chillguys.nebulazone.domain.comment.dto.CommentDeleteCommand;
 import nbc.chillguys.nebulazone.domain.comment.entity.Comment;
 import nbc.chillguys.nebulazone.domain.comment.service.CommentDomainService;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
@@ -29,5 +31,15 @@ public class CommentService {
 		Comment comment = commentDomainService.createComment(command);
 
 		return CreateCommentResponse.from(comment);
+	}
+
+	public DeleteCommentResponse deleteComment(Long userId, Long postId, Long commentId) {
+		User user = userDomainService.findActiveUserById(userId);
+		Post post = postDomainService.findMyActivePost(postId, userId);
+
+		CommentDeleteCommand command = CommentDeleteCommand.of(user, post, commentId);
+		commentDomainService.deleteComment(command);
+
+		return DeleteCommentResponse.from(commentId);
 	}
 }

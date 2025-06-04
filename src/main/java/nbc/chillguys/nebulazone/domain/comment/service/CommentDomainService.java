@@ -1,10 +1,13 @@
 package nbc.chillguys.nebulazone.domain.comment.service;
 
+import java.util.Objects;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentCreateCommand;
+import nbc.chillguys.nebulazone.domain.comment.dto.CommentDeleteCommand;
 import nbc.chillguys.nebulazone.domain.comment.entity.Comment;
 import nbc.chillguys.nebulazone.domain.comment.exception.CommentErrorCode;
 import nbc.chillguys.nebulazone.domain.comment.exception.CommentException;
@@ -39,5 +42,28 @@ public class CommentDomainService {
 	public Comment findActiveComment(Long commentId) {
 		return commentRepository.findById(commentId)
 			.orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
+	}
+
+	@Transactional
+	public void deleteComment(CommentDeleteCommand command) {
+		Comment comment = findActiveComment(command.commentId());
+
+		validateBelongsToPost(comment, command.post().getId());
+		validateCommentOwner(comment, command.user().getId());
+
+		comment.delete();
+	}
+
+
+	private void validateBelongsToPost(Comment comment, Long postId) {
+		if (!Objects.equals(comment.getPost().getId(), postId)) {
+			throw new CommentException(CommentErrorCode.NOT_BELONG_TO_POST);
+		}
+	}
+
+	private void validateCommentOwner(Comment comment, Long userId) {
+		if (!Objects.equals(comment.getUser().getId(), userId)) {
+			throw new CommentException(CommentErrorCode.NOT_COMMENT_OWNER);
+		}
 	}
 }
