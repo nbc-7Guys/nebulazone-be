@@ -95,16 +95,21 @@ public class User extends BaseEntity {
 		this.roles.add(role);
 	}
 
-	public void addAddress(String roadAddress, String detailAddress) {
-		this.addresses.add(Address.builder()
-			.roadAddress(roadAddress)
-			.detailAddress(detailAddress)
-			.build());
-	}
-
-	public void delete() {
+	public void withdraw() {
 		this.status = UserStatus.INACTIVE;
 		this.deletedAt = LocalDateTime.now();
+	}
+
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public void updateProfileImage(String profileImage) {
+		this.profileImage = profileImage;
+	}
+
+	public void updatePassword(String password) {
+		this.password = password;
 	}
 }
 
