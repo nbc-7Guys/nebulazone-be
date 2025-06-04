@@ -8,6 +8,7 @@ public record CommentDeleteCommand(
 	User user,
 	Long commentId
 ) {
+
 	public static CommentDeleteCommand of(User user, Post post, Long commentId) {
 		return new CommentDeleteCommand(post, user, commentId);
 	}
