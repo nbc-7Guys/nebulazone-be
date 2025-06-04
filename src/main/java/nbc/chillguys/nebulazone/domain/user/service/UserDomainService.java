@@ -38,6 +38,7 @@ public class UserDomainService {
 	 * @param rawPassword 원본 비밀번호
 	 * @param encodedPassword 암호화된 비밀번호
 	 * @throws UserException 일치 하지 않을 시 예외 발생
+	 * @author 이승현
 	 */
 	public void validPassword(String rawPassword, String encodedPassword) {
 		if (!passwordEncoder.matches(rawPassword, encodedPassword)) {
@@ -85,6 +86,7 @@ public class UserDomainService {
 	 * 이메일 검증
 	 * @param email 이메일
 	 * @throws UserException 중복된 이메일이 존재할 시 예외 발생
+	 * @author 이승현
 	 */
 	public void validEmail(String email) {
 		if (userRepository.existsByEmail(email)) {
@@ -96,10 +98,64 @@ public class UserDomainService {
 	 * 닉네임 검증
 	 * @param nickname 닉네임
 	 * @throws UserException 중복된 닉네임 존재할 시 예외 발생
+	 * @author 이승현
 	 */
 	public void validNickname(String nickname) {
 		if (userRepository.existsByNickname(nickname)) {
 			throw new UserException(UserErrorCode.ALREADY_EXISTS_NICKNAME);
 		}
+	}
+
+	/**
+	 * 닉네임 수정
+	 * @param nickname 닉네임
+	 * @param user 유저
+	 * @author 이승현
+	 */
+	public void updateUserNickname(String nickname, User user) {
+		user.updateNickname(nickname);
+	}
+
+	/**
+	 * 비밀번호 수정
+	 * @param newPassword 새 비밀번호
+	 * @param user 유저
+	 * @author 이승현
+	 */
+	public void updateUserPassword(String newPassword, User user) {
+		validNewPassword(newPassword, user.getPassword());
+
+		user.updatePassword(passwordEncoder.encode(newPassword));
+	}
+
+	/**
+	 * 프로필 이미지 수정
+	 * @param profileImageUrl 프로필 이미지 url
+	 * @param user 유저
+	 * @author 이승현
+	 */
+	public void updateUserProfileImage(String profileImageUrl, User user) {
+		user.updateProfileImage(profileImageUrl);
+	}
+
+	/**
+	 * 새 비밀번호 검증
+	 * @param newPassword 새 비밀번호
+	 * @param encodedPassword 암호화된 비밀번호
+	 * @author 이승현
+	 */
+	public void validNewPassword(String newPassword, String encodedPassword) {
+		if (passwordEncoder.matches(newPassword, encodedPassword)) {
+			throw new UserException(UserErrorCode.SAME_PASSWORD);
+		}
+	}
+
+	/**
+	 * 회원 탈퇴
+	 * @param user 유저
+	 * @author 이승현
+	 */
+	public void withdrawUser(User user) {
+		user.withdraw();
 	}
 }
