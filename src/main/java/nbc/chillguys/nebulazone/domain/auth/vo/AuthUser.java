@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
+import nbc.chillguys.nebulazone.infra.oauth.dto.CustomOAuth2User;
 
 @Getter
 @Builder
@@ -30,6 +31,14 @@ public class AuthUser {
 			.id(user.getId())
 			.email(user.getEmail())
 			.roles(user.getRoles())
+			.build();
+	}
+
+	public static AuthUser from(CustomOAuth2User oAuth2User) {
+		return AuthUser.builder()
+			.id(oAuth2User.userId())
+			.email(oAuth2User.getName())
+			.roles(oAuth2User.roles())
 			.build();
 	}
 }

@@ -69,12 +69,14 @@ public class UserDomainService {
 	public User createUser(UserSignUpCommand userSignUpCommand) {
 		User user = User.builder()
 			.email(userSignUpCommand.email())
-			.password(passwordEncoder.encode(userSignUpCommand.password()))
+			.password(userSignUpCommand.password() != null
+				? passwordEncoder.encode(userSignUpCommand.password()) : null)
 			.phone(userSignUpCommand.phone())
 			.nickname(userSignUpCommand.nickname())
 			.profileImage(userSignUpCommand.profileImageUrl())
 			.point(0)
-			.oauthType(OAuthType.DOMAIN)
+			.oauthType(userSignUpCommand.oAuthType())
+			.oauthId(userSignUpCommand.oauthId())
 			.roles(Set.of(UserRole.ROLE_USER))
 			.addresses(userSignUpCommand.addresses())
 			.build();
@@ -157,5 +159,10 @@ public class UserDomainService {
 	 */
 	public void withdrawUser(User user) {
 		user.withdraw();
+	}
+
+	public User findActiveUserByEmailAndOAuthType(String email, OAuthType oAuthType) {
+		return userRepository.findActiveUserByEmailAndOAuthType(email, oAuthType)
+			.orElseThrow(() -> new UserException(UserErrorCode.ALREADY_EXISTS_EMAIL));
 	}
 }

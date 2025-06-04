@@ -36,7 +36,7 @@ public class User extends BaseEntity {
 
 	private String password;
 
-	@Column(unique = true, nullable = false)
+	@Column(unique = true)
 	private String phone;
 
 	@Column(unique = true, nullable = false)
@@ -50,9 +50,7 @@ public class User extends BaseEntity {
 	@Column(nullable = false)
 	private OAuthType oauthType;
 
-	private Long oauthId;
-
-	private String providerId;
+	private String oauthId;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -76,7 +74,7 @@ public class User extends BaseEntity {
 
 	@Builder
 	public User(String email, String password, String phone, String nickname, String profileImage,
-		int point, OAuthType oauthType, Long oauthId, String providerId, Set<UserRole> roles, Set<Address> addresses) {
+		int point, OAuthType oauthType, String oauthId, String providerId, Set<UserRole> roles, Set<Address> addresses) {
 		this.email = email;
 		this.password = password;
 		this.phone = phone;
@@ -85,7 +83,7 @@ public class User extends BaseEntity {
 		this.point = point;
 		this.oauthType = oauthType;
 		this.oauthId = oauthId;
-		this.providerId = providerId;
+		// this.providerId = providerId;
 		this.roles = roles != null ? roles : new HashSet<>();
 		this.addresses = addresses != null ? addresses : new HashSet<>();
 		this.status = UserStatus.ACTIVE;
