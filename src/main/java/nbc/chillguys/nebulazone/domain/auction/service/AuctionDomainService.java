@@ -1,10 +1,12 @@
 package nbc.chillguys.nebulazone.domain.auction.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.repository.AuctionRepository;
 
@@ -21,4 +23,7 @@ public class AuctionDomainService {
 		auctionRepository.save(Auction.of(command.product(), command.startPrice(), command.endTime()));
 	}
 
+	public Page<AuctionFindInfo> findAuctions(int page, int size) {
+		return auctionRepository.findAllAuctionsWithProduct(page, size);
+	}
 }
