@@ -161,6 +161,13 @@ public class UserDomainService {
 		user.withdraw();
 	}
 
+	/**
+	 * 소셜 로그인 시 해당 provider로 존재하는 user 조회
+	 * @param email 이메일
+	 * @param oAuthType 소셜 로그인 타입
+	 * @return user
+	 * @author 이승현
+	 */
 	public User findActiveUserByEmailAndOAuthType(String email, OAuthType oAuthType) {
 		return userRepository.findActiveUserByEmailAndOAuthType(email, oAuthType)
 			.orElseThrow(() -> new UserException(UserErrorCode.ALREADY_EXISTS_EMAIL));
