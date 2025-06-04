@@ -77,7 +77,7 @@ public class UserController {
 	@PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<UserResponse> updateUser(
 		@Valid @RequestPart(value = "updateUserRequest", required = false) UpdateUserRequest updateUserRequest,
-		@RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+		@ImageFile @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
 		UserResponse response = userService.updateUser(updateUserRequest, profileImage, authUser);
