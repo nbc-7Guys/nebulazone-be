@@ -62,6 +62,10 @@ public class ProductDomainService {
 	 */
 	@Transactional
 	public void deleteProduct(ProductDeleteCommand command) {
+		if (command.auction() != null && command.auction().isClosed()) {
+			throw new ProductException(ProductErrorCode.AUCTION_NOT_CLOSED);
+		}
+
 		// todo: 판매 상품 상세 조회 메서드 추가되면 교체
 		Product product = productRepository.findById(command.productId())
 			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));

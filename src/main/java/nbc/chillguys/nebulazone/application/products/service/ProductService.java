@@ -12,6 +12,7 @@ import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRe
 import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.response.DeleteProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.response.ProductResponse;
+import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
@@ -82,8 +83,15 @@ public class ProductService {
 		// todo: 카탈로그 도메인 서비스 생성 후 작업
 		Catalog catalog = null;
 
-		ProductDeleteCommand command = ProductDeleteCommand.of(user, catalog, productId);
+		// todo: 옥션 도메인 서비스 생성 후 작업
+		Auction auction = null;
+
+		ProductDeleteCommand command = ProductDeleteCommand.of(user, catalog, auction, productId);
 		productDomainService.deleteProduct(command);
+
+		if (auction != null) {
+			// todo: 경매 삭제
+		}
 
 		return DeleteProductResponse.from(productId);
 	}
