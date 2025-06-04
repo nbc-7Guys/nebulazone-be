@@ -33,7 +33,7 @@ public class S3Service {
 	private String bucket;
 
 	public String generateUploadUrlAndUploadFile(MultipartFile file) {
-		if (file != null || file.isEmpty()) {
+		if (file == null || file.isEmpty()) {
 			return null;
 		}
 
