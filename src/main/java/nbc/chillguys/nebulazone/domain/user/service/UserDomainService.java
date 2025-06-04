@@ -75,8 +75,8 @@ public class UserDomainService {
 			.nickname(userSignUpCommand.nickname())
 			.profileImage(userSignUpCommand.profileImageUrl())
 			.point(0)
-			.oauthType(userSignUpCommand.oAuthType())
-			.oauthId(userSignUpCommand.oauthId())
+			.oAuthType(userSignUpCommand.oAuthType())
+			.oAuthId(userSignUpCommand.oauthId())
 			.roles(Set.of(UserRole.ROLE_USER))
 			.addresses(userSignUpCommand.addresses())
 			.build();

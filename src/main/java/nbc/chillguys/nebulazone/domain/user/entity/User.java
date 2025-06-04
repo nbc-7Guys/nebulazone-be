@@ -48,9 +48,9 @@ public class User extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private OAuthType oauthType;
+	private OAuthType oAuthType;
 
-	private String oauthId;
+	private String oAuthId;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -74,15 +74,15 @@ public class User extends BaseEntity {
 
 	@Builder
 	public User(String email, String password, String phone, String nickname, String profileImage,
-		int point, OAuthType oauthType, String oauthId, Set<UserRole> roles, Set<Address> addresses) {
+		int point, OAuthType oAuthType, String oAuthId, Set<UserRole> roles, Set<Address> addresses) {
 		this.email = email;
 		this.password = password;
 		this.phone = phone;
 		this.nickname = nickname;
 		this.profileImage = profileImage;
 		this.point = point;
-		this.oauthType = oauthType;
-		this.oauthId = oauthId;
+		this.oAuthType = oAuthType;
+		this.oAuthId = oAuthId;
 		this.roles = roles != null ? roles : new HashSet<>();
 		this.addresses = addresses != null ? addresses : new HashSet<>();
 		this.status = UserStatus.ACTIVE;

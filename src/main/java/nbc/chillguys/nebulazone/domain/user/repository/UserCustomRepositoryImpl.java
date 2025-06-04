@@ -50,7 +50,7 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
 			.where(
 				user.email.eq(email),
 				user.status.eq(UserStatus.ACTIVE),
-				user.oauthType.eq(oAuthType)
+				user.oAuthType.eq(oAuthType)
 			).fetchOne());
 	}
 }

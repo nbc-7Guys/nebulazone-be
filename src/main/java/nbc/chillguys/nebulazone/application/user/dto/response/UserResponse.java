@@ -20,8 +20,8 @@ public record UserResponse(
 	String nickname,
 	String profileImageUrl,
 	int point,
-	OAuthType oauthType,
-	String oauthId,
+	OAuthType oAuthType,
+	String oAuthId,
 	Set<AddressResponse> addresses,
 	LocalDateTime createdAt,
 	LocalDateTime modifiedAt
@@ -49,8 +49,8 @@ public record UserResponse(
 			.nickname(user.getNickname())
 			.profileImageUrl(user.getProfileImage())
 			.point(user.getPoint())
-			.oauthType(user.getOauthType())
-			.oauthId(user.getOauthId())
+			.oAuthType(user.getOAuthType())
+			.oAuthId(user.getOAuthId())
 			.addresses(user.getAddresses().stream()
 				.map(AddressResponse::from)
 				.collect(Collectors.toSet()))
