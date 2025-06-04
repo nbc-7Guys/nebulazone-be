@@ -18,8 +18,8 @@ public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, Chat
 		    SELECT cru
 			FROM ChatRoomUser cru
 		    JOIN FETCH cru.chatRoom cr
-		    JOIN FETCH cr.product
-		    JOIN FETCH cru.user
+		    JOIN FETCH cr.product p
+		    JOIN FETCH p.seller
 		    WHERE cru.user.id = :userId
 		""")
 	List<ChatRoomUser> findAllByUserId(@Param("userId") Long userId);
