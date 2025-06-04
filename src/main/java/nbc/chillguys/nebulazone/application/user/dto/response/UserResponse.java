@@ -22,7 +22,6 @@ public record UserResponse(
 	int point,
 	OAuthType oauthType,
 	String oauthId,
-	// String providerId,
 	Set<AddressResponse> addresses,
 	LocalDateTime createdAt,
 	LocalDateTime modifiedAt
