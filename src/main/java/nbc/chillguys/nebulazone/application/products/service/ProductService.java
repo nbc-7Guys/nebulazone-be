@@ -10,10 +10,12 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
+import nbc.chillguys.nebulazone.application.products.dto.response.DeleteProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
@@ -72,5 +74,17 @@ public class ProductService {
 		Product product = productDomainService.updateProduct(command);
 
 		return ProductResponse.from(product);
+	}
+
+	public DeleteProductResponse deleteProduct(Long userId, Long catalogId, Long productId) {
+		User user = userDomainService.findActiveUserById(userId);
+
+		// todo: 카탈로그 도메인 서비스 생성 후 작업
+		Catalog catalog = null;
+
+		ProductDeleteCommand command = ProductDeleteCommand.of(user, catalog, productId);
+		productDomainService.deleteProduct(command);
+
+		return DeleteProductResponse.from(productId);
 	}
 }

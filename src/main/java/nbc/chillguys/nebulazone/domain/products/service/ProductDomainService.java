@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
@@ -52,6 +53,25 @@ public class ProductDomainService {
 		// todo: 수정된 상품명 ES에 갱신
 
 		return product;
+	}
+
+	/**
+	 * 파매 상품 삭제
+	 * @param command 판매 상품 삭제 정보
+	 * @author 윤정환
+	 */
+	@Transactional
+	public void deleteProduct(ProductDeleteCommand command) {
+		// todo: 판매 상품 상세 조회 메서드 추가되면 교체
+		Product product = productRepository.findById(command.productId())
+			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+
+		validateBelongsToCatalog(product, command.catalog().getId());
+		validateProductOwner(product, command.catalog().getId());
+
+		product.delete();
+
+		// todo: 삭제된 정보 ES에 갱신
 	}
 
 	/**

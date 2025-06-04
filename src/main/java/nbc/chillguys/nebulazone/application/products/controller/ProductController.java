@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.application.products.contreoller;
+package nbc.chillguys.nebulazone.application.products.controller;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +20,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
+import nbc.chillguys.nebulazone.application.products.dto.response.DeleteProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.application.products.service.ProductService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
@@ -51,6 +53,17 @@ public class ProductController {
 		@Valid @RequestBody UpdateProductRequest request
 	) {
 		ProductResponse response = productService.updateProduct(authUser.getId(), catalogId, productId, request);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@DeleteMapping("/{productId}")
+	public ResponseEntity<DeleteProductResponse> deleteProduct(
+		@AuthenticationPrincipal AuthUser authUser,
+		@PathVariable("catalogId") Long catalogId,
+		@PathVariable("productId") Long productId
+	) {
+		DeleteProductResponse response = productService.deleteProduct(authUser.getId(), catalogId, productId);
 
 		return ResponseEntity.ok(response);
 	}

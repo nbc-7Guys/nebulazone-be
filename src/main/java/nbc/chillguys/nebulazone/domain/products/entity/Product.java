@@ -118,4 +118,9 @@ public class Product extends BaseEntity {
 		this.name = name;
 		this.description = description;
 	}
+
+	public void delete() {
+		this.isDeleted = true;
+		this.deletedAt = LocalDateTime.now();
+	}
 }
