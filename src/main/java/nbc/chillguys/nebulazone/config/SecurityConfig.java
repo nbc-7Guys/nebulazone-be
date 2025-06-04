@@ -11,8 +11,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -21,6 +19,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import nbc.chillguys.nebulazone.infra.oauth.handler.OAuth2SuccessHandler;
+import nbc.chillguys.nebulazone.infra.oauth.service.OAuthService;
 import nbc.chillguys.nebulazone.infra.security.jwt.JwtUtil;
 import nbc.chillguys.nebulazone.infra.security.jwt.filter.CustomAuthenticationEntryPoint;
 import nbc.chillguys.nebulazone.infra.security.jwt.filter.JwtAuthenticationFilter;
@@ -30,10 +30,15 @@ import nbc.chillguys.nebulazone.infra.security.jwt.filter.JwtAuthenticationFilte
 public class SecurityConfig {
 	private final CustomAuthenticationEntryPoint entryPoint;
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final OAuthService oAuthService;
+	private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-	public SecurityConfig(ObjectMapper objectMapper, JwtUtil jwtUtil) {
+	public SecurityConfig(ObjectMapper objectMapper, JwtUtil jwtUtil, OAuthService oAuthService,
+		OAuth2SuccessHandler oAuth2SuccessHandler) {
 		this.entryPoint = new CustomAuthenticationEntryPoint(objectMapper);
 		this.jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, entryPoint);
+		this.oAuthService = oAuthService;
+		this.oAuth2SuccessHandler = oAuth2SuccessHandler;
 	}
 
 	@Bean
@@ -55,10 +60,15 @@ public class SecurityConfig {
 				).permitAll()
 				.requestMatchers(
 					"/auth/signin",
-					"/users/signup"
+					"/users/signup",
+					"/oauth2/**"
 				).permitAll()
 				.requestMatchers(HttpMethod.GET, "/auctions/**").permitAll()
 				.anyRequest().authenticated())
+			.oauth2Login(oauth2 -> oauth2
+				.userInfoEndpoint(userInfo -> userInfo
+					.userService(oAuthService))
+				.successHandler(oAuth2SuccessHandler))
 			.exceptionHandling(exception ->
 				exception.authenticationEntryPoint(entryPoint))
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -77,11 +87,6 @@ public class SecurityConfig {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
-	}
-
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
 	}
 
 	@Bean
