@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 
 import nbc.chillguys.nebulazone.application.review.dto.response.ReviewResponse;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
@@ -23,6 +24,7 @@ import nbc.chillguys.nebulazone.domain.review.entity.Review;
 import nbc.chillguys.nebulazone.domain.review.service.ReviewDomainService;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 @DisplayName("리뷰 서비스 테스트")
 class ReviewServiceTest {
 	@Mock

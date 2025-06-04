@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,6 +25,7 @@ import nbc.chillguys.nebulazone.application.review.service.ReviewService;
 
 @WebMvcTest(ReviewController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 @DisplayName("리뷰 컨트롤러 테스트")
 class ReviewControllerTest {
 

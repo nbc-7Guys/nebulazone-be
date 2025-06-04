@@ -15,14 +15,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
 import nbc.chillguys.nebulazone.domain.review.entity.Review;
 import nbc.chillguys.nebulazone.domain.review.repository.ReviewRepository;
 
-@DisplayName("리뷰 도메인 서비스 테스트")
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("리뷰 도메인 서비스 테스트")
 class ReviewDomainServiceTest {
 
 	@Mock
