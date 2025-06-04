@@ -74,7 +74,7 @@ public class User extends BaseEntity {
 
 	@Builder
 	public User(String email, String password, String phone, String nickname, String profileImage,
-		int point, OAuthType oauthType, String oauthId, String providerId, Set<UserRole> roles, Set<Address> addresses) {
+		int point, OAuthType oauthType, String oauthId, Set<UserRole> roles, Set<Address> addresses) {
 		this.email = email;
 		this.password = password;
 		this.phone = phone;
@@ -83,7 +83,6 @@ public class User extends BaseEntity {
 		this.point = point;
 		this.oauthType = oauthType;
 		this.oauthId = oauthId;
-		// this.providerId = providerId;
 		this.roles = roles != null ? roles : new HashSet<>();
 		this.addresses = addresses != null ? addresses : new HashSet<>();
 		this.status = UserStatus.ACTIVE;

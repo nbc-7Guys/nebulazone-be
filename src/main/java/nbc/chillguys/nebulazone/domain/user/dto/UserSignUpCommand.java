@@ -4,10 +4,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.Builder;
-import nbc.chillguys.nebulazone.infra.oauth.dto.OAuth2UserInfo;
 import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
+import nbc.chillguys.nebulazone.infra.oauth.dto.OAuth2UserInfo;
 
 @Builder
 public record UserSignUpCommand(
