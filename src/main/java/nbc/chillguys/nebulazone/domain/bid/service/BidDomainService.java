@@ -46,11 +46,27 @@ public class BidDomainService {
 		return bidRepository.save(bid);
 	}
 
+	/**
+	 * 특정 경매의 입찰 내역 조회
+	 * @param auction 조회할 경매
+	 * @param page 페이지
+	 * @param size 출력 개수
+	 * @return FindBidInfo 페이징
+	 * @author 전나겸
+	 */
 	public Page<FindBidInfo> findBids(Auction auction, int page, int size) {
 
 		return bidRepository.findBidsWithUserByAuction(auction, page, size);
 	}
 
+	/**
+	 * 내 입찰 내역 조회
+	 * @param user 로그인 유저
+	 * @param page 페이지
+	 * @param size 출력 개수
+	 * @return FindBidInfo 페이징
+	 * @author 전나겸
+	 */
 	public Page<FindBidInfo> findMyBids(User user, int page, int size) {
 
 		return bidRepository.findMyBids(user, page, size);
