@@ -13,7 +13,8 @@ public enum PointHistoryErrorCode implements ErrorCode {
 	POINT_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 포인트 거래 내역입니다."),
 	ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "이미 처리된 요청입니다."),
 	NOT_PENDING(HttpStatus.BAD_REQUEST, "대기 중(PENDING) 상태만 처리할 수 있습니다."),
-	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다.");
+	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
+	NOT_OWNER(HttpStatus.FORBIDDEN, "본인만 요청할 수 있습니다.");
 
 	private final HttpStatus status;
 	private final String message;

@@ -181,14 +181,9 @@ public class UserDomainService {
 	 * @author 정석현
 	 */
 	public void validateEnoughPoint(User user, int price) {
-		if (!user.hasEnoughPoint(price)) {
+		if (user.hasNotEnoughPoint(price)) {
 			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
 		}
 	}
 
-	public void validateOwnership(User user, Long currentUserId) {
-		if (!user.getId().equals(currentUserId)) {
-			throw new UserException(UserErrorCode.NOT_OWNER);
-		}
-	}
 }
