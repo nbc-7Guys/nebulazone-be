@@ -3,7 +3,7 @@ package nbc.chillguys.nebulazone.application.comment.dto.response;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import nbc.chillguys.nebulazone.domain.comment.dto.CommentWithUserDto;
+import nbc.chillguys.nebulazone.domain.comment.dto.CommentWithUserInfo;
 
 public record CommentDetailResponse(
 	Long commentId,
@@ -15,7 +15,7 @@ public record CommentDetailResponse(
 	List<CommentDetailResponse> children
 ) {
 
-	public static CommentDetailResponse from(CommentWithUserDto comment) {
+	public static CommentDetailResponse from(CommentWithUserInfo comment) {
 		return new CommentDetailResponse(
 			comment.commentId(),
 			comment.parentId(),
