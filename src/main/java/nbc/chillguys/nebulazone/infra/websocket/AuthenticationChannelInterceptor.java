@@ -52,12 +52,6 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 				// jWT 토큰 파싱 및 검증
 				AuthUser authUserFromToken = jwtUtil.getAuthUserFromToken(token);
 
-				// 채팅방 존재 여부 확인
-				boolean existsChatRoomById = chatRoomRepository.existsChatRoomById(authUserFromToken.getId());
-				if (!existsChatRoomById) {
-					throw new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND);
-				}
-
 				// accessor.setUser에는 Principal 타입이 필요하기 때문에 UsernamePasswordAuthenticationToken으로 감싸기
 				Principal principal = new UsernamePasswordAuthenticationToken(String.valueOf(authUserFromToken.getId()),
 					null, authUserFromToken.getAuthorities());
@@ -68,7 +62,7 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 				SessionUtil.registerUser(accessor.getSessionId(), authUserFromToken);
 
 			} catch (Exception e) {
-				log.warn("JWT 파싱 또는 Principal 세팅 예외: {}", e.getMessage());
+				log.warn("JWT 파싱 또는 Principal 세팅 예외: {}", e);
 				throw e;
 			}
 
@@ -85,11 +79,20 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 				try {
 					Long roomId = Long.valueOf(roomIdStr);
 					AuthUser authUser = SessionUtil.getUserIdBySessionId(accessor.getSessionId());
+
+					// 채팅방 존재 여부 확인
+					boolean existsChatRoomById = chatRoomRepository.existsChatRoomById(roomId);
+					if (!existsChatRoomById) {
+						throw new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND);
+					}
+
 					// 채팅방에 참여중인 유저인지 확인
-					boolean isParticipant = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(authUser.getId(), roomId);
+					boolean isParticipant = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId,
+						authUser.getId());
 					if (!isParticipant) {
 						throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 					}
+
 					SessionUtil.registerRoom(accessor.getSessionId(), roomId);
 				} catch (NumberFormatException e) {
 					log.warn("방번호 추출 실패: {}", roomIdStr);

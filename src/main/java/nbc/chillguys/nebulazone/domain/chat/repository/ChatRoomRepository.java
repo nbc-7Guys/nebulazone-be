@@ -23,7 +23,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 	Optional<ChatRoom> findChatRoom(@Param("productId") Long productId, @Param("sellerId") Long sellerId,
 		@Param("buyerId") Long buyerId);
 
-	boolean existsChatRoomById(Long id);
+	boolean existsChatRoomById(Long roomId);
 
 	List<ChatRoom> findAllByProductId(Long productId);
 }

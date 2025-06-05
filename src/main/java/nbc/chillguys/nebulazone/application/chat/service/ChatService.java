@@ -119,7 +119,7 @@ public class ChatService {
 			.map(history -> FindChatHistoryResponse.builder()
 				.message(history.getMessage())
 				.sender(userNicknames.get(history.getUserId()))
-				.sendTime(history.getSendtime())
+				.sendTime(history.getSendTime())
 				.build())
 			.toList();
 

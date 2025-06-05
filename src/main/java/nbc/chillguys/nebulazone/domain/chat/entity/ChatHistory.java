@@ -40,13 +40,13 @@ public class ChatHistory extends BaseEntity {
 	private String message;
 
 	@Column(nullable = false)
-	private LocalDateTime sendtime;
+	private LocalDateTime sendTime;
 
 	@Builder
 	public ChatHistory(ChatRoom chatRoom, Long userId, String message, LocalDateTime sendtime) {
 		this.chatRoom = chatRoom;
 		this.userId = userId;
 		this.message = message;
-		this.sendtime = sendtime;
+		this.sendTime = sendtime;
 	}
 }
