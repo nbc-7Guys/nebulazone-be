@@ -174,16 +174,6 @@ public class UserDomainService {
 	}
 
 	/**
-	 * 포인트 사용
-	 * @param user 유저
-	 * @param point 사용할 포인트
-	 * @author 윤정환
-	 */
-	public void usePoint(User user, int point) {
-		user.usePoint(point);
-	}
-  
-	/**
 	 * 포인 환전시 포인트가 충분한지 조회
 	 *
 	 * @param user 유저

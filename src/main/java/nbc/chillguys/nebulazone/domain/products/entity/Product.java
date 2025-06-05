@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.domain.products.entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -132,6 +133,30 @@ public class Product extends BaseEntity {
 		}
 
 		this.isSold = true;
+	}
+
+	public void validateBelongsToCatalog(Long catalogId) {
+		if (!Objects.equals(getCatalog().getId(), catalogId)) {
+			throw new ProductException(ProductErrorCode.NOT_BELONGS_TO_CATALOG);
+		}
+	}
+
+	public void validateProductOwner(Long userId) {
+		if (!Objects.equals(getSeller().getId(), userId)) {
+			throw new ProductException(ProductErrorCode.NOT_PRODUCT_OWNER);
+		}
+	}
+
+	public void validateNotSold() {
+		if (isSold()) {
+			throw new ProductException(ProductErrorCode.SOLD_ALREADY);
+		}
+	}
+
+	public void validatePurchasable() {
+		if (getTxMethod() == ProductTxMethod.AUCTION) {
+			throw new ProductException(ProductErrorCode.AUCTION_PRODUCT_NOT_PURCHASABLE);
+		}
 	}
 
 	public void delete() {

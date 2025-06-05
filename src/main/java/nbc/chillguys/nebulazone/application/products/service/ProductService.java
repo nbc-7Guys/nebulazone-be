@@ -138,7 +138,7 @@ public class ProductService {
 		// todo: 카탈로그 도메인 서비스 생성 후 작업
 		Catalog catalog = null;
 
-		userDomainService.usePoint(user, Math.toIntExact(product.getPrice()));
+		user.usePoint(Math.toIntExact(product.getPrice()));
 
 		ProductPurchaseCommand command = ProductPurchaseCommand.of(user, catalog, productId);
 		productDomainService.purchaseProduct(command);

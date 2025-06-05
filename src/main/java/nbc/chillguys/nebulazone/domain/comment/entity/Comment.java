@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.domain.comment.entity;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,6 +16,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import nbc.chillguys.nebulazone.domain.comment.exception.CommentErrorCode;
+import nbc.chillguys.nebulazone.domain.comment.exception.CommentException;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -58,6 +61,18 @@ public class Comment extends BaseEntity {
 
 	public void update(String content) {
 		this.content = content;
+	}
+
+	public void validateBelongsToPost(Long postId) {
+		if (!Objects.equals(getPost().getId(), postId)) {
+			throw new CommentException(CommentErrorCode.NOT_BELONG_TO_POST);
+		}
+	}
+
+	public void validateCommentOwner(Long userId) {
+		if (!Objects.equals(getUser().getId(), userId)) {
+			throw new CommentException(CommentErrorCode.NOT_COMMENT_OWNER);
+		}
 	}
 
 	public void delete() {

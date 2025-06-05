@@ -56,8 +56,8 @@ public class ProductDomainService {
 	public Product findAvailableProductById(Long productId) {
 		Product product = findActiveProductById(productId);
 
-		validateNotSold(product);
-		validatePurchasable(product);
+		product.validateNotSold();
+		product.validatePurchasable();
 
 		return product;
 	}
@@ -72,8 +72,8 @@ public class ProductDomainService {
 	public Product updateProduct(ProductUpdateCommand command) {
 		Product product = findActiveProductById(command.productId());
 
-		validateBelongsToCatalog(product, command.catalog().getId());
-		validateProductOwner(product, command.user().getId());
+		product.validateBelongsToCatalog(command.catalog().getId());
+		product.validateProductOwner(command.user().getId());
 
 		product.update(command.name(), command.description());
 
@@ -102,7 +102,7 @@ public class ProductDomainService {
 	}
 
 	/**
-	 * 파매 상품 삭제
+	 * 판매 상품 삭제
 	 * @param command 판매 상품 삭제 정보
 	 * @author 윤정환
 	 */
@@ -112,12 +112,10 @@ public class ProductDomainService {
 			throw new ProductException(ProductErrorCode.AUCTION_NOT_CLOSED);
 		}
 
-		// todo: 판매 상품 상세 조회 메서드 추가되면 교체
-		Product product = productRepository.findById(command.productId())
-			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+		Product product = findActiveProductById(command.productId());
 
-		validateBelongsToCatalog(product, command.catalog().getId());
-		validateProductOwner(product, command.user().getId());
+		product.validateBelongsToCatalog(command.catalog().getId());
+		product.validateProductOwner(command.user().getId());
 
 		product.delete();
 
@@ -129,51 +127,5 @@ public class ProductDomainService {
 		Product product = findAvailableProductById(command.productId());
 
 		product.purchase();
-	}
-
-	/**
-	 * 판매 상품이 해당 카탈로그에 속해있는지 검증
-	 * @param product 판매 상품 정보
-	 * @param catalogId 카탈로그 id
-	 * @author 윤정환
-	 */
-	private void validateBelongsToCatalog(Product product, Long catalogId) {
-		if (!Objects.equals(product.getCatalog().getId(), catalogId)) {
-			throw new ProductException(ProductErrorCode.NOT_BELONGS_TO_CATALOG);
-		}
-	}
-
-	/**
-	 * 판매 상품의 주인이 맞는지 검증
-	 * @param product 판매 상품 정보
-	 * @param userId 유저 id
-	 * @author 윤정환
-	 */
-	private void validateProductOwner(Product product, Long userId) {
-		if (!Objects.equals(product.getSeller().getId(), userId)) {
-			throw new ProductException(ProductErrorCode.NOT_PRODUCT_OWNER);
-		}
-	}
-
-	/**
-	 * 판매된 상품인지 검증
-	 * @param product 판매 상품 정보
-	 * @author 윤정환
-	 */
-	private void validateNotSold(Product product) {
-		if (product.isSold()) {
-			throw new ProductException(ProductErrorCode.SOLD_ALREADY);
-		}
-	}
-
-	/**
-	 * 구매가 가능한 상품인지 검증
-	 * @param product 판매 상품 정보
-	 * @author 윤정환
-	 */
-	private void validatePurchasable(Product product) {
-		if (product.getTxMethod() == ProductTxMethod.AUCTION) {
-			throw new ProductException(ProductErrorCode.AUCTION_PRODUCT_NOT_PURCHASABLE);
-		}
 	}
 }
