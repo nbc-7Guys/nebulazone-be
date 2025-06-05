@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.domain.products.entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -24,6 +25,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
+import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
+import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Getter
@@ -71,7 +74,7 @@ public class Product extends BaseEntity {
 	private List<ProductImage> productImages = new ArrayList<>();
 
 	@Builder
-	public Product(
+	private Product(
 		String name,
 		String description,
 		Long price,
@@ -93,18 +96,6 @@ public class Product extends BaseEntity {
 		this.catalog = catalog;
 	}
 
-	public static Product of(String name, String description, Long price, ProductTxMethod txMethod,
-		User seller, Catalog catalog) {
-		return Product.builder()
-			.name(name)
-			.description(description)
-			.price(price)
-			.txMethod(txMethod)
-			.seller(seller)
-			.catalog(catalog)
-			.build();
-	}
-
 	public void addProductImages(List<String> productImageUrls) {
 		if (productImageUrls != null) {
 			this.productImages.addAll(productImageUrls.stream()
@@ -112,5 +103,52 @@ public class Product extends BaseEntity {
 				.toList());
 		}
 
+	}
+
+	public void update(String name, String description) {
+		this.name = name;
+		this.description = description;
+	}
+
+	public void changeToAuctionType(Long price) {
+		this.price = price;
+		this.txMethod = ProductTxMethod.AUCTION;
+	}
+
+	public void purchase() {
+		if (isSold) {
+			throw new ProductException(ProductErrorCode.SOLD_ALREADY);
+		}
+
+		this.isSold = true;
+	}
+
+	public void validateBelongsToCatalog(Long catalogId) {
+		if (!Objects.equals(getCatalog().getId(), catalogId)) {
+			throw new ProductException(ProductErrorCode.NOT_BELONGS_TO_CATALOG);
+		}
+	}
+
+	public void validateProductOwner(Long userId) {
+		if (!Objects.equals(getSeller().getId(), userId)) {
+			throw new ProductException(ProductErrorCode.NOT_PRODUCT_OWNER);
+		}
+	}
+
+	public void validateNotSold() {
+		if (isSold()) {
+			throw new ProductException(ProductErrorCode.SOLD_ALREADY);
+		}
+	}
+
+	public void validatePurchasable() {
+		if (getTxMethod() == ProductTxMethod.AUCTION) {
+			throw new ProductException(ProductErrorCode.AUCTION_PRODUCT_NOT_PURCHASABLE);
+		}
+	}
+
+	public void delete() {
+		this.isDeleted = true;
+		this.deletedAt = LocalDateTime.now();
 	}
 }

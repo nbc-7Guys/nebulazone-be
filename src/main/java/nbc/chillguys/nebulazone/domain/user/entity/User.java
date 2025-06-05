@@ -20,6 +20,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
+import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
+import nbc.chillguys.nebulazone.domain.user.exception.UserException;
 
 @Getter
 @Entity
@@ -108,5 +110,18 @@ public class User extends BaseEntity {
 	public void updatePassword(String password) {
 		this.password = password;
 	}
+
+	public void usePoint(int usePoint) {
+		if (this.point < usePoint) {
+			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
+		}
+
+		this.point -= point;
+	}
+
+	public boolean hasEnoughPoint(int amount) {
+		return this.point >= amount;
+	}
+
 }
 

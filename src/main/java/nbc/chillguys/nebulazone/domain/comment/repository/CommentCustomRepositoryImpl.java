@@ -15,7 +15,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.comment.dto.CommentWithUserDto;
+import nbc.chillguys.nebulazone.domain.comment.dto.CommentWithUserInfo;
 import nbc.chillguys.nebulazone.domain.comment.entity.QComment;
 import nbc.chillguys.nebulazone.domain.user.entity.QUser;
 
@@ -26,7 +26,7 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Page<CommentWithUserDto> findComments(Long postId, int page, int size) {
+	public Page<CommentWithUserInfo> findComments(Long postId, int page, int size) {
 		QComment comment = QComment.comment;
 		QUser user = QUser.user;
 
@@ -47,8 +47,8 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
 			return new PageImpl<>(Collections.emptyList(), pageable, 0L);
 		}
 
-		List<CommentWithUserDto> flatList = jpaQueryFactory
-			.select(Projections.constructor(CommentWithUserDto.class,
+		List<CommentWithUserInfo> flatList = jpaQueryFactory
+			.select(Projections.constructor(CommentWithUserInfo.class,
 				comment.id,
 				comment.isDeleted.isTrue()
 					.when(true).then("삭제된 댓글입니다.").otherwise(comment.content),
@@ -66,16 +66,16 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
 			.orderBy(comment.parent.id.asc().nullsFirst(), comment.id.asc())
 			.fetch();
 
-		Map<Long, CommentWithUserDto> map = new LinkedHashMap<>();
-		List<CommentWithUserDto> result = new ArrayList<>();
-		for (CommentWithUserDto dto : flatList) {
+		Map<Long, CommentWithUserInfo> map = new LinkedHashMap<>();
+		List<CommentWithUserInfo> result = new ArrayList<>();
+		for (CommentWithUserInfo dto : flatList) {
 			map.put(dto.commentId(), dto);
 		}
-		for (CommentWithUserDto dto : flatList) {
+		for (CommentWithUserInfo dto : flatList) {
 			if (dto.parentId() == null) {
 				result.add(dto);
 			} else {
-				CommentWithUserDto parent = map.get(dto.parentId());
+				CommentWithUserInfo parent = map.get(dto.parentId());
 				if (parent != null) {
 					parent.children().add(dto);
 				}

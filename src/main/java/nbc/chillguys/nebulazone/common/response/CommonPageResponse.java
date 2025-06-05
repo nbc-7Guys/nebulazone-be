@@ -12,7 +12,11 @@ public record CommonPageResponse<T>(
 	long totalElements,
 	int page,
 	int size,
-	int totalPages
+	int totalPages,
+	boolean hasNext,
+	boolean isLast,
+	boolean hasPrevious,
+	boolean isFirst
 ) {
 
 	public static <T> CommonPageResponse<T> from(Page<T> page) {
@@ -22,6 +26,10 @@ public record CommonPageResponse<T>(
 			.page(page.getNumber() + 1)
 			.size(page.getSize())
 			.totalPages(page.getTotalPages())
+			.hasNext(page.hasNext())
+			.isLast(page.isLast())
+			.hasPrevious(page.hasPrevious())
+			.isFirst(page.isFirst())
 			.build();
 	}
 

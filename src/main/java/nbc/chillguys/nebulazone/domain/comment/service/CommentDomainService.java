@@ -1,7 +1,5 @@
 package nbc.chillguys.nebulazone.domain.comment.service;
 
-import java.util.Objects;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +9,7 @@ import nbc.chillguys.nebulazone.domain.comment.dto.CommentCreateCommand;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentDeleteCommand;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentListFindQuery;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentUpdateCommand;
-import nbc.chillguys.nebulazone.domain.comment.dto.CommentWithUserDto;
+import nbc.chillguys.nebulazone.domain.comment.dto.CommentWithUserInfo;
 import nbc.chillguys.nebulazone.domain.comment.entity.Comment;
 import nbc.chillguys.nebulazone.domain.comment.exception.CommentErrorCode;
 import nbc.chillguys.nebulazone.domain.comment.exception.CommentException;
@@ -32,11 +30,7 @@ public class CommentDomainService {
 	 */
 	@Transactional
 	public Comment createComment(CommentCreateCommand command) {
-		Comment parent = null;
-		if (command.parentId() != null) {
-			parent = findActiveComment(command.parentId());
-		}
-
+		Comment parent = findActiveComment(command.parentId());
 		Comment comment = Comment.builder()
 			.post(command.post())
 			.user(command.user())
@@ -66,7 +60,7 @@ public class CommentDomainService {
 	 * @return commentPage
 	 * @author 윤정환
 	 */
-	public Page<CommentWithUserDto> findComments(CommentListFindQuery query) {
+	public Page<CommentWithUserInfo> findComments(CommentListFindQuery query) {
 		return commentRepository.findComments(query.post().getId(), query.page(), query.size());
 	}
 
@@ -80,8 +74,8 @@ public class CommentDomainService {
 	public Comment updateComment(CommentUpdateCommand command) {
 		Comment comment = findActiveComment(command.commentId());
 
-		validateBelongsToPost(comment, command.post().getId());
-		validateCommentOwner(comment, command.user().getId());
+		comment.validateBelongsToPost(command.post().getId());
+		comment.validateCommentOwner(command.user().getId());
 
 		comment.update(command.content());
 
@@ -97,32 +91,9 @@ public class CommentDomainService {
 	public void deleteComment(CommentDeleteCommand command) {
 		Comment comment = findActiveComment(command.commentId());
 
-		validateBelongsToPost(comment, command.post().getId());
-		validateCommentOwner(comment, command.user().getId());
+		comment.validateBelongsToPost(command.post().getId());
+		comment.validateCommentOwner(command.user().getId());
 
 		comment.delete();
-	}
-
-	/**
-	 * 댓글이 해당 게시글에 속해있는지 검증
-	 * @param comment 뎃글 정보
-	 * @param postId 게시글 id
-	 * @author 윤정환
-	 */
-	private void validateBelongsToPost(Comment comment, Long postId) {
-		if (!Objects.equals(comment.getPost().getId(), postId)) {
-			throw new CommentException(CommentErrorCode.NOT_BELONG_TO_POST);
-		}
-	}
-
-	/**
-	 * 댓글의 주인이 맞는지 검증
-	 * @param comment 뎃글 정보
-	 * @param userId 유저 id
-	 */
-	private void validateCommentOwner(Comment comment, Long userId) {
-		if (!Objects.equals(comment.getUser().getId(), userId)) {
-			throw new CommentException(CommentErrorCode.NOT_COMMENT_OWNER);
-		}
 	}
 }

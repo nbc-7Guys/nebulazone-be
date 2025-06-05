@@ -58,7 +58,7 @@ class ProductDomainServiceUnitTest {
 			.nickname("테스트닉")
 			.profileImage("test.jpg")
 			.point(0)
-			.oauthType(OAuthType.DOMAIN)
+			.oAuthType(OAuthType.DOMAIN)
 			.roles(Set.of(UserRole.ROLE_USER))
 			.addresses(addresses)
 			.build();
@@ -82,13 +82,13 @@ class ProductDomainServiceUnitTest {
 
 			List<String> imageUrls = List.of("image1.jpg, image2.jpg");
 
-			Product savedProduct = Product.of(
-				"경매 판매글 제목1",
-				"경매 판매글 내용1",
-				2_000_000L,
-				ProductTxMethod.AUCTION,
-				user,
-				null);
+			Product savedProduct = Product.builder()
+				.name("경매 판매글 제목1")
+				.description("경매 판매글 내용1")
+				.price(2_000_000L)
+				.txMethod(ProductTxMethod.AUCTION)
+				.seller(user)
+				.build();
 			ReflectionTestUtils.setField(savedProduct, "id", 1L);
 
 			given(productRepository.save(any(Product.class))).will(i -> {

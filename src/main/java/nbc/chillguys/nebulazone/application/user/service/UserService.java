@@ -10,6 +10,7 @@ import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.UpdateUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
+import nbc.chillguys.nebulazone.application.user.dto.response.WithdrawUserResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.user.dto.UserSignUpCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -81,13 +82,13 @@ public class UserService {
 	}
 
 	@Transactional
-	public Long withdrawUser(WithdrawUserRequest withdrawUserRequest, AuthUser authUser) {
+	public WithdrawUserResponse withdrawUser(WithdrawUserRequest withdrawUserRequest, AuthUser authUser) {
 		User user = userDomainService.findActiveUserById(authUser.getId());
 
 		userDomainService.validPassword(withdrawUserRequest.password(), user.getPassword());
 
 		userDomainService.withdrawUser(user);
 
-		return user.getId();
+		return WithdrawUserResponse.from(user.getId());
 	}
 }
