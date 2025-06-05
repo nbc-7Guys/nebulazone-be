@@ -11,13 +11,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import nbc.chillguys.nebulazone.application.review.dto.response.ReviewResponse;
+import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
 import nbc.chillguys.nebulazone.domain.review.entity.Review;
@@ -38,7 +38,9 @@ class ReviewServiceTest {
 	void success_findReview() {
 		// given
 		Long catalogId = 1L;
-		Pageable pageable = PageRequest.of(0, 10);
+		int page = 1;
+		int size = 10;
+		Pageable pageable = PageRequest.of(page - 1, size);
 
 		Catalog catalog1 = new Catalog("이름", "설명", CatalogType.CPU);
 		Catalog catalog2 = new Catalog("이름2", "설명2", CatalogType.GPU);
@@ -57,14 +59,14 @@ class ReviewServiceTest {
 		);
 
 		PageImpl<Review> reviewPage = new PageImpl<>(reviewList, pageable, reviewList.size());
-		when(reviewDomainService.findReviews(catalogId, pageable)).thenReturn(reviewPage);
+		when(reviewDomainService.findReviews(eq(catalogId), any(Pageable.class))).thenReturn(reviewPage);
 
 		// when
-		Page<ReviewResponse> result = reviewService.findReviews(catalogId, pageable);
+		CommonPageResponse<ReviewResponse> result = reviewService.findReviews(catalogId, page, size);
 
 		// then
-		assertThat(result.getContent().get(0).content()).isEqualTo("내용1");
-		assertThat(result.getContent().get(1).star()).isEqualTo(3);
-		verify(reviewDomainService).findReviews(catalogId, pageable);
+		assertThat(result.content().get(0).content()).isEqualTo("내용1");
+		assertThat(result.content().get(1).star()).isEqualTo(3);
+		verify(reviewDomainService).findReviews(eq(catalogId), any(Pageable.class));
 	}
 }

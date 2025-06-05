@@ -10,22 +10,18 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import nbc.chillguys.nebulazone.application.review.dto.response.ReviewResponse;
 import nbc.chillguys.nebulazone.application.review.service.ReviewService;
+import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
+import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 
 @WebMvcTest(ReviewController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
 @DisplayName("리뷰 컨트롤러 테스트")
 class ReviewControllerTest {
 
@@ -40,21 +36,28 @@ class ReviewControllerTest {
 	void success_findReviews() throws Exception {
 		// given
 		Long catalogId = 1L;
-		Pageable pageable = PageRequest.of(0, 10);
+		int page = 1;
+		int size = 10;
 
 		List<ReviewResponse> reviews = List.of(
 			new ReviewResponse(1L, "좋아요!", 5, LocalDateTime.now()),
 			new ReviewResponse(2L, "별로예요", 2, LocalDateTime.now())
 		);
 
-		Page<ReviewResponse> reviewPage = new PageImpl<>(reviews, pageable, reviews.size());
+		CommonPageResponse<ReviewResponse> response = CommonPageResponse.<ReviewResponse>builder()
+			.content(reviews)
+			.totalElements(2)
+			.page(page)
+			.size(size)
+			.totalPages(1)
+			.build();
 
-		when(reviewService.findReviews(catalogId, pageable)).thenReturn(reviewPage);
+		when(reviewService.findReviews(eq(catalogId), eq(page), eq(size))).thenReturn(response);
 
 		// when & then
-		mockMvc.perform(get("/catalog/{catalogId}/reviews", catalogId)
-				.param("page", "0")
-				.param("size", "10"))
+		mockMvc.perform(get("/catalogs/{catalogId}/reviews", catalogId)
+				.param("page", String.valueOf(page))
+				.param("size", String.valueOf(size)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.content").isArray())
 			.andExpect(jsonPath("$.content.length()").value(2))
@@ -62,11 +65,41 @@ class ReviewControllerTest {
 			.andExpect(jsonPath("$.content[0].content").value("좋아요!"))
 			.andExpect(jsonPath("$.content[0].star").value(5))
 			.andExpect(jsonPath("$.content[1].id").value(2))
-			.andExpect(jsonPath("$.content[1].content").value("별로예요"))
 			.andExpect(jsonPath("$.content[1].star").value(2))
+			.andExpect(jsonPath("$.page").value(page))
+			.andExpect(jsonPath("$.size").value(size))
 			.andExpect(jsonPath("$.totalElements").value(2))
-			.andExpect(jsonPath("$.totalPages").value(1))
-			.andExpect(jsonPath("$.size").value(10))
-			.andExpect(jsonPath("$.number").value(0));
+			.andExpect(jsonPath("$.totalPages").value(1));
+	}
+
+	@Test
+	@DisplayName("존재하지 않는 카탈로그의 리뷰 조회 - 빈 페이지 반환")
+	void success_findReviews_emptyResult() throws Exception {
+		// given
+		Long catalogId = 999L;
+		int page = 1;
+		int size = 10;
+
+		CommonPageResponse<ReviewResponse> emptyResponse = CommonPageResponse.<ReviewResponse>builder()
+			.content(List.of())
+			.totalElements(0)
+			.page(page)
+			.size(size)
+			.totalPages(0)
+			.build();
+
+		when(reviewService.findReviews(eq(catalogId), eq(page), eq(size))).thenReturn(emptyResponse);
+
+		// when & then
+		mockMvc.perform(get("/catalogs/{catalogId}/reviews", catalogId)
+				.param("page", String.valueOf(page))
+				.param("size", String.valueOf(size)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.content").isArray())
+			.andExpect(jsonPath("$.content.length()").value(0))
+			.andExpect(jsonPath("$.totalElements").value(0))
+			.andExpect(jsonPath("$.page").value(page))
+			.andExpect(jsonPath("$.size").value(size))
+			.andExpect(jsonPath("$.totalPages").value(0));
 	}
 }

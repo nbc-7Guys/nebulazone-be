@@ -1,32 +1,31 @@
 package nbc.chillguys.nebulazone.application.review.controller;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.review.dto.response.ReviewResponse;
 import nbc.chillguys.nebulazone.application.review.service.ReviewService;
+import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 
 @RestController
-@RequestMapping("/catalog")
+@RequestMapping("/catalogs")
 @RequiredArgsConstructor
 public class ReviewController {
 
 	private final ReviewService reviewService;
 
 	@GetMapping("/{catalogId}/reviews")
-	public ResponseEntity<Page<ReviewResponse>> findReviews(
+	public ResponseEntity<CommonPageResponse<ReviewResponse>> findReviews(
 		@PathVariable Long catalogId,
-		@PageableDefault(size = 10)
-		Pageable pageable
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "10") int size
 	) {
-		Page<ReviewResponse> response = reviewService.findReviews(catalogId, pageable);
+		CommonPageResponse<ReviewResponse> response = reviewService.findReviews(catalogId, page, size);
 		return ResponseEntity.ok(response);
 	}
 }
