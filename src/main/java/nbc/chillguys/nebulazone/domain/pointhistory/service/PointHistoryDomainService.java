@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.pointhistory.dto.PointHistoryCommand;
@@ -27,6 +28,7 @@ public class PointHistoryDomainService {
 	 * @return 생성된 PointHistory 엔티티
 	 * @author 정석현
 	 */
+	@Transactional
 	public PointHistory createPointHistory(PointHistoryCommand command) {
 		PointHistory pointHistory = PointHistory.builder()
 			.user(command.user())
@@ -70,7 +72,10 @@ public class PointHistoryDomainService {
 	 * @throws PointHistoryException 내역이 존재하지 않거나, 상태가 PENDING이 아닐 때
 	 * @author 정석현
 	 */
-	public void rejectPointRequest(PointHistory pointHistory) {
+	@Transactional
+	public void rejectPointRequest(PointHistory pointHistory, Long userId) {
+
+		validateOwnership(pointHistory, userId);
 
 		validatePending(pointHistory);
 
@@ -112,6 +117,19 @@ public class PointHistoryDomainService {
 	public void validatePending(PointHistory pointHistory) {
 		if (pointHistory.getPointHistoryStatus() != PointHistoryStatus.PENDING) {
 			throw new PointHistoryException(PointHistoryErrorCode.NOT_PENDING);
+		}
+	}
+
+	/**
+	 * 해당 사용자가 맞는지 검증합니다.
+	 *
+	 * @param pointHistory 포인트 내역 엔티티
+	 * @param userId 유저 아이디
+	 * @author 정석현
+	 */
+	public void validateOwnership(PointHistory pointHistory, Long userId) {
+		if (!pointHistory.getUser().getId().equals(userId)) {
+			throw new PointHistoryException(PointHistoryErrorCode.NOT_OWNER);
 		}
 	}
 
