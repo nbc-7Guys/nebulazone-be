@@ -55,4 +55,13 @@ public class Comment extends BaseEntity {
 		this.user = user;
 		this.parent = parent;
 	}
+
+	public void update(String content) {
+		this.content = content;
+	}
+
+	public void delete() {
+		this.isDeleted = true;
+		this.deletedAt = LocalDateTime.now();
+	}
 }
