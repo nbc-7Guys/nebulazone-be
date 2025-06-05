@@ -9,15 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Encoding;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
@@ -35,23 +33,11 @@ import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
 public class UserController {
 	private final UserService userService;
 
-	@Operation(
-		summary = "회원가입",
-		requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-			content = @Content(
-				mediaType = "multipart/form-data",
-				encoding = {
-					@Encoding(name = "signUpUserRequest", contentType = "application/json")
-				}
-			)
-		)
-	)
-	@PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping("/signup")
 	public ResponseEntity<UserResponse> signup(
-		@Valid @RequestPart("signUpUserRequest") SignUpUserRequest signUpUserRequest,
-		@ImageFile @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
+		@Valid @RequestBody SignUpUserRequest signUpUserRequest
 	) {
-		UserResponse responseDto = userService.signUp(signUpUserRequest, profileImage);
+		UserResponse responseDto = userService.signUp(signUpUserRequest);
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(responseDto);
@@ -64,24 +50,22 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 
-	@Operation(
-		summary = "유저수정",
-		requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-			content = @Content(
-				mediaType = "multipart/form-data",
-				encoding = {
-					@Encoding(name = "updateUserRequest", contentType = "application/json")
-				}
-			)
-		)
-	)
-	@PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<UserResponse> updateUser(
-		@Valid @RequestPart(value = "updateUserRequest", required = false) UpdateUserRequest updateUserRequest,
-		@ImageFile @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+	@PatchMapping
+	public ResponseEntity<UserResponse> updateUserNicknameOrPassword(
+		@Valid @RequestBody UpdateUserRequest updateUserRequest,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
-		UserResponse response = userService.updateUser(updateUserRequest, profileImage, authUser);
+		UserResponse response = userService.updateUserNicknameOrPassword(updateUserRequest, authUser);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<UserResponse> updateUserProfileImage(
+		@ImageFile @RequestPart("profileImage") MultipartFile profileImage,
+		@AuthenticationPrincipal AuthUser authUser
+	) {
+		UserResponse response = userService.updateUserProfileImage(profileImage, authUser);
 
 		return ResponseEntity.ok(response);
 	}

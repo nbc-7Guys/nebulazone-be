@@ -16,14 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jodd.net.HttpMethod;
 import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.UpdateUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest;
@@ -49,22 +47,23 @@ class UserControllerTest {
 
 	private final LocalDateTime now = LocalDateTime.now();
 
-	private final UserResponse userResponse = UserResponse.builder()
-		.userId(1L)
-		.email("test@test.com")
-		.phone("01012345678")
-		.nickname("test")
-		.profileImageUrl("test_profile_image_url")
-		.point(0)
-		.oAuthType(OAuthType.DOMAIN)
-		.addresses(Set.of(UserResponse.AddressResponse.builder()
-			.addressNickname("address_nickname")
-			.roadAddress("test_road_address")
-			.detailAddress("test_detail_address")
-			.build()))
-		.createdAt(now)
-		.modifiedAt(now)
-		.build();
+	private final UserResponse userResponse = new UserResponse(
+		1L,
+		"test@test.com",
+		"01012345678",
+		"test",
+		"test_profile_image_url",
+		0,
+		OAuthType.DOMAIN,
+		null,
+		Set.of(new UserResponse.AddressResponse(
+			"address_nickname",
+			"test_road_address",
+			"test_detail_address"
+		)),
+		now,
+		now
+	);
 
 	@Test
 	@DisplayName("회원 가입 성공")
@@ -75,29 +74,13 @@ class UserControllerTest {
 			Set.of(new SignUpUserRequest.SignUpUserAddressRequest("test_road_address", "test_detail_address",
 				"address_nickname")));
 
-		MockMultipartFile jsonPart = new MockMultipartFile(
-			"signUpUserRequest",
-			"",
-			MediaType.APPLICATION_JSON_VALUE,
-			objectMapper.writeValueAsBytes(request)
-		);
-
-		byte[] dummyJpegBytes = new byte[] {(byte)0xFF, (byte)0xD8, (byte)0xFF, (byte)0xE0, 0x00, 0x00};
-
-		MockMultipartFile imagePart = new MockMultipartFile(
-			"profileImage",
-			"profile.jpg",
-			MediaType.IMAGE_JPEG_VALUE,
-			dummyJpegBytes
-		);
-
-		given(userService.signUp(any(), any()))
+		given(userService.signUp(any()))
 			.willReturn(userResponse);
 
 		// When
 		ResultActions perform = mockMvc.perform(multipart("/users/signup")
-			.file(jsonPart)
-			.file(imagePart));
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(request)));
 
 		// Then
 		perform.andDo(print())
@@ -129,7 +112,7 @@ class UserControllerTest {
 					.value(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
 			);
 
-		verify(userService, times(1)).signUp(any(), any());
+		verify(userService, times(1)).signUp(any());
 
 	}
 
@@ -185,33 +168,14 @@ class UserControllerTest {
 		UpdateUserRequest request = new UpdateUserRequest("newNickname",
 			new UpdateUserRequest.PasswordChangeForm("encodedPassword1!", "newPassword1!"));
 
-		MockMultipartFile jsonPart = new MockMultipartFile(
-			"updateUserRequest",
-			"",
-			MediaType.APPLICATION_JSON_VALUE,
-			objectMapper.writeValueAsBytes(request)
-		);
-
-		byte[] dummyJpegBytes = new byte[] {(byte)0xFF, (byte)0xD8, (byte)0xFF, (byte)0xE0, 0x00, 0x00};
-
-		MockMultipartFile imagePart = new MockMultipartFile(
-			"profileImage",
-			"profile.jpg",
-			MediaType.IMAGE_JPEG_VALUE,
-			dummyJpegBytes
-		);
-
-		given(userService.updateUser(any(), any(), any()))
+		given(userService.updateUserNicknameOrPassword(any(), any()))
 			.willReturn(userResponse);
 
 		// When
-		ResultActions perform = mockMvc.perform(multipart("/users")
-			.file(jsonPart)
-			.file(imagePart)
-			.with(r -> {
-				r.setMethod(HttpMethod.PATCH.name());
-				return r;
-			}));
+		ResultActions perform = mockMvc.perform(patch("/users")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(request))
+		);
 
 		// Then
 		perform.andDo(print())
@@ -243,7 +207,7 @@ class UserControllerTest {
 					.value(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
 			);
 
-		verify(userService, times(1)).updateUser(any(), any(), any());
+		verify(userService, times(1)).updateUserNicknameOrPassword(any(), any());
 
 	}
 
