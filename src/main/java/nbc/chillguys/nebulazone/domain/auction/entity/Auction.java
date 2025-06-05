@@ -44,25 +44,29 @@ public class Auction extends BaseEntity {
 	@Column(nullable = false)
 	private boolean isClosed;
 
-	@Column(nullable = false)
-	private LocalDateTime closedAt;
-
 	private boolean isDeleted;
 	private LocalDateTime deletedAt;
 
 	@Builder
 	public Auction(
-		Long startPrice, Long currentPrice,
-		LocalDateTime endTime,
-		boolean isClosed, LocalDateTime closedAt,
+		Product product, Long startPrice, Long currentPrice,
+		LocalDateTime endTime, boolean isClosed,
 		boolean isDeleted, LocalDateTime deletedAt
 	) {
+		this.product = product;
 		this.startPrice = startPrice;
 		this.currentPrice = currentPrice;
 		this.endTime = endTime;
 		this.isClosed = isClosed;
-		this.closedAt = closedAt;
 		this.isDeleted = isDeleted;
 		this.deletedAt = deletedAt;
+	}
+
+	public static Auction of(Product product, Long startPrice, LocalDateTime endTime) {
+		return Auction.builder()
+			.product(product)
+			.startPrice(startPrice)
+			.endTime(endTime)
+			.build();
 	}
 }

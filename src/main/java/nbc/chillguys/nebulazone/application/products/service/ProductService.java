@@ -1,6 +1,5 @@
 package nbc.chillguys.nebulazone.application.products.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -10,6 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.products.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
+import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.response.DeleteProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.response.ProductResponse;
@@ -25,6 +26,7 @@ import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
+import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
 
 @Service
 @RequiredArgsConstructor
@@ -34,9 +36,9 @@ public class ProductService {
 	private final UserDomainService userDomainService;
 	private final ProductDomainService productDomainService;
 	// todo: private final CatalogDomainService catalogDomainService;
-	// todo: private final AuctionDomainService auctionDomainService;
+	private final AuctionDomainService auctionDomainService;
 
-	// todo: private final S3Service s3Service;
+	private final S3Service s3Service;
 
 	@Transactional
 	public ProductResponse createProduct(AuthUser authUser, Long catalogId, CreateProductRequest request,
@@ -44,19 +46,21 @@ public class ProductService {
 
 		User findUser = userDomainService.findActiveUserById(authUser.getId());
 
-		// todo: controller에서 넘어온 이미지들을 url 리스트로 변환한 다음 Product를 생성
-		// List<String> productImageUrls = s3Service.createImageUrls(multipartFiles);
+		List<String> productImageUrls = multipartFiles == null
+			? List.of()
+			: multipartFiles.stream()
+			.map(s3Service::generateUploadUrlAndUploadFile)
+			.toList();
 
 		// todo: 카탈로그 도메인 서비스 생성되면 추후 붙일 예정
 		// Catalog findCatalog = catalogDomainService.getCatalogById(catalogId);
 
 		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(findUser, null, request);
 
-		Product createProduct = productDomainService.createProduct(productCreateCommand, new ArrayList<>());
+		Product createProduct = productDomainService.createProduct(productCreateCommand, productImageUrls);
 
 		if (createProduct.getTxMethod() == ProductTxMethod.AUCTION) {
-			// todo: 메서드 타입이 옥션이면 자동으로 옥션 생성할 예정.....
-			// auctionDomainService.createProduct(...);
+			auctionDomainService.createAuction(AuctionCreateCommand.of(createProduct, productCreateCommand));
 		}
 
 		return ProductResponse.from(createProduct);
