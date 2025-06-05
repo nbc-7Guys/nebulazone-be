@@ -68,15 +68,6 @@ public class Post extends BaseEntity {
 		this.user = user;
 	}
 
-	public static Post of(String title, String content, PostType type, User user) {
-		return Post.builder()
-			.title(title)
-			.content(content)
-			.type(type)
-			.user(user)
-			.build();
-	}
-
 	public void addPostImages(List<String> postImagesUrl) {
 		if (postImagesUrl != null) {
 			this.postImages.addAll(postImagesUrl.stream()

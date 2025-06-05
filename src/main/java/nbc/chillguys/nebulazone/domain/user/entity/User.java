@@ -119,8 +119,8 @@ public class User extends BaseEntity {
 		this.point -= point;
 	}
 
-	public boolean hasEnoughPoint(int amount) {
-		return this.point >= amount;
+	public boolean hasNotEnoughPoint(int price) {
+		return this.point < price;
 	}
 
 }

@@ -16,12 +16,12 @@ public record PointResponse(
 	LocalDateTime createdAt
 ) {
 	public static PointResponse from(PointHistory pointHistory) {
-		return PointResponse.builder()
-			.id(pointHistory.getId())
-			.price(pointHistory.getPrice())
-			.status(pointHistory.getPointHistoryStatus())
-			.type(pointHistory.getPointHistoryType())
-			.createdAt(pointHistory.getCreatedAt())
-			.build();
+		return new PointResponse(
+			pointHistory.getId(),
+			pointHistory.getPrice(),
+			pointHistory.getPointHistoryType(),
+			pointHistory.getPointHistoryStatus(),
+			pointHistory.getCreatedAt()
+		);
 	}
 }
