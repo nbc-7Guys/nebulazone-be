@@ -22,14 +22,26 @@ public class PostDomainService {
 
 	private final PostRepository postRepository;
 
+	/**
+	 * 게시글 생성
+	 * @param command 유저, 게시글 제목, 게시글 내용, 게시판 종류
+	 * @param postImageUrls 게시글 이미지 리스트
+	 * @return Post
+	 * @author 전나겸
+	 */
 	@Transactional
 	public Post createPost(PostCreateCommand command, List<String> postImageUrls) {
 
-		Post post = Post.of(command.title(), command.content(), command.type(), command.user());
-		Post savePost = postRepository.save(post);
-		savePost.addPostImages(postImageUrls);
+		Post post = Post.builder()
+			.title(command.title())
+			.content(command.content())
+			.type(command.type())
+			.user(command.user())
+			.build();
 
-		return savePost;
+		post.addPostImages(postImageUrls);
+
+		return postRepository.save(post);
 	}
 
 	@Transactional
