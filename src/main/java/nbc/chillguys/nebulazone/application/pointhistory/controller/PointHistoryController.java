@@ -18,7 +18,9 @@ import nbc.chillguys.nebulazone.application.pointhistory.dto.request.PointReques
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.PointHistoryResponse;
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.PointResponse;
 import nbc.chillguys.nebulazone.application.pointhistory.service.PointHistoryService;
+import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 
 @RestController
 @RequestMapping("/points")
@@ -27,7 +29,7 @@ public class PointHistoryController {
 
 	private final PointHistoryService pointHistoryService;
 
-	@PostMapping("/deposit")
+	@PostMapping("/funds")
 	public ResponseEntity<PointResponse> createPointHistory(
 		@RequestBody @Valid PointRequest request,
 		@AuthenticationPrincipal AuthUser authUser
@@ -39,10 +41,21 @@ public class PointHistoryController {
 	@GetMapping("/requests")
 	public ResponseEntity<List<PointHistoryResponse>> getMyPointRequests(
 		@AuthenticationPrincipal(expression = "id") Long userId,
-		@RequestParam(required = false) PointHistoryResponse status
+		@RequestParam(required = false) PointHistoryStatus status
 	) {
 		List<PointHistoryResponse> responseList = pointHistoryService.findMyPointRequests(userId, status);
-		return ResponseEntity.ok(responseList);
+		return ResponseEntity.status(HttpStatus.OK).body(responseList);
+	}
+
+	@GetMapping("/histories")
+	public ResponseEntity<CommonPageResponse<PointHistoryResponse>> getMyPointHistories(
+		@AuthenticationPrincipal(expression = "id") Long userId,
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "10") int size
+	) {
+		CommonPageResponse<PointHistoryResponse> response = pointHistoryService.findMyPointHistories(userId, page,
+			size);
+		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 }

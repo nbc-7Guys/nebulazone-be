@@ -9,16 +9,16 @@ import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 
 @Builder
 public record PointHistoryResponse(
-	Long id,
 	Integer price,
+	String account,
 	PointHistoryType type,
 	PointHistoryStatus status,
 	LocalDateTime createdAt
 ) {
 	public static PointHistoryResponse from(PointHistory pointHistory) {
 		return PointHistoryResponse.builder()
-			.id(pointHistory.getId())
 			.price(pointHistory.getPrice())
+			.account(pointHistory.getAccount())
 			.type(pointHistory.getPointHistoryType())
 			.status(pointHistory.getPointHistoryStatus())
 			.createdAt(pointHistory.getCreatedAt())

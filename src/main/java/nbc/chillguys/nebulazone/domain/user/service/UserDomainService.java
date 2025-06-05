@@ -172,4 +172,11 @@ public class UserDomainService {
 		return userRepository.findActiveUserByEmailAndOAuthType(email, oAuthType)
 			.orElseThrow(() -> new UserException(UserErrorCode.ALREADY_EXISTS_EMAIL));
 	}
+
+	public void validateEnoughPoint(User user, int price) {
+		if (!user.hasEnoughPoint(price)) {
+			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
+		}
+	}
+
 }

@@ -2,6 +2,8 @@ package nbc.chillguys.nebulazone.domain.pointhistory.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -11,7 +13,6 @@ import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 import nbc.chillguys.nebulazone.domain.pointhistory.exception.PointHistoryErrorCode;
 import nbc.chillguys.nebulazone.domain.pointhistory.exception.PointHistoryException;
 import nbc.chillguys.nebulazone.domain.pointhistory.repository.PointHistoryRepository;
-import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
@@ -32,10 +33,14 @@ public class PointHistoryDomainService {
 
 	public List<PointHistory> findPointHistoriesByUserAndStatus(Long userId, PointHistoryStatus status) {
 		if (status != null) {
-			return pointHistoryRepository.findByUser_IdAndPointHistoryStatus(userId, status);
+			return pointHistoryRepository.findByUserIdAndPointHistoryStatus(userId, status);
 		} else {
-			return pointHistoryRepository.findByUser_Id(userId);
+			return pointHistoryRepository.findByUserId(userId);
 		}
+	}
+
+	public Page<PointHistory> findPointHistoriesByUser(Long userId, Pageable pageable) {
+		return pointHistoryRepository.findByUserId(userId, pageable);
 	}
 
 	public PointHistory findPointHistory(Long pointHistoryId) {
@@ -49,9 +54,4 @@ public class PointHistoryDomainService {
 		}
 	}
 
-	public void validateEnoughBalance(User user, int amount) {
-		if (user.getPoint() < amount) {
-			throw new PointHistoryException(PointHistoryErrorCode.INSUFFICIENT_BALANCE);
-		}
-	}
 }

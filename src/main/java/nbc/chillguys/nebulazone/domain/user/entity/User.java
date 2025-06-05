@@ -108,5 +108,10 @@ public class User extends BaseEntity {
 	public void updatePassword(String password) {
 		this.password = password;
 	}
+
+	public boolean hasEnoughPoint(int amount) {
+		return this.point >= amount;
+	}
+
 }
 
