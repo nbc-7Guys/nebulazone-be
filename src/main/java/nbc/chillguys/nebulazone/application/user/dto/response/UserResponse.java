@@ -4,12 +4,15 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import lombok.Builder;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record UserResponse(
 	Long userId,
@@ -18,43 +21,44 @@ public record UserResponse(
 	String nickname,
 	String profileImageUrl,
 	int point,
-	OAuthType oauthType,
-	Long oauthId,
-	String providerId,
+	OAuthType oAuthType,
+	String oAuthId,
 	Set<AddressResponse> addresses,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt
 ) {
+	@Builder
 	public record AddressResponse(
 		String roadAddress,
 		String detailAddress,
 		String addressNickname
 	) {
 		public static AddressResponse from(Address address) {
-			return new AddressResponse(
-				address.getRoadAddress(),
-				address.getDetailAddress(),
-				address.getAddressNickname()
-			);
+			return AddressResponse.builder()
+				.roadAddress(address.getRoadAddress())
+				.detailAddress(address.getDetailAddress())
+				.addressNickname(address.getAddressNickname())
+				.build();
 		}
 	}
 
 	public static UserResponse from(User user) {
-		return new UserResponse(
-			user.getId(),
-			user.getEmail(),
-			user.getPhone(),
-			user.getNickname(),
-			user.getProfileImage(),
-			user.getPoint(),
-			user.getOauthType(),
-			user.getOauthId(),
-			user.getProviderId(),
-			user.getAddresses().stream()
+		return UserResponse.builder()
+			.userId(user.getId())
+			.email(user.getEmail())
+			.phone(user.getPhone())
+			.nickname(user.getNickname())
+			.profileImageUrl(user.getProfileImage())
+			.point(user.getPoint())
+			.oAuthType(user.getOAuthType())
+			.oAuthId(user.getOAuthId())
+			.addresses(user.getAddresses().stream()
 				.map(AddressResponse::from)
-				.collect(Collectors.toSet()),
-			user.getCreatedAt(),
-			user.getModifiedAt()
-		);
+				.collect(Collectors.toSet()))
+			.createdAt(user.getCreatedAt())
+			.modifiedAt(user.getModifiedAt())
+			.build();
 	}
 }

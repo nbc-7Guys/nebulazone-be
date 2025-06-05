@@ -15,8 +15,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.DeleteObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
@@ -31,7 +33,7 @@ public class S3Service {
 	private String bucket;
 
 	public String generateUploadUrlAndUploadFile(MultipartFile file) {
-		if (file != null || file.isEmpty()) {
+		if (file == null || file.isEmpty()) {
 			return null;
 		}
 
@@ -39,16 +41,48 @@ public class S3Service {
 
 		String contentType = file.getContentType();
 
-		String presignedUrl = generateUploadUrl(fileName, contentType, file.getSize());
+		String presignedUploadUrl = generateUploadUrl(fileName, contentType, file.getSize());
 
-		if (!uploadFile(file, presignedUrl, contentType)) {
+		if (!uploadFile(file, presignedUploadUrl, contentType)) {
 			return null;
 		}
 
-		return presignedUrl.split("\\?")[0];
+		return presignedUploadUrl.split("\\?")[0];
 	}
 
-	public String generateUploadUrl(String fileName, String contentType, long contentLength) {
+	public void generateDeleteUrlAndDeleteFile(String presignedUrl) {
+		String presignedDeleteUrl = generateDeleteUrl(presignedUrl);
+
+		deleteFile(presignedDeleteUrl);
+	}
+
+	private String generateDeleteUrl(String presignedUrl) {
+		DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+			.bucket(bucket)
+			.key(presignedUrl.substring(presignedUrl.lastIndexOf("/") + 1))
+			.build();
+
+		DeleteObjectPresignRequest deleteObjectPresignRequest = DeleteObjectPresignRequest.builder()
+			.signatureDuration(Duration.ofMinutes(10))
+			.deleteObjectRequest(deleteObjectRequest)
+			.build();
+
+		return s3Presigner.presignDeleteObject(deleteObjectPresignRequest).url().toString();
+	}
+
+	private void deleteFile(String presignedUrl) {
+		ResponseEntity<String> response = restClient
+			.delete()
+			.uri(URI.create(presignedUrl))
+			.retrieve()
+			.toEntity(String.class);
+
+		if (!response.getStatusCode().is2xxSuccessful()) {
+			log.error("S3 파일 삭제 실패: {}, body: {}", response.getStatusCode(), response.getBody());
+		}
+	}
+
+	private String generateUploadUrl(String fileName, String contentType, long contentLength) {
 		PutObjectRequest putObjectRequest = PutObjectRequest.builder()
 			.bucket(bucket)
 			.key(fileName)

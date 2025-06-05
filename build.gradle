@@ -37,10 +37,11 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt:0.12.6'
 
     // queryDSL
-    implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
-    annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
-    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
-    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+    implementation 'io.github.openfeign.querydsl:querydsl-jpa:6.11'
+    annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:6.11:jpa'
+    //  "cannot find symbol: annotation Entity" 또는 "package jakarta.annotation does not exist" 오류 발생시 주석 풀고 추가
+//    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+//    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
 
     // swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
