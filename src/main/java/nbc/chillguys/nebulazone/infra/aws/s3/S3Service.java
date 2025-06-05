@@ -33,11 +33,11 @@ public class S3Service {
 	private String bucket;
 
 	public String generateUploadUrlAndUploadFile(MultipartFile file) {
-		String s3Url = generateUploadUrl(file);
+		String uploadUrl = generateUploadUrl(file);
 
-		uploadFile(file, s3Url);
+		uploadFile(file, uploadUrl);
 
-		return s3Url.split("\\?")[0];
+		return uploadUrl.split("\\?")[0];
 	}
 
 	public void generateDeleteUrlAndDeleteFile(String presignedUrl) {
@@ -91,7 +91,7 @@ public class S3Service {
 		return presignedPutObjectRequest.url().toString();
 	}
 
-	private void uploadFile(MultipartFile file, String uploadUrl) {
+	public void uploadFile(MultipartFile file, String uploadUrl) {
 		try {
 			ResponseEntity<String> response = restClient
 				.put()
