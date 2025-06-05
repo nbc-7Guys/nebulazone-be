@@ -72,6 +72,7 @@ public class ProductService {
 		return ProductResponse.from(createProduct);
 	}
 
+	@Transactional
 	public ProductResponse updateProduct(
 		Long userId,
 		Long catalogId,
@@ -89,6 +90,7 @@ public class ProductService {
 		return ProductResponse.from(product);
 	}
 
+	@Transactional
 	public ProductResponse changeToAuctionType(
 		Long userId,
 		Long catalogId,
@@ -108,6 +110,7 @@ public class ProductService {
 		return ProductResponse.from(product);
 	}
 
+	@Transactional
 	public DeleteProductResponse deleteProduct(Long userId, Long catalogId, Long productId) {
 		User user = userDomainService.findActiveUserById(userId);
 
