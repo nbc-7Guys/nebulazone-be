@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.infra.security.jwt.exception;
+package nbc.chillguys.nebulazone.infra.security.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

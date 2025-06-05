@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.infra.security.jwt.filter.exception;
+package nbc.chillguys.nebulazone.infra.security.filter.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;

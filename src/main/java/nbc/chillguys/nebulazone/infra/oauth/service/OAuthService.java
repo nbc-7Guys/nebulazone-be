@@ -23,7 +23,7 @@ import nbc.chillguys.nebulazone.infra.oauth.dto.NaverOAuth2UserInfo;
 import nbc.chillguys.nebulazone.infra.oauth.dto.OAuth2UserInfo;
 import nbc.chillguys.nebulazone.infra.oauth.exception.OAuthErrorCode;
 import nbc.chillguys.nebulazone.infra.oauth.exception.OAuthException;
-import nbc.chillguys.nebulazone.infra.security.jwt.JwtUtil;
+import nbc.chillguys.nebulazone.infra.security.JwtUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -80,7 +80,7 @@ public class OAuthService extends DefaultOAuth2UserService {
 
 		userDomainService.validNickname(oAuth2UserInfo.getNickname());
 
-		user = userDomainService.createUser(UserSignUpCommand.of(oAuth2UserInfo));
+		user = userDomainService.createUser(UserSignUpCommand.from(oAuth2UserInfo));
 
 		return user;
 	}
