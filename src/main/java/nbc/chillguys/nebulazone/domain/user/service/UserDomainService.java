@@ -172,4 +172,14 @@ public class UserDomainService {
 		return userRepository.findActiveUserByEmailAndOAuthType(email, oAuthType)
 			.orElseThrow(() -> new UserException(UserErrorCode.ALREADY_EXISTS_EMAIL));
 	}
+
+	/**
+	 * 포인트 사용
+	 * @param user 유저
+	 * @param point 사용할 포인트
+	 * @author 윤정환
+	 */
+	public void usePoint(User user, int point) {
+		user.usePoint(point);
+	}
 }

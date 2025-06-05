@@ -108,5 +108,14 @@ public class User extends BaseEntity {
 	public void updatePassword(String password) {
 		this.password = password;
 	}
+
+	public void usePoint(int usePoint) {
+		if (this.point < usePoint) {
+			// todo: INSUFFICIENT_BALANCE 추가되면 주석 풀기
+			// throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
+		}
+
+		this.point -= point;
+	}
 }
 

@@ -24,6 +24,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
+import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
+import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Getter
@@ -122,6 +124,14 @@ public class Product extends BaseEntity {
 	public void changeToAuctionType(Long price) {
 		this.price = price;
 		this.txMethod = ProductTxMethod.AUCTION;
+	}
+
+	public void purchase() {
+		if (isSold) {
+			throw new ProductException(ProductErrorCode.SOLD_ALREADY);
+		}
+
+		this.isSold = true;
 	}
 
 	public void delete() {
