@@ -1,13 +1,17 @@
 package nbc.chillguys.nebulazone.application.pointhistory.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.pointhistory.dto.request.PointRequest;
+import nbc.chillguys.nebulazone.application.pointhistory.dto.response.PointHistoryResponse;
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.PointResponse;
 import nbc.chillguys.nebulazone.domain.pointhistory.dto.PointHistoryCommand;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistory;
+import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 import nbc.chillguys.nebulazone.domain.pointhistory.service.PointHistoryDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
@@ -33,5 +37,12 @@ public class PointHistoryService {
 		PointHistory pointHistory = pointHistoryDomainService.createPointHistory(command);
 
 		return PointResponse.from(pointHistory);
+	}
+
+	public List<PointHistoryResponse> findMyPointRequests(Long userId, PointHistoryStatus status) {
+		return pointHistoryDomainService.findPointHistoriesByUserAndStatus(userId, status)
+			.stream()
+			.map(PointHistoryResponse::from)
+			.toList();
 	}
 }

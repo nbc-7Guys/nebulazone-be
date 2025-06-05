@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.domain.pointhistory.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,14 @@ public class PointHistoryDomainService {
 			.pointHistoryStatus(PointHistoryStatus.PENDING)
 			.build();
 		return pointHistoryRepository.save(pointHistory);
+	}
+
+	public List<PointHistory> findPointHistoriesByUserAndStatus(Long userId, PointHistoryStatus status) {
+		if (status != null) {
+			return pointHistoryRepository.findByUser_IdAndPointHistoryStatus(userId, status);
+		} else {
+			return pointHistoryRepository.findByUser_Id(userId);
+		}
 	}
 
 	public PointHistory findPointHistory(Long pointHistoryId) {
