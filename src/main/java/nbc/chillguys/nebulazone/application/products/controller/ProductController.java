@@ -24,6 +24,7 @@ import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRe
 import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.response.DeleteProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.response.ProductResponse;
+import nbc.chillguys.nebulazone.application.products.dto.response.PurchaseProductResponse;
 import nbc.chillguys.nebulazone.application.products.service.ProductService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 
@@ -78,6 +79,17 @@ public class ProductController {
 		@PathVariable("productId") Long productId
 	) {
 		DeleteProductResponse response = productService.deleteProduct(authUser.getId(), catalogId, productId);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/{productId}/purchase")
+	public ResponseEntity<PurchaseProductResponse> purchaseProduct(
+		@AuthenticationPrincipal AuthUser authUser,
+		@PathVariable("catalogId") Long catalogId,
+		@PathVariable("productId") Long productId
+	) {
+		PurchaseProductResponse response = productService.purchaseProduct(authUser.getId(), catalogId, productId);
 
 		return ResponseEntity.ok(response);
 	}

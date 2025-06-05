@@ -13,6 +13,6 @@ public record CreateCommentRequest(
 ) {
 
 	public CommentCreateCommand toCommand(User user, Post post) {
-		return new CommentCreateCommand(user, post, content, parentId);
+		return new CommentCreateCommand(user, post, content, parentId == null ? -1 : parentId);
 	}
 }
