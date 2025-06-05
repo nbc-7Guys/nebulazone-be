@@ -8,7 +8,6 @@ import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoomUser;
 
 @Builder
 public record ChatRoomCreationInfo(
-	ChatRoom chatRoom,
-	List<ChatRoomUser> participants
+	ChatRoom chatRoom
 ) {
 }
