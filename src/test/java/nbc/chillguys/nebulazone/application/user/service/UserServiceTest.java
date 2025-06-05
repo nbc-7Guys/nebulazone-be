@@ -24,6 +24,7 @@ import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.UpdateUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
+import nbc.chillguys.nebulazone.application.user.dto.response.WithdrawUserResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
@@ -306,14 +307,14 @@ class UserServiceTest {
 				.willReturn(user);
 
 			// When
-			Long withdrawnUserId = userService.withdrawUser(withdrawUserRequest, authUser);
+			WithdrawUserResponse response = userService.withdrawUser(withdrawUserRequest, authUser);
 
 			// Then
 			verify(userDomainService).findActiveUserById(anyLong());
 			verify(userDomainService).validPassword("encodedPassword", "encodedPassword");
 			verify(userDomainService).withdrawUser(user);
 
-			assertThat(withdrawnUserId)
+			assertThat(response.userId())
 				.isEqualTo(1L);
 
 		}

@@ -28,6 +28,7 @@ import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.UpdateUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
+import nbc.chillguys.nebulazone.application.user.dto.response.WithdrawUserResponse;
 import nbc.chillguys.nebulazone.application.user.service.UserService;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
@@ -252,9 +253,10 @@ class UserControllerTest {
 	void success_withdrawUser() throws Exception {
 		// Given
 		WithdrawUserRequest request = new WithdrawUserRequest("encodedPassword1!");
+		WithdrawUserResponse response = new WithdrawUserResponse(1L);
 
 		given(userService.withdrawUser(any(), any()))
-			.willReturn(1L);
+			.willReturn(response);
 
 		// When
 		ResultActions perform = mockMvc.perform(delete("/users")
@@ -265,7 +267,7 @@ class UserControllerTest {
 		perform.andDo(print())
 			.andExpectAll(
 				status().isOk(),
-				jsonPath("$")
+				jsonPath("$.userId")
 					.value(1L)
 			);
 
