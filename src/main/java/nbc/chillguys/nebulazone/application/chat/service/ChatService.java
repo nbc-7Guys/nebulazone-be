@@ -107,7 +107,7 @@ public class ChatService {
 			throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 		}
 
-		List<ChatHistory> chatHistory = chatRoomHistoryRepository.findAllByChatRoomId(roomId);
+		List<ChatHistory> chatHistory = chatRoomHistoryRepository.findAllByChatRoomIdOrderBySendTimeAsc(roomId);
 
 		List<Long> senderIdList = chatHistory.stream().map(ChatHistory::getUserId).distinct().toList();
 

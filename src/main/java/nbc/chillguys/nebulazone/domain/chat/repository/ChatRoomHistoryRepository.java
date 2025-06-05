@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatHistory;
 
 public interface ChatRoomHistoryRepository extends JpaRepository<ChatHistory, Long> {
-	List<ChatHistory> findAllByChatRoomId(Long chatRoomId);
+	List<ChatHistory> findAllByChatRoomIdOrderBySendTimeAsc(Long chatRoomId);
 
 	@Query("""
 			SELECT ch
