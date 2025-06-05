@@ -42,8 +42,23 @@ public class BidController {
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "20") int size) {
 
-		CommonPageResponse<FindBidResponse> response = bidService.findBids(auctionId, Math.max(page - 1, 0), size);
+		CommonPageResponse<FindBidResponse> response = bidService.findBids(auctionId, toZeroBasedPage(page), size);
 
 		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/bids/me")
+	public ResponseEntity<CommonPageResponse<FindBidResponse>> findMyBids(
+		@AuthenticationPrincipal AuthUser authUser,
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "20") int size) {
+
+		CommonPageResponse<FindBidResponse> response = bidService.findMyBids(authUser, toZeroBasedPage(page), size);
+
+		return ResponseEntity.ok(response);
+	}
+
+	private int toZeroBasedPage(int page) {
+		return Math.max(page - 1, 0);
 	}
 }

@@ -50,4 +50,9 @@ public class BidDomainService {
 
 		return bidRepository.findBidsWithUserByAuction(auction, page, size);
 	}
+
+	public Page<FindBidInfo> findMyBids(User user, int page, int size) {
+
+		return bidRepository.findMyBids(user, page, size);
+	}
 }

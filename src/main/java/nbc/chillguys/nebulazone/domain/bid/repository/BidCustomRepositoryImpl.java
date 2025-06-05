@@ -19,6 +19,7 @@ import jakarta.persistence.EntityManager;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
 import nbc.chillguys.nebulazone.domain.bid.dto.QFindBidInfo;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Repository
 public class BidCustomRepositoryImpl implements BidCustomRepository {
@@ -33,7 +34,8 @@ public class BidCustomRepositoryImpl implements BidCustomRepository {
 	public Page<FindBidInfo> findBidsWithUserByAuction(Auction auction, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		List<FindBidInfo> contents = jpaQueryFactory.select(
+		List<FindBidInfo> contents = jpaQueryFactory
+			.select(
 				new QFindBidInfo(
 					bid.id,
 					bid.price,
@@ -55,6 +57,37 @@ public class BidCustomRepositoryImpl implements BidCustomRepository {
 			.select(bid.countDistinct())
 			.from(bid)
 			.where(bid.auction.eq(auction));
+
+		return PageableExecutionUtils.getPage(contents, pageable, countQuery::fetchOne);
+	}
+
+	@Override
+	public Page<FindBidInfo> findMyBids(User loginUser, int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+
+		List<FindBidInfo> contents = jpaQueryFactory
+			.select(
+				new QFindBidInfo(
+					bid.id,
+					bid.price,
+					bid.createdAt,
+					bid.status,
+					user.nickname,
+					product.name
+				))
+			.from(bid)
+			.join(bid.user, user)
+			.join(bid.auction.product, product)
+			.where(bid.user.eq(loginUser))
+			.orderBy(bid.createdAt.desc())
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
+			.fetch();
+
+		JPAQuery<Long> countQuery = jpaQueryFactory
+			.select(bid.countDistinct())
+			.from(bid)
+			.where(bid.user.eq(loginUser));
 
 		return PageableExecutionUtils.getPage(contents, pageable, countQuery::fetchOne);
 	}

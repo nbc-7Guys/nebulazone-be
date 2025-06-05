@@ -46,4 +46,14 @@ public class BidService {
 
 		return CommonPageResponse.from(response);
 	}
+
+	public CommonPageResponse<FindBidResponse> findMyBids(AuthUser authUser, int page, int size) {
+
+		User user = userDomainService.findActiveUserById(authUser.getId());
+
+		Page<FindBidInfo> findBids = bidDomainService.findMyBids(user, page, size);
+		Page<FindBidResponse> response = findBids.map(FindBidResponse::from);
+
+		return CommonPageResponse.from(response);
+	}
 }
