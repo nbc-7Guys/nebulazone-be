@@ -64,7 +64,13 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 
 		JPAQuery<Long> totalQuery = jpaQueryFactory
 			.select(auction.countDistinct())
-			.from(auction);
+			.from(auction)
+			.where(
+				auction.isDeleted.eq(false),
+				auction.deletedAt.isNull(),
+				product.isDeleted.eq(false),
+				product.deletedAt.isNull()
+			);
 
 		return PageableExecutionUtils.getPage(contents, pageable, totalQuery::fetchOne);
 	}
