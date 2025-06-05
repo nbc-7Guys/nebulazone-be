@@ -56,7 +56,8 @@ public class Product extends BaseEntity {
 
 	private boolean isSold;
 
-	private boolean isDeleted;
+	@Column(name = "is_deleted")
+	private boolean deleted;
 
 	private LocalDateTime deletedAt;
 
@@ -90,7 +91,7 @@ public class Product extends BaseEntity {
 		this.price = price;
 		this.txMethod = txMethod;
 		this.isSold = isSold;
-		this.isDeleted = isDeleted;
+		this.deleted = isDeleted;
 		this.deletedAt = deletedAt;
 		this.seller = seller;
 		this.catalog = catalog;
@@ -160,7 +161,7 @@ public class Product extends BaseEntity {
 	}
 
 	public void delete() {
-		this.isDeleted = true;
+		this.deleted = true;
 		this.deletedAt = LocalDateTime.now();
 	}
 }
