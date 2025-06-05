@@ -35,7 +35,7 @@ public class PointHistoryService {
 
 		// 환전일 경우 포인트 충분한지 검증 매서드
 		if (request.type() == PointHistoryType.EXCHANGE) {
-			userDomainService.validateEnoughPoint(user, request.price());
+			userDomainService.validEnoughPoint(user, request.price());
 		}
 
 		PointHistoryCommand command = PointHistoryCommand.of(request, user);
