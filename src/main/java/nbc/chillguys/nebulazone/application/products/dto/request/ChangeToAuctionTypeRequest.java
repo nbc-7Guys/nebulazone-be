@@ -8,7 +8,7 @@ import nbc.chillguys.nebulazone.domain.products.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 public record ChangeToAuctionTypeRequest(
-	@NotNull(message = "시작 가격을 입력해주세요..")
+	@NotNull(message = "시작 가격을 입력해주세요.")
 	Long price,
 
 	@NotEmpty(message = "마감 시간을 입력해주세요.")

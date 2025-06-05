@@ -6,7 +6,7 @@ import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 public record UpdateProductRequest(
-	@NotBlank(message = "상품명은 입력해주세요.")
+	@NotBlank(message = "상품명을 입력해주세요.")
 	String name,
 
 	@NotBlank(message = "판매글 본문을 입력해주세요.")
