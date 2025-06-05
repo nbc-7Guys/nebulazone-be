@@ -11,7 +11,7 @@ import nbc.chillguys.nebulazone.domain.comment.dto.CommentCreateCommand;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentDeleteCommand;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentListFindQuery;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentUpdateCommand;
-import nbc.chillguys.nebulazone.domain.comment.dto.CommentWithUserDto;
+import nbc.chillguys.nebulazone.domain.comment.dto.CommentWithUserInfo;
 import nbc.chillguys.nebulazone.domain.comment.entity.Comment;
 import nbc.chillguys.nebulazone.domain.comment.exception.CommentErrorCode;
 import nbc.chillguys.nebulazone.domain.comment.exception.CommentException;
@@ -66,7 +66,7 @@ public class CommentDomainService {
 	 * @return commentPage
 	 * @author 윤정환
 	 */
-	public Page<CommentWithUserDto> findComments(CommentListFindQuery query) {
+	public Page<CommentWithUserInfo> findComments(CommentListFindQuery query) {
 		return commentRepository.findComments(query.post().getId(), query.page(), query.size());
 	}
 

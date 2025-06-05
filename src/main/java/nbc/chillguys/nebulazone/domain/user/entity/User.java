@@ -111,11 +111,15 @@ public class User extends BaseEntity {
 
 	public void usePoint(int usePoint) {
 		if (this.point < usePoint) {
-			// todo: INSUFFICIENT_BALANCE 추가되면 주석 풀기
-			// throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
+			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
 		}
 
 		this.point -= point;
 	}
+
+	public boolean hasEnoughPoint(int amount) {
+		return this.point >= amount;
+	}
+
 }
 
