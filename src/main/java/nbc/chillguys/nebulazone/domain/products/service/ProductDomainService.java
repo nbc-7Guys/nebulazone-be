@@ -121,7 +121,7 @@ public class ProductDomainService {
 	 */
 	private void validateProductOwner(Product product, Long userId) {
 		if (!Objects.equals(product.getSeller().getId(), userId)) {
-			throw new ProductException(ProductErrorCode.NOT_BELONGS_TO_CATALOG);
+			throw new ProductException(ProductErrorCode.NOT_PRODUCT_OWNER);
 		}
 	}
 }
