@@ -33,7 +33,8 @@ public class AuctionController {
 	}
 
 	@GetMapping("/sorted")
-	public ResponseEntity<List<FindAuctionResponse>> findAuctions(@RequestParam String sortType) {
+	public ResponseEntity<List<FindAuctionResponse>> findAuctions(
+		@RequestParam(name = "sort") String sortType) {
 
 		List<FindAuctionResponse> response = auctionService.findAuctionsBySortType(AuctionSortType.of(sortType));
 

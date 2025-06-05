@@ -2,6 +2,8 @@ package nbc.chillguys.nebulazone.application.auction.dto.response;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Builder;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
 
@@ -11,6 +13,7 @@ public record FindAuctionResponse(
 	Long startPrice,
 	Long currentPrice,
 	boolean isClosed,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime endTime,
 	String productName,
 	String productImageUrl,
