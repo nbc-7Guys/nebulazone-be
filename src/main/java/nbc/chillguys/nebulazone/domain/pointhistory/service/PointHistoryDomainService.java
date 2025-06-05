@@ -128,10 +128,9 @@ public class PointHistoryDomainService {
 	 * @author 정석현
 	 */
 	public void validateOwnership(PointHistory pointHistory, Long userId) {
-		if (pointHistory.getUser().getId().equals(userId)) {
-			return;
+		if (!pointHistory.getUser().getId().equals(userId)) {
+			throw new PointHistoryException(PointHistoryErrorCode.NOT_OWNER);
 		}
-		throw new PointHistoryException(PointHistoryErrorCode.NOT_OWNER);
 	}
 
 }
