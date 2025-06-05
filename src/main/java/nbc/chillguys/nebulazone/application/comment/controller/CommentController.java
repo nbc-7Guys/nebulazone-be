@@ -17,10 +17,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.comment.dto.request.CreateCommentRequest;
 import nbc.chillguys.nebulazone.application.comment.dto.request.UpdateCommentRequest;
+import nbc.chillguys.nebulazone.application.comment.dto.response.CommentDetailResponse;
 import nbc.chillguys.nebulazone.application.comment.dto.response.CommentResponse;
 import nbc.chillguys.nebulazone.application.comment.dto.response.DeleteCommentResponse;
-import nbc.chillguys.nebulazone.application.comment.dto.response.FindCommentListResponse;
 import nbc.chillguys.nebulazone.application.comment.service.CommentService;
+import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 
 @RequiredArgsConstructor
@@ -42,12 +43,12 @@ public class CommentController {
 	}
 
 	@GetMapping
-	public ResponseEntity<FindCommentListResponse> findComments(
+	public ResponseEntity<CommonPageResponse<CommentDetailResponse>> findComments(
 		@PathVariable("postId") Long postId,
 		@RequestParam(defaultValue = "1", required = false) int page,
 		@RequestParam(defaultValue = "20", required = false) int size
 	) {
-		FindCommentListResponse response = commentService.findComments(postId, page, size);
+		CommonPageResponse<CommentDetailResponse> response = commentService.findComments(postId, page, size);
 
 		return ResponseEntity.ok(response);
 	}

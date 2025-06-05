@@ -50,12 +50,18 @@ public class PointHistory extends BaseEntity {
 	public PointHistory(
 		int price,
 		String account,
+		User user,
 		PointHistoryType pointHistoryType,
 		PointHistoryStatus pointHistoryStatus
 	) {
 		this.price = price;
 		this.account = account;
+		this.user = user;
 		this.pointHistoryType = pointHistoryType;
 		this.pointHistoryStatus = pointHistoryStatus;
+	}
+
+	public void reject() {
+		this.pointHistoryStatus = PointHistoryStatus.REJECT;
 	}
 }
