@@ -11,6 +11,8 @@ import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
+import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
+import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.auction.repository.AuctionRepository;
 
 @Service
@@ -36,6 +38,11 @@ public class AuctionDomainService {
 
 		return auctionRepository.finAuctionsBySortType(sortType);
 
+	}
+
+	public Auction findAuctionById(Long id) {
+		return auctionRepository.findById(id)
+			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 	}
 
 }
