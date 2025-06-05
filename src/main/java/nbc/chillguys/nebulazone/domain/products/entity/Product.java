@@ -74,7 +74,7 @@ public class Product extends BaseEntity {
 	private List<ProductImage> productImages = new ArrayList<>();
 
 	@Builder
-	public Product(
+	private Product(
 		String name,
 		String description,
 		Long price,
@@ -94,18 +94,6 @@ public class Product extends BaseEntity {
 		this.deletedAt = deletedAt;
 		this.seller = seller;
 		this.catalog = catalog;
-	}
-
-	public static Product of(String name, String description, Long price, ProductTxMethod txMethod,
-		User seller, Catalog catalog) {
-		return Product.builder()
-			.name(name)
-			.description(description)
-			.price(price)
-			.txMethod(txMethod)
-			.seller(seller)
-			.catalog(catalog)
-			.build();
 	}
 
 	public void addProductImages(List<String> productImageUrls) {
