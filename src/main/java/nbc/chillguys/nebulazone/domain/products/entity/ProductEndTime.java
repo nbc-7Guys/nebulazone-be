@@ -10,11 +10,11 @@ import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
 @Getter
 @RequiredArgsConstructor
 public enum ProductEndTime {
-	HOUR_12(12 * 60 * 60 * 1000),
-	HOUR_24(24 * 60 * 60 * 1000),
-	DAY_3(72 * 60 * 60 * 1000);
+	HOUR_12(12 * 60 * 60),
+	HOUR_24(24 * 60 * 60),
+	DAY_3(72 * 60 * 60);
 
-	private final long millis;
+	private final long seconds;
 
 	public static ProductEndTime of(String endTime) {
 		if (endTime == null || endTime.isBlank()) {

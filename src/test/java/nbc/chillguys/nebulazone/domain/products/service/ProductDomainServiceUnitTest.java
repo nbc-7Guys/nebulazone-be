@@ -58,7 +58,7 @@ class ProductDomainServiceUnitTest {
 			.nickname("테스트닉")
 			.profileImage("test.jpg")
 			.point(0)
-			.oauthType(OAuthType.DOMAIN)
+			.oAuthType(OAuthType.DOMAIN)
 			.roles(Set.of(UserRole.ROLE_USER))
 			.addresses(addresses)
 			.build();

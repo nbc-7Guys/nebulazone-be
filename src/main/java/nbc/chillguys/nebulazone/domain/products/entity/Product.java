@@ -113,4 +113,19 @@ public class Product extends BaseEntity {
 		}
 
 	}
+
+	public void update(String name, String description) {
+		this.name = name;
+		this.description = description;
+	}
+
+	public void changeToAuctionType(Long price) {
+		this.price = price;
+		this.txMethod = ProductTxMethod.AUCTION;
+	}
+
+	public void delete() {
+		this.isDeleted = true;
+		this.deletedAt = LocalDateTime.now();
+	}
 }
