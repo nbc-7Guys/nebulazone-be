@@ -33,21 +33,11 @@ public class S3Service {
 	private String bucket;
 
 	public String generateUploadUrlAndUploadFile(MultipartFile file) {
-		if (file == null || file.isEmpty()) {
-			return null;
-		}
+		String s3Url = generateUploadUrl(file);
 
-		String fileName = getFileName(file);
+		uploadFile(file, s3Url);
 
-		String contentType = file.getContentType();
-
-		String presignedUploadUrl = generateUploadUrl(fileName, contentType, file.getSize());
-
-		if (!uploadFile(file, presignedUploadUrl, contentType)) {
-			return null;
-		}
-
-		return presignedUploadUrl.split("\\?")[0];
+		return s3Url.split("\\?")[0];
 	}
 
 	public void generateDeleteUrlAndDeleteFile(String presignedUrl) {
@@ -56,10 +46,10 @@ public class S3Service {
 		deleteFile(presignedDeleteUrl);
 	}
 
-	private String generateDeleteUrl(String presignedUrl) {
+	public String generateDeleteUrl(String imageUrl) {
 		DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
 			.bucket(bucket)
-			.key(presignedUrl.substring(presignedUrl.lastIndexOf("/") + 1))
+			.key(imageUrl.substring(imageUrl.lastIndexOf("/") + 1))
 			.build();
 
 		DeleteObjectPresignRequest deleteObjectPresignRequest = DeleteObjectPresignRequest.builder()
@@ -70,10 +60,10 @@ public class S3Service {
 		return s3Presigner.presignDeleteObject(deleteObjectPresignRequest).url().toString();
 	}
 
-	private void deleteFile(String presignedUrl) {
+	public void deleteFile(String deleteUrl) {
 		ResponseEntity<String> response = restClient
 			.delete()
-			.uri(URI.create(presignedUrl))
+			.uri(URI.create(deleteUrl))
 			.retrieve()
 			.toEntity(String.class);
 
@@ -82,12 +72,14 @@ public class S3Service {
 		}
 	}
 
-	private String generateUploadUrl(String fileName, String contentType, long contentLength) {
+	public String generateUploadUrl(MultipartFile multipartFile) {
+		String fileName = getFileName(multipartFile);
+
 		PutObjectRequest putObjectRequest = PutObjectRequest.builder()
 			.bucket(bucket)
 			.key(fileName)
-			.contentType(contentType)
-			.contentLength(contentLength)
+			.contentType(multipartFile.getContentType())
+			.contentLength(multipartFile.getSize())
 			.build();
 
 		PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
@@ -99,13 +91,13 @@ public class S3Service {
 		return presignedPutObjectRequest.url().toString();
 	}
 
-	private boolean uploadFile(MultipartFile file, String presignedUrl, String contentType) {
+	private void uploadFile(MultipartFile file, String uploadUrl) {
 		try {
 			ResponseEntity<String> response = restClient
 				.put()
-				.uri(URI.create(presignedUrl))
+				.uri(URI.create(uploadUrl))
 				.headers(httpHeaders -> {
-					httpHeaders.setContentType(MediaType.valueOf(contentType));
+					httpHeaders.setContentType(MediaType.valueOf(Objects.requireNonNull(file.getContentType())));
 					httpHeaders.setContentLength(file.getSize());
 				})
 				.body(file.getBytes())
@@ -114,14 +106,10 @@ public class S3Service {
 
 			if (!response.getStatusCode().is2xxSuccessful()) {
 				log.error("S3 업로드 실패: {}, body: {}", response.getStatusCode(), response.getBody());
-				return false;
 			}
 		} catch (IOException e) {
 			log.error("파일 변환 실패", e);
-			return false;
 		}
-
-		return true;
 	}
 
 	private String getFileName(MultipartFile file) {
