@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
-import nbc.chillguys.nebulazone.application.products.dto.response.CreateProductResponse;
+import nbc.chillguys.nebulazone.application.products.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.application.products.service.ProductService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
@@ -28,13 +28,13 @@ public class ProductController {
 
 	@PostMapping(value = "/catalogs/{catalogId}/products",
 		consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<CreateProductResponse> createProduct(
+	public ResponseEntity<ProductResponse> createProduct(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("catalogId") Long catalogId,
 		@Valid @RequestPart("product") CreateProductRequest request,
 		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> multipartFiles) {
 
-		CreateProductResponse productResponse = productService.createProduct(authUser, catalogId, request,
+		ProductResponse productResponse = productService.createProduct(authUser, catalogId, request,
 			multipartFiles);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(productResponse);
