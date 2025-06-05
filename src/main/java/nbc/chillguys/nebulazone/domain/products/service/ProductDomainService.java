@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductPurchaseCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
@@ -36,6 +37,32 @@ public class ProductDomainService {
 	}
 
 	/**
+	 * 삭제되지 않은 판매 상품 조회
+	 * @param productId 상품 id
+	 * @return product
+	 * @author 윤정환
+	 */
+	public Product findActiveProductById(Long productId) {
+		return productRepository.findByIdAndDeletedFalse(productId)
+			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+	}
+
+	/**
+	 * 판매되지 않은 일반 판매 상품 조회
+	 * @param productId 상품 id
+	 * @return product
+	 * @author 윤정환
+	 */
+	public Product findAvailableProductById(Long productId) {
+		Product product = findActiveProductById(productId);
+
+		product.validateNotSold();
+		product.validatePurchasable();
+
+		return product;
+	}
+
+	/**
 	 * 판매 상품 수정
 	 * @param command 판매 상품 수정 정보
 	 * @return product
@@ -43,12 +70,10 @@ public class ProductDomainService {
 	 */
 	@Transactional
 	public Product updateProduct(ProductUpdateCommand command) {
-		// todo: 판매 상품 상세 조회 메서드 추가되면 교체
-		Product product = productRepository.findById(command.productId())
-			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+		Product product = findActiveProductById(command.productId());
 
-		validateBelongsToCatalog(product, command.catalog().getId());
-		validateProductOwner(product, command.user().getId());
+		product.validateBelongsToCatalog(command.catalog().getId());
+		product.validateProductOwner(command.user().getId());
 
 		product.update(command.name(), command.description());
 
@@ -65,9 +90,7 @@ public class ProductDomainService {
 	 */
 	@Transactional
 	public Product changeToAuctionType(ChangeToAuctionTypeCommand command) {
-		// todo: 판매 상품 상세 조회 메서드 추가되면 교체
-		Product product = productRepository.findById(command.productId())
-			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+		Product product = findActiveProductById(command.productId());
 
 		if (Objects.equals(product.getTxMethod(), ProductTxMethod.AUCTION)) {
 			throw new ProductException(ProductErrorCode.ALREADY_AUCTION_TYPE);
@@ -79,7 +102,7 @@ public class ProductDomainService {
 	}
 
 	/**
-	 * 파매 상품 삭제
+	 * 판매 상품 삭제
 	 * @param command 판매 상품 삭제 정보
 	 * @author 윤정환
 	 */
@@ -89,39 +112,20 @@ public class ProductDomainService {
 			throw new ProductException(ProductErrorCode.AUCTION_NOT_CLOSED);
 		}
 
-		// todo: 판매 상품 상세 조회 메서드 추가되면 교체
-		Product product = productRepository.findById(command.productId())
-			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+		Product product = findActiveProductById(command.productId());
 
-		validateBelongsToCatalog(product, command.catalog().getId());
-		validateProductOwner(product, command.user().getId());
+		product.validateBelongsToCatalog(command.catalog().getId());
+		product.validateProductOwner(command.user().getId());
 
 		product.delete();
 
 		// todo: 삭제된 정보 ES에 갱신
 	}
 
-	/**
-	 * 판매 상품이 해당 카탈로그에 속해있는지 검증
-	 * @param product 판매 상품 정보
-	 * @param catalogId 카탈로그 id
-	 * @author 윤정환
-	 */
-	private void validateBelongsToCatalog(Product product, Long catalogId) {
-		if (!Objects.equals(product.getCatalog().getId(), catalogId)) {
-			throw new ProductException(ProductErrorCode.NOT_BELONGS_TO_CATALOG);
-		}
-	}
+	@Transactional
+	public void purchaseProduct(ProductPurchaseCommand command) {
+		Product product = findAvailableProductById(command.productId());
 
-	/**
-	 * 판매 상품의 주인이 맞는지 검증
-	 * @param product 판매 상품 정보
-	 * @param userId 유저 id
-	 * @author 윤정환
-	 */
-	private void validateProductOwner(Product product, Long userId) {
-		if (!Objects.equals(product.getSeller().getId(), userId)) {
-			throw new ProductException(ProductErrorCode.NOT_PRODUCT_OWNER);
-		}
+		product.purchase();
 	}
 }

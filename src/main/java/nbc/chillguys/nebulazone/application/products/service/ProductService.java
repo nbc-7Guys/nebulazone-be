@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.products.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
+import nbc.chillguys.nebulazone.application.products.dto.response.PurchaseProductResponse;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
@@ -20,10 +21,14 @@ import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductPurchaseCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
+import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
+import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
+import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
@@ -37,6 +42,7 @@ public class ProductService {
 	private final ProductDomainService productDomainService;
 	// todo: private final CatalogDomainService catalogDomainService;
 	private final AuctionDomainService auctionDomainService;
+	private final TransactionDomainService transactionDomainService;
 
 	private final S3Service s3Service;
 
@@ -119,5 +125,25 @@ public class ProductService {
 		}
 
 		return DeleteProductResponse.from(productId);
+	}
+
+	@Transactional
+	public PurchaseProductResponse purchaseProduct(Long userId, Long catalogId, Long productId) {
+		User user = userDomainService.findActiveUserById(userId);
+		Product product = productDomainService.findAvailableProductById(productId);
+
+		// todo: 카탈로그 도메인 서비스 생성 후 작업
+		Catalog catalog = null;
+
+		user.usePoint(Math.toIntExact(product.getPrice()));
+
+		ProductPurchaseCommand command = ProductPurchaseCommand.of(user, catalog, productId);
+		productDomainService.purchaseProduct(command);
+
+		TransactionCreateCommand txCreateCommand
+			= TransactionCreateCommand.of(user, product, product.getTxMethod().name());
+		Transaction tx = transactionDomainService.createTransaction(txCreateCommand);
+
+		return PurchaseProductResponse.from(tx);
 	}
 }

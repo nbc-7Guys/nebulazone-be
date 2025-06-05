@@ -191,5 +191,4 @@ public class UserDomainService {
 			throw new UserException(UserErrorCode.NOT_OWNER);
 		}
 	}
-
 }
