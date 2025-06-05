@@ -84,9 +84,9 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 				String roomIdStr = destination.substring("/topic/chat/".length());
 				try {
 					Long roomId = Long.valueOf(roomIdStr);
-					Long userId = SessionUtil.getUserIdBySessionId(accessor.getSessionId());
+					AuthUser authUser = SessionUtil.getUserIdBySessionId(accessor.getSessionId());
 					// 채팅방에 참여중인 유저인지 확인
-					boolean isParticipant = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(userId, roomId);
+					boolean isParticipant = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(authUser.getId(), roomId);
 					if (!isParticipant) {
 						throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 					}
