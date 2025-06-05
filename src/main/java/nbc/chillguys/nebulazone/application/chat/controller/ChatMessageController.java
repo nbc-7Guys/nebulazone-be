@@ -24,11 +24,10 @@ public class ChatMessageController {
 		StompHeaderAccessor accessor
 	) {
 		String sessionId = accessor.getSessionId();
-		// Principal principal = AuthenticationChannelInterceptor.sessionPrincipalMap.get(sessionId);
 
-		Long userId = SessionUtil.getUserIdBySessionId(sessionId);
+		// Long userId = SessionUtil.getUserIdBySessionId(sessionId);
 
-		chatMessageService.sendMessage(userId, roomId, command);
+		chatMessageService.sendMessage(sessionId, roomId, command);
 
 	}
 

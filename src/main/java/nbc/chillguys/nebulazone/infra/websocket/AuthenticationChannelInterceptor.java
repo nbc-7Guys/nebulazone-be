@@ -14,6 +14,10 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
+import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
+import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomRepository;
+import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomUserRepository;
 import nbc.chillguys.nebulazone.infra.security.jwt.JwtUtil;
 
 @Slf4j
@@ -22,6 +26,8 @@ import nbc.chillguys.nebulazone.infra.security.jwt.JwtUtil;
 public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 
 	private final JwtUtil jwtUtil;
+	private final ChatRoomRepository chatRoomRepository;
+	private final ChatRoomUserRepository chatRoomUserRepository;
 
 	@Override
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -46,6 +52,12 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 				// jWT 토큰 파싱 및 검증
 				AuthUser authUserFromToken = jwtUtil.getAuthUserFromToken(token);
 
+				// 채팅방 존재 여부 확인
+				boolean existsChatRoomById = chatRoomRepository.existsChatRoomById(authUserFromToken.getId());
+				if (!existsChatRoomById) {
+					throw new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND);
+				}
+
 				// accessor.setUser에는 Principal 타입이 필요하기 때문에 UsernamePasswordAuthenticationToken으로 감싸기
 				Principal principal = new UsernamePasswordAuthenticationToken(String.valueOf(authUserFromToken.getId()),
 					null, authUserFromToken.getAuthorities());
@@ -53,7 +65,7 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 				accessor.setUser(principal);
 
 				// CONNECT 단계 에서는 유저 정보만 매핑
-				SessionUtil.registerUser(accessor.getSessionId(), authUserFromToken.getId());
+				SessionUtil.registerUser(accessor.getSessionId(), authUserFromToken);
 
 			} catch (Exception e) {
 				log.warn("JWT 파싱 또는 Principal 세팅 예외: {}", e.getMessage());
@@ -72,6 +84,12 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 				String roomIdStr = destination.substring("/topic/chat/".length());
 				try {
 					Long roomId = Long.valueOf(roomIdStr);
+					Long userId = SessionUtil.getUserIdBySessionId(accessor.getSessionId());
+					// 채팅방에 참여중인 유저인지 확인
+					boolean isParticipant = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(userId, roomId);
+					if (!isParticipant) {
+						throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+					}
 					SessionUtil.registerRoom(accessor.getSessionId(), roomId);
 				} catch (NumberFormatException e) {
 					log.warn("방번호 추출 실패: {}", roomIdStr);

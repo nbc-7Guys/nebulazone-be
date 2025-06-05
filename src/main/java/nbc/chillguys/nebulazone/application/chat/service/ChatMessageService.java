@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.chat.dto.request.ChatSendMessageCommand;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatHistory;
@@ -20,7 +21,10 @@ import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomRepository;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomUserRepository;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
+import nbc.chillguys.nebulazone.domain.user.exception.UserException;
 import nbc.chillguys.nebulazone.domain.user.repository.UserRepository;
+import nbc.chillguys.nebulazone.infra.websocket.SessionUtil;
 
 @Slf4j
 @Service
@@ -42,26 +46,17 @@ public class ChatMessageService {
 	 * @param command the command
 	 */
 	@Transactional
-	public void sendMessage(Long userId, Long roomId, ChatSendMessageCommand command) {
+	public void sendMessage(String sessionId, Long roomId, ChatSendMessageCommand command) {
 
-		// 채팅방 존재 확인
-		boolean existsed = chatRoomRepository.existsChatRoomById(roomId);
-		if (!existsed) {
-			throw new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND);
-		}
+		AuthUser authUser = SessionUtil.getUserIdBySessionId(sessionId);
+		Long roomIdBySessionId = SessionUtil.getRoomIdBySessionId(sessionId);
 
-		// 참가자 확인
-		boolean isParticipant = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId, userId);
-		if (!isParticipant) {
+		if (authUser.getId() == null || roomIdBySessionId == null || !roomIdBySessionId.equals(roomId)) {
 			throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 		}
 
-		// 발신자 정보 조회
-		User sender = userRepository.findById(userId)
-			.orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다."));
-
 		// 메시지 본문 작성
-		ChatMessageInfo message = chatDomainService.createMessage(roomId, sender, command.message(), command.type());
+		ChatMessageInfo message = chatDomainService.createMessage(roomId, authUser, command.message(), command.type());
 
 		// 메시지 전송
 		messagingTemplate.convertAndSend("/topic/chat/" + roomId, message);
@@ -78,13 +73,7 @@ public class ChatMessageService {
 	@Transactional
 	public void saveMessagesToDb(Long roomId) {
 		// 채팅방Id를 기준으로 레디스에 있는 채팅기록들 불러오기
-		log.info("saveMessagesToDb 실행");
 		List<ChatMessageInfo> messagesFromRedis = chatMessageRedisService.getMessagesFromRedis(roomId);
-
-		log.info("message들");
-		for (ChatMessageInfo messagesFromRedi : messagesFromRedis) {
-			System.out.println("messagesFromRedi = " + messagesFromRedi.toString());
-		}
 
 		if (messagesFromRedis.isEmpty()) {
 			return;

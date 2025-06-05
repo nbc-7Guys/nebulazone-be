@@ -46,7 +46,7 @@ public class ChatService {
 
 	/**
 	 * 채팅방 생성 또는 기존에 채팅방 조회.<br/>
-	 * 채팅방이 없다면 생성하고 있다면 기존 채팅방 정보를 가져온다.
+	 * 채팅방이 없다면 생성하고 있다면 기존 채팅방 정보를 가져온다.<br/>
 	 *
 	 * @param authUser the auth user
 	 * @param request the request
@@ -58,6 +58,7 @@ public class ChatService {
 		// 로그인한 유저가 특정 상품에 대해 참여중인 채팅방이 있는지 확인
 		Optional<ChatRoomUser> existingChatRoomUser = chatDomainService.findExistingChatRoom(authUser.getId(),
 			request.productId());
+
 		if (existingChatRoomUser.isPresent()) {
 			return CreateChatRoomResponse.of(existingChatRoomUser.get().getChatRoom());
 		}

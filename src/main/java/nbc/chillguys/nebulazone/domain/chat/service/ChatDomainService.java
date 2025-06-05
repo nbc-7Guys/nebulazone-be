@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomCreationInfo;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
@@ -18,6 +19,9 @@ import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomHistoryRepository
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomRepository;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomUserRepository;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
+import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
+import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 /**
@@ -48,6 +52,9 @@ public class ChatDomainService {
 		if (buyer.getId().equals(seller.getId())) {
 			throw new ChatException(ChatErrorCode.CANNOT_CHAT_WITH_SELF);
 		}
+		if (product.getTxMethod().equals(ProductTxMethod.AUCTION)) {
+			throw new ProductException(ProductErrorCode.INVALID_PRODUCT_TYPE);
+		}
 
 		ChatRoom chatRoom = ChatRoom.builder()
 			.product(product)
@@ -77,17 +84,18 @@ public class ChatDomainService {
 	/**
 	 * 채팅방 메시지 생성
 	 */
-	public ChatMessageInfo createMessage(Long roomId, User sender, String content, String type) {
+	public ChatMessageInfo createMessage(Long roomId, AuthUser sender, String content, String type) {
 		return ChatMessageInfo.builder()
             .roomId(roomId)
 			.senderId(sender.getId())
-            .senderNickname(sender.getNickname())
+            .senderEmail(sender.getEmail())
             .message(content)
             .sendTime(LocalDateTime.now())
             .build();
 	}
 
 	public String removeUserFromChatRoom(Long userId, Long roomId) {
+
 		ChatRoomUser user = chatRoomUserRepository.findByIdUserIdAndIdChatRoomId(userId, roomId)
 			.orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED));
 

@@ -3,14 +3,16 @@ package nbc.chillguys.nebulazone.infra.websocket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+
 public class SessionUtil {
 
-	private static final Map<String, Long> sessionIdToUserId = new ConcurrentHashMap<>();
+	private static final Map<String, AuthUser> sessionIdToUserId = new ConcurrentHashMap<>();
 	private static final Map<String, Long> sessionIdToRoomId = new ConcurrentHashMap<>();
 
 	// 세션ID : userId 매핑
-	public static void registerUser(String sessionId, long userId) {
-		sessionIdToUserId.put(sessionId, userId);
+	public static void registerUser(String sessionId, AuthUser authUser) {
+		sessionIdToUserId.put(sessionId, authUser);
 	}
 
 	// 세션ID : roomId 매핑
@@ -19,7 +21,7 @@ public class SessionUtil {
 	}
 
 	// 세션ID로 userId 찾기
-	public static Long getUserIdBySessionId(String sessionId) {
+	public static AuthUser getUserIdBySessionId(String sessionId) {
 		return sessionIdToUserId.get(sessionId);
 	}
 
