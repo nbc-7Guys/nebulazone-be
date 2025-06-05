@@ -25,8 +25,6 @@ public class ChatMessageController {
 	) {
 		String sessionId = accessor.getSessionId();
 
-		// Long userId = SessionUtil.getUserIdBySessionId(sessionId);
-
 		chatMessageService.sendMessage(sessionId, roomId, command);
 
 	}

@@ -58,7 +58,7 @@ public class ChatController {
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("roomId") Long roomId
 	) {
-		chatService.leaveChatRoom(authUser, roomId);
+		chatService.exitChatRoom(authUser, roomId);
 		return ResponseEntity.ok("성공적으로 채팅방을 나갔습니다.");
 	}
 

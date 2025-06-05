@@ -45,4 +45,8 @@ public class ChatRoomUser {
 			.build();
 	}
 
+	public void setChatRoom(ChatRoom chatRoom) {
+		this.chatRoom = chatRoom;
+	}
+
 }

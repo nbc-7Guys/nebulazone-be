@@ -45,4 +45,14 @@ public class ChatRoom extends BaseEntity {
 		this.product = product;
 	}
 
+	public void addChatRoomUser(ChatRoomUser chatRoomUser) {
+    	chatRoomUsers.add(chatRoomUser);
+    	chatRoomUser.setChatRoom(this);
+	}
+
+	public void removeChatRoomUser(ChatRoomUser chatRoomUser) {
+    	chatRoomUsers.remove(chatRoomUser);
+    	chatRoomUser.setChatRoom(null);
+	}
+
 }
