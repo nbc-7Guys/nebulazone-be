@@ -48,7 +48,7 @@ public class Auction extends BaseEntity {
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public Auction(
+	private Auction(
 		Product product, Long startPrice, Long currentPrice,
 		LocalDateTime endTime, boolean isClosed,
 		boolean isDeleted, LocalDateTime deletedAt
@@ -62,11 +62,4 @@ public class Auction extends BaseEntity {
 		this.deletedAt = deletedAt;
 	}
 
-	public static Auction of(Product product, Long startPrice, LocalDateTime endTime) {
-		return Auction.builder()
-			.product(product)
-			.startPrice(startPrice)
-			.endTime(endTime)
-			.build();
-	}
 }

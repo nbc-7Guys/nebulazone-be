@@ -9,13 +9,13 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.products.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
-import nbc.chillguys.nebulazone.application.products.dto.response.PurchaseProductResponse;
-import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
-import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.response.DeleteProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.response.ProductResponse;
+import nbc.chillguys.nebulazone.application.products.dto.response.PurchaseProductResponse;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
+import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
@@ -40,9 +40,10 @@ public class ProductService {
 
 	private final UserDomainService userDomainService;
 	private final ProductDomainService productDomainService;
-	// todo: private final CatalogDomainService catalogDomainService;
 	private final AuctionDomainService auctionDomainService;
 	private final TransactionDomainService transactionDomainService;
+
+	// todo: private final CatalogDomainService catalogDomainService;
 
 	private final S3Service s3Service;
 
@@ -66,10 +67,10 @@ public class ProductService {
 		Product createProduct = productDomainService.createProduct(productCreateCommand, productImageUrls);
 
 		if (createProduct.getTxMethod() == ProductTxMethod.AUCTION) {
-			auctionDomainService.createAuction(AuctionCreateCommand.of(createProduct, productCreateCommand));
+			auctionDomainService.createAuction(AuctionCreateCommand.of(createProduct, request.getProductEndTime()));
 		}
 
-		return ProductResponse.from(createProduct);
+		return ProductResponse.from(createProduct, request.getProductEndTime());
 	}
 
 	public ProductResponse updateProduct(
@@ -105,7 +106,7 @@ public class ProductService {
 
 		// todo: 경매 생성하는 메서드 추가되면 작업
 
-		return ProductResponse.from(product);
+		return ProductResponse.from(product, request.getProductEndTime());
 	}
 
 	public DeleteProductResponse deleteProduct(Long userId, Long catalogId, Long productId) {

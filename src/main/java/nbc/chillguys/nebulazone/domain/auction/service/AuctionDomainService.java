@@ -20,18 +20,42 @@ public class AuctionDomainService {
 
 	private final AuctionRepository auctionRepository;
 
+	/**
+	 * 경매 생성
+	 * @param command 경매상품, 종료시간
+	 * @author 전나겸
+	 */
 	@Transactional
 	public void createAuction(AuctionCreateCommand command) {
 
-		auctionRepository.save(Auction.of(command.product(), command.startPrice(), command.endTime()));
+		Auction auction = Auction.builder()
+			.product(command.product())
+			.startPrice(command.product().getPrice())
+			.endTime(command.endTime())
+			.build();
+
+		auctionRepository.save(auction);
 	}
 
+	/**
+	 * 경매 전체 조회(페이징)
+	 * @param page 페이지 정보
+	 * @param size 출력 개수
+	 * @return 페이징 AuctionFindInfo
+	 * @author 전나겸
+	 */
 	public Page<AuctionFindInfo> findAuctions(int page, int size) {
 
 		return auctionRepository.findAuctionsWithProduct(page, size);
 
 	}
 
+	/**
+	 * 경매 정렬 조건으로 조회<br>
+	 * 마감 임박순 5개 조회, 경매 입찰 건수 많은 순 5개 조회
+	 * @param sortType 정렬 조건(closing, popular)
+	 * @return 리스트 AuctionFindInfo
+	 */
 	public List<AuctionFindInfo> findAuctionsBySortType(AuctionSortType sortType) {
 
 		return auctionRepository.finAuctionsBySortType(sortType);
