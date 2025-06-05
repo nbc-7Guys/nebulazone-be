@@ -16,7 +16,8 @@ public enum UserErrorCode implements ErrorCode {
 	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
 	ALREADY_EXISTS_EMAIL(HttpStatus.CONFLICT, "이미 존재하는 이메일이 있습니다."),
 	ALREADY_EXISTS_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 닉네임이 있습니다."),
-	INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, "포인트가 부족합니다.");
+	INSUFFICIENT_BALANCE(HttpStatus.BAD_REQUEST, "포인트가 부족합니다."),
+	NOT_OWNER(HttpStatus.FORBIDDEN, "본인만 요청할 수 있습니다.");
 
 	private final HttpStatus status;
 	private final String message;

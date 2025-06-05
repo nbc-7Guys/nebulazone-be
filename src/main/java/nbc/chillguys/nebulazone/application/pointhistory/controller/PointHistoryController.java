@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +21,6 @@ import nbc.chillguys.nebulazone.application.pointhistory.dto.response.PointHisto
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.PointResponse;
 import nbc.chillguys.nebulazone.application.pointhistory.service.PointHistoryService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 
 @RestController
@@ -32,9 +33,9 @@ public class PointHistoryController {
 	@PostMapping("/funds")
 	public ResponseEntity<PointResponse> createPointHistory(
 		@RequestBody @Valid PointRequest request,
-		@AuthenticationPrincipal AuthUser authUser
+		@AuthenticationPrincipal(expression = "id") Long userId
 	) {
-		PointResponse response = pointHistoryService.createPointHistory(request, authUser.getId());
+		PointResponse response = pointHistoryService.createPointHistory(request, userId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
@@ -56,6 +57,15 @@ public class PointHistoryController {
 		CommonPageResponse<PointHistoryResponse> response = pointHistoryService.findMyPointHistories(userId, page,
 			size);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@DeleteMapping("/points/{pointId}")
+	public ResponseEntity<Void> rejectPointRequest(
+		@PathVariable Long pointId,
+		@AuthenticationPrincipal(expression = "id") Long userId
+	) {
+		pointHistoryService.rejectPointRequest(userId, pointId);
+		return ResponseEntity.ok().build();
 	}
 
 }

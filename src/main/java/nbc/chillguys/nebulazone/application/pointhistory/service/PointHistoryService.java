@@ -53,6 +53,7 @@ public class PointHistoryService {
 			.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public CommonPageResponse<PointHistoryResponse> findMyPointHistories(Long userId, int page, int size) {
 		Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
@@ -61,6 +62,13 @@ public class PointHistoryService {
 		Page<PointHistoryResponse> dtoPage = histories.map(PointHistoryResponse::from);
 
 		return CommonPageResponse.from(dtoPage);
+	}
+
+	@Transactional
+	public void rejectPointRequest(Long userId, Long pointHistoryId) {
+		PointHistory pointHistory = pointHistoryDomainService.findActivePointHistory(pointHistoryId);
+		userDomainService.validateOwnership(pointHistory.getUser(), userId); // 소유자 검증
+		pointHistoryDomainService.rejectPointRequest(pointHistory); // 상태 검증 + 거절 처리
 	}
 
 }

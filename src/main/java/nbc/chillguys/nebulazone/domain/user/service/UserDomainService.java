@@ -173,9 +173,22 @@ public class UserDomainService {
 			.orElseThrow(() -> new UserException(UserErrorCode.ALREADY_EXISTS_EMAIL));
 	}
 
+	/**
+	 * 포인 환전시 포인트가 충분한지 조회
+	 *
+	 * @param user 유저
+	 * @param price 요청 포인트
+	 * @author 정석현
+	 */
 	public void validateEnoughPoint(User user, int price) {
 		if (!user.hasEnoughPoint(price)) {
 			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
+		}
+	}
+
+	public void validateOwnership(User user, Long currentUserId) {
+		if (!user.getId().equals(currentUserId)) {
+			throw new UserException(UserErrorCode.NOT_OWNER);
 		}
 	}
 
