@@ -48,7 +48,7 @@ public class ProductDomainService {
 			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 		validateBelongsToCatalog(product, command.catalog().getId());
-		validateProductOwner(product, command.catalog().getId());
+		validateProductOwner(product, command.user().getId());
 
 		product.update(command.name(), command.description());
 
@@ -94,7 +94,7 @@ public class ProductDomainService {
 			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 		validateBelongsToCatalog(product, command.catalog().getId());
-		validateProductOwner(product, command.catalog().getId());
+		validateProductOwner(product, command.user().getId());
 
 		product.delete();
 
