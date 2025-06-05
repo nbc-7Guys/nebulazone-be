@@ -70,7 +70,8 @@ public class PointHistoryDomainService {
 	 * @throws PointHistoryException 내역이 존재하지 않거나, 상태가 PENDING이 아닐 때
 	 * @author 정석현
 	 */
-	public void rejectPointRequest(PointHistory pointHistory) {
+	public void rejectPointRequest(PointHistory pointHistory, Long userId) {
+		validateOwnership(pointHistory, userId);
 
 		validatePending(pointHistory);
 
@@ -113,6 +114,20 @@ public class PointHistoryDomainService {
 		if (pointHistory.getPointHistoryStatus() != PointHistoryStatus.PENDING) {
 			throw new PointHistoryException(PointHistoryErrorCode.NOT_PENDING);
 		}
+	}
+
+	/**
+	 * 해당 사용자가 맞는지 검증합니다.
+	 *
+	 * @param pointHistory 포인트 내역 엔티티
+	 * @param userId 유저 아이디
+	 * @author 정석현
+	 */
+	public void validateOwnership(PointHistory pointHistory, Long userId) {
+		if (pointHistory.getUser().getId().equals(userId)) {
+			return;
+		}
+		throw new PointHistoryException(PointHistoryErrorCode.NOT_OWNER);
 	}
 
 }

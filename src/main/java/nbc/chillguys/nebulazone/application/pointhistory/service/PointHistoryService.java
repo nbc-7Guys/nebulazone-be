@@ -67,8 +67,7 @@ public class PointHistoryService {
 	@Transactional
 	public void rejectPointRequest(Long userId, Long pointHistoryId) {
 		PointHistory pointHistory = pointHistoryDomainService.findActivePointHistory(pointHistoryId);
-		userDomainService.validateOwnership(pointHistory.getUser(), userId); // 소유자 검증
-		pointHistoryDomainService.rejectPointRequest(pointHistory); // 상태 검증 + 거절 처리
+		pointHistoryDomainService.rejectPointRequest(pointHistory, userId);
 	}
 
 }
