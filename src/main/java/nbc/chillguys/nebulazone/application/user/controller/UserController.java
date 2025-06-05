@@ -24,6 +24,7 @@ import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.UpdateUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
+import nbc.chillguys.nebulazone.application.user.dto.response.WithdrawUserResponse;
 import nbc.chillguys.nebulazone.application.user.service.UserService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
@@ -86,12 +87,12 @@ public class UserController {
 	}
 
 	@DeleteMapping
-	public ResponseEntity<Long> withdrawUser(
+	public ResponseEntity<WithdrawUserResponse> withdrawUser(
 		@Valid @RequestBody WithdrawUserRequest withdrawUserRequest,
 		@AuthenticationPrincipal AuthUser authUser
 	) {
-		Long withdrawnUserId = userService.withdrawUser(withdrawUserRequest, authUser);
+		WithdrawUserResponse response = userService.withdrawUser(withdrawUserRequest, authUser);
 
-		return ResponseEntity.ok(withdrawnUserId);
+		return ResponseEntity.ok(response);
 	}
 }

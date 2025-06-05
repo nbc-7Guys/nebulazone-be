@@ -6,10 +6,11 @@ import java.util.List;
 import lombok.Builder;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductEndTime;
+import nbc.chillguys.nebulazone.domain.products.entity.ProductImage;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 
 @Builder
-public record CreateProductResponse(
+public record ProductResponse(
 
 	String name,
 	String description,
@@ -19,14 +20,18 @@ public record CreateProductResponse(
 	LocalDateTime modifiedAt,
 	List<String> imageUrls) {
 
-	public static CreateProductResponse from(Product product, List<String> imageUrls) {
-		return CreateProductResponse.builder()
+	public static ProductResponse from(Product product) {
+		return ProductResponse.builder()
 			.name(product.getName())
 			.description(product.getDescription())
 			.price(product.getPrice())
 			.txMethod(product.getTxMethod())
 			.modifiedAt(product.getModifiedAt())
-			.imageUrls(imageUrls)
+			.imageUrls(
+				product.getProductImages().stream()
+					.map(ProductImage::getUrl)
+					.toList()
+			)
 			.build();
 	}
 
