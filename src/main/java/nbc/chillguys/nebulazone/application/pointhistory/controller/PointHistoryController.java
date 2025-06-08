@@ -21,6 +21,7 @@ import nbc.chillguys.nebulazone.application.pointhistory.dto.response.PointHisto
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.PointResponse;
 import nbc.chillguys.nebulazone.application.pointhistory.service.PointHistoryService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
+import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 
 @RestController
@@ -33,28 +34,32 @@ public class PointHistoryController {
 	@PostMapping("/funds")
 	public ResponseEntity<PointResponse> createPointHistory(
 		@RequestBody @Valid PointRequest request,
-		@AuthenticationPrincipal(expression = "id") Long userId
+		@AuthenticationPrincipal AuthUser authUser
 	) {
+		Long userId = authUser.getId();
 		PointResponse response = pointHistoryService.createPointHistory(request, userId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
 	@GetMapping("/requests")
 	public ResponseEntity<List<PointHistoryResponse>> getMyPointRequests(
-		@AuthenticationPrincipal(expression = "id") Long userId,
+		@AuthenticationPrincipal AuthUser authUser,
 		@RequestParam(required = false) PointHistoryStatus status
 	) {
+		Long userId = authUser.getId();
 		List<PointHistoryResponse> responseList = pointHistoryService.findMyPointRequests(userId, status);
 		return ResponseEntity.status(HttpStatus.OK).body(responseList);
 	}
 
 	@GetMapping("/histories")
 	public ResponseEntity<CommonPageResponse<PointHistoryResponse>> getMyPointHistories(
-		@AuthenticationPrincipal(expression = "id") Long userId,
+		@AuthenticationPrincipal AuthUser authUser,
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "10") int size
 	) {
-		CommonPageResponse<PointHistoryResponse> response = pointHistoryService.findMyPointHistories(userId, page,
+		Long userId = authUser.getId();
+		CommonPageResponse<PointHistoryResponse> response = pointHistoryService.findMyPointHistories(userId,
+			page,
 			size);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
@@ -62,8 +67,9 @@ public class PointHistoryController {
 	@DeleteMapping("/points/{pointId}")
 	public ResponseEntity<Void> rejectPointRequest(
 		@PathVariable Long pointId,
-		@AuthenticationPrincipal(expression = "id") Long userId
+		@AuthenticationPrincipal AuthUser authUser
 	) {
+		Long userId = authUser.getId();
 		pointHistoryService.rejectPointRequest(userId, pointId);
 		return ResponseEntity.ok().build();
 	}
