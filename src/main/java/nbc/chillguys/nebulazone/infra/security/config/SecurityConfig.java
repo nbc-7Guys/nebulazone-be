@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.config;
+package nbc.chillguys.nebulazone.infra.security.config;
 
 import java.util.List;
 
@@ -21,9 +21,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import nbc.chillguys.nebulazone.infra.oauth.handler.OAuth2SuccessHandler;
 import nbc.chillguys.nebulazone.infra.oauth.service.OAuthService;
-import nbc.chillguys.nebulazone.infra.security.jwt.JwtUtil;
-import nbc.chillguys.nebulazone.infra.security.jwt.filter.CustomAuthenticationEntryPoint;
-import nbc.chillguys.nebulazone.infra.security.jwt.filter.JwtAuthenticationFilter;
+import nbc.chillguys.nebulazone.infra.security.JwtUtil;
+import nbc.chillguys.nebulazone.infra.security.filter.CustomAuthenticationEntryPoint;
+import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -52,6 +52,8 @@ public class SecurityConfig {
 					"/v3/api-docs/**",
 					"/swagger-ui/**",
 					"/swagger-ui.html",
+					"/webjars/**",
+					"/swagger-resources/**",
 					"/favicon.ico",
 					"/error",
 					"/actuator/**",
