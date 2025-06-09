@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import nbc.chillguys.nebulazone.application.auth.dto.request.SignInRequest;
+import nbc.chillguys.nebulazone.application.auth.dto.response.ReissueResponse;
 import nbc.chillguys.nebulazone.application.auth.dto.response.SignInResponse;
 import nbc.chillguys.nebulazone.application.auth.service.AuthService;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
@@ -79,6 +80,29 @@ class AuthControllerTest {
 				status().isOk(),
 				jsonPath("$")
 					.value("로그아웃 성공")
+			);
+
+	}
+
+	@Test
+	@DisplayName("access token 재발급 성공")
+	void success_reissueAccessToken() throws Exception {
+		// Given
+		ReissueResponse response = new ReissueResponse("regenerateAccessToken");
+
+		given(authService.reissueAccessToken(anyString()))
+			.willReturn(response);
+
+		// When
+		ResultActions perform = mockMvc.perform(post("/auth/reissue")
+			.header("Refresh-Token", "Bearer test_refresh_token"));
+
+		// Then
+		perform.andDo(print())
+			.andExpectAll(
+				status().isOk(),
+				jsonPath("$.accessToken")
+					.value("regenerateAccessToken")
 			);
 
 	}

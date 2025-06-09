@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.domain.config;
+package nbc.chillguys.nebulazone.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

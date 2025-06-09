@@ -1,7 +1,6 @@
 package nbc.chillguys.nebulazone.application.user.service;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
@@ -30,8 +29,6 @@ import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
-import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
-import nbc.chillguys.nebulazone.domain.user.exception.UserException;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
 
@@ -51,9 +48,6 @@ class UserServiceTest {
 	private User user;
 
 	private AuthUser authUser;
-
-	private final MultipartFile mockImage = new MockMultipartFile("image", "test.jpg", "image/jpeg",
-		"content".getBytes());
 
 	@BeforeEach
 	void init() {
@@ -93,20 +87,16 @@ class UserServiceTest {
 				"01012345678", "test",
 				Set.of(new SignUpUserRequest.SignUpUserAddressRequest("test_road_address", "test_detail_address",
 					"test_address_nickname")));
-			MultipartFile profileImage = mock(MultipartFile.class);
 
-			given(s3Service.generateUploadUrlAndUploadFile(any()))
-				.willReturn("test_profile_image_url");
 			given(userDomainService.createUser(any()))
 				.willReturn(user);
 
 			// When
-			UserResponse response = userService.signUp(signUpUserRequest, profileImage);
+			UserResponse response = userService.signUp(signUpUserRequest);
 
 			// Then
 			verify(userDomainService, times(1)).validEmail(anyString());
 			verify(userDomainService, times(1)).validNickname(anyString());
-			verify(s3Service, times(1)).generateUploadUrlAndUploadFile(any());
 			verify(userDomainService, times(1)).createUser(any());
 
 			assertThat(response)
@@ -185,53 +175,11 @@ class UserServiceTest {
 	@DisplayName("유저 수정 테스트")
 	class UpdateUserTest {
 		@Test
-		@DisplayName("유저 수정 성공 - 닉네임")
-		void success_updateUser_nickname() {
-			// Given
-			UpdateUserRequest request = new UpdateUserRequest("new_test", null);
-
-			given(userDomainService.findActiveUserById(anyLong()))
-				.willReturn(user);
-
-			// When
-			UserResponse response = userService.updateUser(request, null, authUser);
-
-			// Then
-			verify(userDomainService).findActiveUserById(anyLong());
-			verify(userDomainService).validNickname("new_test");
-			verify(userDomainService).updateUserNickname("new_test", user);
-
-			assertThat(response)
-				.isNotNull();
-		}
-
-		@Test
-		@DisplayName("유저 수정 성공 - 비밀번호")
-		void success_updateUser_password() {
-			// Given
-			UpdateUserRequest request = new UpdateUserRequest(null,
-				new UpdateUserRequest.PasswordChangeForm("encodedPassword", "newPassword"));
-
-			given(userDomainService.findActiveUserById(anyLong()))
-				.willReturn(user);
-
-			// When
-			UserResponse response = userService.updateUser(request, null, authUser);
-
-			// Then
-			verify(userDomainService).findActiveUserById(anyLong());
-			verify(userDomainService).validPassword("encodedPassword", "encodedPassword");
-			verify(userDomainService).updateUserPassword("newPassword", user);
-
-			assertThat(response)
-				.isNotNull();
-		}
-
-		@Test
 		@DisplayName("유저 수정 성공 - 프로필 이미지")
-		void success_updateUser_profileImage() {
+		void success_updateUserProfileImage() {
 			// Given
-			UpdateUserRequest request = new UpdateUserRequest(null, null);
+			MultipartFile mockImage = new MockMultipartFile("image", "test.jpg", "image/jpeg",
+				"content".getBytes());
 
 			given(userDomainService.findActiveUserById(anyLong()))
 				.willReturn(user);
@@ -239,7 +187,7 @@ class UserServiceTest {
 				.willReturn("new_image_url");
 
 			// When
-			UserResponse response = userService.updateUser(request, mockImage, authUser);
+			UserResponse response = userService.updateUserProfileImage(mockImage, authUser);
 
 			// Then
 			verify(userDomainService).findActiveUserById(anyLong());
@@ -252,45 +200,22 @@ class UserServiceTest {
 		}
 
 		@Test
-		@DisplayName("전체 필드 업데이트 성공")
-		void updateAllFields_success() {
+		@DisplayName("유저 닉네임, 비밀번호 수정 성공")
+		void success_userNicknameOrPassword() {
 			// Given
 			UpdateUserRequest request = new UpdateUserRequest("newNickname",
 				new UpdateUserRequest.PasswordChangeForm("encodedPassword", "newPassword"));
-			given(userDomainService.findActiveUserById(anyLong()))
+			given(userDomainService.updateUserNicknameOrPassword(any()))
 				.willReturn(user);
-			given(s3Service.generateUploadUrlAndUploadFile(any()))
-				.willReturn("new_image_url");
 
 			// When
-			UserResponse response = userService.updateUser(request, mockImage, authUser);
+			UserResponse response = userService.updateUserNicknameOrPassword(request, authUser);
 
 			// Then
-			verify(userDomainService).findActiveUserById(anyLong());
-			verify(userDomainService).validNickname("newNickname");
-			verify(userDomainService).updateUserNickname("newNickname", user);
-			verify(userDomainService).validPassword("encodedPassword", "encodedPassword");
-			verify(userDomainService).updateUserPassword("newPassword", user);
-			verify(s3Service).generateUploadUrlAndUploadFile(mockImage);
+			verify(userDomainService).updateUserNicknameOrPassword(any());
 
 			assertThat(response)
 				.isNotNull();
-		}
-
-		@Test
-		@DisplayName("유저 수정 실패 - 수정 사항이 없음")
-		void fail_updateUser_nothingToUpdate() {
-			// Given
-			UpdateUserRequest request = new UpdateUserRequest(null, null);
-
-			// When
-			UserException exception = assertThrows(UserException.class,
-				() -> userService.updateUser(request, null, authUser));
-
-			// Then
-			assertThat(exception.getErrorCode())
-				.isEqualTo(UserErrorCode.NOTHING_TO_UPDATE);
-
 		}
 	}
 

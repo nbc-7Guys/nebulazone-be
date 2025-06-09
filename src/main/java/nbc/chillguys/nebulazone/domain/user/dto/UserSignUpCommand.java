@@ -3,13 +3,11 @@ package nbc.chillguys.nebulazone.domain.user.dto;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.Builder;
 import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.infra.oauth.dto.OAuth2UserInfo;
 
-@Builder
 public record UserSignUpCommand(
 	String email,
 	String password,
@@ -20,31 +18,35 @@ public record UserSignUpCommand(
 	OAuthType oAuthType,
 	String oauthId
 ) {
-	public static UserSignUpCommand of(SignUpUserRequest signUpUserRequest, String profileImageUrl) {
-		return UserSignUpCommand.builder()
-			.email(signUpUserRequest.email())
-			.password(signUpUserRequest.password())
-			.nickname(signUpUserRequest.nickname())
-			.phone(signUpUserRequest.phone())
-			.profileImageUrl(profileImageUrl)
-			.addresses(signUpUserRequest.addresses().stream()
+	public static UserSignUpCommand from(SignUpUserRequest signUpUserRequest) {
+		return new UserSignUpCommand(
+			signUpUserRequest.email(),
+			signUpUserRequest.password(),
+			signUpUserRequest.nickname(),
+			signUpUserRequest.phone(),
+			null,
+			signUpUserRequest.addresses().stream()
 				.map(a -> Address.builder()
 					.roadAddress(a.roadAddress())
 					.detailAddress(a.detailAddress())
 					.addressNickname(a.addressNickname())
 					.build())
-				.collect(Collectors.toSet()))
-			.oAuthType(OAuthType.DOMAIN)
-			.build();
+				.collect(Collectors.toSet()),
+			OAuthType.DOMAIN,
+			null
+		);
 	}
 
-	public static UserSignUpCommand of(OAuth2UserInfo oAuth2UserInfo) {
-		return UserSignUpCommand.builder()
-			.email(oAuth2UserInfo.getEmail())
-			.nickname(oAuth2UserInfo.getNickname())
-			.profileImageUrl(oAuth2UserInfo.getProfileImageUrl())
-			.oAuthType(oAuth2UserInfo.getOAuthType())
-			.oauthId(oAuth2UserInfo.getId())
-			.build();
+	public static UserSignUpCommand from(OAuth2UserInfo oAuth2UserInfo) {
+		return new UserSignUpCommand(
+			oAuth2UserInfo.getEmail(),
+			null,
+			null,
+			oAuth2UserInfo.getNickname(),
+			oAuth2UserInfo.getProfileImageUrl(),
+			null,
+			oAuth2UserInfo.getOAuthType(),
+			oAuth2UserInfo.getId()
+		);
 	}
 }

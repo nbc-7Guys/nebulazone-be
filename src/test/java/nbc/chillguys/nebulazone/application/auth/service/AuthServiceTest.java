@@ -26,7 +26,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
-import nbc.chillguys.nebulazone.infra.security.jwt.JwtUtil;
+import nbc.chillguys.nebulazone.infra.security.JwtUtil;
 
 @DisplayName("auth 어플리케이션 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
