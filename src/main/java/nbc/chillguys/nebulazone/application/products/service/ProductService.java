@@ -133,15 +133,14 @@ public class ProductService {
 		// todo: 카탈로그 도메인 서비스 생성 후 작업
 		Catalog catalog = null;
 
-		// todo: 옥션 도메인 서비스 생성 후 작업
-		Auction auction = null;
-
-		ProductDeleteCommand command = ProductDeleteCommand.of(user, catalog, auction, productId);
-		productDomainService.deleteProduct(command);
+		Auction auction = auctionDomainService.findAuctionByProductId(productId);
 
 		if (auction != null) {
-			// todo: 경매 삭제
+			auction.delete();
 		}
+
+		ProductDeleteCommand command = ProductDeleteCommand.of(user, catalog, productId);
+		productDomainService.deleteProduct(command);
 
 		return DeleteProductResponse.from(productId);
 	}

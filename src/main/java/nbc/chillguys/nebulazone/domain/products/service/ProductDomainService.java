@@ -121,10 +121,6 @@ public class ProductDomainService {
 	 */
 	@Transactional
 	public void deleteProduct(ProductDeleteCommand command) {
-		if (command.auction() != null && command.auction().isClosed()) {
-			throw new ProductException(ProductErrorCode.AUCTION_NOT_CLOSED);
-		}
-
 		Product product = findActiveProductById(command.productId());
 
 		product.validateBelongsToCatalog(command.catalog().getId());

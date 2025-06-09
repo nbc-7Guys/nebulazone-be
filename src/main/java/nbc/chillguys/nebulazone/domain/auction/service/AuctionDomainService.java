@@ -11,6 +11,8 @@ import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
+import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
+import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.auction.repository.AuctionRepository;
 
 @Service
@@ -62,4 +64,14 @@ public class AuctionDomainService {
 
 	}
 
+	/**
+	 * 삭제되지 않은 경매 단건 조회
+	 * @param productId 판매 상품 id
+	 * @return auction
+	 * @author 윤정환
+	 */
+	public Auction findAuctionByProductId(Long productId) {
+		return auctionRepository.findByProduct_IdAndIsDeletedFalse(productId)
+			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
+	}
 }
