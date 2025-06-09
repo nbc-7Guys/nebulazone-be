@@ -1,7 +1,6 @@
 package nbc.chillguys.nebulazone.domain.products.service;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +12,6 @@ import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductPurchaseCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
-import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
 import nbc.chillguys.nebulazone.domain.products.repository.ProductRepository;
@@ -97,7 +95,7 @@ public class ProductDomainService {
 
 	/**
 	 * 판매 방식 옥션으로 변경
-	 * @param command 핀메 싱픔 정보
+	 * @param command 판매 싱픔 정보
 	 * @return product
 	 * @author 윤정환
 	 */
@@ -105,9 +103,8 @@ public class ProductDomainService {
 	public Product changeToAuctionType(ChangeToAuctionTypeCommand command) {
 		Product product = findActiveProductById(command.productId());
 
-		if (Objects.equals(product.getTxMethod(), ProductTxMethod.AUCTION)) {
-			throw new ProductException(ProductErrorCode.ALREADY_AUCTION_TYPE);
-		}
+		product.validateBelongsToCatalog(command.catalog().getId());
+		product.validateProductOwner(command.user().getId());
 
 		product.changeToAuctionType(command.price());
 

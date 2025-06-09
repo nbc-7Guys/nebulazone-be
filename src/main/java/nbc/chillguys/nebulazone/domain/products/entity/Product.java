@@ -120,13 +120,17 @@ public class Product extends BaseEntity {
 	}
 
 	public void changeToAuctionType(Long price) {
+		if (Objects.equals(getTxMethod(), ProductTxMethod.AUCTION)) {
+			throw new ProductException(ProductErrorCode.ALREADY_AUCTION_TYPE);
+		}
+
 		this.price = price;
 		this.txMethod = ProductTxMethod.AUCTION;
 	}
 
 	public void purchase() {
 		if (isSold) {
-			throw new ProductException(ProductErrorCode.SOLD_ALREADY);
+			throw new ProductException(ProductErrorCode.ALREADY_SOLD);
 		}
 
 		this.isSold = true;
@@ -146,7 +150,7 @@ public class Product extends BaseEntity {
 
 	public void validateNotSold() {
 		if (isSold()) {
-			throw new ProductException(ProductErrorCode.SOLD_ALREADY);
+			throw new ProductException(ProductErrorCode.ALREADY_SOLD);
 		}
 	}
 
