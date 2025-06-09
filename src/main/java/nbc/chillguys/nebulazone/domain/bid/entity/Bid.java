@@ -53,4 +53,8 @@ public class Bid extends BaseEntity {
 		this.status = BidStatus.BID;
 	}
 
+	public void cancelBid() {
+		this.status = BidStatus.CANCEL;
+	}
+
 }

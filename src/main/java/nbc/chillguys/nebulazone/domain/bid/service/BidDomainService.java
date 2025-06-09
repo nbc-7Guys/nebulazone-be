@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.domain.bid.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,8 @@ import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
+import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
+import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
 import nbc.chillguys.nebulazone.domain.bid.repository.BidRepository;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
@@ -24,21 +27,27 @@ public class BidDomainService {
 
 	/**
 	 * 입찰 생성
-	 * @param auction 경매
+	 * @param lockAuction 삭제되지 않은 비관적 락이 적용된 Auction
 	 * @param user 입찰자
 	 * @param price 입찰 가격
 	 * @return Bid
 	 * @author 전나겸
 	 */
 	@Transactional
-	public Bid createBid(Auction auction, User user, Long price) {
+	public Bid createBid(Auction lockAuction, User user, Long price) {
 
-		if (auction.getEndTime().isBefore(LocalDateTime.now())) {
+		if (lockAuction.getEndTime().isBefore(LocalDateTime.now())) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_CLOSED);
 		}
 
+		Optional<Long> highestPrice = bidRepository.findHighestPriceByAuction(lockAuction);
+
+		if (highestPrice.isPresent() && highestPrice.get() >= price) {
+			throw new BidException(BidErrorCode.BID_PRICE_TOO_LOW);
+		}
+
 		Bid bid = Bid.builder()
-			.auction(auction)
+			.auction(lockAuction)
 			.user(user)
 			.price(price)
 			.build();
@@ -48,7 +57,7 @@ public class BidDomainService {
 
 	/**
 	 * 특정 경매의 입찰 내역 조회
-	 * @param auction 조회할 경매
+	 * @param auction 조회할 삭제되지 않은 경매
 	 * @param page 페이지
 	 * @param size 출력 개수
 	 * @return FindBidInfo 페이징
@@ -70,5 +79,33 @@ public class BidDomainService {
 	public Page<FindBidInfo> findMyBids(User user, int page, int size) {
 
 		return bidRepository.findMyBids(user, page, size);
+	}
+
+	/**
+	 * 내 입찰 취소
+	 * @param auction 삭제되지 않은 경매
+	 * @param user    로그인한 유저
+	 * @param bidId   취소할 입찰 Id
+	 * @return 취소한 입찰 Id
+	 * @author 전나겸
+	 */
+	public Long statusBid(Auction auction, User user, Long bidId) {
+
+		Bid findBid = bidRepository.findById(bidId)
+			.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
+
+		if (auction.getEndTime().isBefore(LocalDateTime.now())) {
+			throw new AuctionException(AuctionErrorCode.AUCTION_CLOSED);
+		}
+
+		if (hasNotBidOwner(user, findBid)) {
+			throw new BidException(BidErrorCode.BID_NOT_OWNER);
+		}
+		findBid.cancelBid();
+		return findBid.getId();
+	}
+
+	private boolean hasNotBidOwner(User user, Bid findBid) {
+		return !user.equals(findBid.getUser());
 	}
 }

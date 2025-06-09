@@ -52,7 +52,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.leftJoin(auction.product.productImages, productImage)
 			.leftJoin(bid).on(bid.auction.eq(auction))
 			.where(
-				auction.isDeleted.eq(false),
+				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
 				product.deleted.eq(false),
 				product.deletedAt.isNull())
@@ -66,7 +66,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.select(auction.countDistinct())
 			.from(auction)
 			.where(
-				auction.isDeleted.eq(false),
+				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
 				product.deleted.eq(false),
 				product.deletedAt.isNull()
@@ -101,7 +101,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.leftJoin(bid).on(bid.auction.eq(auction))
 			.where(
 				auction.isClosed.eq(false),
-				auction.isDeleted.eq(false),
+				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
 				product.deleted.eq(false),
 				product.deletedAt.isNull())

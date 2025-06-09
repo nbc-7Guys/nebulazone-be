@@ -44,7 +44,8 @@ public class Auction extends BaseEntity {
 	@Column(nullable = false)
 	private boolean isClosed;
 
-	private boolean isDeleted;
+	@Column(name = "is_deleted")
+	private boolean deleted;
 	private LocalDateTime deletedAt;
 
 	@Builder
@@ -58,7 +59,7 @@ public class Auction extends BaseEntity {
 		this.currentPrice = currentPrice;
 		this.endTime = endTime;
 		this.isClosed = isClosed;
-		this.isDeleted = isDeleted;
+		this.deleted = isDeleted;
 		this.deletedAt = deletedAt;
 	}
 

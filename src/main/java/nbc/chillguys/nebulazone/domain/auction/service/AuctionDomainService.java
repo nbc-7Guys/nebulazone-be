@@ -64,9 +64,13 @@ public class AuctionDomainService {
 
 	}
 
-	public Auction findAuctionById(Long id) {
-		return auctionRepository.findById(id)
+	public Auction findActiveAuctionById(Long id) {
+		return auctionRepository.findByIdAndDeletedFalse(id)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 	}
 
+	public Auction findActiveLockAuction(Long id) {
+		return auctionRepository.findActiveAuctionByIdLock(id)
+			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
+	}
 }

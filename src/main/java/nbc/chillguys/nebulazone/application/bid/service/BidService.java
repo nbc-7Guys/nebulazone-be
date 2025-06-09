@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.bid.dto.request.CreateBidRequest;
 import nbc.chillguys.nebulazone.application.bid.dto.response.CreateBidResponse;
+import nbc.chillguys.nebulazone.application.bid.dto.response.DeleteBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.FindBidResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
@@ -29,17 +30,17 @@ public class BidService {
 
 	public CreateBidResponse createBid(Long auctionId, AuthUser authUser, CreateBidRequest request) {
 
-		Auction auction = auctionDomainService.findAuctionById(auctionId);
+		Auction lockAuction = auctionDomainService.findActiveLockAuction(auctionId);
 
 		User user = userDomainService.findActiveUserById(authUser.getId());
 
-		Bid createBid = bidDomainService.createBid(auction, user, request.price());
+		Bid createBid = bidDomainService.createBid(lockAuction, user, request.price());
 		return CreateBidResponse.from(createBid);
 
 	}
 
 	public CommonPageResponse<FindBidResponse> findBids(Long auctionId, int page, int size) {
-		Auction auction = auctionDomainService.findAuctionById(auctionId);
+		Auction auction = auctionDomainService.findActiveAuctionById(auctionId);
 
 		Page<FindBidInfo> findBids = bidDomainService.findBids(auction, page, size);
 		Page<FindBidResponse> response = findBids.map(FindBidResponse::from);
@@ -55,5 +56,15 @@ public class BidService {
 		Page<FindBidResponse> response = findBids.map(FindBidResponse::from);
 
 		return CommonPageResponse.from(response);
+	}
+
+	public DeleteBidResponse statusBid(AuthUser authUser, Long auctionId, Long bidId) {
+
+		User user = userDomainService.findActiveUserById(authUser.getId());
+		Auction auction = auctionDomainService.findActiveAuctionById(auctionId);
+
+		Long deletedBidId = bidDomainService.statusBid(auction, user, bidId);
+		return DeleteBidResponse.from(deletedBidId);
+
 	}
 }
