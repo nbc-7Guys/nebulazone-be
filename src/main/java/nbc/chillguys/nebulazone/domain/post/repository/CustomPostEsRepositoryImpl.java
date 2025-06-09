@@ -29,13 +29,17 @@ public class CustomPostEsRepositoryImpl implements CustomPostEsRepository {
 			.must(m -> m.term(t -> t.field("type.keyword").value(type)));
 
 		if (StringUtils.hasText(keyword)) {
-			builder.must(m -> m
+			builder.should(m -> m.term(t -> t.field("author.keyword").value(keyword)));
+
+			builder.should(m -> m
 				.multiMatch(mm -> mm
 					.query(keyword)
-					.fields("title", "content", "author")
+					.fields("title", "content")
 					.type(TextQueryType.CrossFields)
 				)
 			);
+
+			builder.minimumShouldMatch("1");
 		}
 
 		Query query = Query.of(q -> q.bool(builder.build()));
