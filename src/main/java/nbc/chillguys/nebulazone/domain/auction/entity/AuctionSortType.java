@@ -11,8 +11,7 @@ import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 @RequiredArgsConstructor
 public enum AuctionSortType {
 	CLOSING("마감 임박순 정렬"),
-	POPULAR("인기순 정렬"),
-	;
+	POPULAR("인기순 정렬");
 
 	private final String description;
 
