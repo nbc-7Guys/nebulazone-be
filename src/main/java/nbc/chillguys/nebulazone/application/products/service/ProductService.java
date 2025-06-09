@@ -87,11 +87,9 @@ public class ProductService {
 		// todo: 카탈로그 도메인 서비스 생성 후 작업
 		Catalog catalog = null;
 
-		List<String> imageUrls = new ArrayList<>();
+		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
 		boolean hasImage = !imageFiles.isEmpty();
 		if (hasImage) {
-			imageUrls.addAll(request.remainImageUrls());
-
 			List<String> newImageUrls = imageFiles.stream()
 				.map(s3Service::generateUploadUrlAndUploadFile)
 				.toList();
