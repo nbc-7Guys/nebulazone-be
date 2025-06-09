@@ -70,18 +70,16 @@ public class PostService {
 				.toList();
 			imageUrls.addAll(newImageUrls);
 
-		Post updatedPost = postDomainService.updatePost(command);
 			post.getPostImages().stream()
 				.filter(postImage -> !imageUrls.contains(postImage.getUrl()))
 				.forEach((postImage) -> s3Service.generateDeleteUrlAndDeleteFile(postImage.getUrl()));
 		}
 
-		postDomainService.savePostToEs(updatedPost);
-
-		return UpdatePostResponse.from(updatedPost);
 		PostUpdateCommand command = request.toCommand(userId, postId, imageUrls);
 
 		Post updatedPost = postDomainService.updatePost(command);
+
+		postDomainService.savePostToEs(updatedPost);
 
 		return UpdatePostResponse.from(updatedPost);
 	}
