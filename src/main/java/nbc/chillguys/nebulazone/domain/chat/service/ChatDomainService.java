@@ -39,7 +39,6 @@ public class ChatDomainService {
 	private final ChatRoomRepository chatRoomRepository;
 	private final ChatRoomUserRepository chatRoomUserRepository;
 	private final ChatRoomHistoryRepository chatRoomHistoryRepository;
-	private final ProductRepository productRepository;
 	private final UserRepository userRepository;
 
 	/**
@@ -49,8 +48,14 @@ public class ChatDomainService {
 	 * @param productId 상품 ID
 	 * @return Optional(채팅방)
 	 */
+	// 값이 있다면 getChatRoom() 할수 있는 방법??
 	public Optional<ChatRoomUser> findExistingChatRoom(Long userId, Long productId) {
 		return chatRoomUserRepository.findByIdUserIdAndChatRoomProductId(userId, productId);
+	}
+
+	public Optional<ChatRoom> findChatRoom(Long productId, Long userId) {
+		return chatRoomRepository.findByProduct_IdAndChatRoomUsers_User_Id(
+			productId, userId);
 	}
 
 	/**

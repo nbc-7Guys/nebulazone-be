@@ -40,25 +40,30 @@ public class ChatService {
 	 * @param request the request
 	 * @return the chat room info
 	 */
-	@Transactional
-	public CreateChatRoomResponse createOrGet(AuthUser authUser, CreateChatRoomRequest request) {
+	public CreateChatRoomResponse getOrCreate(AuthUser authUser, CreateChatRoomRequest request) {
 
 		// 로그인한 유저가 특정 상품에 대해 참여중인 채팅방이 있는지 확인
-		Optional<ChatRoomUser> existingChatRoomUser = chatDomainService.findExistingChatRoom(authUser.getId(),
-			request.productId());
-		if (existingChatRoomUser.isPresent()) {
-			return CreateChatRoomResponse.from(existingChatRoomUser.get().getChatRoom());
-		}
+		// Optional<ChatRoomUser> existingChatRoomUser = chatDomainService.findExistingChatRoom(authUser.getId(),
+		// 	request.productId());
+		// if (existingChatRoomUser.isPresent()) {
+		// 	return CreateChatRoomResponse.from(existingChatRoomUser.get().getChatRoom());
+		// }
 
+		ChatRoom result = chatDomainService.findChatRoom(request.productId(), authUser.getId())
+			.orElse(createChatRoom(authUser, request));
+
+		return CreateChatRoomResponse.from(result);
+	}
+
+	@Transactional
+	public ChatRoom createChatRoom(AuthUser authUser, CreateChatRoomRequest request) {
 		// 기존에 참여중인 방이 없다면 거래상품 구매자, 판매자 생성
 		Product product = productDomainService.findAvailableProductById(request.productId());
 		User buyer = userDomainService.findActiveUserByEmail(authUser.getEmail());
 		User seller = product.getSeller();
 
 		// 채팅방 및 참가자 save
-		ChatRoom result = chatDomainService.createChatRoom(product, buyer, seller);
-
-		return CreateChatRoomResponse.from(result);
+		return chatDomainService.createChatRoom(product, buyer, seller);
 	}
 
 	/**

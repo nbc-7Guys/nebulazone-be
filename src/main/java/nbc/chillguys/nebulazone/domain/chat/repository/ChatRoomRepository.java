@@ -11,4 +11,6 @@ import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 	boolean existsChatRoomById(Long roomId);
+
+	Optional<ChatRoom> findByProduct_IdAndChatRoomUsers_User_Id(Long productId, Long roomId);
 }

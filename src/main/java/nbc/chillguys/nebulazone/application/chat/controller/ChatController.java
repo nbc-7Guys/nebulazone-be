@@ -32,7 +32,7 @@ public class ChatController {
 		@AuthenticationPrincipal AuthUser authUser,
 		@RequestBody CreateChatRoomRequest request
 	) {
-		CreateChatRoomResponse chatRoom = chatService.createOrGet(authUser, request);
+		CreateChatRoomResponse chatRoom = chatService.getOrCreate(authUser, request);
 		return ResponseEntity.ok(chatRoom);
 	}
 
