@@ -108,6 +108,7 @@ public class ProductService {
 		return ProductResponse.from(updatedProduct);
 	}
 
+	@Transactional
 	public ProductResponse changeToAuctionType(
 		Long userId,
 		Long catalogId,
@@ -122,8 +123,7 @@ public class ProductService {
 		ChangeToAuctionTypeCommand command = request.toCommand(user, catalog, productId);
 		Product product = productDomainService.changeToAuctionType(command);
 
-		// todo: 경매 생성하는 메서드 추가되면 작업
-
+		auctionDomainService.createAuction(AuctionCreateCommand.of(product, request.getProductEndTime()));
 
 		return ProductResponse.from(product, request.getProductEndTime());
 	}
