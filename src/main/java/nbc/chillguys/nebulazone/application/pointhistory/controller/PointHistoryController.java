@@ -54,8 +54,8 @@ public class PointHistoryController {
 	@GetMapping("/histories")
 	public ResponseEntity<CommonPageResponse<PointHistoryResponse>> getMyPointHistories(
 		@AuthenticationPrincipal AuthUser authUser,
-		@RequestParam(defaultValue = "1") int page,
-		@RequestParam(defaultValue = "10") int size
+		@RequestParam(value = "page", defaultValue = "1") int page,
+		@RequestParam(value = "size", defaultValue = "10") int size
 	) {
 		Long userId = authUser.getId();
 		CommonPageResponse<PointHistoryResponse> response = pointHistoryService.findMyPointHistories(userId, page,
