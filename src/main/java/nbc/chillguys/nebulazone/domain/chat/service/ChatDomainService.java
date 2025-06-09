@@ -2,9 +2,7 @@ package nbc.chillguys.nebulazone.domain.chat.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +36,6 @@ public class ChatDomainService {
 	private final ChatRoomRepository chatRoomRepository;
 	private final ChatRoomUserRepository chatRoomUserRepository;
 	private final ChatRoomHistoryRepository chatRoomHistoryRepository;
-	private final UserRepository userRepository;
 
 	/**
 	 * 기존 채팅방을 Optional로 조회
@@ -86,18 +83,13 @@ public class ChatDomainService {
 	 * @param roomId 채팅방 ID
 	 * @return 채팅 기록 응답(FindChatHistoryResponse) 리스트
 	 */
-	public List<FindChatHistoryResponse> findChatHistoryResponses(Long roomId) {
+	public List<FindChatHistoryResponse> findChatHistoryResponses(Long roomId, String senderEmail) {
 		List<ChatHistory> chatHistory = chatRoomHistoryRepository.findAllByChatRoomIdOrderBySendTimeAsc(roomId);
 
-		List<Long> senderIdList = chatHistory.stream().map(ChatHistory::getUserId).distinct().toList();
-
-		Map<Long, String> userNicknames = userRepository.findAllById(senderIdList)
-			.stream()
-			.collect(Collectors.toMap(User::getId, User::getNickname));
-
 		List<FindChatHistoryResponse> responses = chatHistory.stream()
-			.map(history -> FindChatHistoryResponse.from(history, userNicknames.get(history.getUserId())))
+			.map(history -> FindChatHistoryResponse.from(history, senderEmail))
 			.toList();
+
 		return responses;
 	}
 
@@ -147,7 +139,7 @@ public class ChatDomainService {
 		user.getChatRoom().removeChatRoomUser(user);
 		chatRoomUserRepository.delete(user);
 
-		return user.getUser().getNickname();
+		return user.getUser().getEmail();
 	}
 
 	/**

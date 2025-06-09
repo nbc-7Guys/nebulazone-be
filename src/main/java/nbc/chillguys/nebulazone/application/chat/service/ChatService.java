@@ -99,7 +99,7 @@ public class ChatService {
 
 		chatDomainService.validateUserAccessToChatRoom(authUser, roomId);
 
-		List<FindChatHistoryResponse> responses = chatDomainService.findChatHistoryResponses(roomId);
+		List<FindChatHistoryResponse> responses = chatDomainService.findChatHistoryResponses(roomId, authUser.getEmail());
 
 		return responses;
 	}
