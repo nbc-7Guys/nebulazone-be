@@ -71,7 +71,7 @@ public class AuctionDomainService {
 	 * @author 윤정환
 	 */
 	public Auction findAuctionByProductId(Long productId) {
-		return auctionRepository.findByProduct_IdAndIsDeletedFalse(productId)
+		return auctionRepository.findByProduct_IdAndDeletedFalse(productId)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 	}
 
