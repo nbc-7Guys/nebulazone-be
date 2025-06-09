@@ -88,7 +88,7 @@ public class ProductDomainService {
 		product.validateBelongsToCatalog(command.catalog().getId());
 		product.validateProductOwner(command.user().getId());
 
-		product.update(command.name(), command.description());
+		product.update(command.name(), command.description(), command.imageUrls());
 
 		// todo: 수정된 상품명 ES에 갱신
 

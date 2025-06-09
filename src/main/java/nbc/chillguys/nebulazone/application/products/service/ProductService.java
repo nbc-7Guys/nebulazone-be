@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.application.products.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -77,17 +78,34 @@ public class ProductService {
 		Long userId,
 		Long catalogId,
 		Long productId,
-		UpdateProductRequest request
+		UpdateProductRequest request,
+		List<MultipartFile> imageFiles
 	) {
 		User user = userDomainService.findActiveUserById(userId);
+		Product product = productDomainService.findActiveProductById(productId);
 
 		// todo: 카탈로그 도메인 서비스 생성 후 작업
 		Catalog catalog = null;
 
-		ProductUpdateCommand command = request.toCommand(user, catalog, productId);
-		Product product = productDomainService.updateProduct(command);
+		List<String> imageUrls = new ArrayList<>();
+		boolean hasImage = !imageFiles.isEmpty();
+		if (hasImage) {
+			imageUrls.addAll(request.remainImageUrls());
 
-		return ProductResponse.from(product);
+			List<String> newImageUrls = imageFiles.stream()
+				.map(s3Service::generateUploadUrlAndUploadFile)
+				.toList();
+			imageUrls.addAll(newImageUrls);
+
+			product.getProductImages().stream()
+				.filter(productImage -> !imageUrls.contains(productImage.getUrl()))
+				.forEach((productImage) -> s3Service.generateDeleteUrlAndDeleteFile(productImage.getUrl()));
+		}
+
+		ProductUpdateCommand command = request.toCommand(user, catalog, productId, imageUrls);
+		Product updatedProduct = productDomainService.updateProduct(command);
+
+		return ProductResponse.from(updatedProduct);
 	}
 
 	public ProductResponse changeToAuctionType(
