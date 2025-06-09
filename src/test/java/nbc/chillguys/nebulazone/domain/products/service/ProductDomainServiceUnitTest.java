@@ -403,8 +403,6 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 구매 실패 - 옥션 상품은 구매 불가")
 		void fail_purchaseProduct_auctionProductNotPurchasable() {
-			success_purchaseProduct();
-
 			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, auctionProduct.getId());
 
 			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(auctionProduct));
