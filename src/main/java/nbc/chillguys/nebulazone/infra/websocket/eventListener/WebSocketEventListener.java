@@ -6,11 +6,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.application.chat.service.ChatMessageService;
 import nbc.chillguys.nebulazone.infra.websocket.SessionUtil;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class WebSocketEventListener {
