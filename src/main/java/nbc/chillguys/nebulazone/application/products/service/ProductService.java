@@ -124,9 +124,11 @@ public class ProductService {
 
 		// todo: 경매 생성하는 메서드 추가되면 작업
 
+
 		return ProductResponse.from(product, request.getProductEndTime());
 	}
 
+	@Transactional
 	public DeleteProductResponse deleteProduct(Long userId, Long catalogId, Long productId) {
 		User user = userDomainService.findActiveUserById(userId);
 
