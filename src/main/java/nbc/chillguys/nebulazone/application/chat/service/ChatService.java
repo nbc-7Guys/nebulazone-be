@@ -43,16 +43,28 @@ public class ChatService {
 	@Transactional
 	public CreateChatRoomResponse getOrCreate(AuthUser authUser, CreateChatRoomRequest request) {
 
-		Product availableProductById = productDomainService.findAvailableProductById(request.productId());
-		if (availableProductById.getSeller().getId().equals(authUser.getId())) {
-			throw new ChatException(ChatErrorCode.CANNOT_CHAT_WITH_SELF);
-		}
+		// 구매자와 판매자가 동일 유저인지 확인
+		validateBuyerIsNotSeller(authUser.getId(), request.productId());
 
 		// 로그인한 유저가 특정 상품에 대해 참여중인 채팅방이 있는지 확인
 		ChatRoom result = chatDomainService.findExistingChatRoom(authUser.getId(), request.productId())
 			.orElseGet(() -> createChatRoom(authUser, request));
 
 		return CreateChatRoomResponse.from(result);
+	}
+
+	/**
+	 * 구매자와 판매자가 동일 유저인지 확인
+	 *
+	 * @param buyerId 구매자 ID
+	 * @param productId 판매 상품 ID
+	 * @throws ChatException CANNOT_CHAT_WITH_SELF
+	 */
+	private void validateBuyerIsNotSeller(Long buyerId, Long productId) {
+		Product availableProductById = productDomainService.findAvailableProductById(productId);
+		if (availableProductById.getSeller().getId().equals(buyerId)) {
+			throw new ChatException(ChatErrorCode.CANNOT_CHAT_WITH_SELF);
+		}
 	}
 
 	public ChatRoom createChatRoom(AuthUser authUser, CreateChatRoomRequest request) {

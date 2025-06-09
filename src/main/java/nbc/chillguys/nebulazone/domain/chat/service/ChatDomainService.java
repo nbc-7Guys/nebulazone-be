@@ -113,8 +113,6 @@ public class ChatDomainService {
 	@Transactional
 	public ChatRoom createChatRoom(Product product, User buyer, User seller) {
 
-		validateBuyerAndSeller(buyer, seller);
-
 		if (product.getTxMethod().equals(ProductTxMethod.AUCTION)) {
 			throw new ProductException(ProductErrorCode.INVALID_PRODUCT_TYPE);
 		}
@@ -192,19 +190,6 @@ public class ChatDomainService {
 		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
 			.orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
 		return chatRoom;
-	}
-
-	/**
-	 * 구매자와 판매자가 동일 유저인지 확인
-	 *
-	 * @param buyer 구매자
-	 * @param seller 판매자
-	 * @throws ChatException CANNOT_CHAT_WITH_SELF
-	 */
-	public void validateBuyerAndSeller(User buyer, User seller) {
-		if (buyer.getId().equals(seller.getId())) {
-			throw new ChatException(ChatErrorCode.CANNOT_CHAT_WITH_SELF);
-		}
 	}
 
 }
