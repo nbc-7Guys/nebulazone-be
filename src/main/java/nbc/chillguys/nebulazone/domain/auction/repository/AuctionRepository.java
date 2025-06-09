@@ -22,4 +22,6 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
 	Optional<Auction> findAuctionWithProductAndSellerLock(@Param("auctionId") Long id);
 
 	Optional<Auction> findByIdAndDeletedFalse(Long id);
+
+	Optional<Auction> findByProduct_IdAndDeletedFalse(long productId);
 }

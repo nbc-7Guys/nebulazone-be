@@ -30,7 +30,10 @@ public class CommentDomainService {
 	 */
 	@Transactional
 	public Comment createComment(CommentCreateCommand command) {
-		Comment parent = findActiveComment(command.parentId());
+		Comment parent = null;
+		if (command.parentId() > 0) {
+			parent = findActiveComment(command.parentId());
+		}
 		Comment comment = Comment.builder()
 			.post(command.post())
 			.user(command.user())
@@ -50,7 +53,7 @@ public class CommentDomainService {
 	 * @author 윤정환
 	 */
 	public Comment findActiveComment(Long commentId) {
-		return commentRepository.findById(commentId)
+		return commentRepository.findByIdAndDeletedFalse(commentId)
 			.orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
 	}
 
@@ -61,7 +64,7 @@ public class CommentDomainService {
 	 * @author 윤정환
 	 */
 	public Page<CommentWithUserInfo> findComments(CommentListFindQuery query) {
-		return commentRepository.findComments(query.post().getId(), query.page(), query.size());
+		return commentRepository.findComments(query);
 	}
 
 	/**

@@ -7,6 +7,6 @@ public record CommentCreateCommand(
 	User user,
 	Post post,
 	String content,
-	Long parentId
+	long parentId
 ) {
 }
