@@ -47,7 +47,8 @@ public class Comment extends BaseEntity {
 	@JoinColumn(name = "parent_id")
 	private Comment parent;
 
-	private boolean isDeleted;
+	@Column(name = "is_deleted")
+	private boolean deleted;
 
 	private LocalDateTime deletedAt;
 
@@ -76,7 +77,7 @@ public class Comment extends BaseEntity {
 	}
 
 	public void delete() {
-		this.isDeleted = true;
+		this.deleted = true;
 		this.deletedAt = LocalDateTime.now();
 	}
 }
