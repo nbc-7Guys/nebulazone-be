@@ -94,6 +94,16 @@ public class PostDomainService {
 	}
 
 	/**
+	 * Elasticsearch에 게시글 삭제
+	 * @param postId 게시글 id
+	 * @author 이승현
+	 */
+	@Transactional
+	public void deletePostFromEs(Long postId) {
+		postEsRepository.deleteById(postId);
+	}
+
+	/**
 	 * 게시글 검색</br>
 	 * keyword로 검색 제목, 본문을 토큰 단위로 검색, 유저명은 정확히 일치해야 함
 	 * @param keyword 제목, 본문, 유저명

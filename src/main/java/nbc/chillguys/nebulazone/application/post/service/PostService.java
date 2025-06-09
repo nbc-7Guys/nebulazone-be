@@ -91,6 +91,8 @@ public class PostService {
 
 		postDomainService.deletePost(command);
 
+		postDomainService.deletePostFromEs(postId);
+
 		return DeletePostResponse.from(postId);
 	}
 
