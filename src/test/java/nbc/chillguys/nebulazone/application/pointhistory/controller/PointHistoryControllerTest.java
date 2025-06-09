@@ -161,11 +161,11 @@ class PointHistoryControllerTest {
 
 	@Nested
 	@WithCustomMockUser
-	@DisplayName("포인트 요청 거절 테스트")
+	@DisplayName("포인트 요청 취소 테스트")
 	class RejectPointRequestTest {
 
 		@Test
-		@DisplayName("성공: 포인트 요청 거절")
+		@DisplayName("성공: 포인트 요청 취소")
 		void success_rejectPointRequest() throws Exception {
 			// Given
 			Long pointId = 1L;
