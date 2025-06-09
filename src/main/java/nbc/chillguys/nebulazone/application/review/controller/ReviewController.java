@@ -22,8 +22,8 @@ public class ReviewController {
 	@GetMapping("/{catalogId}/reviews")
 	public ResponseEntity<CommonPageResponse<ReviewResponse>> findReviews(
 		@PathVariable Long catalogId,
-		@RequestParam(defaultValue = "1") int page,
-		@RequestParam(defaultValue = "10") int size
+		@RequestParam(value = "page", defaultValue = "1") int page,
+		@RequestParam(value = "size", defaultValue = "10") int size
 	) {
 		CommonPageResponse<ReviewResponse> response = reviewService.findReviews(catalogId, page, size);
 		return ResponseEntity.ok(response);
