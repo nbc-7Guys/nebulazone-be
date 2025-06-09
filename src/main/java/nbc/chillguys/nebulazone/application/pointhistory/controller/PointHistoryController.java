@@ -58,8 +58,7 @@ public class PointHistoryController {
 		@RequestParam(defaultValue = "10") int size
 	) {
 		Long userId = authUser.getId();
-		CommonPageResponse<PointHistoryResponse> response = pointHistoryService.findMyPointHistories(userId,
-			page,
+		CommonPageResponse<PointHistoryResponse> response = pointHistoryService.findMyPointHistories(userId, page,
 			size);
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}

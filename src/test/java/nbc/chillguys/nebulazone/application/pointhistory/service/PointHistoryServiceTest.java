@@ -86,7 +86,7 @@ class PointHistoryServiceTest {
 			pointHistoryService.createPointHistory(req, userId);
 
 			// then
-			verify(userDomainService).validateEnoughPoint(mockUser, 3000);
+			verify(userDomainService).validEnoughPoint(mockUser, 3000);
 		}
 	}
 

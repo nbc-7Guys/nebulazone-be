@@ -180,7 +180,7 @@ public class UserDomainService {
 	 * @param price 요청 포인트
 	 * @author 정석현
 	 */
-	public void validateEnoughPoint(User user, int price) {
+	public void validEnoughPoint(User user, int price) {
 		if (user.hasNotEnoughPoint(price)) {
 			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
 		}
