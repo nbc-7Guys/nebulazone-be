@@ -1,7 +1,6 @@
 package nbc.chillguys.nebulazone.domain.post.service;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -120,11 +119,5 @@ public class PostDomainService {
 	public Post getActivePostWithUserAndImages(Long postId) {
 		return postRepository.findActivePostByIdWithUserAndImages(postId)
 			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
-	}
-
-	private void validatePostOwner(Post post, Long userId) {
-		if (!Objects.equals(post.getUser().getId(), userId)) {
-			throw new PostException(PostErrorCode.NOT_POST_OWNER);
-		}
 	}
 }
