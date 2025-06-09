@@ -33,7 +33,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 
 	@Override
 	public Page<AuctionFindInfo> findAuctionsWithProduct(int page, int size) {
-		Pageable pageable = PageRequest.of(Math.max(page, 0), size);
+		Pageable pageable = PageRequest.of(page, size);
 
 		List<AuctionFindInfo> contents = jpaQueryFactory
 			.select(new QAuctionFindInfo(
@@ -52,7 +52,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.leftJoin(auction.product.productImages, productImage)
 			.leftJoin(bid).on(bid.auction.eq(auction))
 			.where(
-				auction.isDeleted.eq(false),
+				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
 				product.deleted.eq(false),
 				product.deletedAt.isNull())
@@ -62,17 +62,17 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.orderBy(auction.createdAt.desc())
 			.fetch();
 
-		JPAQuery<Long> totalQuery = jpaQueryFactory
+		JPAQuery<Long> countQuery = jpaQueryFactory
 			.select(auction.countDistinct())
 			.from(auction)
 			.where(
-				auction.isDeleted.eq(false),
+				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
 				product.deleted.eq(false),
 				product.deletedAt.isNull()
 			);
 
-		return PageableExecutionUtils.getPage(contents, pageable, totalQuery::fetchOne);
+		return PageableExecutionUtils.getPage(contents, pageable, countQuery::fetchOne);
 	}
 
 	@Override
@@ -101,7 +101,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.leftJoin(bid).on(bid.auction.eq(auction))
 			.where(
 				auction.isClosed.eq(false),
-				auction.isDeleted.eq(false),
+				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
 				product.deleted.eq(false),
 				product.deletedAt.isNull())
