@@ -35,7 +35,6 @@ import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ProductService {
 
 	private final UserDomainService userDomainService;
