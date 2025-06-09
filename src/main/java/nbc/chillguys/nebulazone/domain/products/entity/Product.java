@@ -106,9 +106,17 @@ public class Product extends BaseEntity {
 
 	}
 
-	public void update(String name, String description) {
+	public void update(String name, String description, List<String> imageUrls) {
 		this.name = name;
 		this.description = description;
+		this.productImages.clear();
+
+		boolean hasImage = !imageUrls.isEmpty();
+		if (hasImage) {
+			this.productImages.addAll(imageUrls.stream()
+				.map(ProductImage::new)
+				.toList());
+		}
 	}
 
 	public void changeToAuctionType(Long price) {

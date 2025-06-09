@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.application.post.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -53,12 +54,34 @@ public class PostService {
 
 	}
 
-	public UpdatePostResponse updatePost(Long userId, Long postId, UpdatePostRequest request) {
-		PostUpdateCommand command = request.toCommand(userId, postId);
+	public UpdatePostResponse updatePost(
+		Long userId,
+		Long postId,
+		UpdatePostRequest request,
+		List<MultipartFile> imageFiles
+	) {
+		Post post = postDomainService.findMyActivePost(userId, postId);
+
+		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
+		boolean hasImage = !imageFiles.isEmpty();
+		if (hasImage) {
+			List<String> newImageUrls = imageFiles.stream()
+				.map(s3Service::generateUploadUrlAndUploadFile)
+				.toList();
+			imageUrls.addAll(newImageUrls);
 
 		Post updatedPost = postDomainService.updatePost(command);
+			post.getPostImages().stream()
+				.filter(postImage -> !imageUrls.contains(postImage.getUrl()))
+				.forEach((postImage) -> s3Service.generateDeleteUrlAndDeleteFile(postImage.getUrl()));
+		}
 
 		postDomainService.savePostToEs(updatedPost);
+
+		return UpdatePostResponse.from(updatedPost);
+		PostUpdateCommand command = request.toCommand(userId, postId, imageUrls);
+
+		Post updatedPost = postDomainService.updatePost(command);
 
 		return UpdatePostResponse.from(updatedPost);
 	}

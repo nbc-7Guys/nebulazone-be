@@ -88,7 +88,7 @@ public class ProductDomainService {
 		product.validateBelongsToCatalog(command.catalog().getId());
 		product.validateProductOwner(command.user().getId());
 
-		product.update(command.name(), command.description());
+		product.update(command.name(), command.description(), command.imageUrls());
 
 		// todo: 수정된 상품명 ES에 갱신
 
@@ -121,10 +121,6 @@ public class ProductDomainService {
 	 */
 	@Transactional
 	public void deleteProduct(ProductDeleteCommand command) {
-		if (command.auction() != null && command.auction().isClosed()) {
-			throw new ProductException(ProductErrorCode.AUCTION_NOT_CLOSED);
-		}
-
 		Product product = findActiveProductById(command.productId());
 
 		product.validateBelongsToCatalog(command.catalog().getId());
