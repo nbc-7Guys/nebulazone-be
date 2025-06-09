@@ -13,6 +13,7 @@ import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
+import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
 import nbc.chillguys.nebulazone.domain.bid.repository.BidRepository;
@@ -100,6 +101,10 @@ public class BidDomainService {
 
 		if (auction.getEndTime().isBefore(LocalDateTime.now())) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_CLOSED);
+		}
+
+		if (findBid.getStatus() == BidStatus.WON) {
+			throw new BidException(BidErrorCode.CANNOT_CANCEL_WON_BID);
 		}
 
 		if (isNotBidOwner(user, findBid)) {
