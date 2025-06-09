@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Getter
 @Entity
@@ -61,6 +62,10 @@ public class Auction extends BaseEntity {
 		this.isClosed = isClosed;
 		this.deleted = isDeleted;
 		this.deletedAt = deletedAt;
+	}
+
+	public boolean isAuctionOwner(User user) {
+		return product.getSeller().getId().equals(user.getId());
 	}
 
 }

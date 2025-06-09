@@ -41,7 +41,7 @@ public class BidDomainService {
 			throw new AuctionException(AuctionErrorCode.AUCTION_CLOSED);
 		}
 
-		if (isAuctionOwner(lockAuction, user)) {
+		if (lockAuction.isAuctionOwner(user)) {
 			throw new BidException(BidErrorCode.CANNOT_BID_OWN_AUCTION);
 		}
 
@@ -95,30 +95,23 @@ public class BidDomainService {
 	 * @author 전나겸
 	 */
 	public Long statusBid(Auction auction, User user, Long bidId) {
-
-		Bid findBid = bidRepository.findById(bidId)
-			.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
-
 		if (auction.getEndTime().isBefore(LocalDateTime.now())) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_CLOSED);
 		}
+
+		Bid findBid = bidRepository.findById(bidId)
+			.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
 
 		if (findBid.getStatus() == BidStatus.WON) {
 			throw new BidException(BidErrorCode.CANNOT_CANCEL_WON_BID);
 		}
 
-		if (isNotBidOwner(user, findBid)) {
+		if (findBid.isNotBidOwner(user)) {
 			throw new BidException(BidErrorCode.BID_NOT_OWNER);
 		}
+
 		findBid.cancelBid();
 		return findBid.getId();
 	}
 
-	private boolean isAuctionOwner(Auction lockAuction, User user) {
-		return lockAuction.getProduct().getSeller().getId().equals(user.getId());
-	}
-
-	private boolean isNotBidOwner(User user, Bid findBid) {
-		return !user.equals(findBid.getUser());
-	}
 }

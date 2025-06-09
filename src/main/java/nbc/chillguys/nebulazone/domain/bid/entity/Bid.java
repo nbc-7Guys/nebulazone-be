@@ -57,4 +57,8 @@ public class Bid extends BaseEntity {
 		this.status = BidStatus.CANCEL;
 	}
 
+	public boolean isNotBidOwner(User user) {
+		return !user.equals(this.user);
+	}
+
 }
