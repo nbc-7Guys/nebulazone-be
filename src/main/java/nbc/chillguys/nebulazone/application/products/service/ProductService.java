@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.application.products.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -77,19 +78,35 @@ public class ProductService {
 		Long userId,
 		Long catalogId,
 		Long productId,
-		UpdateProductRequest request
+		UpdateProductRequest request,
+		List<MultipartFile> imageFiles
 	) {
 		User user = userDomainService.findActiveUserById(userId);
+		Product product = productDomainService.findActiveProductById(productId);
 
 		// todo: 카탈로그 도메인 서비스 생성 후 작업
 		Catalog catalog = null;
 
-		ProductUpdateCommand command = request.toCommand(user, catalog, productId);
-		Product product = productDomainService.updateProduct(command);
+		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
+		boolean hasImage = !imageFiles.isEmpty();
+		if (hasImage) {
+			List<String> newImageUrls = imageFiles.stream()
+				.map(s3Service::generateUploadUrlAndUploadFile)
+				.toList();
+			imageUrls.addAll(newImageUrls);
 
-		return ProductResponse.from(product);
+			product.getProductImages().stream()
+				.filter(productImage -> !imageUrls.contains(productImage.getUrl()))
+				.forEach((productImage) -> s3Service.generateDeleteUrlAndDeleteFile(productImage.getUrl()));
+		}
+
+		ProductUpdateCommand command = request.toCommand(user, catalog, productId, imageUrls);
+		Product updatedProduct = productDomainService.updateProduct(command);
+
+		return ProductResponse.from(updatedProduct);
 	}
 
+	@Transactional
 	public ProductResponse changeToAuctionType(
 		Long userId,
 		Long catalogId,
@@ -104,26 +121,26 @@ public class ProductService {
 		ChangeToAuctionTypeCommand command = request.toCommand(user, catalog, productId);
 		Product product = productDomainService.changeToAuctionType(command);
 
-		// todo: 경매 생성하는 메서드 추가되면 작업
+		auctionDomainService.createAuction(AuctionCreateCommand.of(product, request.getProductEndTime()));
 
 		return ProductResponse.from(product, request.getProductEndTime());
 	}
 
+	@Transactional
 	public DeleteProductResponse deleteProduct(Long userId, Long catalogId, Long productId) {
 		User user = userDomainService.findActiveUserById(userId);
 
 		// todo: 카탈로그 도메인 서비스 생성 후 작업
 		Catalog catalog = null;
 
-		// todo: 옥션 도메인 서비스 생성 후 작업
-		Auction auction = null;
-
-		ProductDeleteCommand command = ProductDeleteCommand.of(user, catalog, auction, productId);
-		productDomainService.deleteProduct(command);
+		Auction auction = auctionDomainService.findAuctionByProductId(productId);
 
 		if (auction != null) {
-			// todo: 경매 삭제
+			auction.delete();
 		}
+
+		ProductDeleteCommand command = ProductDeleteCommand.of(user, catalog, productId);
+		productDomainService.deleteProduct(command);
 
 		return DeleteProductResponse.from(productId);
 	}
