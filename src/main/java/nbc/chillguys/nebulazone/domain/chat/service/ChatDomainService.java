@@ -62,9 +62,7 @@ public class ChatDomainService {
 	public List<ChatRoom> findChatRooms(AuthUser authUser) {
 		List<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findAllByUserId(authUser.getId());
 
-		List<ChatRoom> chatRooms = chatRoomUsers.stream()
-			.map(ChatRoomUser::getChatRoom)
-			.toList();
+		List<ChatRoom> chatRooms = chatRoomUsers.stream().map(ChatRoomUser::getChatRoom).toList();
 		return chatRooms;
 	}
 
@@ -98,10 +96,7 @@ public class ChatDomainService {
 			.collect(Collectors.toMap(User::getId, User::getNickname));
 
 		List<FindChatHistoryResponse> responses = chatHistory.stream()
-			.map(history -> FindChatHistoryResponse.from(
-				history,
-				userNicknames.get(history.getUserId())
-			))
+			.map(history -> FindChatHistoryResponse.from(history, userNicknames.get(history.getUserId())))
 			.toList();
 		return responses;
 	}
@@ -136,8 +131,6 @@ public class ChatDomainService {
 
 		return chatRoom;
 	}
-
-
 
 	/**
 	 * 채팅방 나가기.
