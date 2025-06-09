@@ -59,6 +59,9 @@ dependencies {
     implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.3.0')
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
 
+    // ES
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
