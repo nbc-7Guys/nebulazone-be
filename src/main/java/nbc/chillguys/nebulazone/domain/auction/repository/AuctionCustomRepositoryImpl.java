@@ -4,12 +4,16 @@ import static nbc.chillguys.nebulazone.domain.auction.entity.QAuction.*;
 import static nbc.chillguys.nebulazone.domain.bid.entity.QBid.*;
 import static nbc.chillguys.nebulazone.domain.products.entity.QProduct.*;
 import static nbc.chillguys.nebulazone.domain.products.entity.QProductImage.*;
+import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
@@ -18,8 +22,10 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.QAuctionFindInfo;
+import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 
 @Repository
@@ -109,6 +115,27 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.limit(5)
 			.orderBy(orderType)
 			.fetch();
+	}
+
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("""
+		select a from Auction a
+		join fetch a.product p
+		join fetch p.seller s
+		where a.id = :auctionId and a.deleted = false
+		""")
+
+	@Override
+	public Optional<Auction> findAuctionWithProductAndSellerLock(Long id) {
+
+		return Optional.ofNullable(jpaQueryFactory
+			.selectFrom(auction)
+			.join(auction.product, product).fetchJoin()
+			.join(product.seller, user).fetchJoin()
+			.where(auction.deleted.eq(false)
+				.and(product.deleted.eq(false)))
+			.setLockMode(LockModeType.PESSIMISTIC_WRITE)
+			.fetchOne());
 	}
 
 }

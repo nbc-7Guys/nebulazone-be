@@ -5,6 +5,7 @@ import static nbc.chillguys.nebulazone.domain.products.entity.QProduct.*;
 import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -90,5 +91,15 @@ public class BidCustomRepositoryImpl implements BidCustomRepository {
 			.where(bid.user.eq(loginUser));
 
 		return PageableExecutionUtils.getPage(contents, pageable, countQuery::fetchOne);
+	}
+
+	@Override
+	public Optional<Long> findHighestPriceByAuction(Auction auction) {
+
+		return Optional.ofNullable(jpaQueryFactory
+			.select(bid.price.max())
+			.from(bid)
+			.where(bid.auction.eq(auction))
+			.fetchOne());
 	}
 }
