@@ -21,7 +21,7 @@ jobs:
           --health-retries 5
 
       elasticsearch:
-        image: seunghyun937/elasticsearch-nori:8.18.1
+        image: shlee054/elasticsearch-nori:8.18.1
         ports:
           - 9200:9200
         options: >-
