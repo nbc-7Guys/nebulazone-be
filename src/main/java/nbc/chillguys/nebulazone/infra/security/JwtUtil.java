@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.infra.security.jwt;
+package nbc.chillguys.nebulazone.infra.security;
 
 import java.util.Date;
 import java.util.List;
@@ -19,10 +19,10 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
-import nbc.chillguys.nebulazone.infra.security.jwt.constant.JwtConstants;
-import nbc.chillguys.nebulazone.infra.security.jwt.constant.TokenExpiredConstant;
-import nbc.chillguys.nebulazone.infra.security.jwt.exception.JwtTokenErrorCode;
-import nbc.chillguys.nebulazone.infra.security.jwt.exception.JwtTokenException;
+import nbc.chillguys.nebulazone.infra.security.constant.JwtConstants;
+import nbc.chillguys.nebulazone.infra.security.constant.TokenExpiredConstant;
+import nbc.chillguys.nebulazone.infra.security.exception.JwtTokenErrorCode;
+import nbc.chillguys.nebulazone.infra.security.exception.JwtTokenException;
 
 @Component
 public class JwtUtil {

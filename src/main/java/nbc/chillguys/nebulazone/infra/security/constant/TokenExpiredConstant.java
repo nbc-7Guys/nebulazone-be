@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.infra.security.jwt.constant;
+package nbc.chillguys.nebulazone.infra.security.constant;
 
 import java.util.Date;
 

@@ -6,11 +6,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auth.dto.request.SignInRequest;
+import nbc.chillguys.nebulazone.application.auth.dto.response.ReissueResponse;
 import nbc.chillguys.nebulazone.application.auth.dto.response.SignInResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
-import nbc.chillguys.nebulazone.infra.security.jwt.JwtUtil;
+import nbc.chillguys.nebulazone.infra.security.JwtUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -34,5 +35,11 @@ public class AuthService {
 
 	public void signOut() {
 		SecurityContextHolder.clearContext();
+	}
+
+	public ReissueResponse reissueAccessToken(String refreshToken) {
+		String accessToken = jwtUtil.regenerateAccessToken(refreshToken);
+
+		return ReissueResponse.from(accessToken);
 	}
 }

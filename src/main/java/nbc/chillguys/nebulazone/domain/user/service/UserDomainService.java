@@ -4,9 +4,11 @@ import java.util.Set;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.user.dto.UserSignUpCommand;
+import nbc.chillguys.nebulazone.domain.user.dto.UserUpdateCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
@@ -16,6 +18,7 @@ import nbc.chillguys.nebulazone.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserDomainService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
@@ -66,6 +69,7 @@ public class UserDomainService {
 	 * @return user
 	 * @author 이승현
 	 */
+	@Transactional
 	public User createUser(UserSignUpCommand userSignUpCommand) {
 		User user = User.builder()
 			.email(userSignUpCommand.email())
@@ -109,33 +113,12 @@ public class UserDomainService {
 	}
 
 	/**
-	 * 닉네임 수정
-	 * @param nickname 닉네임
-	 * @param user 유저
-	 * @author 이승현
-	 */
-	public void updateUserNickname(String nickname, User user) {
-		user.updateNickname(nickname);
-	}
-
-	/**
-	 * 비밀번호 수정
-	 * @param newPassword 새 비밀번호
-	 * @param user 유저
-	 * @author 이승현
-	 */
-	public void updateUserPassword(String newPassword, User user) {
-		validNewPassword(newPassword, user.getPassword());
-
-		user.updatePassword(passwordEncoder.encode(newPassword));
-	}
-
-	/**
 	 * 프로필 이미지 수정
 	 * @param profileImageUrl 프로필 이미지 url
 	 * @param user 유저
 	 * @author 이승현
 	 */
+	@Transactional
 	public void updateUserProfileImage(String profileImageUrl, User user) {
 		user.updateProfileImage(profileImageUrl);
 	}
@@ -157,6 +140,7 @@ public class UserDomainService {
 	 * @param user 유저
 	 * @author 이승현
 	 */
+	@Transactional
 	public void withdrawUser(User user) {
 		user.withdraw();
 	}
@@ -180,10 +164,41 @@ public class UserDomainService {
 	 * @param price 요청 포인트
 	 * @author 정석현
 	 */
-	public void validateEnoughPoint(User user, int price) {
+	public void validEnoughPoint(User user, int price) {
 		if (user.hasNotEnoughPoint(price)) {
 			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
 		}
 	}
 
+	/**
+	 * 닉네임 또는 비밀번호 수정
+	 * @param userUpdateCommand 유저 수정(userId, nickname, oldPassword, newPassword)
+	 * @return user
+	 * @author 이승현
+	 */
+	@Transactional
+	public User updateUserNicknameOrPassword(UserUpdateCommand userUpdateCommand) {
+		User user = findActiveUserById(userUpdateCommand.userId());
+
+		if (userUpdateCommand.nickname() == null && userUpdateCommand.oldPassword() == null
+			&& userUpdateCommand.newPassword() == null) {
+			throw new UserException(UserErrorCode.NOTHING_TO_UPDATE);
+		}
+
+		if (userUpdateCommand.nickname() != null) {
+			validNickname(userUpdateCommand.nickname());
+
+			user.updateNickname(userUpdateCommand.nickname());
+		}
+
+		if (userUpdateCommand.oldPassword() != null && userUpdateCommand.newPassword() != null) {
+			validPassword(userUpdateCommand.oldPassword(), user.getPassword());
+
+			validNewPassword(userUpdateCommand.newPassword(), user.getPassword());
+
+			user.updatePassword(passwordEncoder.encode(userUpdateCommand.newPassword()));
+		}
+
+		return user;
+	}
 }
