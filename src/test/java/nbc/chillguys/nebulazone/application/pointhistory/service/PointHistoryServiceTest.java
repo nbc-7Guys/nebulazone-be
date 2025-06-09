@@ -6,13 +6,13 @@ import static org.mockito.BDDMockito.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +29,7 @@ import nbc.chillguys.nebulazone.domain.pointhistory.service.PointHistoryDomainSe
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
+@ExtendWith(MockitoExtension.class)
 class PointHistoryServiceTest {
 
 	@Mock
@@ -37,11 +38,6 @@ class PointHistoryServiceTest {
 	private UserDomainService userDomainService;
 	@InjectMocks
 	private PointHistoryService pointHistoryService;
-
-	@BeforeEach
-	void setUp() {
-		MockitoAnnotations.openMocks(this);
-	}
 
 	@Nested
 	@DisplayName("포인트 내역 생성 테스트")
@@ -80,7 +76,6 @@ class PointHistoryServiceTest {
 			Long userId = 1L;
 			User mockUser = mock(User.class);
 			PointRequest req = new PointRequest(3000, PointHistoryType.EXCHANGE, "321-654-987");
-			PointHistoryCommand command = PointHistoryCommand.of(req, mockUser);
 			PointHistory mockPointHistory = mock(PointHistory.class);
 
 			given(userDomainService.findActiveUserById(userId)).willReturn(mockUser);
@@ -111,8 +106,8 @@ class PointHistoryServiceTest {
 			given(point1.getPointHistoryStatus()).willReturn(PointHistoryStatus.PENDING);
 			given(point1.getCreatedAt()).willReturn(LocalDateTime.now());
 
-			given(pointHistoryDomainService.findPointHistoriesByUserAndStatus(userId, status))
-				.willReturn(List.of(point1));
+			given(pointHistoryDomainService.findPointHistoriesByUserAndStatus(userId, status)).willReturn(
+				List.of(point1));
 
 			// when
 			List<PointHistoryResponse> result = pointHistoryService.findMyPointRequests(userId, status);
@@ -136,8 +131,8 @@ class PointHistoryServiceTest {
 			given(point2.getPointHistoryType()).willReturn(PointHistoryType.EXCHANGE);
 
 			Page<PointHistory> pageMock = new PageImpl<>(List.of(point1, point2));
-			given(pointHistoryDomainService.findPointHistoriesByUser(eq(userId), any(Pageable.class)))
-				.willReturn(pageMock);
+			given(pointHistoryDomainService.findPointHistoriesByUser(eq(userId), any(Pageable.class))).willReturn(
+				pageMock);
 
 			// when
 			CommonPageResponse<PointHistoryResponse> result = pointHistoryService.findMyPointHistories(userId, page,
