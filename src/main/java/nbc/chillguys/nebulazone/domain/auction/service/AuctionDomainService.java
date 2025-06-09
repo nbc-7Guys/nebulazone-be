@@ -69,8 +69,9 @@ public class AuctionDomainService {
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 	}
 
-	public Auction findActiveLockAuction(Long id) {
-		return auctionRepository.findActiveAuctionByIdLock(id)
+	@Transactional
+	public Auction findActiveAuctionWithProductAnsSellerLock(Long id) {
+		return auctionRepository.findAuctionWithProductAndSellerLock(id)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 	}
 }

@@ -27,7 +27,7 @@ public class BidDomainService {
 
 	/**
 	 * 입찰 생성
-	 * @param lockAuction 삭제되지 않은 비관적 락이 적용된 Auction
+	 * @param lockAuction 삭제되지 않은 비관적 락이 적용된 Auction(상품, 셀러 정보 포함)
 	 * @param user 입찰자
 	 * @param price 입찰 가격
 	 * @return Bid
@@ -38,6 +38,10 @@ public class BidDomainService {
 
 		if (lockAuction.getEndTime().isBefore(LocalDateTime.now())) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_CLOSED);
+		}
+
+		if (isAuctionOwner(lockAuction, user)) {
+			throw new BidException(BidErrorCode.CANNOT_BID_OWN_AUCTION);
 		}
 
 		Optional<Long> highestPrice = bidRepository.findHighestPriceByAuction(lockAuction);
@@ -98,14 +102,18 @@ public class BidDomainService {
 			throw new AuctionException(AuctionErrorCode.AUCTION_CLOSED);
 		}
 
-		if (hasNotBidOwner(user, findBid)) {
+		if (isNotBidOwner(user, findBid)) {
 			throw new BidException(BidErrorCode.BID_NOT_OWNER);
 		}
 		findBid.cancelBid();
 		return findBid.getId();
 	}
 
-	private boolean hasNotBidOwner(User user, Bid findBid) {
+	private boolean isAuctionOwner(Auction lockAuction, User user) {
+		return lockAuction.getProduct().getSeller().getId().equals(user.getId());
+	}
+
+	private boolean isNotBidOwner(User user, Bid findBid) {
 		return !user.equals(findBid.getUser());
 	}
 }
