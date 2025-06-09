@@ -55,7 +55,7 @@ public class PostDomainService {
 	public Post updatePost(PostUpdateCommand command) {
 		Post post = findActivePost(command.postId());
 
-		validatePostOwner(post, command.userId());
+		post.validatePostOwner(command.userId());
 
 		post.update(command.title(), command.content(), command.imageUrls());
 
@@ -71,7 +71,7 @@ public class PostDomainService {
 	public void deletePost(PostDeleteCommand command) {
 		Post post = findActivePost(command.postId());
 
-		validatePostOwner(post, command.userId());
+		post.validatePostOwner(command.userId());
 
 		post.delete();
 	}
@@ -79,7 +79,7 @@ public class PostDomainService {
 	public Post findMyActivePost(Long postId, Long userId) {
 		Post post = findActivePost(postId);
 
-		validatePostOwner(post, userId);
+		post.validatePostOwner(userId);
 
 		return post;
 	}

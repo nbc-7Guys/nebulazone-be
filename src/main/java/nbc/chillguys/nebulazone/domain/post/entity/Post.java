@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.domain.post.entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -23,6 +24,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
+import nbc.chillguys.nebulazone.domain.post.exception.PostErrorCode;
+import nbc.chillguys.nebulazone.domain.post.exception.PostException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Getter
@@ -86,6 +89,12 @@ public class Post extends BaseEntity {
 				.map(PostImage::new)
 				.toList()
 		);
+	}
+
+	public void validatePostOwner(Long userId) {
+		if (!Objects.equals(getUser().getId(), userId)) {
+			throw new PostException(PostErrorCode.NOT_POST_OWNER);
+		}
 	}
 
 	public void delete() {
