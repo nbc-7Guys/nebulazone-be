@@ -15,8 +15,11 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
+import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Getter
 @Entity
@@ -44,7 +47,8 @@ public class Auction extends BaseEntity {
 	@Column(nullable = false)
 	private boolean isClosed;
 
-	private boolean isDeleted;
+	@Column(name = "is_deleted")
+	private boolean deleted;
 	private LocalDateTime deletedAt;
 
 	@Builder
@@ -58,8 +62,20 @@ public class Auction extends BaseEntity {
 		this.currentPrice = currentPrice;
 		this.endTime = endTime;
 		this.isClosed = isClosed;
-		this.isDeleted = isDeleted;
+		this.deleted = isDeleted;
 		this.deletedAt = deletedAt;
 	}
 
+	public boolean isAuctionOwner(User user) {
+		return product.getSeller().getId().equals(user.getId());
+	}
+
+	public void delete() {
+		if (!isClosed) {
+			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_CLOSED);
+		}
+
+		this.deleted = true;
+		this.deletedAt = LocalDateTime.now();
+	}
 }

@@ -52,7 +52,7 @@ public class CommentService {
 
 		Post post = postDomainService.findActivePost(postId);
 
-		CommentListFindQuery query = CommentListFindQuery.of(post, page, size);
+		CommentListFindQuery query = CommentListFindQuery.of(post, page - 1, size);
 		Page<CommentWithUserInfo> comments = commentDomainService.findComments(query);
 		Page<CommentDetailResponse> response = comments.map(CommentDetailResponse::from);
 

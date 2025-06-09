@@ -55,16 +55,7 @@ public class PointHistoryDomainService {
 			return pointHistoryRepository.findByUserId(userId);
 		}
 	}
-
-	/**
-	 * 포인트 환급/충전 요청을 거절 처리합니다.<br>
-	 * (상태 검증/예외처리만 담당, 소유자 검증은 Application Service에서 별도 처리)
-	 *
-	 * @param pointHistoryId 포인트 내역 ID
-	 * @throws PointHistoryException 내역이 존재하지 않거나, 상태가 PENDING이 아닐 때
-	 * @author 정석현
-	 */
-
+	
 	/**
 	 * 포인트 환급/충전 요청을 거절 처리합니다.
 	 *

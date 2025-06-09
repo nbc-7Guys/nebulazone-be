@@ -15,6 +15,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.domain.comment.dto.CommentListFindQuery;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentWithUserInfo;
 import nbc.chillguys.nebulazone.domain.comment.entity.QComment;
 import nbc.chillguys.nebulazone.domain.user.entity.QUser;
@@ -26,7 +27,11 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Page<CommentWithUserInfo> findComments(Long postId, int page, int size) {
+	public Page<CommentWithUserInfo> findComments(CommentListFindQuery query) {
+		long postId = query.post().getId();
+		int page = query.page();
+		int size = query.size();
+
 		QComment comment = QComment.comment;
 		QUser user = QUser.user;
 
@@ -38,11 +43,11 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
 				comment.parent.isNull()
 			)
 			.orderBy(comment.id.desc())
-			.offset((long) (page - 1) * size)
+			.offset( (long)page * size)
 			.limit(size)
 			.fetch();
 
-		PageRequest pageable = PageRequest.of(page - 1, size);
+		PageRequest pageable = PageRequest.of(page, size);
 		if (parentIds.isEmpty()) {
 			return new PageImpl<>(Collections.emptyList(), pageable, 0L);
 		}
@@ -50,7 +55,7 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
 		List<CommentWithUserInfo> flatList = jpaQueryFactory
 			.select(Projections.constructor(CommentWithUserInfo.class,
 				comment.id,
-				comment.isDeleted.isTrue()
+				comment.deleted.isTrue()
 					.when(true).then("삭제된 댓글입니다.").otherwise(comment.content),
 				user.nickname,
 				comment.parent.id,

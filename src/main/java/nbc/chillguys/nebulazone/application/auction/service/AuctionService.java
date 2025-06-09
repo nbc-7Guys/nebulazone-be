@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindAuctionResponse;
@@ -15,7 +14,6 @@ import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class AuctionService {
 
 	private final AuctionDomainService auctionDomainService;

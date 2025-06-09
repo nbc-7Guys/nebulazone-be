@@ -1,8 +1,10 @@
 package nbc.chillguys.nebulazone.application.post.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class PostService {
 	private final PostDomainService postDomainService;
 	private final S3Service s3Service;
 
+	@Transactional
 	public CreatePostResponse createPost(AuthUser authUser, CreatePostRequest request,
 		List<MultipartFile> multipartFiles) {
 
@@ -47,12 +50,32 @@ public class PostService {
 
 	}
 
-	public UpdatePostResponse updatePost(Long userId, Long postId, UpdatePostRequest request) {
-		PostUpdateCommand command = request.toCommand(userId, postId);
+	public UpdatePostResponse updatePost(
+		Long userId,
+		Long postId,
+		UpdatePostRequest request,
+		List<MultipartFile> imageFiles
+	) {
+		Post post = postDomainService.findMyActivePost(userId, postId);
 
-		Post post = postDomainService.updatePost(command);
+		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
+		boolean hasImage = !imageFiles.isEmpty();
+		if (hasImage) {
+			List<String> newImageUrls = imageFiles.stream()
+				.map(s3Service::generateUploadUrlAndUploadFile)
+				.toList();
+			imageUrls.addAll(newImageUrls);
 
-		return UpdatePostResponse.from(post);
+			post.getPostImages().stream()
+				.filter(postImage -> !imageUrls.contains(postImage.getUrl()))
+				.forEach((postImage) -> s3Service.generateDeleteUrlAndDeleteFile(postImage.getUrl()));
+		}
+
+		PostUpdateCommand command = request.toCommand(userId, postId, imageUrls);
+
+		Post updatedPost = postDomainService.updatePost(command);
+
+		return UpdatePostResponse.from(updatedPost);
 	}
 
 	public DeletePostResponse deletePost(Long userId, Long postId) {

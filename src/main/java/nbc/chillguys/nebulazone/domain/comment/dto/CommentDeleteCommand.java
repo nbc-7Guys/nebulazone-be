@@ -4,12 +4,12 @@ import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 public record CommentDeleteCommand(
-	Post post,
 	User user,
+	Post post,
 	Long commentId
 ) {
 
 	public static CommentDeleteCommand of(User user, Post post, Long commentId) {
-		return new CommentDeleteCommand(post, user, commentId);
+		return new CommentDeleteCommand(user, post, commentId);
 	}
 }

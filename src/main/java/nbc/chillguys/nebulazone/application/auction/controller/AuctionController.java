@@ -23,8 +23,8 @@ public class AuctionController {
 
 	@GetMapping
 	public ResponseEntity<CommonPageResponse<FindAuctionResponse>> findAuctions(
-		@RequestParam(defaultValue = "1") int page,
-		@RequestParam(defaultValue = "20") int size) {
+		@RequestParam(defaultValue = "1", value = "page") int page,
+		@RequestParam(defaultValue = "20", value = "size") int size) {
 
 		CommonPageResponse<FindAuctionResponse> response = auctionService.findAuctions(Math.max(page - 1, 0), size);
 
@@ -34,7 +34,7 @@ public class AuctionController {
 
 	@GetMapping("/sorted")
 	public ResponseEntity<List<FindAuctionResponse>> findAuctions(
-		@RequestParam(name = "sort") String sortType) {
+		@RequestParam("sort") String sortType) {
 
 		List<FindAuctionResponse> response = auctionService.findAuctionsBySortType(AuctionSortType.of(sortType));
 
