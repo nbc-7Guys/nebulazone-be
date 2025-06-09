@@ -58,7 +58,11 @@ public class SecurityConfig {
 					"/error",
 					"/actuator/**",
 					"/metrics/**",
-					"/api/v1/**"
+					"/api/v1/**",
+					"/ws/**",
+				    "/ws",
+    				"/chat/**",
+    				"/topic/**"
 				).permitAll()
 				.requestMatchers(
 					"/auth/signin",
@@ -80,7 +84,7 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("*"));
+		configuration.setAllowedOriginPatterns(List.of("*"));
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("*"));
 		configuration.setExposedHeaders(List.of("*"));

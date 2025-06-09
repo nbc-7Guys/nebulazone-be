@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.domain.chat.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -42,6 +43,10 @@ public class ChatRoomUser {
 			.chatRoomId(chatRoom.getId())
 			.userId(user.getId())
 			.build();
+	}
+
+	public void setChatRoom(ChatRoom chatRoom) {
+		this.chatRoom = chatRoom;
 	}
 
 }
