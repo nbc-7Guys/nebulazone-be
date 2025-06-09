@@ -60,9 +60,9 @@ public class SecurityConfig {
 					"/metrics/**",
 					"/api/v1/**",
 					"/ws/**",
-				    "/ws",
-    				"/chat/**",
-    				"/topic/**"
+					"/ws",
+					"/chat/**",
+					"/topic/**"
 				).permitAll()
 				.requestMatchers(
 					"/auth/signin",

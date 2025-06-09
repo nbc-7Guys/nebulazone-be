@@ -138,7 +138,7 @@ class PostDomainServiceUnitTest {
 			PostUpdateCommand command
 				= new PostUpdateCommand(user.getId(), post.getId(), "수정된 제목", "수정된 본문", imageUrls);
 
-			given(postRepository.findById(post.getId())).willReturn(Optional.ofNullable(post));
+			given(postRepository.findActivePostById(post.getId())).willReturn(Optional.ofNullable(post));
 
 			Post result = postDomainService.updatePost(command);
 
@@ -154,7 +154,7 @@ class PostDomainServiceUnitTest {
 			PostUpdateCommand command
 				= new PostUpdateCommand(user.getId(), post.getId(), "수정된 제목", "수정된 본문", imageUrls);
 
-			given(postRepository.findById(post.getId())).willReturn(Optional.empty());
+			given(postRepository.findActivePostById(post.getId())).willReturn(Optional.empty());
 
 			PostException exception
 				= assertThrows(PostException.class, () -> postDomainService.updatePost(command));
@@ -169,7 +169,7 @@ class PostDomainServiceUnitTest {
 			PostUpdateCommand command
 				= new PostUpdateCommand(2L, post.getId(), "수정된 제목", "수정된 본문", imageUrls);
 
-			given(postRepository.findById(post.getId())).willReturn(Optional.ofNullable(post));
+			given(postRepository.findActivePostById(post.getId())).willReturn(Optional.ofNullable(post));
 
 			PostException exception
 				= assertThrows(PostException.class, () -> postDomainService.updatePost(command));
@@ -187,7 +187,7 @@ class PostDomainServiceUnitTest {
 		void success_deletePost() {
 			PostDeleteCommand command = new PostDeleteCommand(user.getId(), post.getId());
 
-			given(postRepository.findById(post.getId())).willReturn(Optional.ofNullable(post));
+			given(postRepository.findActivePostById(post.getId())).willReturn(Optional.ofNullable(post));
 
 			postDomainService.deletePost(command);
 
@@ -200,7 +200,7 @@ class PostDomainServiceUnitTest {
 		void fail_deletePost_postNotFound() {
 			PostDeleteCommand command = new PostDeleteCommand(user.getId(), post.getId());
 
-			given(postRepository.findById(post.getId())).willReturn(Optional.empty());
+			given(postRepository.findActivePostById(post.getId())).willReturn(Optional.empty());
 
 			PostException exception
 				= assertThrows(PostException.class, () -> postDomainService.deletePost(command));
@@ -213,7 +213,7 @@ class PostDomainServiceUnitTest {
 		void fail_deletePost_notPostOwner() {
 			PostDeleteCommand command = new PostDeleteCommand(2L, post.getId());
 
-			given(postRepository.findById(post.getId())).willReturn(Optional.ofNullable(post));
+			given(postRepository.findActivePostById(post.getId())).willReturn(Optional.ofNullable(post));
 
 			PostException exception
 				= assertThrows(PostException.class, () -> postDomainService.deletePost(command));
