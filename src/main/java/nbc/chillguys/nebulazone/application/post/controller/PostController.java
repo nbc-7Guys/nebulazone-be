@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,8 +24,7 @@ import nbc.chillguys.nebulazone.application.post.dto.response.DeletePostResponse
 import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse;
 import nbc.chillguys.nebulazone.application.post.service.PostService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
-import nbc.chillguys.nebulazone.domain.post.dto.PostDeleteCommand;
-import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
+import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
 
 @RestController
 @RequestMapping("/posts")
@@ -50,9 +48,10 @@ public class PostController {
 	public ResponseEntity<UpdatePostResponse> updatePost(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("postId") Long postId,
-		@Valid @RequestBody UpdatePostRequest request
+		@Valid @RequestPart("post") UpdatePostRequest request,
+		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles
 	) {
-		UpdatePostResponse res = postService.updatePost(authUser.getId(), postId, request);
+		UpdatePostResponse res = postService.updatePost(authUser.getId(), postId, request, imageFiles);
 
 		return ResponseEntity.ok(res);
 	}
