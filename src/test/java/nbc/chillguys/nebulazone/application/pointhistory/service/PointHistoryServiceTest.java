@@ -44,7 +44,7 @@ class PointHistoryServiceTest {
 	class CreatePointHistoryTest {
 		@Test
 		@DisplayName("CHARGE 타입 포인트 내역 생성 성공")
-		void createChargePointHistory_success() {
+		void success_createChargePointHistory() {
 			// given
 			Long userId = 1L;
 			User mockUser = mock(User.class);
