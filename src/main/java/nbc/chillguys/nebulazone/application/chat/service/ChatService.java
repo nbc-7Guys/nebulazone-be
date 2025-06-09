@@ -1,7 +1,6 @@
 package nbc.chillguys.nebulazone.application.chat.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -15,7 +14,8 @@ import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryRes
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
-import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoomUser;
+import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
+import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
@@ -40,22 +40,21 @@ public class ChatService {
 	 * @param request the request
 	 * @return the chat room info
 	 */
+	@Transactional
 	public CreateChatRoomResponse getOrCreate(AuthUser authUser, CreateChatRoomRequest request) {
 
-		// 로그인한 유저가 특정 상품에 대해 참여중인 채팅방이 있는지 확인
-		// Optional<ChatRoomUser> existingChatRoomUser = chatDomainService.findExistingChatRoom(authUser.getId(),
-		// 	request.productId());
-		// if (existingChatRoomUser.isPresent()) {
-		// 	return CreateChatRoomResponse.from(existingChatRoomUser.get().getChatRoom());
-		// }
+		Product availableProductById = productDomainService.findAvailableProductById(request.productId());
+		if (availableProductById.getSeller().getId().equals(authUser.getId())) {
+			throw new ChatException(ChatErrorCode.CANNOT_CHAT_WITH_SELF);
+		}
 
-		ChatRoom result = chatDomainService.findChatRoom(request.productId(), authUser.getId())
-			.orElse(createChatRoom(authUser, request));
+		// 로그인한 유저가 특정 상품에 대해 참여중인 채팅방이 있는지 확인
+		ChatRoom result = chatDomainService.findExistingChatRoom(authUser.getId(), request.productId())
+			.orElseGet(() -> createChatRoom(authUser, request));
 
 		return CreateChatRoomResponse.from(result);
 	}
 
-	@Transactional
 	public ChatRoom createChatRoom(AuthUser authUser, CreateChatRoomRequest request) {
 		// 기존에 참여중인 방이 없다면 거래상품 구매자, 판매자 생성
 		Product product = productDomainService.findAvailableProductById(request.productId());

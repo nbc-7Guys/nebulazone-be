@@ -25,7 +25,6 @@ import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
-import nbc.chillguys.nebulazone.domain.products.repository.ProductRepository;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.repository.UserRepository;
 
@@ -48,14 +47,10 @@ public class ChatDomainService {
 	 * @param productId 상품 ID
 	 * @return Optional(채팅방)
 	 */
-	// 값이 있다면 getChatRoom() 할수 있는 방법??
-	public Optional<ChatRoomUser> findExistingChatRoom(Long userId, Long productId) {
-		return chatRoomUserRepository.findByIdUserIdAndChatRoomProductId(userId, productId);
-	}
-
-	public Optional<ChatRoom> findChatRoom(Long productId, Long userId) {
-		return chatRoomRepository.findByProduct_IdAndChatRoomUsers_User_Id(
-			productId, userId);
+	@Transactional(readOnly = true)
+	public Optional<ChatRoom> findExistingChatRoom(Long userId, Long productId) {
+		return chatRoomUserRepository.findByIdUserIdAndChatRoomProductId(userId, productId)
+			.map(ChatRoomUser::getChatRoom);
 	}
 
 	/**
