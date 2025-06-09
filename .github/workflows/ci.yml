@@ -21,7 +21,7 @@ jobs:
           --health-retries 5
 
       elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.18.1
+        image: seunghyun937/elasticsearch-nori:8.18.1
         ports:
           - 9200:9200
         options: >-
@@ -50,5 +50,3 @@ jobs:
 
       - name: Run tests
         run: ./gradlew clean test
-        env:
-          SPRING_ELASTICSEARCH_URIS: http://localhost:9200
