@@ -28,7 +28,7 @@ public class BidService {
 
 	public CreateBidResponse createBid(Long auctionId, AuthUser authUser, CreateBidRequest request) {
 
-		Auction lockAuction = auctionDomainService.findActiveAuctionWithProductAnsSellerLock(auctionId);
+		Auction lockAuction = auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId);
 
 		User user = userDomainService.findActiveUserById(authUser.getId());
 

@@ -66,6 +66,17 @@ public class AuctionDomainService {
 	}
 
 	/**
+	 * 삭제되지 않은 경매 단건 조회
+	 * @param productId 판매 상품 id
+	 * @return auction
+	 * @author 윤정환
+	 */
+	public Auction findAuctionByProductId(Long productId) {
+		return auctionRepository.findByProduct_IdAndDeletedFalse(productId)
+			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
+	}
+
+	/**
 	 * 경매 삭제
 	 * @param auctionId 삭제할 경매 id
 	 * @param user 로그인 유저
@@ -99,9 +110,9 @@ public class AuctionDomainService {
 	}
 
 	/**
-	 * 상품과 판매자 정보를 함께 조회한 비관적 락이 적용된 경매
-	 * @param id 경매 id
-	 * @return 락이 적용된 경매
+	 * 삭제되지 않은 비관적 락이 적용된 경매 조회(상품, 판매자 정보 한번에 조회)
+	 * @param id 조회할 경매 id
+	 * @return 비관적 락이 적용된 auction
 	 * @author 전나겸
 	 */
 	@Transactional

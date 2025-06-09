@@ -15,6 +15,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
+import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -66,6 +68,15 @@ public class Auction extends BaseEntity {
 
 	public boolean isAuctionOwner(User user) {
 		return product.getSeller().getId().equals(user.getId());
+	}
+
+	public void delete() {
+		if (!isClosed) {
+			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_CLOSED);
+		}
+
+		this.deleted = true;
+		this.deletedAt = LocalDateTime.now();
 	}
 
 	public boolean isDeleted() {

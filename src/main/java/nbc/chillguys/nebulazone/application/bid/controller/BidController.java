@@ -38,7 +38,7 @@ public class BidController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
-	@GetMapping("/autioncs/{auctionId}/bids")
+	@GetMapping("/auctions/{auctionId}/bids")
 	public ResponseEntity<CommonPageResponse<FindBidResponse>> findBids(
 		@PathVariable("auctionId") Long auctionId,
 		@RequestParam(defaultValue = "1", value = "page") int page,
