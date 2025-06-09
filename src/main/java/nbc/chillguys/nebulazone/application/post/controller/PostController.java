@@ -30,8 +30,8 @@ import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse
 import nbc.chillguys.nebulazone.application.post.service.PostService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
-import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
+import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 
 @RestController
 @RequestMapping("/posts")
