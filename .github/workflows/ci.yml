@@ -50,3 +50,5 @@ jobs:
 
       - name: Run tests
         run: ./gradlew clean test
+        env:
+          SPRING_ELASTICSEARCH_URIS: http://localhost:9200
