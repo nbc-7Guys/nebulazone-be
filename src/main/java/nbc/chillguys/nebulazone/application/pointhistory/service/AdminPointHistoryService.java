@@ -17,6 +17,15 @@ public class AdminPointHistoryService {
 	private final PointHistoryDomainService pointHistoryDomainService;
 	private final AdminPointHistoryDomainService adminPointHistoryDomainService;
 
+	/**
+	 * 포인트 히스토리 목록을 검색/조회합니다.<br>
+	 * 조건/페이징/정렬을 지원하며, CommonPageResponse 형태로 반환합니다.
+	 *
+	 * @param request 어드민 포인트 히스토리 검색 조건 DTO
+	 * @param pageable 페이징 및 정렬 정보
+	 * @return 페이징된 포인트 히스토리 리스트
+	 * @author 정석현
+	 */
 	@Transactional(readOnly = true)
 	public CommonPageResponse<AdminPointHistoryResponse> searchAdminPointHistories(
 		AdminPointHistoryRequest request, Pageable pageable) {
@@ -26,10 +35,22 @@ public class AdminPointHistoryService {
 		);
 	}
 
+	/**
+	 * 포인트 히스토리 요청을 승인 처리합니다.
+	 *
+	 * @param pointHistoryId 포인트 히스토리 ID
+	 * @author 정석현
+	 */
 	public void approvePointHistory(Long pointHistoryId) {
 		adminPointHistoryDomainService.approvePointHistory(pointHistoryId);
 	}
 
+	/**
+	 * 포인트 히스토리 요청을 거절 처리합니다.
+	 *
+	 * @param pointHistoryId 포인트 히스토리 ID
+	 * @author 정석현
+	 */
 	public void rejectPointHistory(Long pointHistoryId) {
 		adminPointHistoryDomainService.rejectPointHistory(pointHistoryId);
 	}
