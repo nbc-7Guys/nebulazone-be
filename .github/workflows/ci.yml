@@ -2,8 +2,8 @@ name: CI
 
 on:
   pull_request:
-     branches:
-       - develop
+    branches:
+      - develop
 
 jobs:
   build:
@@ -19,6 +19,18 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
+      elasticsearch:
+        image: shlee054/elasticsearch-nori:8.18.1
+        ports:
+          - 9200:9200
+        options: >-
+          --health-cmd="curl http://localhost:9200/_cluster/health"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+          -e "discovery.type=single-node"
+          -e "xpack.security.enabled=false"
 
     steps:
       - name: Checkout code
@@ -38,6 +50,3 @@ jobs:
 
       - name: Run tests
         run: ./gradlew clean test
-        env:
-          SPRING_REDIS_HOST: localhost
-          SPRING_REDIS_PORT: 6379
