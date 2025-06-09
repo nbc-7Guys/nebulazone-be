@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.infra.websocket;
+package nbc.chillguys.nebulazone.infra.websocket.interceptor;
 
 import java.security.Principal;
 
@@ -19,6 +19,7 @@ import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomRepository;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomUserRepository;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
+import nbc.chillguys.nebulazone.infra.websocket.SessionUtil;
 
 @Slf4j
 @Component
