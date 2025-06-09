@@ -6,7 +6,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +25,7 @@ import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 
 @RestController
 @RequestMapping("/admin/points")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 @RequiredArgsConstructor
 public class AdminPointHistoryController {
 	private final PointHistoryService pointHistoryService;
@@ -46,6 +50,18 @@ public class AdminPointHistoryController {
 			adminPointHistoryService.searchAdminPointHistories(request, PageRequest.of(page - 1, size));
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
+
+	@PostMapping("/points/{pointHistoryId}/approve")
+	public ResponseEntity<Void> approvePointRequest(@PathVariable Long pointHistoryId) {
+		adminPointHistoryService.approvePointHistory(pointHistoryId);
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/points/{pointHistoryId}/reject")
+	public ResponseEntity<Void> rejectPointRequest(@PathVariable Long pointHistoryId) {
+		adminPointHistoryService.rejectPointHistory(pointHistoryId);
+		return ResponseEntity.ok().build();
 	}
 
 }

@@ -25,4 +25,12 @@ public class AdminPointHistoryService {
 			adminPointHistoryDomainService.searchAdminPointHistories(request, pageable)
 		);
 	}
+
+	public void approvePointHistory(Long pointHistoryId) {
+		adminPointHistoryDomainService.approvePointHistory(pointHistoryId);
+	}
+
+	public void rejectPointHistory(Long pointHistoryId) {
+		adminPointHistoryDomainService.rejectPointHistory(pointHistoryId);
+	}
 }
