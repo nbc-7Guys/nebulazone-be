@@ -68,14 +68,9 @@ public class ChatMessageService {
 	 */
 	public void sendImageMessage(AuthUser authUser, MultipartFile multipartFile, Long roomId, String type) {
 		chatDomainService.validateUserAccessToChatRoom(authUser, roomId);
-		// S3Service 에서 에러를 던져 줘야함
-		try {
-			String imageUrl = s3Service.generateUploadUrlAndUploadFile(multipartFile);
-			MessageType messageType = MessageType.valueOf(type);
-			sendAndSaveMessage(roomId, imageUrl, messageType, authUser);
-		} catch (Exception e) {
-			throw new ChatException(ChatErrorCode.CHAT_SEND_FAILED);
-		}
+		String imageUrl = s3Service.generateUploadUrlAndUploadFile(multipartFile);
+		MessageType messageType = MessageType.valueOf(type);
+		sendAndSaveMessage(roomId, imageUrl, messageType, authUser);
 	}
 
 	/**

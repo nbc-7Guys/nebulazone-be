@@ -24,7 +24,6 @@ import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.repository.UserRepository;
 
 /**
  * The type Chat service.
