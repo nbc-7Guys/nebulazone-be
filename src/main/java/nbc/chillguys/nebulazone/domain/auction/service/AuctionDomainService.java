@@ -14,6 +14,7 @@ import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.auction.repository.AuctionRepository;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
@@ -64,14 +65,49 @@ public class AuctionDomainService {
 
 	}
 
+	/**
+	 * 경매 삭제
+	 * @param auctionId 삭제할 경매 id
+	 * @param user 로그인 유저
+	 * @return 삭제된 경매 id
+	 * @author 전나겸
+	 */
+	public Long deleteAuction(long auctionId, User user) {
+		Auction findAuction = auctionRepository.findById(auctionId)
+			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
+
+		if (findAuction.isDeleted()) {
+			throw new AuctionException(AuctionErrorCode.ALREADY_DELETED_AUCTION);
+		}
+
+		if (findAuction.isAuctionOwner(user)) {
+			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
+		}
+
+		return findAuction.deleteAuction();
+	}
+
+	/**
+	 * 삭제되지 않은 경매
+	 * @param id 경매 id
+	 * @return 조회된 경매
+	 * @author 전나겸
+	 */
 	public Auction findActiveAuctionById(Long id) {
 		return auctionRepository.findByIdAndDeletedFalse(id)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 	}
 
+	/**
+	 * 상품과 판매자 정보를 함께 조회한 비관적 락이 적용된 경매
+	 * @param id 경매 id
+	 * @return 락이 적용된 경매
+	 * @author 전나겸
+	 */
 	@Transactional
 	public Auction findActiveAuctionWithProductAnsSellerLock(Long id) {
 		return auctionRepository.findAuctionWithProductAndSellerLock(id)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 	}
+
 }

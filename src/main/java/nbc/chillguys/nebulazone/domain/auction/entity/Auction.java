@@ -68,4 +68,13 @@ public class Auction extends BaseEntity {
 		return product.getSeller().getId().equals(user.getId());
 	}
 
+	public boolean isDeleted() {
+		return deleted && deletedAt != null;
+	}
+
+	public Long deleteAuction() {
+		deleted = true;
+		deletedAt = LocalDateTime.now();
+		return id;
+	}
 }

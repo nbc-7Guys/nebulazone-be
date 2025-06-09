@@ -3,16 +3,21 @@ package nbc.chillguys.nebulazone.application.auction.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
+import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 
 @RestController
 @RequestMapping("/auctions")
@@ -40,5 +45,15 @@ public class AuctionController {
 
 		return ResponseEntity.ok(response);
 
+	}
+
+	@DeleteMapping("/{auctionId}")
+	public ResponseEntity<DeleteAuctionResponse> deleteAuction(
+		@PathVariable("auctionId") long auctionId,
+		@AuthenticationPrincipal AuthUser authUser) {
+
+		DeleteAuctionResponse response = auctionService.deleteAuction(auctionId, authUser);
+
+		return ResponseEntity.ok(response);
 	}
 }
