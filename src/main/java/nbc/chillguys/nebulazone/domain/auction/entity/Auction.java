@@ -66,26 +66,22 @@ public class Auction extends BaseEntity {
 		this.deletedAt = deletedAt;
 	}
 
-	public boolean isAuctionOwner(User user) {
-		return product.getSeller().getId().equals(user.getId());
-	}
-
-	public void delete() {
+	public Long delete() {
 		if (!isClosed) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_CLOSED);
 		}
 
 		this.deleted = true;
 		this.deletedAt = LocalDateTime.now();
+		return id;
+	}
+
+	public boolean isAuctionOwner(User user) {
+		return product.getSeller().getId().equals(user.getId());
 	}
 
 	public boolean isDeleted() {
 		return deleted && deletedAt != null;
 	}
 
-	public Long deleteAuction() {
-		deleted = true;
-		deletedAt = LocalDateTime.now();
-		return id;
-	}
 }
