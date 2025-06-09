@@ -18,7 +18,7 @@ import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomRepository;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomUserRepository;
-import nbc.chillguys.nebulazone.infra.security.jwt.JwtUtil;
+import nbc.chillguys.nebulazone.infra.security.JwtUtil;
 
 @Slf4j
 @Component

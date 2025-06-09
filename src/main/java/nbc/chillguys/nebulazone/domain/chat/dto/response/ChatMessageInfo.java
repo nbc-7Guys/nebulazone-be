@@ -26,7 +26,7 @@ public record ChatMessageInfo(
 			authUser.getEmail(),
 			command.message(),
 			// command.type(),
-			MessageType.TEXT.name(), // 이미지 업로드 추가 하면 바꿀 예정
+			"TEXT", // 이미지 업로드 추가 하면 바꿀 예정
 			sendTime
 		);
 	}
