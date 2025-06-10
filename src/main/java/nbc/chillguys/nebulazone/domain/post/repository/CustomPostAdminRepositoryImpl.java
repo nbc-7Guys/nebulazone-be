@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.domain.post.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -54,5 +55,19 @@ public class CustomPostAdminRepositoryImpl implements CustomPostAdminRepository 
 			.fetchOne();
 
 		return new PageImpl<>(content, pageable, total != null ? total : 0L);
+	}
+
+	@Override
+	public Optional<Post> findDeletedPostById(Long postId) {
+		QPost post = QPost.post;
+
+		Post result = jpaQueryFactory
+			.selectFrom(post)
+			.where(
+				post.id.eq(postId),
+				post.isDeleted.isTrue()
+			)
+			.fetchOne();
+		return Optional.ofNullable(result);
 	}
 }

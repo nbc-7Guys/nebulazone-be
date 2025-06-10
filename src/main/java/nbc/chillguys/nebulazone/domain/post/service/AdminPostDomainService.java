@@ -51,6 +51,22 @@ public class AdminPostDomainService {
 		post.updateType(type);
 	}
 
+	@Transactional
+	public void deletePost(Long postId) {
+		Post post = findDeletedPost(postId);
+
+		post.validatePostOwner(postId);
+
+		post.delete();
+	}
+
+	@Transactional
+	public void restorePost(Long postId) {
+		Post post = findActivePost(postId);
+		post.restore();
+		savePostToEs(post);
+	}
+
 	public Post findActivePost(Long postId) {
 		return postRepository.findActivePostById(postId)
 			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
@@ -61,9 +77,19 @@ public class AdminPostDomainService {
 		return findActivePost(postId);
 	}
 
+	public Post findDeletedPost(Long postId) {
+		return postRepository.findDeletedPostById(postId)
+			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+	}
+
 	@Transactional
 	public void savePostToEs(Post post) {
 		postEsRepository.save(PostDocument.from(post));
+	}
+
+	@Transactional
+	public void deletePostFromEs(Long postId) {
+		postEsRepository.deleteById(postId);
 	}
 
 }

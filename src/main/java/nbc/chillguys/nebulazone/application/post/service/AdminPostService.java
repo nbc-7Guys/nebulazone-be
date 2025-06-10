@@ -13,6 +13,7 @@ import nbc.chillguys.nebulazone.application.post.dto.request.AdminPostSearchRequ
 import nbc.chillguys.nebulazone.application.post.dto.request.AdminPostUpdateTypeRequest;
 import nbc.chillguys.nebulazone.application.post.dto.request.UpdatePostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.response.AdminPostResponse;
+import nbc.chillguys.nebulazone.application.post.dto.response.DeletePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
@@ -77,6 +78,18 @@ public class AdminPostService {
 
 	public void updatePostType(Long postId, AdminPostUpdateTypeRequest request) {
 		adminPostDomainService.updatePostType(postId, request.type());
+	}
+
+	public DeletePostResponse deleteAdminPost(Long postId) {
+		adminPostDomainService.deletePost(postId);
+
+		adminPostDomainService.deletePostFromEs(postId);
+
+		return DeletePostResponse.from(postId);
+	}
+
+	public void restorePost(Long postId) {
+		adminPostDomainService.restorePost(postId);
 	}
 
 }
