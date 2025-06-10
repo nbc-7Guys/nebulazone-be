@@ -2,6 +2,9 @@ package nbc.chillguys.nebulazone.domain.products.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,11 +13,14 @@ import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductPurchaseCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductSearchCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
+import nbc.chillguys.nebulazone.domain.products.repository.ProductEsRepository;
 import nbc.chillguys.nebulazone.domain.products.repository.ProductRepository;
+import nbc.chillguys.nebulazone.domain.products.vo.ProductDocument;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +28,7 @@ import nbc.chillguys.nebulazone.domain.products.repository.ProductRepository;
 public class ProductDomainService {
 
 	private final ProductRepository productRepository;
+	private final ProductEsRepository productEsRepository;
 
 	/**
 	 * 판매 상품 생성
@@ -54,7 +61,7 @@ public class ProductDomainService {
 	 * @author 윤정환
 	 */
 	public Product findActiveProductById(Long productId) {
-		return productRepository.findByIdAndDeletedFalse(productId)
+		return productRepository.findActiveProductById(productId)
 			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
 	}
 
@@ -67,8 +74,8 @@ public class ProductDomainService {
 	public Product findAvailableProductById(Long productId) {
 		Product product = findActiveProductById(productId);
 
-		product.validateNotSold();
-		product.validatePurchasable();
+		product.validNotSold();
+		product.validPurchasable();
 
 		return product;
 	}
@@ -83,12 +90,10 @@ public class ProductDomainService {
 	public Product updateProduct(ProductUpdateCommand command) {
 		Product product = findActiveProductById(command.productId());
 
-		product.validateBelongsToCatalog(command.catalog().getId());
-		product.validateProductOwner(command.user().getId());
+		product.validBelongsToCatalog(command.catalog().getId());
+		product.validProductOwner(command.user().getId());
 
 		product.update(command.name(), command.description(), command.imageUrls());
-
-		// todo: 수정된 상품명 ES에 갱신
 
 		return product;
 	}
@@ -103,8 +108,8 @@ public class ProductDomainService {
 	public Product changeToAuctionType(ChangeToAuctionTypeCommand command) {
 		Product product = findActiveProductById(command.productId());
 
-		product.validateBelongsToCatalog(command.catalog().getId());
-		product.validateProductOwner(command.user().getId());
+		product.validBelongsToCatalog(command.catalog().getId());
+		product.validProductOwner(command.user().getId());
 
 		product.changeToAuctionType(command.price());
 
@@ -120,12 +125,10 @@ public class ProductDomainService {
 	public void deleteProduct(ProductDeleteCommand command) {
 		Product product = findActiveProductById(command.productId());
 
-		product.validateBelongsToCatalog(command.catalog().getId());
-		product.validateProductOwner(command.user().getId());
+		product.validBelongsToCatalog(command.catalog().getId());
+		product.validProductOwner(command.user().getId());
 
 		product.delete();
-
-		// todo: 삭제된 정보 ES에 갱신
 	}
 
 	@Transactional
@@ -133,5 +136,50 @@ public class ProductDomainService {
 		Product product = findAvailableProductById(command.productId());
 
 		product.purchase();
+	}
+
+	/**
+	 * Elasticsearch에 상품 저장
+	 * @param product 상품
+	 * @author 이승현
+	 */
+	@Transactional
+	public void saveProductToEs(Product product) {
+		productEsRepository.save(ProductDocument.from(product));
+	}
+
+	/**
+	 * 상품 검색
+	 * @param command keyword, txMethod, priceFrom, priceTo, page, size
+	 * @return 상품 목록
+	 * @author 이승현
+	 */
+	public Page<ProductDocument> searchProduct(ProductSearchCommand command) {
+		Pageable pageable = PageRequest.of(command.page() - 1, command.size());
+
+		return productEsRepository.searchProduct(command.productName(), command.txMethod(), command.priceFrom(),
+			command.priceTo(), pageable);
+	}
+
+	/**
+	 * Elasticsearch에 상품 삭제
+	 * @param productId 상품 id
+	 * @author 이승현
+	 */
+	@Transactional
+	public void deleteProductFromEs(Long productId) {
+		productEsRepository.deleteById(productId);
+	}
+
+	/**
+	 * 상품 조회</br>
+	 * 유저와 이미지도 함께 조회
+	 * @param productId 상품 id
+	 * @return product
+	 * @author 이승현
+	 */
+	public Product getProductByIdWithUserAndImages(Long productId) {
+		return productRepository.findActiveProductByIdWithUserAndImages(productId)
+			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
 	}
 }
