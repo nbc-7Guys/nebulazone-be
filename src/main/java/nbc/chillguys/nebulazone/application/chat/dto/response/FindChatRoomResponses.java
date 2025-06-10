@@ -16,12 +16,14 @@ public record FindChatRoomResponses(
 
     public static record FindChatRoomResponse(
         String productName,
-        String sellerName
+        String sellerName,
+		Long chatRoomId
     ) {
         public static FindChatRoomResponse from(ChatRoomInfo chatRoomInfo) {
             return new FindChatRoomResponse(
                 chatRoomInfo.productName(),
-                chatRoomInfo.sellerName()
+                chatRoomInfo.sellerName(),
+				chatRoomInfo.ChatRoomId()
             );
         }
     }

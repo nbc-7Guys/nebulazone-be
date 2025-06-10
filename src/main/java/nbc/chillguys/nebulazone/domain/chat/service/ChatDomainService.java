@@ -82,11 +82,11 @@ public class ChatDomainService {
 	 * @param roomId 채팅방 ID
 	 * @return 채팅 기록 응답(FindChatHistoryResponse) 리스트
 	 */
-	public List<FindChatHistoryResponse> findChatHistoryResponses(Long roomId, String senderEmail) {
+	public List<FindChatHistoryResponse> findChatHistoryResponses(Long roomId) {
 		List<ChatHistory> chatHistory = chatRoomHistoryRepository.findAllByChatRoomIdOrderBySendTimeAsc(roomId);
 
 		List<FindChatHistoryResponse> responses = chatHistory.stream()
-			.map(history -> FindChatHistoryResponse.from(history, senderEmail))
+			.map(history -> FindChatHistoryResponse.from(history))
 			.toList();
 
 		return responses;
@@ -161,12 +161,12 @@ public class ChatDomainService {
 				.chatRoom(chatRoom)
 				.userId(messages.senderId())
 				.message(messages.message())
+				.messageType(messages.type())
 				.sendtime(messages.sendTime())
 				.build();
 
 			histories.add(history);
 		}
-
 		chatRoomHistoryRepository.saveAll(histories);
 	}
 

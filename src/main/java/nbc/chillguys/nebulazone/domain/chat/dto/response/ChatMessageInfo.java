@@ -25,7 +25,7 @@ public record ChatMessageInfo(
 			authUser.getId(),
 			authUser.getEmail(),
 			message,
-			messageType, // 이미지 업로드 추가 하면 바꿀 예정
+			messageType,
 			sendTime
 		);
 	}
