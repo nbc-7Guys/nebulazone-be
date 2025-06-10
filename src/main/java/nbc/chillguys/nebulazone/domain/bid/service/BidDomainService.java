@@ -93,11 +93,10 @@ public class BidDomainService {
 	}
 
 	/**
-	 * 내 입찰 취소<br>
-	 * 마감 30분 이내에는 취소 불가능
+	 * 내 입찰 취소
 	 * @param lockAuction 삭제되지 않은 경매(락 적용)
-	 * @param user    로그인한 유저
-	 * @param bidId   취소할 입찰 Id
+	 * @param user 로그인한 유저
+	 * @param bidId 취소할 입찰 Id
 	 * @return 취소한 입찰 Id
 	 * @author 전나겸
 	 */
@@ -144,12 +143,26 @@ public class BidDomainService {
 		return findBid.getId();
 	}
 
+	/**
+	 * 특정 경매의 최고가 입찰 조회<br>
+	 * 취소된 입찰은 대상 아님
+	 * @param auctionId 경매 id
+	 * @return 조회된 Bid
+	 * @author 전나겸
+	 */
 	public Bid findHighBidByAuction(Long auctionId) {
 		return bidRepository.findHighestPriceBidByAuction(auctionId);
 	}
 
+	/**
+	 * 특정 입찰 조회(타 도메인에서 사용할 목적)
+	 * @param bidId 조회할 입찰 Id
+	 * @return 조회된 Bid
+	 * @author 전나겸
+	 */
 	public Bid findBid(Long bidId) {
-		return bidRepository.findById(bidId).orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
+		return bidRepository.findById(bidId)
+			.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
 	}
 
 }

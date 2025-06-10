@@ -36,6 +36,11 @@ public class AuctionSchedulerService {
 	private final BidDomainService bidDomainService;
 	private final AutoAuctionDomainService autoAuctionDomainService;
 
+	/**
+	 * 자동 경매 종료 스케줄러 등록
+	 * @param auction 등록할 경매
+	 * @author 전나겸
+	 */
 	public void autoAuctionEndSchedule(Auction auction) {
 		long seconds = Duration.between(LocalDateTime.now(), auction.getEndTime()).getSeconds();
 
@@ -55,6 +60,11 @@ public class AuctionSchedulerService {
 		log.info("자동 낙찰 스케줄러 등록 완료. auctionId: {}, {} 초 후 실행, 등록된 스케줄러 수: {}", auction.getId(), seconds, tasks.size());
 	}
 
+	/**
+	 * 경매 스케줄러 취소
+	 * @param auctionId 취소할 경매 아이디
+	 * @author 전나겸
+	 */
 	public void cancelSchedule(Long auctionId) {
 		ScheduledFuture<?> future = tasks.remove(auctionId);
 		if (future != null) {

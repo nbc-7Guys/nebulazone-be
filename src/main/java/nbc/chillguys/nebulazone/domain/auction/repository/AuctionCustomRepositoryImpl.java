@@ -12,8 +12,6 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
@@ -117,14 +115,6 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.fetch();
 	}
 
-	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	@Query("""
-		select a from Auction a
-		join fetch a.product p
-		join fetch p.seller s
-		where a.id = :auctionId and a.deleted = false
-		""")
-
 	@Override
 	public Optional<Auction> findAuctionWithProductAndSellerLock(Long id) {
 
@@ -133,7 +123,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.join(auction.product, product).fetchJoin()
 			.join(product.seller, user).fetchJoin()
 			.where(auction.deleted.eq(false)
-				.and(product.deleted.eq(false)))
+				.and(product.isDeleted.eq(false)))
 			.setLockMode(LockModeType.PESSIMISTIC_WRITE)
 			.fetchOne());
 	}

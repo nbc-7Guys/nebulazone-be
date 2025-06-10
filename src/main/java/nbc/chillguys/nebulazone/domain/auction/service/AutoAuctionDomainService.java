@@ -18,6 +18,12 @@ public class AutoAuctionDomainService {
 
 	private final AuctionRepository auctionRepository;
 
+	/**
+	 * 자동 경매 종료
+	 * @param auctionId 종료할 경매 id
+	 * @param wonBid 낙찰된 입찰
+	 * @author 전나겸
+	 */
 	@Transactional
 	public void endAuction(Long auctionId, Bid wonBid) {
 		Optional<Auction> optAuction = auctionRepository.findById(auctionId);
