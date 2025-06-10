@@ -133,5 +133,13 @@ public class User extends BaseEntity {
 		}
 	}
 
+	public void updateRoles(Set<UserRole> roles) {
+		if (roles == null || roles.isEmpty()) {
+			throw new UserException(UserErrorCode.WRONG_ROLES);
+		}
+		this.roles.clear();
+		this.roles.addAll(roles);
+	}
+
 }
 
