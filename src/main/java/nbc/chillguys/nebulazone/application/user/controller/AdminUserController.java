@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.user.dto.request.AdminUserSearchQuery;
 import nbc.chillguys.nebulazone.application.user.dto.response.AdminUserResponse;
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
-import nbc.chillguys.nebulazone.application.user.service.AdminUserSevice;
+import nbc.chillguys.nebulazone.application.user.service.AdminUserService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.domain.user.entity.UserStatus;
@@ -25,7 +25,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.UserStatus;
 @RequestMapping("/admin/users")
 @RequiredArgsConstructor
 public class AdminUserController {
-	private final AdminUserSevice adminUserSevice;
+	private final AdminUserService adminUserService;
 
 	@GetMapping
 	public ResponseEntity<CommonPageResponse<AdminUserResponse>> findUsers(
@@ -39,7 +39,7 @@ public class AdminUserController {
 			keyword, status, roles, page, size
 		);
 		Pageable pageable = PageRequest.of(page - 1, size);
-		CommonPageResponse<AdminUserResponse> response = adminUserSevice.findUsers(query, pageable);
+		CommonPageResponse<AdminUserResponse> response = adminUserService.findUsers(query, pageable);
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}

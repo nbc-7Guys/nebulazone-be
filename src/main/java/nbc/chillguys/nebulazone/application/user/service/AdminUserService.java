@@ -16,7 +16,7 @@ import nbc.chillguys.nebulazone.domain.user.service.AdminUserDomainService;
 
 @Service
 @RequiredArgsConstructor
-public class AdminUserSevice {
+public class AdminUserService {
 
 	private final AdminUserDomainService adminUserDomainService;
 
@@ -37,7 +37,7 @@ public class AdminUserSevice {
 		return CommonPageResponse.from(responsePage);
 	}
 
-	public UserResponse getUser(Long userId) {
+	public UserResponse getUserDetail(Long userId) {
 		User targetUser = adminUserDomainService.findActiveUserById(userId);
 
 		return UserResponse.from(targetUser);
