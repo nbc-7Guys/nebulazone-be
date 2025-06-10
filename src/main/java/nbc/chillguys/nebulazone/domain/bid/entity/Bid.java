@@ -61,4 +61,8 @@ public class Bid extends BaseEntity {
 		return !user.equals(this.user);
 	}
 
+	public boolean isDifferentAuction(Auction auction) {
+		return !this.auction.equals(auction);
+	}
+
 }

@@ -20,6 +20,7 @@ import jakarta.persistence.EntityManager;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
 import nbc.chillguys.nebulazone.domain.bid.dto.QFindBidInfo;
+import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Repository
@@ -94,12 +95,13 @@ public class BidCustomRepositoryImpl implements BidCustomRepository {
 	}
 
 	@Override
-	public Optional<Long> findHighestPriceByAuction(Auction auction) {
+	public Optional<Long> findActiveBidHighestPriceByAuction(Auction auction) {
 
 		return Optional.ofNullable(jpaQueryFactory
 			.select(bid.price.max())
 			.from(bid)
-			.where(bid.auction.eq(auction))
+			.where(bid.auction.eq(auction)
+				.and(bid.status.notIn(BidStatus.CANCEL)))
 			.fetchOne());
 	}
 }

@@ -21,7 +21,7 @@ public record FindAuctionResponse(
 		return new FindAuctionResponse(
 			findInfo.auctionId(),
 			findInfo.startPrice(),
-			findInfo.currentPrice() != null ? findInfo.currentPrice() : 0,
+			findInfo.currentPrice(),
 			findInfo.isClosed(),
 			findInfo.endTime(),
 			findInfo.productName(),

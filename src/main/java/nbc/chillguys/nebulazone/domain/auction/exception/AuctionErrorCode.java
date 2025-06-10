@@ -14,7 +14,8 @@ public enum AuctionErrorCode implements ErrorCode {
 	ALREADY_DELETED_AUCTION(HttpStatus.BAD_REQUEST, "이미 삭제된 경매입니다."),
 	AUCTION_NOT_OWNER(HttpStatus.FORBIDDEN, "본인이 등록한 경매만 삭제할 수 있습니다."),
 	AUCTION_NOT_CLOSED(HttpStatus.CONFLICT, "경매가 종료되어야 삭제할 수 있습니다."),
-	AUCTION_CLOSED(HttpStatus.BAD_REQUEST, "이미 종료된 경매 입니다..");
+	AUCTION_CLOSED(HttpStatus.BAD_REQUEST, "이미 종료된 경매 입니다."),
+	AUCTION_END_TIME_INVALID(HttpStatus.BAD_REQUEST, "경매 종료 시간이 현재 시간보다 늦어야 합니다.");
 
 	private final HttpStatus status;
 	private final String message;

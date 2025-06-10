@@ -59,7 +59,7 @@ public class BidService {
 	public DeleteBidResponse statusBid(AuthUser authUser, Long auctionId, Long bidId) {
 
 		User user = userDomainService.findActiveUserById(authUser.getId());
-		Auction auction = auctionDomainService.findActiveAuctionById(auctionId);
+		Auction auction = auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId);
 
 		Long deletedBidId = bidDomainService.statusBid(auction, user, bidId);
 		return DeleteBidResponse.from(deletedBidId);

@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.domain.auction.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,6 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
 	Optional<Auction> findByIdAndDeletedFalse(Long id);
 
 	Optional<Auction> findByProduct_IdAndDeletedFalse(long productId);
+
+	List<Auction> findAllByDeletedFalse();
 }

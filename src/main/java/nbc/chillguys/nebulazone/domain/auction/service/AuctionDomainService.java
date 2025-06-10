@@ -23,6 +23,8 @@ public class AuctionDomainService {
 
 	private final AuctionRepository auctionRepository;
 
+	private final AuctionSchedulerService scheduler;
+
 	/**
 	 * 경매 생성
 	 * @param command 경매상품, 종료시간
@@ -38,6 +40,8 @@ public class AuctionDomainService {
 			.build();
 
 		auctionRepository.save(auction);
+
+		scheduler.recoverSchedules();
 	}
 
 	/**
@@ -66,7 +70,7 @@ public class AuctionDomainService {
 	}
 
 	/**
-	 * 경매 삭제
+	 * 경매 삭제(취소)
 	 * @param auctionId 삭제할 경매 id
 	 * @param user 로그인 유저
 	 * @return 삭제된 경매 id
@@ -100,24 +104,24 @@ public class AuctionDomainService {
 
 	/**
 	 * 삭제되지 않은 경매
-	 * @param id 경매 id
+	 * @param auctionId 조회할 AuctionId
 	 * @return 조회된 경매
 	 * @author 전나겸
 	 */
-	public Auction findActiveAuctionById(Long id) {
-		return auctionRepository.findByIdAndDeletedFalse(id)
+	public Auction findActiveAuctionById(Long auctionId) {
+		return auctionRepository.findByIdAndDeletedFalse(auctionId)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 	}
 
 	/**
 	 * 삭제되지 않은 비관적 락이 적용된 경매 조회(상품, 판매자 정보 한번에 조회)
-	 * @param id 조회할 경매 id
+	 * @param auctionId 조회할 AuctionId
 	 * @return 비관적 락이 적용된 auction
 	 * @author 전나겸
 	 */
 	@Transactional
-	public Auction findActiveAuctionWithProductAndSellerLock(Long id) {
-		return auctionRepository.findAuctionWithProductAndSellerLock(id)
+	public Auction findActiveAuctionWithProductAndSellerLock(Long auctionId) {
+		return auctionRepository.findAuctionWithProductAndSellerLock(auctionId)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 	}
 

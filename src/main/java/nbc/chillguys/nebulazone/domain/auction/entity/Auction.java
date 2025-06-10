@@ -76,6 +76,15 @@ public class Auction extends BaseEntity {
 		return id;
 	}
 
+	public Long close() {
+		isClosed = true;
+		return id;
+	}
+
+	public void updateBidPrice(Long price) {
+		this.currentPrice = price;
+	}
+
 	public boolean isAuctionOwner(User user) {
 		return product.getSeller().getId().equals(user.getId());
 	}

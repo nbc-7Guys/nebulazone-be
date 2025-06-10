@@ -25,6 +25,7 @@ import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductPurchaseCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
+import nbc.chillguys.nebulazone.domain.products.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
@@ -64,13 +65,17 @@ public class ProductService {
 
 		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(findUser, null, request);
 
+		ProductEndTime productEndTime = request.getProductEndTime();
+		// todo tx.method가 direct인데 endtime에 값이 있으면 에러 발생 검증
+		// 아니면 Commonad들을 먼저 다 빼서 검증을 하자,
+
 		Product createProduct = productDomainService.createProduct(productCreateCommand, productImageUrls);
 
 		if (createProduct.getTxMethod() == ProductTxMethod.AUCTION) {
-			auctionDomainService.createAuction(AuctionCreateCommand.of(createProduct, request.getProductEndTime()));
+			auctionDomainService.createAuction(AuctionCreateCommand.of(createProduct, productEndTime));
 		}
 
-		return ProductResponse.from(createProduct, request.getProductEndTime());
+		return ProductResponse.from(createProduct, productEndTime);
 	}
 
 	public ProductResponse updateProduct(
