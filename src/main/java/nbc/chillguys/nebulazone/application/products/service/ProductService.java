@@ -21,6 +21,7 @@ import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
+import nbc.chillguys.nebulazone.domain.catalog.service.CatalogDomainService;
 import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
@@ -47,8 +48,7 @@ public class ProductService {
 	private final ProductDomainService productDomainService;
 	private final AuctionDomainService auctionDomainService;
 	private final TransactionDomainService transactionDomainService;
-
-	// todo: private final CatalogDomainService catalogDomainService;
+	private final CatalogDomainService catalogDomainService;
 
 	private final S3Service s3Service;
 
@@ -64,10 +64,9 @@ public class ProductService {
 			.map(s3Service::generateUploadUrlAndUploadFile)
 			.toList();
 
-		// todo: 카탈로그 도메인 서비스 생성되면 추후 붙일 예정
-		// Catalog findCatalog = catalogDomainService.getCatalogById(catalogId);
+		Catalog findCatalog = catalogDomainService.getCatalogById(catalogId);
 
-		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(findUser, null, request);
+		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(findUser, findCatalog, request);
 
 		ProductEndTime productEndTime = request.getProductEndTime();
 
@@ -92,9 +91,7 @@ public class ProductService {
 	) {
 		User user = userDomainService.findActiveUserById(userId);
 		Product product = productDomainService.findActiveProductById(productId);
-
-		// todo: 카탈로그 도메인 서비스 생성 후 작업
-		Catalog catalog = null;
+		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
 		boolean hasImage = !imageFiles.isEmpty();
@@ -125,9 +122,7 @@ public class ProductService {
 		ChangeToAuctionTypeRequest request
 	) {
 		User user = userDomainService.findActiveUserById(userId);
-
-		// todo: 카탈로그 도메인 서비스 생성 후 작업
-		Catalog catalog = null;
+		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		ChangeToAuctionTypeCommand command = request.toCommand(user, catalog, productId);
 		Product product = productDomainService.changeToAuctionType(command);
@@ -142,10 +137,7 @@ public class ProductService {
 	@Transactional
 	public DeleteProductResponse deleteProduct(Long userId, Long catalogId, Long productId) {
 		User user = userDomainService.findActiveUserById(userId);
-
-		// todo: 카탈로그 도메인 서비스 생성 후 작업
-		Catalog catalog = null;
-
+		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 		Auction auction = auctionDomainService.findAuctionByProductId(productId);
 
 		if (auction != null) {
@@ -164,9 +156,7 @@ public class ProductService {
 	public PurchaseProductResponse purchaseProduct(Long userId, Long catalogId, Long productId) {
 		User user = userDomainService.findActiveUserById(userId);
 		Product product = productDomainService.findAvailableProductById(productId);
-
-		// todo: 카탈로그 도메인 서비스 생성 후 작업
-		Catalog catalog = null;
+		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		user.usePoint(Math.toIntExact(product.getPrice()));
 
