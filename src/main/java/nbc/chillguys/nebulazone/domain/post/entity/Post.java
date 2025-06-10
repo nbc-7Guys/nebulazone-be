@@ -113,4 +113,9 @@ public class Post extends BaseEntity {
 	public String getUserNickname() {
 		return this.user.getNickname();
 	}
+
+	public void updateType(PostType type) {
+		this.type = type;
+	}
+
 }

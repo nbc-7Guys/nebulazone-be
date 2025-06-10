@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.post.dto.request.AdminPostSearchRequest;
+import nbc.chillguys.nebulazone.application.post.dto.request.AdminPostUpdateTypeRequest;
 import nbc.chillguys.nebulazone.application.post.dto.request.UpdatePostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.response.AdminPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
@@ -73,4 +74,9 @@ public class AdminPostService {
 
 		return UpdatePostResponse.from(updatedPost);
 	}
+
+	public void updatePostType(Long postId, AdminPostUpdateTypeRequest request) {
+		adminPostDomainService.updatePostType(postId, request.type());
+	}
+
 }

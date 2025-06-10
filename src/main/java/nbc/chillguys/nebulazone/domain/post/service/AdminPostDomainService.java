@@ -10,6 +10,7 @@ import nbc.chillguys.nebulazone.domain.post.dto.AdminPostInfo;
 import nbc.chillguys.nebulazone.domain.post.dto.AdminPostSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.AdminPostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
+import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 import nbc.chillguys.nebulazone.domain.post.exception.PostErrorCode;
 import nbc.chillguys.nebulazone.domain.post.exception.PostException;
 import nbc.chillguys.nebulazone.domain.post.repository.PostEsRepository;
@@ -23,6 +24,7 @@ public class AdminPostDomainService {
 	private final PostRepository postRepository;
 	private final PostEsRepository postEsRepository;
 
+	@Transactional(readOnly = true)
 	public Page<AdminPostInfo> findPosts(AdminPostSearchQueryCommand command, Pageable pageable) {
 		return postRepository.searchPosts(command, pageable)
 			.map(AdminPostInfo::from);
@@ -37,19 +39,26 @@ public class AdminPostDomainService {
 		return post;
 	}
 
-	public Post findMyActivePost(Long postId) {
-
-		return findActivePost(postId);
-	}
-
+	@Transactional(readOnly = true)
 	public Post getActivePostWithUserAndImages(Long postId) {
 		return postRepository.findActivePostByIdWithUserAndImages(postId)
 			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 	}
 
+	@Transactional
+	public void updatePostType(Long postId, PostType type) {
+		Post post = findActivePost(postId);
+		post.updateType(type);
+	}
+
 	public Post findActivePost(Long postId) {
 		return postRepository.findActivePostById(postId)
 			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+	}
+
+	public Post findMyActivePost(Long postId) {
+
+		return findActivePost(postId);
 	}
 
 	@Transactional
