@@ -108,6 +108,7 @@ public class AuctionDomainService {
 	 * @return 삭제된 경매 id
 	 * @author 전나겸
 	 */
+	@Transactional
 	public Long deleteAuction(Long auctionId, User user) {
 		Auction findAuction = auctionRepository.findById(auctionId)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));

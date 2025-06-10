@@ -103,9 +103,9 @@ public class BidDomainService {
 	@Transactional
 	public Long statusBid(Auction lockAuction, User user, Long bidId) {
 
-		if (Duration.between(LocalDateTime.now(), lockAuction.getEndTime()).toMinutes() < 30) {
-			throw new BidException(BidErrorCode.BID_CANCEL_TIME_LIMIT_EXCEEDED);
-		}
+		// if (Duration.between(LocalDateTime.now(), lockAuction.getEndTime()).toMinutes() < 30) {
+		// 	throw new BidException(BidErrorCode.BID_CANCEL_TIME_LIMIT_EXCEEDED);
+		// }
 
 		if (Duration.between(LocalDateTime.now(), lockAuction.getEndTime()).isNegative()) {
 			throw new AuctionException(AuctionErrorCode.ALREADY_CLOSED_AUCTION);

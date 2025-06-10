@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
@@ -44,6 +45,7 @@ public class AuctionService {
 		return findAuctionsBySortType.stream().map(FindAuctionResponse::from).toList();
 	}
 
+	@Transactional
 	public DeleteAuctionResponse deleteAuction(Long auctionId, AuthUser authUser) {
 
 		User user = userDomainService.findActiveUserById(authUser.getId());

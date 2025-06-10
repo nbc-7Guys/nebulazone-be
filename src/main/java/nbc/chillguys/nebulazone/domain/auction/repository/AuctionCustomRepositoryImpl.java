@@ -122,8 +122,9 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.selectFrom(auction)
 			.join(auction.product, product).fetchJoin()
 			.join(product.seller, user).fetchJoin()
-			.where(auction.deleted.eq(false)
-				.and(product.isDeleted.eq(false)))
+			.where(auction.id.eq(id),
+				auction.deleted.eq(false),
+				product.isDeleted.eq(false))
 			.setLockMode(LockModeType.PESSIMISTIC_WRITE)
 			.fetchOne());
 	}
