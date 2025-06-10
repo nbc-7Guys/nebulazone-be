@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.repository.AuctionRepository;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
-import nbc.chillguys.nebulazone.domain.bid.repository.BidRepository;
 
 @Slf4j
 @Service
@@ -18,10 +17,9 @@ import nbc.chillguys.nebulazone.domain.bid.repository.BidRepository;
 public class AutoAuctionDomainService {
 
 	private final AuctionRepository auctionRepository;
-	private final BidRepository bidRepository;
 
 	@Transactional
-	public void endAuction(Long auctionId) {
+	public void endAuction(Long auctionId, Bid wonBid) {
 		Optional<Auction> optAuction = auctionRepository.findById(auctionId);
 
 		if (optAuction.isEmpty()) {
@@ -29,24 +27,22 @@ public class AutoAuctionDomainService {
 			return;
 		}
 
-		Auction endedauction = optAuction.get();
+		Auction endedAuction = optAuction.get();
 
-		if (endedauction.isClosed() || endedauction.isDeleted()) {
-			log.info("이미 종료된 경매를 자동 종료 할 수 없음. 경매 id: {}", auctionId);
+		if (endedAuction.isWon() || endedAuction.isDeleted()) {
+			log.warn("경매가 낙찰되었거나 종료 상태인 경매는 자동 종료 불가. 경매 id: {}", auctionId);
 			return;
 		}
 
-		Optional<Bid> optBid = bidRepository.findHighestPriceBidByAuction(endedauction);
-		if (optBid.isEmpty()) {
+		if (wonBid == null) {
 			log.info("유찰 - 경매 id: {}", auctionId);
-			endedauction.close();
+			endedAuction.close();
 
 		} else {
-			Bid wonBid = optBid.get();
 			log.info("낙찰 - 경매 id: {}, 입찰 id: {}", auctionId, wonBid.getId());
 			wonBid.wonBid();
-			endedauction.getProduct().purchase();
-			endedauction.close();
+			endedAuction.getProduct().purchase();
+			endedAuction.close();
 		}
 
 	}

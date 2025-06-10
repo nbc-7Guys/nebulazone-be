@@ -7,13 +7,18 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuctionRequest;
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
@@ -45,6 +50,17 @@ public class AuctionController {
 
 		return ResponseEntity.ok(response);
 
+	}
+
+	@PostMapping("/{auctionId}")
+	public ResponseEntity<ManualEndAuctionResponse> manualEndAuction(
+		@PathVariable("auctionId") long auctionId,
+		@AuthenticationPrincipal AuthUser authUser,
+		@Valid @RequestBody ManualEndAuctionRequest request) {
+
+		ManualEndAuctionResponse response = auctionService.manualEndAuction(auctionId, authUser, request.BidId());
+
+		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/{auctionId}")

@@ -23,15 +23,13 @@ public class AuctionDomainService {
 
 	private final AuctionRepository auctionRepository;
 
-	private final AuctionSchedulerService scheduler;
-
 	/**
 	 * 경매 생성
 	 * @param command 경매상품, 종료시간
 	 * @author 전나겸
 	 */
 	@Transactional
-	public void createAuction(AuctionCreateCommand command) {
+	public Auction createAuction(AuctionCreateCommand command) {
 
 		Auction auction = Auction.builder()
 			.product(command.product())
@@ -39,9 +37,7 @@ public class AuctionDomainService {
 			.endTime(command.endTime())
 			.build();
 
-		auctionRepository.save(auction);
-
-		scheduler.autoAuctionEndSchedule(auction);
+		return auctionRepository.save(auction);
 	}
 
 	/**
@@ -88,7 +84,6 @@ public class AuctionDomainService {
 			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
 		}
 
-		scheduler.cancelSchedule(findAuction.getId());
 		return findAuction.delete();
 	}
 
@@ -124,6 +119,15 @@ public class AuctionDomainService {
 	public Auction findActiveAuctionWithProductAndSellerLock(Long auctionId) {
 		return auctionRepository.findAuctionWithProductAndSellerLock(auctionId)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
+	}
+
+	/**
+	 * 삭제 되지 않은 경매 리스트 조회
+	 * @return 삭제 되지 않은 경매 리스트
+	 * @author 전나겸
+	 */
+	public List<Auction> findActiveAuctions() {
+		return auctionRepository.findAuctionsByNotDeletedAndIsWonFalse();
 	}
 
 }

@@ -46,7 +46,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 				auction.id,
 				auction.startPrice,
 				auction.currentPrice,
-				auction.isClosed,
+				auction.isWon,
 				auction.endTime,
 				auction.createdAt,
 				product.name,
@@ -94,7 +94,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 				auction.id,
 				auction.startPrice,
 				auction.currentPrice,
-				auction.isClosed,
+				auction.isWon,
 				auction.endTime,
 				auction.createdAt,
 				product.name,
@@ -106,7 +106,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.leftJoin(auction.product.productImages, productImage)
 			.leftJoin(bid).on(bid.auction.eq(auction))
 			.where(
-				auction.isClosed.eq(false),
+				auction.isWon.eq(false),
 				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
 				product.deleted.eq(false),
@@ -136,6 +136,16 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 				.and(product.deleted.eq(false)))
 			.setLockMode(LockModeType.PESSIMISTIC_WRITE)
 			.fetchOne());
+	}
+
+	@Override
+	public List<Auction> findAuctionsByNotDeletedAndIsWonFalse() {
+
+		return jpaQueryFactory
+			.selectFrom(auction)
+			.where(auction.deleted.eq(false)
+				.and(auction.isWon.eq(false)))
+			.fetch();
 	}
 
 }

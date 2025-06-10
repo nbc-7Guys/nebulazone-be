@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.auction.service.AuctionSchedulerService;
 import nbc.chillguys.nebulazone.application.products.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
@@ -44,6 +45,8 @@ public class ProductService {
 	private final AuctionDomainService auctionDomainService;
 	private final TransactionDomainService transactionDomainService;
 
+	private final AuctionSchedulerService auctionSchedulerService;
+
 	// todo: private final CatalogDomainService catalogDomainService;
 
 	private final S3Service s3Service;
@@ -66,13 +69,13 @@ public class ProductService {
 		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(findUser, null, request);
 
 		ProductEndTime productEndTime = request.getProductEndTime();
-		// todo tx.method가 direct인데 endtime에 값이 있으면 에러 발생 검증
-		// 아니면 Commonad들을 먼저 다 빼서 검증을 하자,
 
 		Product createProduct = productDomainService.createProduct(productCreateCommand, productImageUrls);
 
 		if (createProduct.getTxMethod() == ProductTxMethod.AUCTION) {
-			auctionDomainService.createAuction(AuctionCreateCommand.of(createProduct, productEndTime));
+			AuctionCreateCommand auctionCreateCommand = AuctionCreateCommand.of(createProduct, productEndTime);
+			Auction savedAuction = auctionDomainService.createAuction(auctionCreateCommand);
+			auctionSchedulerService.autoAuctionEndSchedule(savedAuction);
 		}
 
 		return ProductResponse.from(createProduct, productEndTime);

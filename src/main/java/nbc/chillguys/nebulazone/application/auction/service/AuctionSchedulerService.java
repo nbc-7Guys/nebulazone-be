@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.domain.auction.service;
+package nbc.chillguys.nebulazone.application.auction.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -19,7 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
-import nbc.chillguys.nebulazone.domain.auction.repository.AuctionRepository;
+import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
+import nbc.chillguys.nebulazone.domain.auction.service.AutoAuctionDomainService;
+import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
+import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 
 @Slf4j
 @Service
@@ -29,7 +32,8 @@ public class AuctionSchedulerService {
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(30);
 	private final Map<Long, ScheduledFuture<?>> tasks = new ConcurrentHashMap<>();
 
-	private final AuctionRepository auctionRepository;
+	private final AuctionDomainService auctionDomainService;
+	private final BidDomainService bidDomainService;
 	private final AutoAuctionDomainService autoAuctionDomainService;
 
 	public void autoAuctionEndSchedule(Auction auction) {
@@ -40,11 +44,15 @@ public class AuctionSchedulerService {
 		}
 
 		ScheduledFuture<?> future = scheduler.schedule(() -> {
-			autoAuctionDomainService.endAuction(auction.getId());
+
+			Bid wonBid = bidDomainService.findHighestPriceBidByAuction(auction);
+			autoAuctionDomainService.endAuction(auction.getId(), wonBid);
 			tasks.remove(auction.getId());
+
 		}, seconds, TimeUnit.SECONDS);
 
 		tasks.put(auction.getId(), future);
+		log.info("자동 낙찰 스케줄러 등록 완료. auctionId: {}, {} 초 후 실행, 등록된 스케줄러 수: {}", auction.getId(), seconds, tasks.size());
 	}
 
 	public void cancelSchedule(Long auctionId) {
@@ -61,10 +69,10 @@ public class AuctionSchedulerService {
 	@PostConstruct
 	public void recoverSchedules() {
 		log.info("서버 재시작 - 경매 스케줄 복구 시작");
-		List<Auction> auctionList = auctionRepository.findAllByDeletedFalse();
+		List<Auction> auctionList = auctionDomainService.findActiveAuctions();
 
 		auctionList.stream()
-			.filter(auction -> !auction.isClosed())
+			.filter(auction -> !auction.isWon())
 			.filter(auction -> Duration.between(LocalDateTime.now(), auction.getEndTime()).isPositive())
 			.forEach(this::autoAuctionEndSchedule);
 	}

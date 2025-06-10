@@ -39,11 +39,11 @@ public class BidDomainService {
 	public Bid createBid(Auction lockAuction, User user, Long price) {
 
 		if (Duration.between(LocalDateTime.now(), lockAuction.getEndTime()).isNegative()) {
-			throw new AuctionException(AuctionErrorCode.AUCTION_CLOSED);
+			throw new AuctionException(AuctionErrorCode.ALREADY_CLOSED_AUCTION);
 		}
 
-		if (lockAuction.isClosed()) {
-			throw new AuctionException(AuctionErrorCode.AUCTION_CLOSED);
+		if (lockAuction.isWon()) {
+			throw new AuctionException(AuctionErrorCode.ALREADY_WON_AUCTION);
 		}
 
 		if (lockAuction.isAuctionOwner(user)) {
@@ -109,11 +109,11 @@ public class BidDomainService {
 		}
 
 		if (Duration.between(LocalDateTime.now(), lockAuction.getEndTime()).isNegative()) {
-			throw new AuctionException(AuctionErrorCode.AUCTION_CLOSED);
+			throw new AuctionException(AuctionErrorCode.ALREADY_CLOSED_AUCTION);
 		}
 
-		if (lockAuction.isClosed()) {
-			throw new AuctionException(AuctionErrorCode.AUCTION_CLOSED);
+		if (lockAuction.isWon()) {
+			throw new AuctionException(AuctionErrorCode.ALREADY_WON_AUCTION);
 		}
 
 		Bid findBid = bidRepository.findById(bidId)
@@ -124,7 +124,7 @@ public class BidDomainService {
 		}
 
 		if (findBid.getStatus() == BidStatus.CANCEL) {
-			throw new BidException(BidErrorCode.BID_ALREADY_CANCELLED);
+			throw new BidException(BidErrorCode.ALREADY_BID_CANCELLED);
 		}
 
 		if (findBid.isNotBidOwner(user)) {
@@ -142,6 +142,10 @@ public class BidDomainService {
 		lockAuction.updateBidPrice(beforeHighestPrice);
 
 		return findBid.getId();
+	}
+
+	public Bid findHighestPriceBidByAuction(Auction auction) {
+		return bidRepository.findHighestPriceBidByAuction(auction);
 	}
 
 }

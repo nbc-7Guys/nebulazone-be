@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
@@ -21,6 +22,7 @@ import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 public class AuctionService {
 
 	private final AuctionDomainService auctionDomainService;
+	private final AuctionSchedulerService auctionSchedulerService;
 	private final UserDomainService userDomainService;
 
 	public CommonPageResponse<FindAuctionResponse> findAuctions(int page, int size) {
@@ -42,7 +44,12 @@ public class AuctionService {
 
 		User user = userDomainService.findActiveUserById(authUser.getId());
 		Long deletedAuctionId = auctionDomainService.deleteAuction(auctionId, user);
+		auctionSchedulerService.cancelSchedule(deletedAuctionId);
 
 		return DeleteAuctionResponse.from(deletedAuctionId);
+	}
+
+	public ManualEndAuctionResponse manualEndAuction(long auctionId, AuthUser authUser, Long bidId) {
+		return null;
 	}
 }

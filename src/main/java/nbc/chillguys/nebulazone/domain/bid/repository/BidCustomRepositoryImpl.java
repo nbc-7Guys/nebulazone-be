@@ -107,14 +107,14 @@ public class BidCustomRepositoryImpl implements BidCustomRepository {
 	}
 
 	@Override
-	public Optional<Bid> findHighestPriceBidByAuction(Auction auction) {
+	public Bid findHighestPriceBidByAuction(Auction auction) {
 
-		return Optional.ofNullable(jpaQueryFactory
+		return jpaQueryFactory
 			.selectFrom(bid)
 			.where(bid.auction.eq(auction)
 				.and(bid.status.eq(BidStatus.BID)))
 			.orderBy(bid.price.desc())
 			.limit(1)
-			.fetchOne());
+			.fetchOne();
 	}
 }
