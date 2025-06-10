@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
+import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatHistory;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoomUser;
@@ -55,19 +56,18 @@ public class ChatDomainService {
 	 * @param authUser 인증된 사용자
 	 * @return 사용자가 참여중인 채팅방들
 	 */
-	public List<ChatRoom> findChatRooms(AuthUser authUser) {
-		List<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findAllByUserId(authUser.getId());
+	public List<ChatRoomInfo> findChatRooms(AuthUser authUser) {
+		List<ChatRoomInfo> chatRooms = chatRoomRepository.findAllByUserId(authUser.getId());
 
-		List<ChatRoom> chatRooms = chatRoomUsers.stream().map(ChatRoomUser::getChatRoom).toList();
 		return chatRooms;
 	}
 
 	/**
-	 * 인증된 사용자가 특정 채팅방에 접근할 수 있는지 검증<br/>
-	 * 접근 권한이 없으면 예외를 발생시킴
+	 * 인증된 사용자가 특정 채팅방에 참여중인지 확인<br/>
+	 * 참여중이지 않으면 예외를 발생시킴
 	 *
-	 * @param authUser 접근 권한을 확인할 인증된 사용자
-	 * @param roomId 검증할 채팅방의 ID
+	 * @param authUser 참여 중인지 확인할 인증된 사용자
+	 * @param roomId 확인할 채팅방의 ID
 	 * @throws ChatException 접근이 거부될 경우 CHAT_ROOM_ACCESS_DENIED 에러 코드와 함께 발생
 	 */
 	public void validateUserAccessToChatRoom(AuthUser authUser, Long roomId) {

@@ -11,8 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.application.chat.dto.request.CreateChatRoomRequest;
 import nbc.chillguys.nebulazone.application.chat.dto.response.CreateChatRoomResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryResponse;
-import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponse;
+import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponses;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
@@ -82,10 +83,10 @@ public class ChatService {
 	 *
 	 * @param authUser the auth user
 	 */
-	public FindChatRoomResponse findChatRooms(AuthUser authUser) {
+	public FindChatRoomResponses findChatRooms(AuthUser authUser) {
 		// 로그인한 유저 ID를 기반으로 해당 유저가 참여중인 모든 채팅방 찾기
-		List<ChatRoom> chatRooms = chatDomainService.findChatRooms(authUser);
-		return FindChatRoomResponse.of(chatRooms);
+		List<ChatRoomInfo> chatRooms = chatDomainService.findChatRooms(authUser);
+		return FindChatRoomResponses.of(chatRooms);
 	}
 
 	/**

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.chat.dto.request.CreateChatRoomRequest;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryResponse;
-import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponse;
+import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponses;
 import nbc.chillguys.nebulazone.application.chat.service.ChatService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.application.chat.dto.response.CreateChatRoomResponse;
@@ -37,10 +37,10 @@ public class ChatController {
 	}
 
 	@GetMapping("/rooms")
-	public ResponseEntity<FindChatRoomResponse> findChatRoom(
+	public ResponseEntity<FindChatRoomResponses> findChatRoom(
 		@AuthenticationPrincipal AuthUser authUser
 	) {
-		FindChatRoomResponse chatRooms = chatService.findChatRooms(authUser);
+		FindChatRoomResponses chatRooms = chatService.findChatRooms(authUser);
 		return ResponseEntity.ok(chatRooms);
 	}
 
