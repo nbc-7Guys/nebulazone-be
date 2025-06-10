@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.user.dto.request.AdminUserSearchQuery;
+import nbc.chillguys.nebulazone.application.user.dto.request.AdminUserUpdateRolesRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.AdminUserUpdateStatusRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.AdminUserResponse;
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
@@ -47,7 +48,13 @@ public class AdminUserService {
 		return UserResponse.from(targetUser);
 	}
 
+	@Transactional
 	public void updateUserStatus(Long userId, AdminUserUpdateStatusRequest request) {
 		adminUserDomainService.updateUserStatus(userId, request.status());
 	}
+
+	public void updateUserRoles(Long userId, AdminUserUpdateRolesRequest request) {
+		adminUserDomainService.updateUserRoles(userId, request.roles());
+	}
+
 }

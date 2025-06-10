@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.domain.user.service;
 
+import java.util.Set;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.user.dto.AdminUserInfo;
 import nbc.chillguys.nebulazone.domain.user.dto.AdminUserSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.domain.user.entity.UserStatus;
 import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
 import nbc.chillguys.nebulazone.domain.user.exception.UserException;
@@ -36,5 +39,12 @@ public class AdminUserDomainService {
 		User user = findActiveUserById(userId);
 
 		user.changeStatus(status); // 엔티티 메서드에서 상태값 검증/적용
+	}
+
+	@Transactional
+	public void updateUserRoles(Long userId, Set<UserRole> roles) {
+		User user = findActiveUserById(userId);
+
+		user.updateRoles(roles);
 	}
 }
