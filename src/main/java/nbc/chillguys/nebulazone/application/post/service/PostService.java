@@ -19,6 +19,7 @@ import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostDeleteCommand;
+import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
@@ -97,7 +98,9 @@ public class PostService {
 	}
 
 	public Page<SearchPostResponse> searchPost(String keyword, PostType type, int page, int size) {
-		return postDomainService.searchPost(keyword, type, page, size).map(SearchPostResponse::from);
+		PostSearchCommand command = PostSearchCommand.of(keyword, type, page, size);
+
+		return postDomainService.searchPost(command).map(SearchPostResponse::from);
 	}
 
 	public GetPostResponse getPost(Long postId) {
