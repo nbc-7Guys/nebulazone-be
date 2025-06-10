@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.domain.products.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductFindQuery;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductPurchaseCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductSearchCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
@@ -174,12 +176,16 @@ public class ProductDomainService {
 	/**
 	 * 상품 조회</br>
 	 * 유저와 이미지도 함께 조회
-	 * @param productId 상품 id
+	 * @param query 조회 정보
 	 * @return product
 	 * @author 이승현
 	 */
-	public Product getProductByIdWithUserAndImages(Long productId) {
-		return productRepository.findActiveProductByIdWithUserAndImages(productId)
+	public Product getProductByIdWithUserAndImages(ProductFindQuery query) {
+		Product product = productRepository.findActiveProductByIdWithUserAndImages(query.productId())
 			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+
+		product.validBelongsToCatalog(query.catalogId());
+
+		return product;
 	}
 }

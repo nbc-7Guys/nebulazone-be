@@ -25,6 +25,7 @@ import nbc.chillguys.nebulazone.domain.catalog.service.CatalogDomainService;
 import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductFindQuery;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductPurchaseCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductSearchCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
@@ -181,9 +182,10 @@ public class ProductService {
 	}
 
 	public ProductResponse getProduct(Long catalogId, Long productId) {
-		// todo: 카탈로그 도메인 서비스 생성 후 작업
+		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
-		Product product = productDomainService.getProductByIdWithUserAndImages(productId);
+		ProductFindQuery query = ProductFindQuery.of(catalog.getId(), productId);
+		Product product = productDomainService.getProductByIdWithUserAndImages(query);
 
 		return ProductResponse.from(product);
 	}
