@@ -69,6 +69,7 @@ public class SecurityConfig {
 					"/users/signup",
 					"/oauth2/**"
 				).permitAll()
+				.requestMatchers("/admin/**").hasRole("ADMIN") // 어드민 전용
 				.requestMatchers(
 					HttpMethod.GET,
 					"/auctions/**",
