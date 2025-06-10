@@ -53,4 +53,5 @@ public class UserCustomRepositoryImpl implements UserCustomRepository {
 				user.oAuthType.eq(oAuthType)
 			).fetchOne());
 	}
+
 }
