@@ -54,7 +54,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.where(
 				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
-				product.deleted.eq(false),
+				product.isDeleted.eq(false),
 				product.deletedAt.isNull())
 			.groupBy(auction.id, product.id)
 			.offset(pageable.getOffset())
@@ -68,7 +68,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.where(
 				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
-				product.deleted.eq(false),
+				product.isDeleted.eq(false),
 				product.deletedAt.isNull()
 			);
 
@@ -103,7 +103,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 				auction.isClosed.eq(false),
 				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
-				product.deleted.eq(false),
+				product.isDeleted.eq(false),
 				product.deletedAt.isNull())
 			.groupBy(auction.id, product.id)
 			.limit(5)

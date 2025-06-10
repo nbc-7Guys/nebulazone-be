@@ -2,17 +2,19 @@ package nbc.chillguys.nebulazone.application.products.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,18 +27,20 @@ import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRe
 import nbc.chillguys.nebulazone.application.products.dto.response.DeleteProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.response.PurchaseProductResponse;
+import nbc.chillguys.nebulazone.application.products.dto.response.SearchProductResponse;
 import nbc.chillguys.nebulazone.application.products.service.ProductService;
+import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
+import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/catalogs/{catalogId}/products")
 public class ProductController {
 
 	private final ProductService productService;
 
-	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(value = "/catalogs/{catalogId}/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ProductResponse> createProduct(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("catalogId") Long catalogId,
@@ -49,7 +53,7 @@ public class ProductController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(productResponse);
 	}
 
-	@PutMapping("/{productId}")
+	@PutMapping("/catalogs/{catalogId}/products/{productId}")
 	public ResponseEntity<ProductResponse> updateProduct(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("catalogId") Long catalogId,
@@ -63,7 +67,7 @@ public class ProductController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PatchMapping("/{productId}/auction-type")
+	@PatchMapping("/catalogs/{catalogId}/products/{productId}/auction-type")
 	public ResponseEntity<ProductResponse> changeToAuctionType(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("catalogId") Long catalogId,
@@ -75,7 +79,7 @@ public class ProductController {
 		return ResponseEntity.ok(response);
 	}
 
-	@DeleteMapping("/{productId}")
+	@DeleteMapping("/catalogs/{catalogId}/products/{productId}")
 	public ResponseEntity<DeleteProductResponse> deleteProduct(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("catalogId") Long catalogId,
@@ -86,13 +90,38 @@ public class ProductController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PostMapping("/{productId}/purchase")
+	@PostMapping("/catalogs/{catalogId}/products/{productId}/purchase")
 	public ResponseEntity<PurchaseProductResponse> purchaseProduct(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("catalogId") Long catalogId,
 		@PathVariable("productId") Long productId
 	) {
 		PurchaseProductResponse response = productService.purchaseProduct(authUser.getId(), catalogId, productId);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/products")
+	public ResponseEntity<CommonPageResponse<SearchProductResponse>> searchProduct(
+		@RequestParam(value = "name", required = false) String name,
+		@RequestParam("type") ProductTxMethod type,
+		@RequestParam(value = "from", required = false) Long priceFrom,
+		@RequestParam(value = "to", required = false) Long priceTo,
+		@RequestParam(value = "page", defaultValue = "1") Integer page,
+		@RequestParam(value = "size", defaultValue = "10") Integer size
+	) {
+		Page<SearchProductResponse> responses = productService.searchProduct(name, type, priceFrom, priceTo, page,
+			size);
+
+		return ResponseEntity.ok(CommonPageResponse.from(responses));
+	}
+
+	@GetMapping("/catalogs/{catalogId}/products/{productId}")
+	public ResponseEntity<ProductResponse> getProduct(
+		@PathVariable("catalogId") Long catalogId,
+		@PathVariable("productId") Long productId
+	) {
+		ProductResponse response = productService.getProduct(catalogId, productId);
 
 		return ResponseEntity.ok(response);
 	}

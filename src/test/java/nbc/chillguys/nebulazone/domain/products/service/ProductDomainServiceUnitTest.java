@@ -161,7 +161,7 @@ class ProductDomainServiceUnitTest {
 			ProductUpdateCommand command
 				= new ProductUpdateCommand(user, catalog, product.getId(), imageUrls, "수정된 이름", "수정된 본문");
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(product));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
 			Product result = productDomainService.updateProduct(command);
 
@@ -177,7 +177,7 @@ class ProductDomainServiceUnitTest {
 			ProductUpdateCommand command
 				= new ProductUpdateCommand(user, catalog, product.getId(), imageUrls, "수정된 이름", "수정된 본문");
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.empty());
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.updateProduct(command));
@@ -194,7 +194,7 @@ class ProductDomainServiceUnitTest {
 			ProductUpdateCommand command
 				= new ProductUpdateCommand(user, catalog, product.getId(), imageUrls, "수정된 이름", "수정된 본문");
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(product));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.updateProduct(command));
@@ -211,7 +211,7 @@ class ProductDomainServiceUnitTest {
 			ProductUpdateCommand command
 				= new ProductUpdateCommand(user, catalog, product.getId(), imageUrls, "수정된 이름", "수정된 본문");
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(product));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.updateProduct(command));
@@ -229,7 +229,7 @@ class ProductDomainServiceUnitTest {
 			ChangeToAuctionTypeCommand command
 				= new ChangeToAuctionTypeCommand(user, catalog, product.getId(), 100000L, ProductEndTime.HOUR_24);
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(product));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
 			Product result = productDomainService.changeToAuctionType(command);
 
@@ -243,7 +243,7 @@ class ProductDomainServiceUnitTest {
 			ChangeToAuctionTypeCommand command
 				= new ChangeToAuctionTypeCommand(user, catalog, product.getId(), 100000L, ProductEndTime.HOUR_24);
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.empty());
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.changeToAuctionType(command));
@@ -259,7 +259,7 @@ class ProductDomainServiceUnitTest {
 			ChangeToAuctionTypeCommand command
 				= new ChangeToAuctionTypeCommand(user, catalog, product.getId(), 100000L, ProductEndTime.HOUR_24);
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(product));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.changeToAuctionType(command));
@@ -275,7 +275,7 @@ class ProductDomainServiceUnitTest {
 			ChangeToAuctionTypeCommand command
 				= new ChangeToAuctionTypeCommand(user, catalog, product.getId(), 100000L, ProductEndTime.HOUR_24);
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(product));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.changeToAuctionType(command));
@@ -289,7 +289,7 @@ class ProductDomainServiceUnitTest {
 				user, catalog, auctionProduct.getId(), 100000L, ProductEndTime.HOUR_24
 			);
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(auctionProduct));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(auctionProduct));
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.changeToAuctionType(command));
@@ -306,7 +306,7 @@ class ProductDomainServiceUnitTest {
 		void success_deleteProduct() {
 			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(product));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
 			productDomainService.deleteProduct(command);
 
@@ -320,7 +320,7 @@ class ProductDomainServiceUnitTest {
 			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
 
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.empty());
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.deleteProduct(command));
@@ -335,7 +335,7 @@ class ProductDomainServiceUnitTest {
 
 			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(product));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.deleteProduct(command));
@@ -350,7 +350,7 @@ class ProductDomainServiceUnitTest {
 
 			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(product));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.deleteProduct(command));
@@ -367,7 +367,7 @@ class ProductDomainServiceUnitTest {
 		void success_purchaseProduct() {
 			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, product.getId());
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(product));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
 			productDomainService.purchaseProduct(command);
 
@@ -379,7 +379,7 @@ class ProductDomainServiceUnitTest {
 		void fail_purchaseProduct_productNotFound() {
 			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, product.getId());
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.empty());
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.purchaseProduct(command));
@@ -393,7 +393,7 @@ class ProductDomainServiceUnitTest {
 
 			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, product.getId());
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(product));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.purchaseProduct(command));
@@ -405,7 +405,7 @@ class ProductDomainServiceUnitTest {
 		void fail_purchaseProduct_auctionProductNotPurchasable() {
 			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, auctionProduct.getId());
 
-			given(productRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.of(auctionProduct));
+			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(auctionProduct));
 
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.purchaseProduct(command));

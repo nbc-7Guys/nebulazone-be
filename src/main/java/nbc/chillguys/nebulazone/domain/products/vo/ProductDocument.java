@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.domain.post.vo;
+package nbc.chillguys.nebulazone.domain.products.vo;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,33 +10,24 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
-import nbc.chillguys.nebulazone.domain.post.entity.Post;
-import nbc.chillguys.nebulazone.domain.post.entity.PostImage;
+import nbc.chillguys.nebulazone.domain.products.entity.Product;
+import nbc.chillguys.nebulazone.domain.products.entity.ProductImage;
 
-@Document(indexName = "posts")
+@Document(indexName = "products")
 @Setting(settingPath = "/elastic/settings.json")
-public record PostDocument(
+public record ProductDocument(
 	@Id
 	@Field(type = FieldType.Long)
-	Long postId,
+	Long productId,
 
 	@Field(type = FieldType.Text, analyzer = "korean_english")
-	String title,
-
-	@Field(type = FieldType.Text, analyzer = "korean_english")
-	String content,
-
-	@Field(type = FieldType.Keyword)
-	String type,
+	String name,
 
 	@Field(type = FieldType.Long)
-	Long userId,
+	Long price,
 
 	@Field(type = FieldType.Keyword)
-	String author,
-
-	@Field(type = FieldType.Boolean)
-	boolean isDeleted,
+	String txMethod,
 
 	@Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
 	LocalDateTime createdAt,
@@ -44,18 +35,15 @@ public record PostDocument(
 	@Field(type = FieldType.Keyword)
 	List<String> imageUrls
 ) {
-	public static PostDocument from(Post post) {
-		return new PostDocument(
-			post.getId(),
-			post.getTitle(),
-			post.getContent(),
-			post.getType().name(),
-			post.getUserId(),
-			post.getUserNickname(),
-			post.isDeleted(),
-			post.getCreatedAt(),
-			post.getPostImages().stream()
-				.map(PostImage::getUrl)
+	public static ProductDocument from(Product product) {
+		return new ProductDocument(
+			product.getId(),
+			product.getName(),
+			product.getPrice(),
+			product.getTxMethod().name(),
+			product.getCreatedAt(),
+			product.getProductImages().stream()
+				.map(ProductImage::getUrl)
 				.toList()
 		);
 	}

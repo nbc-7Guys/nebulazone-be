@@ -19,10 +19,12 @@ import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostDeleteCommand;
+import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
+import nbc.chillguys.nebulazone.domain.post.vo.PostDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
@@ -91,11 +93,17 @@ public class PostService {
 
 		postDomainService.deletePost(command);
 
+		postDomainService.deletePostFromEs(postId);
+
 		return DeletePostResponse.from(postId);
 	}
 
 	public Page<SearchPostResponse> searchPost(String keyword, PostType type, int page, int size) {
-		return postDomainService.searchPost(keyword, type, page, size).map(SearchPostResponse::from);
+		PostSearchCommand command = PostSearchCommand.of(keyword, type, page, size);
+
+		Page<PostDocument> postDocuments = postDomainService.searchPost(command);
+
+		return postDocuments.map(SearchPostResponse::from);
 	}
 
 	public GetPostResponse getPost(Long postId) {
