@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.user.dto.request.AdminUserUpdateRequest;
 import nbc.chillguys.nebulazone.domain.user.dto.AdminUserInfo;
 import nbc.chillguys.nebulazone.domain.user.dto.AdminUserSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -38,7 +39,7 @@ public class AdminUserDomainService {
 
 		User user = findActiveUserById(userId);
 
-		user.changeStatus(status); // 엔티티 메서드에서 상태값 검증/적용
+		user.changeStatus(status);
 	}
 
 	@Transactional
@@ -47,4 +48,22 @@ public class AdminUserDomainService {
 
 		user.updateRoles(roles);
 	}
+
+	public void updateUser(Long userId, AdminUserUpdateRequest request) {
+		User user = findActiveUserById(userId);
+
+		if (request.email() != null) {
+			user.updateEmail(request.email());
+		}
+		if (request.phone() != null) {
+			user.updatePhone(request.phone());
+		}
+		if (request.nickname() != null) {
+			user.updateNickname(request.nickname());
+		}
+		if (request.profileImage() != null) {
+			user.updateProfileImage(request.profileImage());
+		}
+	}
+
 }

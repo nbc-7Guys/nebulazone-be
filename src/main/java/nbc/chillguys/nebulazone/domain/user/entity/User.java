@@ -99,6 +99,14 @@ public class User extends BaseEntity {
 		this.deletedAt = LocalDateTime.now();
 	}
 
+	public void updateEmail(String email) {
+		this.email = email;
+	}
+
+	public void updatePhone(String phone) {
+		this.phone = phone;
+	}
+
 	public void updateNickname(String nickname) {
 		this.nickname = nickname;
 	}

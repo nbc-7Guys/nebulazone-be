@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.user.dto.request.AdminUserSearchQuery;
+import nbc.chillguys.nebulazone.application.user.dto.request.AdminUserUpdateRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.AdminUserUpdateRolesRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.AdminUserUpdateStatusRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.AdminUserResponse;
@@ -55,7 +56,7 @@ public class AdminUserController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PatchMapping("/admin/users/{userId}/status")
+	@PatchMapping("/{userId}/status")
 	public ResponseEntity<Void> updateUserStatus(
 		@PathVariable Long userId,
 		@RequestBody AdminUserUpdateStatusRequest request
@@ -64,12 +65,21 @@ public class AdminUserController {
 		return ResponseEntity.ok().build();
 	}
 
-	@PatchMapping("/admin/users/{userId}/roles")
+	@PatchMapping("/{userId}/roles")
 	public ResponseEntity<Void> updateUserRoles(
 		@PathVariable Long userId,
 		@RequestBody AdminUserUpdateRolesRequest request
 	) {
 		adminUserService.updateUserRoles(userId, request);
+		return ResponseEntity.ok().build();
+	}
+
+	@PatchMapping("/{userId}")
+	public ResponseEntity<Void> updateUser(
+		@PathVariable Long userId,
+		@RequestBody AdminUserUpdateRequest request
+	) {
+		adminUserService.updateUser(userId, request);
 		return ResponseEntity.ok().build();
 	}
 
