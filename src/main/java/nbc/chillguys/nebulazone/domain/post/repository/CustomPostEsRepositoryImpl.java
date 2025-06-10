@@ -26,10 +26,10 @@ public class CustomPostEsRepositoryImpl implements CustomPostEsRepository {
 	@Override
 	public Page<PostDocument> searchPost(String keyword, String type, Pageable pageable) {
 		BoolQuery.Builder builder = QueryBuilders.bool()
-			.must(m -> m.term(t -> t.field("type.keyword").value(type)));
+			.must(m -> m.term(t -> t.field("type").value(type)));
 
 		if (StringUtils.hasText(keyword)) {
-			builder.should(m -> m.term(t -> t.field("author.keyword").value(keyword)));
+			builder.should(m -> m.term(t -> t.field("author").value(keyword)));
 
 			builder.should(m -> m
 				.multiMatch(mm -> mm
