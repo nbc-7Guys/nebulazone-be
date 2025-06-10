@@ -20,14 +20,14 @@ public record ManualEndAuctionResponse(
 
 	public static ManualEndAuctionResponse from(ManualEndAuctionInfo auctionInfo) {
 		return new ManualEndAuctionResponse(
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null
+			auctionInfo.auctionId(),
+			auctionInfo.BidId(),
+			auctionInfo.winnerId(),
+			auctionInfo.winnerNickname(),
+			auctionInfo.winnerEmail(),
+			auctionInfo.wonProductPrice(),
+			auctionInfo.wonProductName(),
+			auctionInfo.wonDate()
 		);
 	}
 }
