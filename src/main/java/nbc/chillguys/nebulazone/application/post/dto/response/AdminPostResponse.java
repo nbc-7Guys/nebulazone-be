@@ -8,7 +8,6 @@ import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 public record AdminPostResponse(
 	Long postId,
 	String title,
-	String content,
 	String nickname,
 	PostType type,
 	boolean isDeleted,
@@ -20,7 +19,6 @@ public record AdminPostResponse(
 		return new AdminPostResponse(
 			info.postId(),
 			info.title(),
-			info.content(),
 			info.nickname(),
 			info.type(),
 			info.isDeleted(),

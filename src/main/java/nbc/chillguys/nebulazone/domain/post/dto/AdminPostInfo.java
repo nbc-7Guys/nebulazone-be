@@ -3,13 +3,13 @@ package nbc.chillguys.nebulazone.domain.post.dto;
 import java.time.LocalDateTime;
 
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
+import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 
 public record AdminPostInfo(
 	Long postId,
 	String title,
-	String content,
 	String nickname,
-	nbc.chillguys.nebulazone.domain.post.entity.PostType type,
+	PostType type,
 	boolean isDeleted,
 	LocalDateTime deletedAt,
 	LocalDateTime createdAt,
@@ -19,7 +19,6 @@ public record AdminPostInfo(
 		return new AdminPostInfo(
 			post.getId(),
 			post.getTitle(),
-			post.getContent(),
 			post.getUser().getNickname(),
 			post.getType(),
 			post.isDeleted(),
