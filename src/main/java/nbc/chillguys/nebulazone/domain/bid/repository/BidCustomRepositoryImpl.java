@@ -107,11 +107,11 @@ public class BidCustomRepositoryImpl implements BidCustomRepository {
 	}
 
 	@Override
-	public Bid findHighestPriceBidByAuction(Auction auction) {
+	public Bid findHighestPriceBidByAuction(Long auctionId) {
 
 		return jpaQueryFactory
 			.selectFrom(bid)
-			.where(bid.auction.eq(auction)
+			.where(bid.auction.id.eq(auctionId)
 				.and(bid.status.eq(BidStatus.BID)))
 			.orderBy(bid.price.desc())
 			.limit(1)

@@ -36,14 +36,13 @@ public class AutoAuctionDomainService {
 
 		if (wonBid == null) {
 			log.info("유찰 - 경매 id: {}", auctionId);
-			endedAuction.close();
-
-		} else {
-			log.info("낙찰 - 경매 id: {}, 입찰 id: {}", auctionId, wonBid.getId());
-			wonBid.wonBid();
-			endedAuction.getProduct().purchase();
-			endedAuction.close();
+			return;
 		}
+
+		log.info("낙찰 - 경매 id: {}, 입찰 id: {}", auctionId, wonBid.getId());
+		wonBid.wonBid();
+		endedAuction.getProduct().purchase();
+		endedAuction.wonAuction();
 
 	}
 

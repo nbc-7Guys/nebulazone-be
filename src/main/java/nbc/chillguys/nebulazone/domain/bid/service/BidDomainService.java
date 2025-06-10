@@ -144,8 +144,12 @@ public class BidDomainService {
 		return findBid.getId();
 	}
 
-	public Bid findHighestPriceBidByAuction(Auction auction) {
-		return bidRepository.findHighestPriceBidByAuction(auction);
+	public Bid findHighBidByAuction(Long auctionId) {
+		return bidRepository.findHighestPriceBidByAuction(auctionId);
+	}
+
+	public Bid findBid(Long bidId) {
+		return bidRepository.findById(bidId).orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
 	}
 
 }

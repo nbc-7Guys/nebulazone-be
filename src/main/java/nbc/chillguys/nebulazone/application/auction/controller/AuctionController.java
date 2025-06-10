@@ -54,18 +54,18 @@ public class AuctionController {
 
 	@PostMapping("/{auctionId}")
 	public ResponseEntity<ManualEndAuctionResponse> manualEndAuction(
-		@PathVariable("auctionId") long auctionId,
+		@PathVariable("auctionId") Long auctionId,
 		@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody ManualEndAuctionRequest request) {
 
-		ManualEndAuctionResponse response = auctionService.manualEndAuction(auctionId, authUser, request.BidId());
+		ManualEndAuctionResponse response = auctionService.manualEndAuction(auctionId, authUser, request.bidId());
 
 		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/{auctionId}")
 	public ResponseEntity<DeleteAuctionResponse> deleteAuction(
-		@PathVariable("auctionId") long auctionId,
+		@PathVariable("auctionId") Long auctionId,
 		@AuthenticationPrincipal AuthUser authUser) {
 
 		DeleteAuctionResponse response = auctionService.deleteAuction(auctionId, authUser);

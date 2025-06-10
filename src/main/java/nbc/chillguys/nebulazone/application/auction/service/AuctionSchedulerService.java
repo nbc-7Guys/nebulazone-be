@@ -45,7 +45,7 @@ public class AuctionSchedulerService {
 
 		ScheduledFuture<?> future = scheduler.schedule(() -> {
 
-			Bid wonBid = bidDomainService.findHighestPriceBidByAuction(auction);
+			Bid wonBid = bidDomainService.findHighBidByAuction(auction.getId());
 			autoAuctionDomainService.endAuction(auction.getId(), wonBid);
 			tasks.remove(auction.getId());
 

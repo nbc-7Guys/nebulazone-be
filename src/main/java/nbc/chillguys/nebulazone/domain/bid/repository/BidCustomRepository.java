@@ -17,5 +17,5 @@ public interface BidCustomRepository {
 
 	Optional<Long> findActiveBidHighestPriceByAuction(Auction auction);
 
-	Bid findHighestPriceBidByAuction(Auction auction);
+	Bid findHighestPriceBidByAuction(Long auctionId);
 }

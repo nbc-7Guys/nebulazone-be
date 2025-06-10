@@ -70,7 +70,7 @@ public class Auction extends BaseEntity {
 		return id;
 	}
 
-	public void close() {
+	public void wonAuction() {
 		isWon = true;
 	}
 
@@ -86,4 +86,7 @@ public class Auction extends BaseEntity {
 		return deleted && deletedAt != null;
 	}
 
+	public void updateEndTime() {
+		this.endTime = LocalDateTime.now();
+	}
 }
