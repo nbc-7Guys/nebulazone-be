@@ -24,6 +24,7 @@ import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
+import nbc.chillguys.nebulazone.domain.post.vo.PostDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
@@ -100,7 +101,9 @@ public class PostService {
 	public Page<SearchPostResponse> searchPost(String keyword, PostType type, int page, int size) {
 		PostSearchCommand command = PostSearchCommand.of(keyword, type, page, size);
 
-		return postDomainService.searchPost(command).map(SearchPostResponse::from);
+		Page<PostDocument> postDocuments = postDomainService.searchPost(command);
+
+		return postDocuments.map(SearchPostResponse::from);
 	}
 
 	public GetPostResponse getPost(Long postId) {

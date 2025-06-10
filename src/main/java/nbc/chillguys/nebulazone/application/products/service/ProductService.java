@@ -31,6 +31,7 @@ import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
+import nbc.chillguys.nebulazone.domain.products.vo.ProductDocument;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
@@ -181,10 +182,12 @@ public class ProductService {
 
 	public Page<SearchProductResponse> searchProduct(String productName, ProductTxMethod txMethod, Long priceFrom,
 		Long priceTo, int page, int size) {
-		ProductSearchCommand productSearchCommand = new ProductSearchCommand(productName, txMethod.name(), priceFrom,
+		ProductSearchCommand productSearchCommand = ProductSearchCommand.of(productName, txMethod, priceFrom,
 			priceTo, page, size);
 
-		return productDomainService.searchProduct(productSearchCommand).map(SearchProductResponse::from);
+		Page<ProductDocument> productDocuments = productDomainService.searchProduct(productSearchCommand);
+
+		return productDocuments.map(SearchProductResponse::from);
 	}
 
 	public ProductResponse getProduct(Long catalogId, Long productId) {
