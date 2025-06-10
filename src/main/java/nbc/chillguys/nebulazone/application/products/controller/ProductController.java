@@ -19,9 +19,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Encoding;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.products.dto.request.ChangeToAuctionTypeRequest;
@@ -43,17 +40,6 @@ public class ProductController {
 
 	private final ProductService productService;
 
-	@Operation(
-		summary = "상품 생성",
-		requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-			content = @Content(
-				mediaType = "multipart/form-data",
-				encoding = {
-					@Encoding(name = "product", contentType = "application/json")
-				}
-			)
-		)
-	)
 	@PostMapping(value = "/catalogs/{catalogId}/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ProductResponse> createProduct(
 		@AuthenticationPrincipal AuthUser authUser,
