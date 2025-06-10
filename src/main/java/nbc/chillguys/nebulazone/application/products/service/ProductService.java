@@ -3,18 +3,19 @@ package nbc.chillguys.nebulazone.application.products.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.auction.service.AuctionSchedulerService;
 import nbc.chillguys.nebulazone.application.products.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.response.DeleteProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.response.PurchaseProductResponse;
+import nbc.chillguys.nebulazone.application.products.dto.response.SearchProductResponse;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
@@ -24,11 +25,13 @@ import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductPurchaseCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductSearchCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
+import nbc.chillguys.nebulazone.domain.products.vo.ProductDocument;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
@@ -70,14 +73,20 @@ public class ProductService {
 
 		ProductEndTime productEndTime = request.getProductEndTime();
 
-		Product createProduct = productDomainService.createProduct(productCreateCommand, productImageUrls);
+		Product createdProduct = productDomainService.createProduct(productCreateCommand, productImageUrls);
 
+		productDomainService.saveProductToEs(createdProduct);
+
+		if (createdProduct.getTxMethod() == ProductTxMethod.AUCTION) {
+
+			auctionDomainService.createAuction(AuctionCreateCommand.of(createdProduct, productEndTime));
 		if (createProduct.getTxMethod() == ProductTxMethod.AUCTION) {
 			AuctionCreateCommand auctionCreateCommand = AuctionCreateCommand.of(createProduct, productEndTime);
 			Auction savedAuction = auctionDomainService.createAuction(auctionCreateCommand);
 			auctionSchedulerService.autoAuctionEndSchedule(savedAuction);
 		}
 
+		return ProductResponse.from(createdProduct, request.getProductEndTime());
 		return ProductResponse.from(createProduct, productEndTime);
 	}
 
@@ -110,6 +119,8 @@ public class ProductService {
 		ProductUpdateCommand command = request.toCommand(user, catalog, productId, imageUrls);
 		Product updatedProduct = productDomainService.updateProduct(command);
 
+		productDomainService.saveProductToEs(updatedProduct);
+
 		return ProductResponse.from(updatedProduct);
 	}
 
@@ -127,6 +138,8 @@ public class ProductService {
 
 		ChangeToAuctionTypeCommand command = request.toCommand(user, catalog, productId);
 		Product product = productDomainService.changeToAuctionType(command);
+
+		productDomainService.saveProductToEs(product);
 
 		auctionDomainService.createAuction(AuctionCreateCommand.of(product, request.getProductEndTime()));
 
@@ -170,5 +183,23 @@ public class ProductService {
 		Transaction tx = transactionDomainService.createTransaction(txCreateCommand);
 
 		return PurchaseProductResponse.from(tx);
+	}
+
+	public Page<SearchProductResponse> searchProduct(String productName, ProductTxMethod txMethod, Long priceFrom,
+		Long priceTo, int page, int size) {
+		ProductSearchCommand productSearchCommand = ProductSearchCommand.of(productName, txMethod, priceFrom,
+			priceTo, page, size);
+
+		Page<ProductDocument> productDocuments = productDomainService.searchProduct(productSearchCommand);
+
+		return productDocuments.map(SearchProductResponse::from);
+	}
+
+	public ProductResponse getProduct(Long catalogId, Long productId) {
+		// todo: 카탈로그 도메인 서비스 생성 후 작업
+
+		Product product = productDomainService.getProductByIdWithUserAndImages(productId);
+
+		return ProductResponse.from(product);
 	}
 }

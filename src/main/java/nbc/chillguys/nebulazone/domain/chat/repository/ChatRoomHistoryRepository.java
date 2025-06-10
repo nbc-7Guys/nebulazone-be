@@ -3,10 +3,8 @@ package nbc.chillguys.nebulazone.domain.chat.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatHistory;
 
-public interface ChatRoomHistoryRepository extends JpaRepository<ChatHistory, Long> {
-	List<ChatHistory> findAllByChatRoomIdOrderBySendTimeAsc(Long chatRoomId);
+public interface ChatRoomHistoryRepository extends JpaRepository<ChatHistory, Long>, ChatRoomHistoryRepositoryCustom {
 }

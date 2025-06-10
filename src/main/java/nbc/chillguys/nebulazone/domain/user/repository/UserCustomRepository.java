@@ -11,4 +11,5 @@ public interface UserCustomRepository {
 	Optional<User> findActiveUserById(Long userId);
 
 	Optional<User> findActiveUserByEmailAndOAuthType(String email, OAuthType oAuthType);
+
 }

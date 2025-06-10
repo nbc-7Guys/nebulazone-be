@@ -99,6 +99,14 @@ public class User extends BaseEntity {
 		this.deletedAt = LocalDateTime.now();
 	}
 
+	public void updateEmail(String email) {
+		this.email = email;
+	}
+
+	public void updatePhone(String phone) {
+		this.phone = phone;
+	}
+
 	public void updateNickname(String nickname) {
 		this.nickname = nickname;
 	}
@@ -121,6 +129,24 @@ public class User extends BaseEntity {
 
 	public boolean hasNotEnoughPoint(int price) {
 		return this.point < price;
+	}
+
+	public void changeStatus(UserStatus status) {
+		if (status == UserStatus.INACTIVE) {
+			this.status = UserStatus.INACTIVE;
+			this.deletedAt = LocalDateTime.now();
+		} else if (status == UserStatus.ACTIVE) {
+			this.status = UserStatus.ACTIVE;
+			this.deletedAt = null;
+		}
+	}
+
+	public void updateRoles(Set<UserRole> roles) {
+		if (roles == null || roles.isEmpty()) {
+			throw new UserException(UserErrorCode.WRONG_ROLES);
+		}
+		this.roles.clear();
+		this.roles.addAll(roles);
 	}
 
 }

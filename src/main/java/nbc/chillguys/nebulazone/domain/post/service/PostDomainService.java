@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostDeleteCommand;
+import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
-import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 import nbc.chillguys.nebulazone.domain.post.exception.PostErrorCode;
 import nbc.chillguys.nebulazone.domain.post.exception.PostException;
 import nbc.chillguys.nebulazone.domain.post.repository.PostEsRepository;
@@ -94,19 +94,26 @@ public class PostDomainService {
 	}
 
 	/**
+	 * Elasticsearch에 게시글 삭제
+	 * @param postId 게시글 id
+	 * @author 이승현
+	 */
+	@Transactional
+	public void deletePostFromEs(Long postId) {
+		postEsRepository.deleteById(postId);
+	}
+
+	/**
 	 * 게시글 검색</br>
 	 * keyword로 검색 제목, 본문을 토큰 단위로 검색, 유저명은 정확히 일치해야 함
-	 * @param keyword 제목, 본문, 유저명
-	 * @param type 게시글 유형
-	 * @param page page idx
-	 * @param size page size
+	 * @param command keyword(제목, 본문, 유저명), type(게시글 유형), page(page idx), size(page size)
 	 * @return 게시글 목록
 	 * @author 이승현
 	 */
-	public Page<PostDocument> searchPost(String keyword, PostType type, int page, int size) {
-		Pageable pageable = PageRequest.of(page - 1, size);
+	public Page<PostDocument> searchPost(PostSearchCommand command) {
+		Pageable pageable = PageRequest.of(command.page() - 1, command.size());
 
-		return postEsRepository.searchPost(keyword, type.name(), pageable);
+		return postEsRepository.searchPost(command.keyword(), command.type(), pageable);
 	}
 
 	/**

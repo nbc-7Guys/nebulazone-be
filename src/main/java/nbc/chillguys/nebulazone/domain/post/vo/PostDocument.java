@@ -8,7 +8,6 @@ import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.elasticsearch.annotations.Mapping;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
@@ -16,16 +15,15 @@ import nbc.chillguys.nebulazone.domain.post.entity.PostImage;
 
 @Document(indexName = "posts")
 @Setting(settingPath = "/elastic/settings.json")
-@Mapping(mappingPath = "/elastic/mappings.json")
 public record PostDocument(
 	@Id
 	@Field(type = FieldType.Long)
 	Long postId,
 
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Text, analyzer = "korean_english")
 	String title,
 
-	@Field(type = FieldType.Text)
+	@Field(type = FieldType.Text, analyzer = "korean_english")
 	String content,
 
 	@Field(type = FieldType.Keyword)
