@@ -2,9 +2,7 @@ package nbc.chillguys.nebulazone.domain.chat.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
+import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatHistory;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoomUser;
@@ -25,9 +24,7 @@ import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
-import nbc.chillguys.nebulazone.domain.products.repository.ProductRepository;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.repository.UserRepository;
 
 /**
  * The type Chat service.
@@ -39,8 +36,6 @@ public class ChatDomainService {
 	private final ChatRoomRepository chatRoomRepository;
 	private final ChatRoomUserRepository chatRoomUserRepository;
 	private final ChatRoomHistoryRepository chatRoomHistoryRepository;
-	private final ProductRepository productRepository;
-	private final UserRepository userRepository;
 
 	/**
 	 * 기존 채팅방을 Optional로 조회
@@ -49,8 +44,10 @@ public class ChatDomainService {
 	 * @param productId 상품 ID
 	 * @return Optional(채팅방)
 	 */
-	public Optional<ChatRoomUser> findExistingChatRoom(Long userId, Long productId) {
-		return chatRoomUserRepository.findByIdUserIdAndChatRoomProductId(userId, productId);
+	@Transactional(readOnly = true)
+	public Optional<ChatRoom> findExistingChatRoom(Long userId, Long productId) {
+		return chatRoomUserRepository.findByIdUserIdAndChatRoomProductId(userId, productId)
+			.map(ChatRoomUser::getChatRoom);
 	}
 
 	/**
@@ -59,19 +56,18 @@ public class ChatDomainService {
 	 * @param authUser 인증된 사용자
 	 * @return 사용자가 참여중인 채팅방들
 	 */
-	public List<ChatRoom> findChatRooms(AuthUser authUser) {
-		List<ChatRoomUser> chatRoomUsers = chatRoomUserRepository.findAllByUserId(authUser.getId());
+	public List<ChatRoomInfo> findChatRooms(AuthUser authUser) {
+		List<ChatRoomInfo> chatRooms = chatRoomRepository.findAllByUserId(authUser.getId());
 
-		List<ChatRoom> chatRooms = chatRoomUsers.stream().map(ChatRoomUser::getChatRoom).toList();
 		return chatRooms;
 	}
 
 	/**
-	 * 인증된 사용자가 특정 채팅방에 접근할 수 있는지 검증<br/>
-	 * 접근 권한이 없으면 예외를 발생시킴
+	 * 인증된 사용자가 특정 채팅방에 참여중인지 확인<br/>
+	 * 참여중이지 않으면 예외를 발생시킴
 	 *
-	 * @param authUser 접근 권한을 확인할 인증된 사용자
-	 * @param roomId 검증할 채팅방의 ID
+	 * @param authUser 참여 중인지 확인할 인증된 사용자
+	 * @param roomId 확인할 채팅방의 ID
 	 * @throws ChatException 접근이 거부될 경우 CHAT_ROOM_ACCESS_DENIED 에러 코드와 함께 발생
 	 */
 	public void validateUserAccessToChatRoom(AuthUser authUser, Long roomId) {
@@ -86,18 +82,13 @@ public class ChatDomainService {
 	 * @param roomId 채팅방 ID
 	 * @return 채팅 기록 응답(FindChatHistoryResponse) 리스트
 	 */
-	public List<FindChatHistoryResponse> findChatHistoryResponses(Long roomId) {
+	public List<FindChatHistoryResponse> findChatHistoryResponses(Long roomId, String senderEmail) {
 		List<ChatHistory> chatHistory = chatRoomHistoryRepository.findAllByChatRoomIdOrderBySendTimeAsc(roomId);
 
-		List<Long> senderIdList = chatHistory.stream().map(ChatHistory::getUserId).distinct().toList();
-
-		Map<Long, String> userNicknames = userRepository.findAllById(senderIdList)
-			.stream()
-			.collect(Collectors.toMap(User::getId, User::getNickname));
-
 		List<FindChatHistoryResponse> responses = chatHistory.stream()
-			.map(history -> FindChatHistoryResponse.from(history, userNicknames.get(history.getUserId())))
+			.map(history -> FindChatHistoryResponse.from(history, senderEmail))
 			.toList();
+
 		return responses;
 	}
 
@@ -112,8 +103,6 @@ public class ChatDomainService {
 	 */
 	@Transactional
 	public ChatRoom createChatRoom(Product product, User buyer, User seller) {
-
-		validateBuyerAndSeller(buyer, seller);
 
 		if (product.getTxMethod().equals(ProductTxMethod.AUCTION)) {
 			throw new ProductException(ProductErrorCode.INVALID_PRODUCT_TYPE);
@@ -149,7 +138,7 @@ public class ChatDomainService {
 		user.getChatRoom().removeChatRoomUser(user);
 		chatRoomUserRepository.delete(user);
 
-		return user.getUser().getNickname();
+		return user.getUser().getEmail();
 	}
 
 	/**
@@ -192,19 +181,6 @@ public class ChatDomainService {
 		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
 			.orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
 		return chatRoom;
-	}
-
-	/**
-	 * 구매자와 판매자가 동일 유저인지 확인
-	 *
-	 * @param buyer 구매자
-	 * @param seller 판매자
-	 * @throws ChatException CANNOT_CHAT_WITH_SELF
-	 */
-	public void validateBuyerAndSeller(User buyer, User seller) {
-		if (buyer.getId().equals(seller.getId())) {
-			throw new ChatException(ChatErrorCode.CANNOT_CHAT_WITH_SELF);
-		}
 	}
 
 }

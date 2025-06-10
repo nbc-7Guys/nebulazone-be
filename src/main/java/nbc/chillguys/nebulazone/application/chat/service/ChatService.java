@@ -1,7 +1,6 @@
 package nbc.chillguys.nebulazone.application.chat.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -12,10 +11,12 @@ import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.application.chat.dto.request.CreateChatRoomRequest;
 import nbc.chillguys.nebulazone.application.chat.dto.response.CreateChatRoomResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryResponse;
-import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponse;
+import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponses;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
-import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoomUser;
+import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
+import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
@@ -41,24 +42,40 @@ public class ChatService {
 	 * @return the chat room info
 	 */
 	@Transactional
-	public CreateChatRoomResponse createOrGet(AuthUser authUser, CreateChatRoomRequest request) {
+	public CreateChatRoomResponse getOrCreate(AuthUser authUser, CreateChatRoomRequest request) {
+
+		// 구매자와 판매자가 동일 유저인지 확인
+		validateBuyerIsNotSeller(authUser.getId(), request.productId());
 
 		// 로그인한 유저가 특정 상품에 대해 참여중인 채팅방이 있는지 확인
-		Optional<ChatRoomUser> existingChatRoomUser = chatDomainService.findExistingChatRoom(authUser.getId(),
-			request.productId());
-		if (existingChatRoomUser.isPresent()) {
-			return CreateChatRoomResponse.from(existingChatRoomUser.get().getChatRoom());
-		}
+		ChatRoom result = chatDomainService.findExistingChatRoom(authUser.getId(), request.productId())
+			.orElseGet(() -> createChatRoom(authUser, request));
 
+		return CreateChatRoomResponse.from(result);
+	}
+
+	/**
+	 * 구매자와 판매자가 동일 유저인지 확인
+	 *
+	 * @param buyerId 구매자 ID
+	 * @param productId 판매 상품 ID
+	 * @throws ChatException CANNOT_CHAT_WITH_SELF
+	 */
+	private void validateBuyerIsNotSeller(Long buyerId, Long productId) {
+		Product availableProductById = productDomainService.findAvailableProductById(productId);
+		if (availableProductById.getSeller().getId().equals(buyerId)) {
+			throw new ChatException(ChatErrorCode.CANNOT_CHAT_WITH_SELF);
+		}
+	}
+
+	public ChatRoom createChatRoom(AuthUser authUser, CreateChatRoomRequest request) {
 		// 기존에 참여중인 방이 없다면 거래상품 구매자, 판매자 생성
 		Product product = productDomainService.findAvailableProductById(request.productId());
 		User buyer = userDomainService.findActiveUserByEmail(authUser.getEmail());
 		User seller = product.getSeller();
 
 		// 채팅방 및 참가자 save
-		ChatRoom result = chatDomainService.createChatRoom(product, buyer, seller);
-
-		return CreateChatRoomResponse.from(result);
+		return chatDomainService.createChatRoom(product, buyer, seller);
 	}
 
 	/**
@@ -66,10 +83,10 @@ public class ChatService {
 	 *
 	 * @param authUser the auth user
 	 */
-	public FindChatRoomResponse findChatRooms(AuthUser authUser) {
+	public FindChatRoomResponses findChatRooms(AuthUser authUser) {
 		// 로그인한 유저 ID를 기반으로 해당 유저가 참여중인 모든 채팅방 찾기
-		List<ChatRoom> chatRooms = chatDomainService.findChatRooms(authUser);
-		return FindChatRoomResponse.of(chatRooms);
+		List<ChatRoomInfo> chatRooms = chatDomainService.findChatRooms(authUser);
+		return FindChatRoomResponses.of(chatRooms);
 	}
 
 	/**
@@ -83,7 +100,7 @@ public class ChatService {
 
 		chatDomainService.validateUserAccessToChatRoom(authUser, roomId);
 
-		List<FindChatHistoryResponse> responses = chatDomainService.findChatHistoryResponses(roomId);
+		List<FindChatHistoryResponse> responses = chatDomainService.findChatHistoryResponses(roomId, authUser.getEmail());
 
 		return responses;
 	}
