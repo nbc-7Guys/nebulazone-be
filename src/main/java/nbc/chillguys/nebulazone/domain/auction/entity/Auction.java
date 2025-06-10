@@ -76,9 +76,8 @@ public class Auction extends BaseEntity {
 		return id;
 	}
 
-	public Long close() {
+	public void close() {
 		isClosed = true;
-		return id;
 	}
 
 	public void updateBidPrice(Long price) {

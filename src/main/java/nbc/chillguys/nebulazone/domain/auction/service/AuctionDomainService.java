@@ -41,7 +41,7 @@ public class AuctionDomainService {
 
 		auctionRepository.save(auction);
 
-		scheduler.recoverSchedules();
+		scheduler.autoAuctionEndSchedule(auction);
 	}
 
 	/**
@@ -88,6 +88,7 @@ public class AuctionDomainService {
 			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
 		}
 
+		scheduler.cancelSchedule(findAuction.getId());
 		return findAuction.delete();
 	}
 

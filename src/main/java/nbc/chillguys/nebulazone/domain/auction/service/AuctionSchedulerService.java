@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
@@ -31,19 +32,19 @@ public class AuctionSchedulerService {
 	private final AuctionRepository auctionRepository;
 	private final AutoAuctionDomainService autoAuctionDomainService;
 
-	public void autoAuctionEndSchedule(Long auctionId, LocalDateTime endTime) {
-		long seconds = Duration.between(LocalDateTime.now(), endTime).getSeconds();
+	public void autoAuctionEndSchedule(Auction auction) {
+		long seconds = Duration.between(LocalDateTime.now(), auction.getEndTime()).getSeconds();
 
 		if (seconds <= 0) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_END_TIME_INVALID);
 		}
 
 		ScheduledFuture<?> future = scheduler.schedule(() -> {
-			autoAuctionDomainService.endAuction(auctionId);
-			tasks.remove(auctionId);
+			autoAuctionDomainService.endAuction(auction.getId());
+			tasks.remove(auction.getId());
 		}, seconds, TimeUnit.SECONDS);
 
-		tasks.put(auctionId, future);
+		tasks.put(auction.getId(), future);
 	}
 
 	public void cancelSchedule(Long auctionId) {
@@ -53,17 +54,37 @@ public class AuctionSchedulerService {
 		}
 	}
 
+	/**
+	 * 서버 재시작 시 날라간 삭제 및 종료 되지 않은 경매의 스케줄러를 복구
+	 * @author 전나겸
+	 */
 	@PostConstruct
 	public void recoverSchedules() {
-		log.info("서버 재시작 - 활성 경매 스케줄 복구 시작");
+		log.info("서버 재시작 - 경매 스케줄 복구 시작");
 		List<Auction> auctionList = auctionRepository.findAllByDeletedFalse();
 
 		auctionList.stream()
 			.filter(auction -> !auction.isClosed())
-			.filter(auction -> auction.getEndTime().isAfter(LocalDateTime.now()))
-			.forEach(auction -> {
+			.filter(auction -> Duration.between(LocalDateTime.now(), auction.getEndTime()).isPositive())
+			.forEach(this::autoAuctionEndSchedule);
+	}
 
-				autoAuctionEndSchedule(auction.getId(), auction.getEndTime());
-			});
+	/**
+	 * 서버 종료 시 스레드 종료
+	 * @author 전나겸
+	 */
+	@PreDestroy
+	public void shutdown() {
+		log.info("서버 종료 - 경매 스케줄러 스레드 종료");
+		scheduler.shutdown();
+		try {
+			if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+				log.warn("스케줄러가 정상 종료 되지 않음, 강제 종료 수행");
+				scheduler.shutdownNow();
+			}
+		} catch (InterruptedException e) {
+			log.warn("스케줄러 종료 중 에러 발생, 강제 종료 수행");
+			scheduler.shutdownNow();
+		}
 	}
 }

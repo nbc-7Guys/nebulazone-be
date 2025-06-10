@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
+import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 public interface BidCustomRepository {
@@ -15,4 +16,6 @@ public interface BidCustomRepository {
 	Page<FindBidInfo> findMyBids(User user, int page, int size);
 
 	Optional<Long> findActiveBidHighestPriceByAuction(Auction auction);
+
+	Optional<Bid> findHighestPriceBidByAuction(Auction auction);
 }
