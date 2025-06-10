@@ -17,7 +17,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Repository
 @RequiredArgsConstructor
-public class AdminUserQueryRepositoryImpl {
+public class AdminUserQueryRepositoryImpl implements AdminUserQueryRepository {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
