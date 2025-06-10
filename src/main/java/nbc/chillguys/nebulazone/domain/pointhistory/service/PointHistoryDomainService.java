@@ -55,7 +55,7 @@ public class PointHistoryDomainService {
 			return pointHistoryRepository.findByUserId(userId);
 		}
 	}
-	
+
 	/**
 	 * 포인트 환급/충전 요청을 거절 처리합니다.
 	 *

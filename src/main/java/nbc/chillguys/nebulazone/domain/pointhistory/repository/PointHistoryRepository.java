@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistory;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 
-public interface PointHistoryRepository extends JpaRepository<PointHistory, Long> {
+public interface PointHistoryRepository extends JpaRepository<PointHistory, Long>, PointHistoryCustomRepository {
 	Optional<PointHistory> findActivePointHistoryById(Long id);
 
 	List<PointHistory> findByUserId(Long userId);

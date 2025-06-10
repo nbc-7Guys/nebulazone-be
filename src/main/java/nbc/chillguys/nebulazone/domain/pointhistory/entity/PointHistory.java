@@ -61,6 +61,10 @@ public class PointHistory extends BaseEntity {
 		this.pointHistoryStatus = pointHistoryStatus;
 	}
 
+	public void approve() {
+		this.pointHistoryStatus = PointHistoryStatus.ACCEPT;
+	}
+
 	public void reject() {
 		this.pointHistoryStatus = PointHistoryStatus.REJECT;
 	}
