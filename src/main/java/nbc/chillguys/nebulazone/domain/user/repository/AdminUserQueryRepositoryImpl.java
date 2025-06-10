@@ -40,6 +40,7 @@ public class AdminUserQueryRepositoryImpl implements AdminUserQueryRepository {
 
 		List<User> content = jpaQueryFactory
 			.selectFrom(user)
+			.leftJoin(user.roles).fetchJoin()
 			.where(builder)
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())

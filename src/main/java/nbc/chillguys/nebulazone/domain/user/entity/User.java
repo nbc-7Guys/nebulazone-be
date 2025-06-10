@@ -123,5 +123,15 @@ public class User extends BaseEntity {
 		return this.point < price;
 	}
 
+	public void changeStatus(UserStatus status) {
+		if (status == UserStatus.INACTIVE) {
+			this.status = UserStatus.INACTIVE;
+			this.deletedAt = LocalDateTime.now();
+		} else if (status == UserStatus.ACTIVE) {
+			this.status = UserStatus.ACTIVE;
+			this.deletedAt = null;
+		}
+	}
+
 }
 
