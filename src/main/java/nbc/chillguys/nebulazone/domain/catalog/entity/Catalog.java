@@ -43,4 +43,17 @@ public class Catalog extends BaseEntity {
 		this.description = description;
 		this.type = type;
 	}
+
+	public void update(String name, String description, CatalogType type) {
+		if (name != null) {
+			this.name = name;
+		}
+		if (description != null) {
+			this.description = description;
+		}
+		if (type != null) {
+			this.type = type;
+		}
+	}
+
 }
