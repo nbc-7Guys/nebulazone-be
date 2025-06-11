@@ -35,4 +35,11 @@ public class AdminCommentDomainService {
 			.orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
 	}
 
+	public void deleteComment(Long commentId) {
+
+		Comment comment = findBiCommentId(commentId);
+
+		comment.delete(); // 소프트 딜리트
+	}
+
 }

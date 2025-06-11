@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.application.comment.controller;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,6 +44,12 @@ public class AdminCommentController {
 		@RequestBody AdminCommentUpdateRequest request
 	) {
 		adminCommentService.updateComment(commentId, request);
+		return ResponseEntity.noContent().build();
+	}
+
+	@DeleteMapping("/{commentId}")
+	public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
+		adminCommentService.deleteComment(commentId);
 		return ResponseEntity.noContent().build();
 	}
 
