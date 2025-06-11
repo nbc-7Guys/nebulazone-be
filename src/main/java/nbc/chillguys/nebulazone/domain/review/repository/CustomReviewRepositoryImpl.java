@@ -17,7 +17,7 @@ import nbc.chillguys.nebulazone.domain.review.entity.Review;
 
 @Repository
 @RequiredArgsConstructor
-public class ReviewCustomRepositoryImpl implements ReviewCustomRepository {
+public class CustomReviewRepositoryImpl implements CustomReviewRepository {
 
 	private final JPAQueryFactory queryFactory;
 
