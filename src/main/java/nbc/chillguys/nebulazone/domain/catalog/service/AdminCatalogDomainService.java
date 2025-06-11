@@ -37,7 +37,7 @@ public class AdminCatalogDomainService {
 	}
 
 	/**
-	 * 카탈로그 정보를 수정합니다.
+	 * 카탈로그 정보를 수정합니다
 	 *
 	 * @param catalogId 수정할 카탈로그 ID
 	 * @param request   수정 요청 DTO (이름, 설명, 타입)
