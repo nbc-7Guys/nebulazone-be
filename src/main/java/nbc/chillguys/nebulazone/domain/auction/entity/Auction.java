@@ -70,6 +70,20 @@ public class Auction extends BaseEntity {
 		return id;
 	}
 
+	public void update(Long startPrice, Long currentPrice, LocalDateTime endTime, Boolean isWon) {
+		this.startPrice = startPrice;
+		this.currentPrice = currentPrice;
+		this.endTime = endTime;
+		if (isWon != null) {
+			this.isWon = isWon;
+		}
+	}
+
+	public void restore() {
+		this.deleted = false;
+		this.deletedAt = null;
+	}
+
 	public void wonAuction() {
 		isWon = true;
 	}
