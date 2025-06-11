@@ -168,6 +168,11 @@ public class Product extends BaseEntity {
 		this.price = price;
 	}
 
+	public void restore() {
+		this.isDeleted = false;
+		this.deletedAt = null;
+	}
+
 	public void changePrice(Long price) {
 		this.price = price;
 	}

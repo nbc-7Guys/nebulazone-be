@@ -50,6 +50,17 @@ public class AdminProductDomainService {
 		}
 	}
 
+	@Transactional
+	public void deleteProduct(Long productId) {
+		Product product = findByIdWithJoin(productId);
+		product.delete();
+	}
+
+	public void restoreProduct(Long productId) {
+		Product product = findByIdWithJoin(productId);
+		product.restore();
+	}
+
 	public Product findByIdWithJoin(Long productId) {
 		return productRepository.findByIdWithJoin(productId)
 			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
