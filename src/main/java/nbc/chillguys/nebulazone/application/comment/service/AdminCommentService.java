@@ -35,4 +35,8 @@ public class AdminCommentService {
 		adminCommentDomainService.deleteComment(commentId);
 	}
 
+	public void restoreComment(Long commentId) {
+		adminCommentDomainService.restoreComment(commentId);
+	}
+
 }

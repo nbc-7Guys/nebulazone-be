@@ -81,4 +81,9 @@ public class Comment extends BaseEntity {
 		this.deletedAt = LocalDateTime.now();
 	}
 
+	public void restore() {
+		this.deleted = false;
+		this.deletedAt = null;
+	}
+
 }

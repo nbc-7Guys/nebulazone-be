@@ -24,7 +24,6 @@ public class AdminCommentDomainService {
 	}
 
 	public void updateComment(Long commentId, AdminCommentUpdateRequest request) {
-
 		Comment comment = findBiCommentId(commentId);
 
 		comment.update(request.content());
@@ -36,10 +35,15 @@ public class AdminCommentDomainService {
 	}
 
 	public void deleteComment(Long commentId) {
-
 		Comment comment = findBiCommentId(commentId);
 
-		comment.delete(); // 소프트 딜리트
+		comment.delete();
+	}
+
+	public void restoreComment(Long commentId) {
+		Comment comment = findBiCommentId(commentId);
+
+		comment.restore();
 	}
 
 }
