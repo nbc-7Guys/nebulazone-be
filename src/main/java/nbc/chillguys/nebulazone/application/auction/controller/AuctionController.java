@@ -68,7 +68,7 @@ public class AuctionController {
 		@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody ManualEndAuctionRequest request) {
 
-		ManualEndAuctionResponse response = auctionService.manualEndAuction(auctionId, authUser, request.bidId());
+		ManualEndAuctionResponse response = auctionService.manualEndAuction(auctionId, authUser, request);
 
 		return ResponseEntity.ok(response);
 	}

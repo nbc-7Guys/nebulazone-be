@@ -136,8 +136,10 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 
 		return jpaQueryFactory
 			.selectFrom(auction)
-			.where(auction.deleted.eq(false)
-				.and(auction.isWon.eq(false)))
+			.join(auction.product, product).fetchJoin()
+			.join(product.seller, user).fetchJoin()
+			.where(auction.deleted.eq(false),
+				auction.isWon.eq(false))
 			.fetch();
 	}
 

@@ -65,7 +65,7 @@ public class Product extends BaseEntity {
 	private User seller;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "catalog_id")    // todo: 카탈로그 생성코드가 완성되면 추후 nullable = false 작성
+	@JoinColumn(name = "catalog_id", nullable = false)
 	private Catalog catalog;
 
 	@ElementCollection

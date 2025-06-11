@@ -165,13 +165,13 @@ public class BidDomainService {
 	}
 
 	/**
-	 * 특정 입찰 조회(타 도메인에서 사용할 목적)
+	 * 특정 입찰 조회(유저도 함께 조회)
 	 * @param bidId 조회할 입찰 Id
 	 * @return 조회된 Bid
 	 * @author 전나겸
 	 */
 	public Bid findBid(Long bidId) {
-		return bidRepository.findById(bidId)
+		return bidRepository.findBidWithWonUser(bidId)
 			.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
 	}
 

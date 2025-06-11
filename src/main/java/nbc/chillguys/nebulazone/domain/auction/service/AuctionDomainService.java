@@ -84,14 +84,14 @@ public class AuctionDomainService {
 
 	/**
 	 * 수동 낙찰
-	 * @param user 로그인 유저
+	 * @param loginUser 로그인 유저
 	 * @param wonBid 낙찰 대상인 입찰
 	 * @param auctionId 종료할 경매 id
 	 * @return manualEndAuctionInfo
 	 * @author 전나겸
 	 */
 	@Transactional
-	public ManualEndAuctionInfo manualEndAuction(User user, Bid wonBid, Long auctionId) {
+	public ManualEndAuctionInfo manualEndAuction(User loginUser, Bid wonBid, Long auctionId) {
 
 		Auction findAuction = auctionRepository.findById(auctionId)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
@@ -100,7 +100,7 @@ public class AuctionDomainService {
 			throw new AuctionException(AuctionErrorCode.ALREADY_DELETED_AUCTION);
 		}
 
-		if (!findAuction.isAuctionOwner(user)) {
+		if (!findAuction.isAuctionOwner(loginUser)) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
 		}
 
@@ -112,7 +112,7 @@ public class AuctionDomainService {
 		findAuction.wonAuction();
 		findAuction.updateEndTime();
 
-		return ManualEndAuctionInfo.from(findAuction, wonBid, user);
+		return ManualEndAuctionInfo.from(findAuction, wonBid, loginUser);
 	}
 
 	/**
@@ -177,7 +177,7 @@ public class AuctionDomainService {
 	 * @return 삭제 되지 않은 경매 리스트
 	 * @author 전나겸
 	 */
-	public List<Auction> findActiveAuctions() {
+	public List<Auction> findActiveAuctionsWithProductAndSeller() {
 		return auctionRepository.findAuctionsByNotDeletedAndIsWonFalse();
 	}
 

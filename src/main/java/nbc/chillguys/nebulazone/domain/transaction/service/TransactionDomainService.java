@@ -25,7 +25,7 @@ public class TransactionDomainService {
 			.product(command.product())
 			.user(command.user())
 			.method(TransactionMethod.of(command.txMethod()))
-			.price(command.product().getPrice())
+			.price(command.price())
 			.build();
 		return transactionRepository.save(tx);
 	}
