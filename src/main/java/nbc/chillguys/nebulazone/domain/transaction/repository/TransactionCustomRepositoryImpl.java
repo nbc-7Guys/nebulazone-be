@@ -80,8 +80,8 @@ public class TransactionCustomRepositoryImpl implements TransactionCustomReposit
 				product.isSold
 			))
 			.from(transaction)
-			.join(transaction.user, user).fetchJoin()
-			.join(transaction.product, product).fetchJoin()
+			.join(transaction.user, user)
+			.join(transaction.product, product)
 			.where(user.id.eq(loginUser.getId()),
 				transaction.id.eq(transactionId))
 			.fetchOne());
