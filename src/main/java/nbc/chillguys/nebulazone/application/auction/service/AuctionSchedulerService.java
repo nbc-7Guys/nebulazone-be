@@ -23,6 +23,7 @@ import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.auction.service.AutoAuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
+import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 
 @Slf4j
 @Service
@@ -35,6 +36,7 @@ public class AuctionSchedulerService {
 	private final AuctionDomainService auctionDomainService;
 	private final BidDomainService bidDomainService;
 	private final AutoAuctionDomainService autoAuctionDomainService;
+	private final TransactionDomainService transactionDomainService;
 
 	/**
 	 * 자동 경매 종료 스케줄러 등록
