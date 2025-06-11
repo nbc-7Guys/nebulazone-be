@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.domain.catalog.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.catalog.dto.request.AdminCatalogUpdateRequest;
@@ -29,6 +30,7 @@ public class AdminCatalogDomainService {
 	 * @return AdminCatalogInfo 목록 Page
 	 * @author 정석현
 	 */
+	@Transactional(readOnly = true)
 	public Page<AdminCatalogInfo> findCatalogs(AdminCatalogSearchQueryCommand command, Pageable pageable) {
 		return adminCatalogQueryRepository.searchCatalogs(command, pageable)
 			.map(AdminCatalogInfo::from);
@@ -42,6 +44,7 @@ public class AdminCatalogDomainService {
 	 * @throws CatalogException 카탈로그가 존재하지 않을 때 발생
 	 * @author 정석현
 	 */
+	@Transactional
 	public void updateCatalog(Long catalogId, AdminCatalogUpdateRequest request) {
 
 		Catalog catalog = findCatalogId(catalogId);
@@ -57,6 +60,7 @@ public class AdminCatalogDomainService {
 	 * @throws CatalogException 카탈로그가 존재하지 않을 때 발생
 	 * @author 정석현
 	 */
+	@Transactional
 	public void deleteCatalog(Long catalogId) {
 
 		Catalog catalog = findCatalogId(catalogId);
