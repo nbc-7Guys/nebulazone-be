@@ -30,7 +30,8 @@ public class PostDomainService {
 
 	/**
 	 * 게시글 생성
-	 * @param command 유저, 게시글 제목, 게시글 내용, 게시판 종류
+	 *
+	 * @param command       유저, 게시글 제목, 게시글 내용, 게시판 종류
 	 * @param postImageUrls 게시글 이미지 리스트
 	 * @return Post
 	 * @author 전나겸
@@ -50,6 +51,13 @@ public class PostDomainService {
 		return postRepository.save(post);
 	}
 
+	/**
+	 * 게시글 수정
+	 *
+	 * @param command 게시글 수정 정보
+	 * @return post
+	 * @author 윤정환
+	 */
 	@Transactional
 	public Post updatePost(PostUpdateCommand command) {
 		Post post = findActivePost(command.postId());
@@ -61,11 +69,24 @@ public class PostDomainService {
 		return post;
 	}
 
+	/**
+	 * 삭제되지 않은 게시글 조회
+	 *
+	 * @param postId 게시글 id
+	 * @return post
+	 * @author 윤정환
+	 */
 	public Post findActivePost(Long postId) {
 		return postRepository.findActivePostById(postId)
 			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 	}
 
+	/**
+	 * 게시글 삭제
+	 *
+	 * @param command 게시글 삭제 정보
+	 * @author 윤정환
+	 */
 	@Transactional
 	public void deletePost(PostDeleteCommand command) {
 		Post post = findActivePost(command.postId());
@@ -75,6 +96,14 @@ public class PostDomainService {
 		post.delete();
 	}
 
+	/**
+	 * 내 게시물 조회
+	 *
+	 * @param postId 게시글 id
+	 * @param userId 유저 id
+	 * @return post
+	 * @author 윤정환
+	 */
 	public Post findMyActivePost(Long postId, Long userId) {
 		Post post = findActivePost(postId);
 
@@ -85,6 +114,7 @@ public class PostDomainService {
 
 	/**
 	 * Elasticsearch에 게시글 저장
+	 *
 	 * @param post 게시글
 	 * @author 이승현
 	 */
@@ -95,6 +125,7 @@ public class PostDomainService {
 
 	/**
 	 * Elasticsearch에 게시글 삭제
+	 *
 	 * @param postId 게시글 id
 	 * @author 이승현
 	 */
@@ -106,6 +137,7 @@ public class PostDomainService {
 	/**
 	 * 게시글 검색</br>
 	 * keyword로 검색 제목, 본문을 토큰 단위로 검색, 유저명은 정확히 일치해야 함
+	 *
 	 * @param command keyword(제목, 본문, 유저명), type(게시글 유형), page(page idx), size(page size)
 	 * @return 게시글 목록
 	 * @author 이승현
@@ -119,6 +151,7 @@ public class PostDomainService {
 	/**
 	 * 게시글 상세 조회</br>
 	 * 유저와 이미지들도 함께 조회함
+	 *
 	 * @param postId 게시글 id
 	 * @return post
 	 * @author 이승현
