@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.domain.transaction.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.transaction.dto.AdminTransactionInfo;
@@ -17,11 +18,13 @@ import nbc.chillguys.nebulazone.domain.transaction.repository.TransactionReposit
 public class AdminTransactionDomainService {
 	private final TransactionRepository transactionRepository;
 
+	@Transactional(readOnly = true)
 	public Page<AdminTransactionInfo> findTransactions(AdminTransactionSearchQueryCommand command, Pageable pageable) {
 		return transactionRepository.searchTransactions(command, pageable)
 			.map(AdminTransactionInfo::from);
 	}
 
+	@Transactional
 	public void deleteTransaction(Long txId) {
 		Transaction transaction = findByTransactionId(txId);
 		transactionRepository.delete(transaction);
