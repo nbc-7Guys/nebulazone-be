@@ -17,13 +17,13 @@ public record CommentDetailResponse(
 
 	public static CommentDetailResponse from(CommentWithUserInfo comment) {
 		return new CommentDetailResponse(
-			comment.commentId(),
-			comment.parentId(),
-			comment.author(),
-			comment.content(),
-			comment.createdAt(),
-			comment.modifiedAt(),
-			comment.children().stream()
+			comment.getCommentId(),
+			comment.getParentId(),
+			comment.getAuthor(),
+			comment.getContent(),
+			comment.getCreatedAt(),
+			comment.getModifiedAt(),
+			comment.getChildren().stream()
 				.map(CommentDetailResponse::from)
 				.toList()
 		);

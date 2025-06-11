@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -55,8 +56,9 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
 		List<CommentWithUserInfo> flatList = jpaQueryFactory
 			.select(Projections.constructor(CommentWithUserInfo.class,
 				comment.id,
-				comment.deleted.isTrue()
-					.when(true).then("삭제된 댓글입니다.").otherwise(comment.content),
+				new CaseBuilder()
+					.when(comment.deleted.isTrue()).then("삭제된 댓글입니다.")
+					.otherwise(comment.content),
 				user.nickname,
 				comment.parent.id,
 				comment.createdAt,
@@ -74,15 +76,15 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
 		Map<Long, CommentWithUserInfo> map = new LinkedHashMap<>();
 		List<CommentWithUserInfo> result = new ArrayList<>();
 		for (CommentWithUserInfo dto : flatList) {
-			map.put(dto.commentId(), dto);
+			map.put(dto.getCommentId(), dto);
 		}
 		for (CommentWithUserInfo dto : flatList) {
-			if (dto.parentId() == null) {
+			if (dto.getParentId() == null) {
 				result.add(dto);
 			} else {
-				CommentWithUserInfo parent = map.get(dto.parentId());
+				CommentWithUserInfo parent = map.get(dto.getParentId());
 				if (parent != null) {
-					parent.children().add(dto);
+					parent.getChildren().add(dto);
 				}
 			}
 		}

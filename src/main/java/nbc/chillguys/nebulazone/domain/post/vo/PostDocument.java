@@ -35,9 +35,6 @@ public record PostDocument(
 	@Field(type = FieldType.Keyword)
 	String author,
 
-	@Field(type = FieldType.Boolean)
-	boolean isDeleted,
-
 	@Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
 	LocalDateTime createdAt,
 
@@ -52,7 +49,6 @@ public record PostDocument(
 			post.getType().name(),
 			post.getUserId(),
 			post.getUserNickname(),
-			post.isDeleted(),
 			post.getCreatedAt(),
 			post.getPostImages().stream()
 				.map(PostImage::getUrl)

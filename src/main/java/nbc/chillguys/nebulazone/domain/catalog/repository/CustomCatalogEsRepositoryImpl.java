@@ -26,13 +26,13 @@ public class CustomCatalogEsRepositoryImpl implements CustomCatalogEsRepository 
 	@Override
 	public Page<CatalogDocument> searchCatalog(String keyword, String type, Pageable pageable) {
 		BoolQuery.Builder builder = QueryBuilders.bool()
-			.must(m -> m.term(t -> t.field("catalogType.keyword").value(type)));
+			.must(m -> m.term(t -> t.field("type").value(type)));
 
 		if (StringUtils.hasText(keyword)) {
 			builder.must(m -> m
 				.multiMatch(mm -> mm
 					.query(keyword)
-					.fields("catalogName", "catalogDescription")
+					.fields("name", "description")
 					.type(TextQueryType.CrossFields)
 				)
 			);
