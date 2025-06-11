@@ -71,6 +71,7 @@ public class AuctionService {
 		User loginUser = userDomainService.findActiveUserById(authUser.getId());
 		Bid wonBid = bidDomainService.findBid(request.bidId());
 		Product product = productDomainService.findActiveProductById(request.productId());
+		product.purchase();
 
 		ManualEndAuctionInfo auctionInfo = auctionDomainService.manualEndAuction(loginUser, wonBid, auctionId);
 
@@ -83,8 +84,10 @@ public class AuctionService {
 	}
 
 	public FindDetailAuctionResponse findAuction(Long auctionId) {
+
 		Bid highestPriceBid = bidDomainService.findHighBidByAuctionWithUser(auctionId);
 		AuctionFindDetailInfo auctionFindDetailInfo = auctionDomainService.findAuction(auctionId);
+
 		return FindDetailAuctionResponse.from(auctionFindDetailInfo, highestPriceBid);
 	}
 
