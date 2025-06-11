@@ -27,26 +27,26 @@ public class AdminCommentDomainService {
 
 	@Transactional
 	public void updateComment(Long commentId, AdminCommentUpdateRequest request) {
-		Comment comment = findBiCommentId(commentId);
+		Comment comment = findBycommentId(commentId);
 
 		comment.update(request.content());
 	}
 
 	@Transactional
 	public void deleteComment(Long commentId) {
-		Comment comment = findBiCommentId(commentId);
+		Comment comment = findBycommentId(commentId);
 
 		comment.delete();
 	}
 
 	@Transactional
 	public void restoreComment(Long commentId) {
-		Comment comment = findBiCommentId(commentId);
+		Comment comment = findBycommentId(commentId);
 
 		comment.restore();
 	}
 
-	public Comment findBiCommentId(Long commentId) {
+	public Comment findBycommentId(Long commentId) {
 		return commentRepository.findById(commentId)
 			.orElseThrow(() -> new CommentException(CommentErrorCode.COMMENT_NOT_FOUND));
 	}
