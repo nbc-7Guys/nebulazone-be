@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.product.dto.response.AdminProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.request.AdminProductSearchRequest;
+import nbc.chillguys.nebulazone.application.products.dto.request.AdminProductUpdateRequest;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.products.dto.AdminProductInfo;
 import nbc.chillguys.nebulazone.domain.products.dto.AdminProductSearchQueryCommand;
@@ -26,4 +27,14 @@ public class AdminProductService {
 		Page<AdminProductInfo> infoPage = adminProductDomainService.findProducts(command, pageable);
 		return CommonPageResponse.from(infoPage.map(AdminProductResponse::from));
 	}
+
+	public AdminProductResponse getProduct(Long productId) {
+		AdminProductInfo info = adminProductDomainService.getProduct(productId);
+		return AdminProductResponse.from(info);
+	}
+
+	public void updateProduct(Long productId, AdminProductUpdateRequest request) {
+		adminProductDomainService.updateProduct(productId, request);
+	}
+
 }

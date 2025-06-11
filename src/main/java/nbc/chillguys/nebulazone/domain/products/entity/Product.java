@@ -162,4 +162,14 @@ public class Product extends BaseEntity {
 		this.isDeleted = true;
 		this.deletedAt = LocalDateTime.now();
 	}
+
+	public void changeTxMethod(ProductTxMethod txMethod, Long price) {
+		this.txMethod = txMethod;
+		this.price = price;
+	}
+
+	public void changePrice(Long price) {
+		this.price = price;
+	}
+
 }

@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.domain.products.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -65,4 +66,17 @@ public class CustomProductAdminRepositoryImpl implements CustomProductAdminRepos
 
 		return new PageImpl<>(content, pageable, total != null ? total : 0L);
 	}
+
+	@Override
+	public Optional<Product> findByIdWithJoin(Long productId) {
+		QProduct product = QProduct.product;
+		Product result = jpaQueryFactory
+			.selectFrom(product)
+			.leftJoin(product.seller).fetchJoin()
+			.leftJoin(product.catalog).fetchJoin()
+			.where(product.id.eq(productId))
+			.fetchOne();
+		return Optional.ofNullable(result);
+	}
+
 }
