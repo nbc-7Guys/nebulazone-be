@@ -34,9 +34,10 @@ public class AuctionSchedulerService {
 	private final AutoAuctionService autoAuctionService;
 
 	/**
-	 *
-	 * @param auction
-	 * @param productId
+	 * 경매 자동 종료 스케줄러 등록
+	 * @param auction 등록할 경매
+	 * @param productId 상품 id
+	 * @author 전나겸
 	 */
 	public void autoAuctionEndSchedule(Auction auction, Long productId) {
 		long seconds = Duration.between(LocalDateTime.now(), auction.getEndTime()).getSeconds();
