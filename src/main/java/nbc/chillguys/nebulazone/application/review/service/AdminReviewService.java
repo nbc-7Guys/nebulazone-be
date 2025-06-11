@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.review.dto.request.AdminReviewSearchRequest;
+import nbc.chillguys.nebulazone.application.review.dto.request.AdminReviewUpdateRequest;
 import nbc.chillguys.nebulazone.application.review.dto.response.AdminReviewResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.review.dto.AdminReviewInfo;
@@ -24,4 +25,9 @@ public class AdminReviewService {
 		Page<AdminReviewInfo> infoPage = adminReviewDomainService.findReviews(command, pageable);
 		return CommonPageResponse.from(infoPage.map(AdminReviewResponse::from));
 	}
+
+	public void updateReview(Long reviewId, AdminReviewUpdateRequest request) {
+		adminReviewDomainService.updateReview(reviewId, request);
+	}
+
 }

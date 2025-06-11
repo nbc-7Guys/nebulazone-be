@@ -4,12 +4,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.review.dto.request.AdminReviewSearchRequest;
+import nbc.chillguys.nebulazone.application.review.dto.request.AdminReviewUpdateRequest;
 import nbc.chillguys.nebulazone.application.review.dto.response.AdminReviewResponse;
 import nbc.chillguys.nebulazone.application.review.service.AdminReviewService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
@@ -32,4 +36,14 @@ public class AdminReviewController {
 		CommonPageResponse<AdminReviewResponse> response = adminReviewService.findReviews(request, pageable);
 		return ResponseEntity.ok(response);
 	}
+
+	@PatchMapping("/{reviewId}")
+	public ResponseEntity<Void> updateReview(
+		@PathVariable Long reviewId,
+		@RequestBody AdminReviewUpdateRequest request
+	) {
+		adminReviewService.updateReview(reviewId, request);
+		return ResponseEntity.noContent().build();
+	}
+
 }
