@@ -22,6 +22,12 @@ public class TransactionDomainService {
 
 	private final TransactionRepository transactionRepository;
 
+	/**
+	 * 거래내역 저장
+	 * @param command command
+	 * @return 저장된 거래내역
+	 * @author 윤정환
+	 */
 	@Transactional
 	public Transaction createTransaction(TransactionCreateCommand command) {
 		Transaction tx = Transaction.builder()
@@ -33,10 +39,25 @@ public class TransactionDomainService {
 		return transactionRepository.save(tx);
 	}
 
+	/**
+	 * 내 거래내역 전체 조회
+	 * @param user 로그인 user
+	 * @param page page
+	 * @param size size
+	 * @return 페이징 적용된 나의 거래내역 정보
+	 * @author 전나겸
+	 */
 	public Page<TransactionFindAllInfo> findMyTransactions(User user, int page, int size) {
 		return transactionRepository.findTransactionsWithProductAndUser(user, page, size);
 	}
 
+	/**
+	 * 내 거래내역 상세 조회
+	 * @param user 로그인 user
+	 * @param transactionId 조회할 트랜잭션 아이디
+	 * @return 조회된 거래내역 정보
+	 * @author 전나겸
+	 */
 	public TransactionFindDetailInfo findMyTransaction(User user, Long transactionId) {
 		return transactionRepository.findTransactionWithProductAndUser(user, transactionId)
 			.orElseThrow(() -> new TransactionException(TransactionErrorCode.TRANSACTION_NOT_FOUND));
