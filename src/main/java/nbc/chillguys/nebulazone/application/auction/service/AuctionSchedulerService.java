@@ -20,9 +20,6 @@ import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
-import nbc.chillguys.nebulazone.domain.auction.service.AutoAuctionDomainService;
-import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
-import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 
 @Slf4j
 @Service
@@ -33,15 +30,14 @@ public class AuctionSchedulerService {
 	private final Map<Long, ScheduledFuture<?>> tasks = new ConcurrentHashMap<>();
 
 	private final AuctionDomainService auctionDomainService;
-	private final BidDomainService bidDomainService;
-	private final AutoAuctionDomainService autoAuctionDomainService;
+	private final AutoAuctionService autoAuctionService;
 
 	/**
-	 * 자동 경매 종료 스케줄러 등록
-	 * @param auction 등록할 경매
-	 * @author 전나겸
+	 *
+	 * @param auction
+	 * @param productId
 	 */
-	public void autoAuctionEndSchedule(Auction auction) {
+	public void autoAuctionEndSchedule(Auction auction, Long productId) {
 		long seconds = Duration.between(LocalDateTime.now(), auction.getEndTime()).getSeconds();
 
 		if (seconds <= 0) {
@@ -50,8 +46,8 @@ public class AuctionSchedulerService {
 
 		ScheduledFuture<?> future = scheduler.schedule(() -> {
 
-			Bid wonBid = bidDomainService.findHighBidByAuction(auction.getId());
-			autoAuctionDomainService.endAuction(auction.getId(), wonBid);
+			autoAuctionService.autoEndAuctionAndCreateTransaction(auction.getId(), productId);
+
 			tasks.remove(auction.getId());
 
 		}, seconds, TimeUnit.SECONDS);
@@ -73,18 +69,19 @@ public class AuctionSchedulerService {
 	}
 
 	/**
-	 * 서버 재시작 시 날라간 삭제 및 종료 되지 않은 경매의 스케줄러를 복구
+	 * 서버 재시작 시 날라간 삭제 및 종료 되지 않은 경매의 스케줄러를 복구<br>
+	 * Auction 조회 시 상품과 상품 판매자 정보도 함께 조회 함
 	 * @author 전나겸
 	 */
 	@PostConstruct
 	public void recoverSchedules() {
 		log.info("서버 재시작 - 경매 스케줄 복구 시작");
-		List<Auction> auctionList = auctionDomainService.findActiveAuctions();
+		List<Auction> auctionList = auctionDomainService.findActiveAuctionsWithProductAndSeller();
 
 		auctionList.stream()
 			.filter(auction -> !auction.isWon())
 			.filter(auction -> Duration.between(LocalDateTime.now(), auction.getEndTime()).isPositive())
-			.forEach(this::autoAuctionEndSchedule);
+			.forEach(auction -> autoAuctionEndSchedule(auction, auction.getProduct().getId()));
 	}
 
 	/**

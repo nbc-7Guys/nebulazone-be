@@ -68,13 +68,13 @@ public class AuctionService {
 	public ManualEndAuctionResponse manualEndAuction(Long auctionId, AuthUser authUser,
 		ManualEndAuctionRequest request) {
 
-		User user = userDomainService.findActiveUserById(authUser.getId());
+		User loginUser = userDomainService.findActiveUserById(authUser.getId());
 		Bid wonBid = bidDomainService.findBid(request.bidId());
 		Product product = productDomainService.findActiveProductById(request.productId());
 
-		ManualEndAuctionInfo auctionInfo = auctionDomainService.manualEndAuction(user, wonBid, auctionId);
+		ManualEndAuctionInfo auctionInfo = auctionDomainService.manualEndAuction(loginUser, wonBid, auctionId);
 
-		TransactionCreateCommand txCreateCommand = TransactionCreateCommand.of(user, product,
+		TransactionCreateCommand txCreateCommand = TransactionCreateCommand.of(wonBid.getUser(), product,
 			product.getTxMethod().name(), auctionInfo.wonProductPrice());
 
 		txDomainService.createTransaction(txCreateCommand);
@@ -87,4 +87,5 @@ public class AuctionService {
 		AuctionFindDetailInfo auctionFindDetailInfo = auctionDomainService.findAuction(auctionId);
 		return FindDetailAuctionResponse.from(auctionFindDetailInfo, highestPriceBid);
 	}
+
 }

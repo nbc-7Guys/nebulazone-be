@@ -20,4 +20,6 @@ public interface BidCustomRepository {
 	Bid findHighestPriceBidByAuction(Long auctionId);
 
 	Bid findHighestPriceBidByAuctionWithUser(Long auctionId);
+
+	Optional<Bid> findBidWithWonUser(Long bidId);
 }

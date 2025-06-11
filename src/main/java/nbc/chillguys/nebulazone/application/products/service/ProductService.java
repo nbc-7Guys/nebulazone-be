@@ -22,6 +22,7 @@ import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
+import nbc.chillguys.nebulazone.domain.catalog.service.CatalogDomainService;
 import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
@@ -51,7 +52,7 @@ public class ProductService {
 
 	private final AuctionSchedulerService auctionSchedulerService;
 
-	// todo: private final CatalogDomainService catalogDomainService;
+	private final CatalogDomainService catalogDomainService;
 
 	private final S3Service s3Service;
 
@@ -67,10 +68,9 @@ public class ProductService {
 			.map(s3Service::generateUploadUrlAndUploadFile)
 			.toList();
 
-		// todo: 카탈로그 도메인 서비스 생성되면 추후 붙일 예정
-		// Catalog findCatalog = catalogDomainService.getCatalogById(catalogId);
+		Catalog findCatalog = catalogDomainService.getCatalogById(catalogId);
 
-		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(findUser, null, request);
+		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(findUser, findCatalog, request);
 
 		ProductEndTime productEndTime = request.getProductEndTime();
 
@@ -81,7 +81,7 @@ public class ProductService {
 		if (createdProduct.getTxMethod() == ProductTxMethod.AUCTION) {
 			AuctionCreateCommand auctionCreateCommand = AuctionCreateCommand.of(createdProduct, productEndTime);
 			Auction savedAuction = auctionDomainService.createAuction(auctionCreateCommand);
-			auctionSchedulerService.autoAuctionEndSchedule(savedAuction);
+			auctionSchedulerService.autoAuctionEndSchedule(savedAuction, createdProduct.getId());
 		}
 
 		return ProductResponse.from(createdProduct, productEndTime);

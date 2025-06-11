@@ -50,10 +50,8 @@ public class AutoAuctionDomainService {
 			return;
 		}
 
-		Bid mergeBid = entityManager.merge(wonBid);
-
-		log.info("낙찰 - 경매 id: {}, 입찰 id: {}", auctionId, mergeBid.getId());
-		mergeBid.wonBid();
+		log.info("낙찰 - 경매 id: {}, 입찰 id: {}", auctionId, wonBid.getId());
+		wonBid.wonBid();
 		endedAuction.getProduct().purchase();
 		endedAuction.wonAuction();
 
