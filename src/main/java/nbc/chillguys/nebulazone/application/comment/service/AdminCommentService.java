@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.comment.dto.request.AdminCommentSearchRequest;
+import nbc.chillguys.nebulazone.application.comment.dto.request.AdminCommentUpdateRequest;
 import nbc.chillguys.nebulazone.application.comment.dto.response.AdminCommentResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.comment.dto.AdminCommentInfo;
@@ -25,4 +26,9 @@ public class AdminCommentService {
 		Page<AdminCommentInfo> infoPage = adminCommentDomainService.findComments(command, pageable);
 		return CommonPageResponse.from(infoPage.map(AdminCommentResponse::from));
 	}
+
+	public void updateComment(Long commentId, AdminCommentUpdateRequest request) {
+		adminCommentDomainService.updateComment(commentId, request);
+	}
+
 }

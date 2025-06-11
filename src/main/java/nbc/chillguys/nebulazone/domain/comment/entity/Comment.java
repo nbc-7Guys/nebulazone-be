@@ -80,4 +80,5 @@ public class Comment extends BaseEntity {
 		this.deleted = true;
 		this.deletedAt = LocalDateTime.now();
 	}
+
 }
