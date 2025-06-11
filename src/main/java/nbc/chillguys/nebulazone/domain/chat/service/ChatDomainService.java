@@ -44,7 +44,6 @@ public class ChatDomainService {
 	 * @param productId 상품 ID
 	 * @return Optional(채팅방)
 	 */
-	@Transactional(readOnly = true)
 	public Optional<ChatRoom> findExistingChatRoom(Long userId, Long productId) {
 		return chatRoomUserRepository.findByIdUserIdAndChatRoomProductId(userId, productId)
 			.map(ChatRoomUser::getChatRoom);
@@ -56,6 +55,7 @@ public class ChatDomainService {
 	 * @param authUser 인증된 사용자
 	 * @return 사용자가 참여중인 채팅방들
 	 */
+	@Transactional(readOnly = true)
 	public List<ChatRoomInfo> findChatRooms(AuthUser authUser) {
 		List<ChatRoomInfo> chatRooms = chatRoomRepository.findAllByUserId(authUser.getId());
 
@@ -82,6 +82,7 @@ public class ChatDomainService {
 	 * @param roomId 채팅방 ID
 	 * @return 채팅 기록 응답(FindChatHistoryResponse) 리스트
 	 */
+	@Transactional(readOnly = true)
 	public List<FindChatHistoryResponse> findChatHistoryResponses(Long roomId) {
 		List<ChatHistory> chatHistory = chatRoomHistoryRepository.findAllByChatRoomIdOrderBySendTimeAsc(roomId);
 
@@ -177,6 +178,7 @@ public class ChatDomainService {
 	 * @return ChatRoom 엔티티
 	 * @throws ChatException CHAT_ROOM_NOT_FOUND
 	 */
+	@Transactional(readOnly = true)
 	public ChatRoom findChatRoom(Long roomId) {
 		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
 			.orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));

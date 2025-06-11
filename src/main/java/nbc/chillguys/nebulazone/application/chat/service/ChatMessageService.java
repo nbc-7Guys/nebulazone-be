@@ -50,7 +50,6 @@ public class ChatMessageService {
 	 * @param command 메시지 내용, 타입
 	 */
 	public void sendTextMessage(String sessionId, Long roomId, ChatSendTextMessageCommand command) {
-
 		AuthUser authUser = validateAuthUserInRoom(sessionId, roomId);
 
 		MessageType messageType = MessageType.valueOf(command.type());
@@ -103,6 +102,7 @@ public class ChatMessageService {
 	 *
 	 * @param roomId 채팅방 id
 	 */
+	@Transactional
 	public void saveMessagesToDb(Long roomId) {
 		// 채팅방Id를 기준으로 레디스에 있는 채팅기록들 불러오기
 		List<ChatMessageInfo> messagesFromRedis = chatMessageRedisService.getMessagesFromRedis(roomId);

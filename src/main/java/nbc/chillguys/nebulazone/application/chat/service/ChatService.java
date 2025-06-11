@@ -83,6 +83,7 @@ public class ChatService {
 	 *
 	 * @param authUser the auth user
 	 */
+	@Transactional(readOnly = true)
 	public FindChatRoomResponses findChatRooms(AuthUser authUser) {
 		// 로그인한 유저 ID를 기반으로 해당 유저가 참여중인 모든 채팅방 찾기
 		List<ChatRoomInfo> chatRooms = chatDomainService.findChatRooms(authUser);
@@ -96,6 +97,7 @@ public class ChatService {
 	 * @param roomId the room id
 	 * @return the find chat room response
 	 */
+	@Transactional(readOnly = true)
 	public List<FindChatHistoryResponse> findChatHistories(AuthUser authUser, Long roomId) {
 
 		chatDomainService.validateUserAccessToChatRoom(authUser, roomId);
