@@ -7,8 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindAllInfo;
+import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
 import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
+import nbc.chillguys.nebulazone.domain.transaction.exception.TransactionErrorCode;
+import nbc.chillguys.nebulazone.domain.transaction.exception.TransactionException;
 import nbc.chillguys.nebulazone.domain.transaction.repository.TransactionRepository;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
@@ -30,7 +33,12 @@ public class TransactionDomainService {
 		return transactionRepository.save(tx);
 	}
 
-	public Page<TransactionFindAllInfo> findTransactions(User user, int page, int size) {
-		return transactionRepository.findTransactionsWithProduct(user, page, size);
+	public Page<TransactionFindAllInfo> findMyTransactions(User user, int page, int size) {
+		return transactionRepository.findTransactionsWithProductAndUser(user, page, size);
+	}
+
+	public TransactionFindDetailInfo findMyTransaction(User user, Long transactionId) {
+		return transactionRepository.findTransactionWithProductAndUser(user, transactionId)
+			.orElseThrow(() -> new TransactionException(TransactionErrorCode.TRANSACTION_NOT_FOUND));
 	}
 }

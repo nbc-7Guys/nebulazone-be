@@ -5,6 +5,7 @@ import static nbc.chillguys.nebulazone.domain.transaction.entity.QTransaction.*;
 import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,7 +18,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import jakarta.persistence.EntityManager;
 import nbc.chillguys.nebulazone.domain.transaction.dto.QTransactionFindAllInfo;
+import nbc.chillguys.nebulazone.domain.transaction.dto.QTransactionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindAllInfo;
+import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Repository
@@ -30,7 +33,7 @@ public class TransactionCustomRepositoryImpl implements TransactionCustomReposit
 	}
 
 	@Override
-	public Page<TransactionFindAllInfo> findTransactionsWithProduct(User loginUser, int page, int size) {
+	public Page<TransactionFindAllInfo> findTransactionsWithProductAndUser(User loginUser, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
 		List<TransactionFindAllInfo> contents = jpaQueryFactory
@@ -57,5 +60,30 @@ public class TransactionCustomRepositoryImpl implements TransactionCustomReposit
 			.where(transaction.user.id.eq(loginUser.getId()));
 
 		return PageableExecutionUtils.getPage(contents, pageable, countQuery::fetchOne);
+	}
+
+	@Override
+	public Optional<TransactionFindDetailInfo> findTransactionWithProductAndUser(User loginUser, Long transactionId) {
+
+		return Optional.ofNullable(jpaQueryFactory
+			.select(new QTransactionFindDetailInfo(
+				transaction.id,
+				user.id,
+				user.nickname,
+				user.email,
+				transaction.price,
+				transaction.createdAt,
+				transaction.method,
+				product.id,
+				product.name,
+				product.createdAt,
+				product.isSold
+			))
+			.from(transaction)
+			.join(transaction.user, user).fetchJoin()
+			.join(transaction.product, product).fetchJoin()
+			.where(user.id.eq(loginUser.getId()),
+				transaction.id.eq(transactionId))
+			.fetchOne());
 	}
 }
