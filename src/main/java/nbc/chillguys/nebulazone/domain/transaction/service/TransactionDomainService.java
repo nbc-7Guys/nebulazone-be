@@ -60,6 +60,6 @@ public class TransactionDomainService {
 	 */
 	public TransactionFindDetailInfo findMyTransaction(User user, Long transactionId) {
 		return transactionRepository.findTransactionWithProductAndUser(user, transactionId)
-			.orElseThrow(() -> new TransactionException(TransactionErrorCode.TRANSACTION_NOT_FOUND));
+			.orElseThrow(() -> new TransactionException(TransactionErrorCode.NOT_FOUNT_TRANSACTION));
 	}
 }
