@@ -45,10 +45,12 @@ public class Review extends BaseEntity {
 	}
 
 	public void update(String content, Integer star) {
-		if (content != null)
+		if (content != null) {
 			this.content = content;
-		if (star != null)
+		}
+		if (star != null) {
 			this.star = star;
+		}
 	}
 
 }
