@@ -4,8 +4,10 @@ import static nbc.chillguys.nebulazone.domain.auction.entity.QAuction.*;
 import static nbc.chillguys.nebulazone.domain.bid.entity.QBid.*;
 import static nbc.chillguys.nebulazone.domain.products.entity.QProduct.*;
 import static nbc.chillguys.nebulazone.domain.products.entity.QProductImage.*;
+import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,8 +20,10 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.QAuctionFindInfo;
+import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 
 @Repository
@@ -40,7 +44,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 				auction.id,
 				auction.startPrice,
 				auction.currentPrice,
-				auction.isClosed,
+				auction.isWon,
 				auction.endTime,
 				auction.createdAt,
 				product.name,
@@ -88,7 +92,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 				auction.id,
 				auction.startPrice,
 				auction.currentPrice,
-				auction.isClosed,
+				auction.isWon,
 				auction.endTime,
 				auction.createdAt,
 				product.name,
@@ -100,7 +104,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.leftJoin(auction.product.productImages, productImage)
 			.leftJoin(bid).on(bid.auction.eq(auction))
 			.where(
-				auction.isClosed.eq(false),
+				auction.isWon.eq(false),
 				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
 				product.isDeleted.eq(false),
@@ -108,6 +112,30 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.groupBy(auction.id, product.id)
 			.limit(5)
 			.orderBy(orderType)
+			.fetch();
+	}
+
+	@Override
+	public Optional<Auction> findAuctionWithProductAndSellerLock(Long id) {
+
+		return Optional.ofNullable(jpaQueryFactory
+			.selectFrom(auction)
+			.join(auction.product, product).fetchJoin()
+			.join(product.seller, user).fetchJoin()
+			.where(auction.id.eq(id),
+				auction.deleted.eq(false),
+				product.isDeleted.eq(false))
+			.setLockMode(LockModeType.PESSIMISTIC_WRITE)
+			.fetchOne());
+	}
+
+	@Override
+	public List<Auction> findAuctionsByNotDeletedAndIsWonFalse() {
+
+		return jpaQueryFactory
+			.selectFrom(auction)
+			.where(auction.deleted.eq(false)
+				.and(auction.isWon.eq(false)))
 			.fetch();
 	}
 

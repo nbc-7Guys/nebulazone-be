@@ -10,7 +10,7 @@ public record CreateProductRequest(
 	@NotBlank(message = "상품명은 필수 입력값 입니다.")
 	String name,
 
-	@NotBlank(message = "판매글 본문은 필수 입력값 입니다..")
+	@NotBlank(message = "판매글 본문은 필수 입력값 입니다.")
 	String description,
 
 	@NotNull(message = "판매 유형은 꼭 선택해주셔야 합니다.")

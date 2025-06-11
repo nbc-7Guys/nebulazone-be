@@ -12,7 +12,8 @@ import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
 public enum ProductEndTime {
 	HOUR_12(12 * 60 * 60),
 	HOUR_24(24 * 60 * 60),
-	DAY_3(72 * 60 * 60);
+	DAY_3(72 * 60 * 60),
+	MINUTE_1(60);    // 테스트용
 
 	private final long seconds;
 

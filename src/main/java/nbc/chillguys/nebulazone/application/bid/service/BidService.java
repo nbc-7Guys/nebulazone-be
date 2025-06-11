@@ -2,6 +2,7 @@ package nbc.chillguys.nebulazone.application.bid.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.bid.dto.request.CreateBidRequest;
@@ -26,6 +27,7 @@ public class BidService {
 	private final UserDomainService userDomainService;
 	private final AuctionDomainService auctionDomainService;
 
+	@Transactional
 	public CreateBidResponse createBid(Long auctionId, AuthUser authUser, CreateBidRequest request) {
 
 		Auction lockAuction = auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId);
@@ -56,10 +58,11 @@ public class BidService {
 		return CommonPageResponse.from(response);
 	}
 
+	@Transactional
 	public DeleteBidResponse statusBid(AuthUser authUser, Long auctionId, Long bidId) {
 
 		User user = userDomainService.findActiveUserById(authUser.getId());
-		Auction auction = auctionDomainService.findActiveAuctionById(auctionId);
+		Auction auction = auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId);
 
 		Long deletedBidId = bidDomainService.statusBid(auction, user, bidId);
 		return DeleteBidResponse.from(deletedBidId);
