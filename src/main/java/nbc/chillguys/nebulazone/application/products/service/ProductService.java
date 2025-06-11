@@ -176,7 +176,7 @@ public class ProductService {
 		productDomainService.purchaseProduct(command);
 
 		TransactionCreateCommand txCreateCommand
-			= TransactionCreateCommand.of(user, product, product.getTxMethod().name());
+			= TransactionCreateCommand.of(user, product, product.getTxMethod().name(), product.getPrice());
 		Transaction tx = transactionDomainService.createTransaction(txCreateCommand);
 
 		return PurchaseProductResponse.from(tx);
