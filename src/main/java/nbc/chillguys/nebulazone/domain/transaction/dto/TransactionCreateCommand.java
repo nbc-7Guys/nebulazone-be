@@ -6,10 +6,11 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 public record TransactionCreateCommand(
 	User user,
 	Product product,
-	String txMethod
+	String txMethod,
+	Long price
 ) {
 
-	public static TransactionCreateCommand of(User user, Product product, String name) {
-		return new TransactionCreateCommand(user, product, name);
+	public static TransactionCreateCommand of(User user, Product product, String name, Long price) {
+		return new TransactionCreateCommand(user, product, name, price);
 	}
 }

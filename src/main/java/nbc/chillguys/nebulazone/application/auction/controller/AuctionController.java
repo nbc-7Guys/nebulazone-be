@@ -17,7 +17,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuctionRequest;
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
-import nbc.chillguys.nebulazone.application.auction.dto.response.FindAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.FindAllAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.FindDetailAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
@@ -32,21 +33,30 @@ public class AuctionController {
 	private final AuctionService auctionService;
 
 	@GetMapping
-	public ResponseEntity<CommonPageResponse<FindAuctionResponse>> findAuctions(
+	public ResponseEntity<CommonPageResponse<FindAllAuctionResponse>> findAuctions(
 		@RequestParam(defaultValue = "1", value = "page") int page,
 		@RequestParam(defaultValue = "20", value = "size") int size) {
 
-		CommonPageResponse<FindAuctionResponse> response = auctionService.findAuctions(Math.max(page - 1, 0), size);
+		CommonPageResponse<FindAllAuctionResponse> response = auctionService.findAuctions(Math.max(page - 1, 0), size);
 
 		return ResponseEntity.ok(response);
 
 	}
 
 	@GetMapping("/sorted")
-	public ResponseEntity<List<FindAuctionResponse>> findAuctions(
+	public ResponseEntity<List<FindAllAuctionResponse>> findAuctions(
 		@RequestParam("sort") String sortType) {
 
-		List<FindAuctionResponse> response = auctionService.findAuctionsBySortType(AuctionSortType.of(sortType));
+		List<FindAllAuctionResponse> response = auctionService.findAuctionsBySortType(AuctionSortType.of(sortType));
+
+		return ResponseEntity.ok(response);
+
+	}
+
+	@GetMapping("/{auctionId}")
+	public ResponseEntity<FindDetailAuctionResponse> findAuctions(@PathVariable("auctionId") Long auctionId) {
+
+		FindDetailAuctionResponse response = auctionService.findAuction(auctionId);
 
 		return ResponseEntity.ok(response);
 
@@ -58,7 +68,7 @@ public class AuctionController {
 		@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody ManualEndAuctionRequest request) {
 
-		ManualEndAuctionResponse response = auctionService.manualEndAuction(auctionId, authUser, request.bidId());
+		ManualEndAuctionResponse response = auctionService.manualEndAuction(auctionId, authUser, request);
 
 		return ResponseEntity.ok(response);
 	}

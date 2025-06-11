@@ -9,7 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
-import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.ManualEndAuctionInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
@@ -50,7 +51,7 @@ public class AuctionDomainService {
 	 * @return 페이징 AuctionFindInfo
 	 * @author 전나겸
 	 */
-	public Page<AuctionFindInfo> findAuctions(int page, int size) {
+	public Page<AuctionFindAllInfo> findAuctions(int page, int size) {
 
 		return auctionRepository.findAuctionsWithProduct(page, size);
 
@@ -62,22 +63,35 @@ public class AuctionDomainService {
 	 * @param sortType 정렬 조건(closing, popular)
 	 * @return 리스트 AuctionFindInfo
 	 */
-	public List<AuctionFindInfo> findAuctionsBySortType(AuctionSortType sortType) {
+	public List<AuctionFindAllInfo> findAuctionsBySortType(AuctionSortType sortType) {
 
 		return auctionRepository.finAuctionsBySortType(sortType);
 
 	}
 
 	/**
+	 * 경매 상세 조회
+	 * @param auctionId 조회할 경매
+	 * @return 상품 등록자, 상품정보, 입찰 건수 정보가 포함된 경매 조회
+	 * @author 전나겸
+	 */
+	public AuctionFindDetailInfo findAuction(Long auctionId) {
+
+		return auctionRepository.findAuctionDetail(auctionId)
+			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
+
+	}
+
+	/**
 	 * 수동 낙찰
-	 * @param user 로그인 유저
+	 * @param loginUser 로그인 유저
 	 * @param wonBid 낙찰 대상인 입찰
 	 * @param auctionId 종료할 경매 id
 	 * @return manualEndAuctionInfo
 	 * @author 전나겸
 	 */
 	@Transactional
-	public ManualEndAuctionInfo manualEndAuction(User user, Bid wonBid, Long auctionId) {
+	public ManualEndAuctionInfo manualEndAuction(User loginUser, Bid wonBid, Long auctionId) {
 
 		Auction findAuction = auctionRepository.findById(auctionId)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
@@ -86,7 +100,7 @@ public class AuctionDomainService {
 			throw new AuctionException(AuctionErrorCode.ALREADY_DELETED_AUCTION);
 		}
 
-		if (findAuction.isAuctionOwner(user)) {
+		if (!findAuction.isAuctionOwner(loginUser)) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
 		}
 
@@ -98,7 +112,7 @@ public class AuctionDomainService {
 		findAuction.wonAuction();
 		findAuction.updateEndTime();
 
-		return ManualEndAuctionInfo.from(findAuction, wonBid, user);
+		return ManualEndAuctionInfo.from(findAuction, wonBid, loginUser);
 	}
 
 	/**
@@ -117,7 +131,7 @@ public class AuctionDomainService {
 			throw new AuctionException(AuctionErrorCode.ALREADY_DELETED_AUCTION);
 		}
 
-		if (findAuction.isAuctionOwner(user)) {
+		if (!findAuction.isAuctionOwner(user)) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
 		}
 
@@ -163,7 +177,8 @@ public class AuctionDomainService {
 	 * @return 삭제 되지 않은 경매 리스트
 	 * @author 전나겸
 	 */
-	public List<Auction> findActiveAuctions() {
+	public List<Auction> findActiveAuctionsWithProductAndSeller() {
 		return auctionRepository.findAuctionsByNotDeletedAndIsWonFalse();
 	}
+
 }

@@ -83,7 +83,7 @@ public class ProductService {
 		if (createdProduct.getTxMethod() == ProductTxMethod.AUCTION) {
 			AuctionCreateCommand auctionCreateCommand = AuctionCreateCommand.of(createdProduct, productEndTime);
 			Auction savedAuction = auctionDomainService.createAuction(auctionCreateCommand);
-			auctionSchedulerService.autoAuctionEndSchedule(savedAuction);
+			auctionSchedulerService.autoAuctionEndSchedule(savedAuction, createdProduct.getId());
 		}
 
 		return ProductResponse.from(createdProduct, productEndTime);
@@ -171,7 +171,7 @@ public class ProductService {
 		productDomainService.purchaseProduct(command);
 
 		TransactionCreateCommand txCreateCommand
-			= TransactionCreateCommand.of(user, product, product.getTxMethod().name());
+			= TransactionCreateCommand.of(user, product, product.getTxMethod().name(), product.getPrice());
 		Transaction tx = transactionDomainService.createTransaction(txCreateCommand);
 
 		return PurchaseProductResponse.from(tx);

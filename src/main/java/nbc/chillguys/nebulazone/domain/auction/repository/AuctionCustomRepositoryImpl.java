@@ -21,8 +21,10 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
-import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
-import nbc.chillguys.nebulazone.domain.auction.dto.QAuctionFindInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.QAuctionFindAllInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.QAuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 
@@ -36,11 +38,11 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 	}
 
 	@Override
-	public Page<AuctionFindInfo> findAuctionsWithProduct(int page, int size) {
+	public Page<AuctionFindAllInfo> findAuctionsWithProduct(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		List<AuctionFindInfo> contents = jpaQueryFactory
-			.select(new QAuctionFindInfo(
+		List<AuctionFindAllInfo> contents = jpaQueryFactory
+			.select(new QAuctionFindAllInfo(
 				auction.id,
 				auction.startPrice,
 				auction.currentPrice,
@@ -80,7 +82,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 	}
 
 	@Override
-	public List<AuctionFindInfo> finAuctionsBySortType(AuctionSortType sortType) {
+	public List<AuctionFindAllInfo> finAuctionsBySortType(AuctionSortType sortType) {
 
 		OrderSpecifier<?> orderType = switch (sortType) {
 			case POPULAR -> bid.id.count().desc();
@@ -88,7 +90,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 		};
 
 		return jpaQueryFactory
-			.select(new QAuctionFindInfo(
+			.select(new QAuctionFindAllInfo(
 				auction.id,
 				auction.startPrice,
 				auction.currentPrice,
@@ -116,13 +118,13 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 	}
 
 	@Override
-	public Optional<Auction> findAuctionWithProductAndSellerLock(Long id) {
+	public Optional<Auction> findAuctionWithProductAndSellerLock(Long auctionId) {
 
 		return Optional.ofNullable(jpaQueryFactory
 			.selectFrom(auction)
 			.join(auction.product, product).fetchJoin()
 			.join(product.seller, user).fetchJoin()
-			.where(auction.id.eq(id),
+			.where(auction.id.eq(auctionId),
 				auction.deleted.eq(false),
 				product.isDeleted.eq(false))
 			.setLockMode(LockModeType.PESSIMISTIC_WRITE)
@@ -134,9 +136,40 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 
 		return jpaQueryFactory
 			.selectFrom(auction)
-			.where(auction.deleted.eq(false)
-				.and(auction.isWon.eq(false)))
+			.join(auction.product, product).fetchJoin()
+			.join(product.seller, user).fetchJoin()
+			.where(auction.deleted.eq(false),
+				auction.isWon.eq(false))
 			.fetch();
+	}
+
+	@Override
+	public Optional<AuctionFindDetailInfo> findAuctionDetail(Long auctionId) {
+		return Optional.ofNullable(jpaQueryFactory.select(
+				new QAuctionFindDetailInfo(
+					auction.id,
+					user.id,
+					user.nickname,
+					user.email,
+					auction.startPrice,
+					auction.currentPrice,
+					auction.isWon,
+					auction.endTime,
+					product.id,
+					product.name,
+					productImage.url.min(),
+					product.createdAt,
+					bid.auction.id.count()
+				))
+			.from(auction)
+			.join(auction.product, product)
+			.join(product.seller, user)
+			.leftJoin(auction.product.productImages, productImage)
+			.leftJoin(bid).on(bid.auction.eq(auction))
+			.where(auction.id.eq(auctionId),
+				auction.deleted.eq(false),
+				product.isDeleted.eq(false))
+			.fetchOne());
 	}
 
 }

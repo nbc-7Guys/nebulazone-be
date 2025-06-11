@@ -7,17 +7,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuctionRequest;
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
-import nbc.chillguys.nebulazone.application.auction.dto.response.FindAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.FindAllAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.FindDetailAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
-import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.ManualEndAuctionInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
+import nbc.chillguys.nebulazone.domain.products.entity.Product;
+import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
+import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
+import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
@@ -29,20 +36,22 @@ public class AuctionService {
 	private final AuctionSchedulerService auctionSchedulerService;
 	private final BidDomainService bidDomainService;
 	private final UserDomainService userDomainService;
+	private final TransactionDomainService txDomainService;
+	private final ProductDomainService productDomainService;
 
-	public CommonPageResponse<FindAuctionResponse> findAuctions(int page, int size) {
+	public CommonPageResponse<FindAllAuctionResponse> findAuctions(int page, int size) {
 
-		Page<AuctionFindInfo> findAuctions = auctionDomainService.findAuctions(page, size);
-		Page<FindAuctionResponse> response = findAuctions.map(FindAuctionResponse::from);
+		Page<AuctionFindAllInfo> findAuctions = auctionDomainService.findAuctions(page, size);
+		Page<FindAllAuctionResponse> response = findAuctions.map(FindAllAuctionResponse::from);
 
 		return CommonPageResponse.from(response);
 	}
 
-	public List<FindAuctionResponse> findAuctionsBySortType(AuctionSortType sortType) {
+	public List<FindAllAuctionResponse> findAuctionsBySortType(AuctionSortType sortType) {
 
-		List<AuctionFindInfo> findAuctionsBySortType = auctionDomainService.findAuctionsBySortType(sortType);
+		List<AuctionFindAllInfo> findAuctionsBySortType = auctionDomainService.findAuctionsBySortType(sortType);
 
-		return findAuctionsBySortType.stream().map(FindAuctionResponse::from).toList();
+		return findAuctionsBySortType.stream().map(FindAllAuctionResponse::from).toList();
 	}
 
 	@Transactional
@@ -55,10 +64,28 @@ public class AuctionService {
 		return DeleteAuctionResponse.from(deletedAuctionId);
 	}
 
-	public ManualEndAuctionResponse manualEndAuction(Long auctionId, AuthUser authUser, Long bidId) {
-		User user = userDomainService.findActiveUserById(authUser.getId());
-		Bid wonBid = bidDomainService.findBid(bidId);
-		ManualEndAuctionInfo manualAuctionInfo = auctionDomainService.manualEndAuction(user, wonBid, auctionId);
-		return ManualEndAuctionResponse.from(manualAuctionInfo);
+	@Transactional
+	public ManualEndAuctionResponse manualEndAuction(Long auctionId, AuthUser authUser,
+		ManualEndAuctionRequest request) {
+
+		User loginUser = userDomainService.findActiveUserById(authUser.getId());
+		Bid wonBid = bidDomainService.findBid(request.bidId());
+		Product product = productDomainService.findActiveProductById(request.productId());
+
+		ManualEndAuctionInfo auctionInfo = auctionDomainService.manualEndAuction(loginUser, wonBid, auctionId);
+
+		TransactionCreateCommand txCreateCommand = TransactionCreateCommand.of(wonBid.getUser(), product,
+			product.getTxMethod().name(), auctionInfo.wonProductPrice());
+
+		txDomainService.createTransaction(txCreateCommand);
+
+		return ManualEndAuctionResponse.from(auctionInfo);
 	}
+
+	public FindDetailAuctionResponse findAuction(Long auctionId) {
+		Bid highestPriceBid = bidDomainService.findHighBidByAuctionWithUser(auctionId);
+		AuctionFindDetailInfo auctionFindDetailInfo = auctionDomainService.findAuction(auctionId);
+		return FindDetailAuctionResponse.from(auctionFindDetailInfo, highestPriceBid);
+	}
+
 }

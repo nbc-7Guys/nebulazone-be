@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.domain.transaction.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
@@ -14,12 +15,13 @@ public class TransactionDomainService {
 
 	private final TransactionRepository transactionRepository;
 
+	@Transactional
 	public Transaction createTransaction(TransactionCreateCommand command) {
 		Transaction tx = Transaction.builder()
 			.product(command.product())
 			.user(command.user())
 			.method(TransactionMethod.of(command.txMethod()))
-			.price(command.product().getPrice())
+			.price(command.price())
 			.build();
 		return transactionRepository.save(tx);
 	}
