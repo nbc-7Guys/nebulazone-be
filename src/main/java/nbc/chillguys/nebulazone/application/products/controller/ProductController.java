@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.products.dto.request.ChangeToAuctionTypeRequest;
@@ -53,7 +55,10 @@ public class ProductController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(productResponse);
 	}
 
-	@PutMapping("/catalogs/{catalogId}/products/{productId}")
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(
+		content = @Content(encoding = @Encoding(name = "product", contentType = MediaType.APPLICATION_JSON_VALUE))
+	)
+	@PutMapping(path = "/catalogs/{catalogId}/products/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ProductResponse> updateProduct(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("catalogId") Long catalogId,
