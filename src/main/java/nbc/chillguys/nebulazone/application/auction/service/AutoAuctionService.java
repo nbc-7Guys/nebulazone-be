@@ -13,19 +13,23 @@ import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @Service
 @RequiredArgsConstructor
 public class AutoAuctionService {
 
 	private final AuctionDomainService auctionDomainService;
-	private final UserDomainService userDomainService;
 	private final TransactionDomainService txDomainService;
 	private final ProductDomainService productDomainService;
 	private final AutoAuctionDomainService autoAuctionDomainService;
 	private final BidDomainService bidDomainService;
 
+	/**
+	 * 자동 낙찰 시 자동으로 거래내역을 생성하는 로직
+	 * @param auctionId 종료된 경매 id
+	 * @param productId 경매 상품 id
+	 * @author 전나겸
+	 */
 	@Transactional
 	public void autoEndAuctionAndCreateTransaction(Long auctionId, Long productId) {
 
