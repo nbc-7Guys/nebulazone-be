@@ -30,4 +30,8 @@ public class AdminReviewService {
 		adminReviewDomainService.updateReview(reviewId, request);
 	}
 
+	public void deleteReview(Long reviewId) {
+		adminReviewDomainService.deleteReview(reviewId);
+	}
+
 }
