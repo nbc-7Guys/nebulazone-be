@@ -20,9 +20,6 @@ import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
-import nbc.chillguys.nebulazone.domain.auction.service.AutoAuctionDomainService;
-import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
-import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 
 @Slf4j
 @Service
