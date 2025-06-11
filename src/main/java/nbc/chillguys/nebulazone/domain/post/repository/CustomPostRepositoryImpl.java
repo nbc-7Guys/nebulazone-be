@@ -28,6 +28,19 @@ public class CustomPostRepositoryImpl implements CustomPostRepository {
 	}
 
 	@Override
+	public Optional<Post> findActivePostByIdWithUser(Long postId) {
+		QPost post = QPost.post;
+
+		return Optional.ofNullable(queryFactory.selectFrom(post)
+			.leftJoin(post.user).fetchJoin()
+			.where(
+				post.isDeleted.eq(false),
+				post.id.eq(postId)
+			)
+			.fetchOne());
+	}
+
+	@Override
 	public Optional<Post> findActivePostByIdWithUserAndImages(Long postId) {
 		QPost post = QPost.post;
 

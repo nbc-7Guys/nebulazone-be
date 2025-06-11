@@ -67,7 +67,7 @@ public class PostService {
 		Post post = postDomainService.findMyActivePost(userId, postId);
 
 		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
-		boolean hasImage = !imageFiles.isEmpty();
+		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
 		if (hasImage) {
 			List<String> newImageUrls = imageFiles.stream()
 				.map(s3Service::generateUploadUrlAndUploadFile)

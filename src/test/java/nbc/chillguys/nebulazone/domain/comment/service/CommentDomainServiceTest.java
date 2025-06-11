@@ -224,8 +224,8 @@ class CommentDomainServiceTest {
 					comment.getUser().getNickname(),
 					null,
 					comment.getCreatedAt(),
-					comment.getModifiedAt(),
-					List.of())
+					comment.getModifiedAt()
+				)
 			);
 
 			PageImpl<CommentWithUserInfo> commentPage = new PageImpl<>(comments, pageable, comments.size());

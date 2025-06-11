@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
@@ -51,7 +54,10 @@ public class PostController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(postResponse);
 	}
 
-	@PutMapping("/{postId}")
+	@RequestBody(
+		content = @Content(encoding = @Encoding(name = "post", contentType = MediaType.APPLICATION_JSON_VALUE))
+	)
+	@PutMapping(path = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<UpdatePostResponse> updatePost(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("postId") Long postId,

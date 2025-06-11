@@ -124,13 +124,15 @@ public class ProductDomainService {
 	 * @author 윤정환
 	 */
 	@Transactional
-	public void deleteProduct(ProductDeleteCommand command) {
+	public Product deleteProduct(ProductDeleteCommand command) {
 		Product product = findActiveProductById(command.productId());
 
 		product.validBelongsToCatalog(command.catalog().getId());
 		product.validProductOwner(command.user().getId());
 
 		product.delete();
+
+		return product;
 	}
 
 	@Transactional

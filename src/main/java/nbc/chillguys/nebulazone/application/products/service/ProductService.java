@@ -2,6 +2,7 @@ package nbc.chillguys.nebulazone.application.products.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -95,7 +96,7 @@ public class ProductService {
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
-		boolean hasImage = !imageFiles.isEmpty();
+		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
 		if (hasImage) {
 			List<String> newImageUrls = imageFiles.stream()
 				.map(s3Service::generateUploadUrlAndUploadFile)
@@ -139,16 +140,16 @@ public class ProductService {
 	public DeleteProductResponse deleteProduct(Long userId, Long catalogId, Long productId) {
 		User user = userDomainService.findActiveUserById(userId);
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
-		Auction auction = auctionDomainService.findAuctionByProductId(productId);
-
-		if (auction != null) {
-			auction.delete();
-		}
 
 		ProductDeleteCommand command = ProductDeleteCommand.of(user, catalog, productId);
-		productDomainService.deleteProduct(command);
+		Product product = productDomainService.deleteProduct(command);
 
 		productDomainService.deleteProductFromEs(productId);
+
+		if (Objects.equals(product.getTxMethod(), ProductTxMethod.AUCTION)) {
+			Auction auction = auctionDomainService.findAuctionByProductId(productId);
+			auction.delete();
+		}
 
 		return DeleteProductResponse.from(productId);
 	}

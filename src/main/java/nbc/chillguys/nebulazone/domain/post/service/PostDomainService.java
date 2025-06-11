@@ -77,7 +77,7 @@ public class PostDomainService {
 	 * @author 윤정환
 	 */
 	public Post findActivePost(Long postId) {
-		return postRepository.findActivePostById(postId)
+		return postRepository.findActivePostByIdWithUser(postId)
 			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
 	}
 
