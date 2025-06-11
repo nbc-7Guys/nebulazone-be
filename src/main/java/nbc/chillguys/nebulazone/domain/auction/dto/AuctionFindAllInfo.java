@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 
 import com.querydsl.core.annotations.QueryProjection;
 
-public record AuctionFindInfo(
+public record AuctionFindAllInfo(
 	Long auctionId,
 	Long startPrice,
 	Long currentPrice,
-	boolean isClosed,
+	boolean isWon,
 	LocalDateTime endTime,
 	LocalDateTime createdAt,
 	String productName,
@@ -17,7 +17,7 @@ public record AuctionFindInfo(
 ) {
 
 	@QueryProjection
-	public AuctionFindInfo {
+	public AuctionFindAllInfo {
 	}
 
 }

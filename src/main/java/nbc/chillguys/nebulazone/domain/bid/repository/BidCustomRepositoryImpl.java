@@ -101,8 +101,8 @@ public class BidCustomRepositoryImpl implements BidCustomRepository {
 		return Optional.ofNullable(jpaQueryFactory
 			.select(bid.price.max())
 			.from(bid)
-			.where(bid.auction.eq(auction)
-				.and(bid.status.notIn(BidStatus.CANCEL)))
+			.where(bid.auction.eq(auction),
+				bid.status.notIn(BidStatus.CANCEL))
 			.fetchOne());
 	}
 
@@ -111,8 +111,21 @@ public class BidCustomRepositoryImpl implements BidCustomRepository {
 
 		return jpaQueryFactory
 			.selectFrom(bid)
-			.where(bid.auction.id.eq(auctionId)
-				.and(bid.status.eq(BidStatus.BID)))
+			.where(bid.auction.id.eq(auctionId),
+				bid.status.eq(BidStatus.BID))
+			.orderBy(bid.price.desc())
+			.limit(1)
+			.fetchOne();
+	}
+
+	@Override
+	public Bid findHighestPriceBidByAuctionWithUser(Long auctionId) {
+
+		return jpaQueryFactory
+			.selectFrom(bid)
+			.join(bid.user, user).fetchJoin()
+			.where(bid.auction.id.eq(auctionId),
+				bid.status.eq(BidStatus.BID))
 			.orderBy(bid.price.desc())
 			.limit(1)
 			.fetchOne();

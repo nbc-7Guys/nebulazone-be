@@ -4,25 +4,25 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
 
-public record FindAuctionResponse(
+public record FindAllAuctionResponse(
 	Long auctionId,
 	Long startPrice,
 	Long currentPrice,
-	boolean isClosed,
+	boolean isWon,
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime endTime,
 	String productName,
 	String productImageUrl,
 	Long bidCount) {
 
-	public static FindAuctionResponse from(AuctionFindInfo findInfo) {
-		return new FindAuctionResponse(
+	public static FindAllAuctionResponse from(AuctionFindAllInfo findInfo) {
+		return new FindAllAuctionResponse(
 			findInfo.auctionId(),
 			findInfo.startPrice(),
 			findInfo.currentPrice(),
-			findInfo.isClosed(),
+			findInfo.isWon(),
 			findInfo.endTime(),
 			findInfo.productName(),
 			findInfo.productImageUrl() != null ? findInfo.productImageUrl() : "이미지 없음",

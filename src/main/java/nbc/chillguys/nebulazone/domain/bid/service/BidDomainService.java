@@ -155,6 +155,16 @@ public class BidDomainService {
 	}
 
 	/**
+	 * 특정 경매의 최고가 입찰 조회 시 유저 정보를 한번에 조회
+	 * @param auctionId 경매 id
+	 * @return 조회된 Bid
+	 * @author 전나겸
+	 */
+	public Bid findHighBidByAuctionWithUser(Long auctionId) {
+		return bidRepository.findHighestPriceBidByAuctionWithUser(auctionId);
+	}
+
+	/**
 	 * 특정 입찰 조회(타 도메인에서 사용할 목적)
 	 * @param bidId 조회할 입찰 Id
 	 * @return 조회된 Bid

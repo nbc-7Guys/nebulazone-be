@@ -8,10 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
-import nbc.chillguys.nebulazone.application.auction.dto.response.FindAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.FindAllAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.FindDetailAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
-import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.ManualEndAuctionInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
@@ -30,19 +32,19 @@ public class AuctionService {
 	private final BidDomainService bidDomainService;
 	private final UserDomainService userDomainService;
 
-	public CommonPageResponse<FindAuctionResponse> findAuctions(int page, int size) {
+	public CommonPageResponse<FindAllAuctionResponse> findAuctions(int page, int size) {
 
-		Page<AuctionFindInfo> findAuctions = auctionDomainService.findAuctions(page, size);
-		Page<FindAuctionResponse> response = findAuctions.map(FindAuctionResponse::from);
+		Page<AuctionFindAllInfo> findAuctions = auctionDomainService.findAuctions(page, size);
+		Page<FindAllAuctionResponse> response = findAuctions.map(FindAllAuctionResponse::from);
 
 		return CommonPageResponse.from(response);
 	}
 
-	public List<FindAuctionResponse> findAuctionsBySortType(AuctionSortType sortType) {
+	public List<FindAllAuctionResponse> findAuctionsBySortType(AuctionSortType sortType) {
 
-		List<AuctionFindInfo> findAuctionsBySortType = auctionDomainService.findAuctionsBySortType(sortType);
+		List<AuctionFindAllInfo> findAuctionsBySortType = auctionDomainService.findAuctionsBySortType(sortType);
 
-		return findAuctionsBySortType.stream().map(FindAuctionResponse::from).toList();
+		return findAuctionsBySortType.stream().map(FindAllAuctionResponse::from).toList();
 	}
 
 	@Transactional
@@ -60,5 +62,11 @@ public class AuctionService {
 		Bid wonBid = bidDomainService.findBid(bidId);
 		ManualEndAuctionInfo manualAuctionInfo = auctionDomainService.manualEndAuction(user, wonBid, auctionId);
 		return ManualEndAuctionResponse.from(manualAuctionInfo);
+	}
+
+	public FindDetailAuctionResponse findAuction(Long auctionId) {
+		Bid highestPriceBid = bidDomainService.findHighBidByAuctionWithUser(auctionId);
+		AuctionFindDetailInfo auctionFindDetailInfo = auctionDomainService.findAuction(auctionId);
+		return FindDetailAuctionResponse.from(auctionFindDetailInfo, highestPriceBid);
 	}
 }
