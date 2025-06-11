@@ -3,7 +3,6 @@ package nbc.chillguys.nebulazone.application.chat.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +17,7 @@ import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
 import nbc.chillguys.nebulazone.infra.websocket.SessionUtil;
 
 @Slf4j
@@ -27,7 +27,7 @@ public class ChatMessageService {
 
 	private final ChatMessageRedisService chatMessageRedisService;
 	private final S3Service s3Service;
-	private final SimpMessagingTemplate messagingTemplate;
+	private final RedisMessagePublisher redisMessagePublisher;
 	private final ChatDomainService chatDomainService;
 
 	/**
@@ -90,10 +90,10 @@ public class ChatMessageService {
 			LocalDateTime.now()
 		);
 
-		// 메시지 전송
-		messagingTemplate.convertAndSend("/topic/chat/" + roomId, content);
+		// Redis Pub/Sub을 통해 모든 인스턴스에 메시지 발행
+		redisMessagePublisher.publishChatMessage(roomId, content);
 
-		// 레디스 저장
+		// 레디스 저장 (채팅 기록 임시 저장)
 		chatMessageRedisService.saveMessageToRedis(roomId, content);
 	}
 

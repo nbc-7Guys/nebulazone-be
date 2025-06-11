@@ -30,4 +30,22 @@ public record ChatMessageInfo(
 		);
 	}
 
+	public static ChatMessageInfo of(
+		Long roomId,
+		Long senderId,
+		String senderEmail,
+		String message,
+		MessageType messageType,
+		LocalDateTime sendTime
+	) {
+		return new ChatMessageInfo(
+			roomId,
+			senderId,
+			senderEmail,
+			message,
+			messageType,
+			sendTime
+		);
+	}
+
 }
