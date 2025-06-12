@@ -19,8 +19,8 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
+import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.QAuctionFindAllInfo;
@@ -30,13 +30,10 @@ import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 
 @Repository
+@RequiredArgsConstructor
 public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 
 	private final JPAQueryFactory jpaQueryFactory;
-
-	public AuctionCustomRepositoryImpl(EntityManager em) {
-		this.jpaQueryFactory = new JPAQueryFactory(em);
-	}
 
 	@Override
 	public Page<AuctionFindAllInfo> findAuctionsWithProduct(int page, int size) {

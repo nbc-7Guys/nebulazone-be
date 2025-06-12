@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.transaction.dto.QTransactionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.transaction.dto.QTransactionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindAllInfo;
@@ -24,13 +24,10 @@ import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindDetailInfo
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Repository
+@RequiredArgsConstructor
 public class TransactionCustomRepositoryImpl implements TransactionCustomRepository {
 
 	private final JPAQueryFactory jpaQueryFactory;
-
-	public TransactionCustomRepositoryImpl(EntityManager em) {
-		this.jpaQueryFactory = new JPAQueryFactory(em);
-	}
 
 	@Override
 	public Page<TransactionFindAllInfo> findTransactionsWithProductAndUser(User loginUser, int page, int size) {

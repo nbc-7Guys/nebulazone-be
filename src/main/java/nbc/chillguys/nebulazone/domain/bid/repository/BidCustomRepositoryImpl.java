@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
 import nbc.chillguys.nebulazone.domain.bid.dto.QFindBidInfo;
@@ -25,13 +25,10 @@ import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Repository
+@RequiredArgsConstructor
 public class BidCustomRepositoryImpl implements BidCustomRepository {
 
 	private final JPAQueryFactory jpaQueryFactory;
-
-	public BidCustomRepositoryImpl(EntityManager em) {
-		this.jpaQueryFactory = new JPAQueryFactory(em);
-	}
 
 	@Override
 	public Page<FindBidInfo> findBidsWithUserByAuction(Auction auction, int page, int size) {
