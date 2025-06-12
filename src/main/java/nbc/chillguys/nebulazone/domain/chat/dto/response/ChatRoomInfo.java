@@ -4,12 +4,14 @@ import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 
 public record ChatRoomInfo(
 	String productName,
-	String sellerName
+	String sellerName,
+	Long ChatRoomId
 ) {
 	public static ChatRoomInfo from(ChatRoom chatRoom) {
 		return new ChatRoomInfo(
 			chatRoom.getProduct().getName(),
-			chatRoom.getProduct().getSeller().getNickname()
+			chatRoom.getProduct().getSeller().getNickname(),
+			chatRoom.getId()
 		);
 	}
 }

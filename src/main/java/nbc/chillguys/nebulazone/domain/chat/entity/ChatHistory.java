@@ -58,10 +58,11 @@ public class ChatHistory {
 	private LocalDateTime createdAt;
 
 	@Builder
-	public ChatHistory(ChatRoom chatRoom, Long userId, String message, LocalDateTime sendtime) {
+	public ChatHistory(ChatRoom chatRoom, Long userId, String message, LocalDateTime sendtime, MessageType messageType) {
 		this.chatRoom = chatRoom;
 		this.userId = userId;
 		this.message = message;
 		this.sendTime = sendtime;
+		this.messageType = messageType;
 	}
 }
