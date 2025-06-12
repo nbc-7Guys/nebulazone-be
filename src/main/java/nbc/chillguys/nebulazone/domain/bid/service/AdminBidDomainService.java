@@ -50,8 +50,7 @@ public class AdminBidDomainService {
 	}
 
 	/**
-	 * 입찰을 완전히 삭제합니다.<br>
-	 * (DB에서 삭제)
+	 * 입찰을 소프트델리트합니다.<br>
 	 *
 	 * @param bidId     삭제할 입찰 ID
 	 * @throws BidException 입찰이 존재하지 않을 경우 발생
@@ -60,7 +59,7 @@ public class AdminBidDomainService {
 	@Transactional
 	public void deleteBid(Long bidId) {
 		Bid bid = findByBidId(bidId);
-		bidRepository.delete(bid); // 완전 삭제
+		bid.cancelBid();
 	}
 
 	/**
