@@ -67,6 +67,7 @@ public class SecurityConfig {
 				.requestMatchers(
 					"/auth/signin",
 					"/users/signup",
+					"/auth/reissue",
 					"/oauth2/**"
 				).permitAll()
 				.requestMatchers("/admin/**").hasRole("ADMIN") // 어드민 전용
