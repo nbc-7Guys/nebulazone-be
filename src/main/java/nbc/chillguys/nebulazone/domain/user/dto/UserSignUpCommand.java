@@ -22,8 +22,8 @@ public record UserSignUpCommand(
 		return new UserSignUpCommand(
 			signUpUserRequest.email(),
 			signUpUserRequest.password(),
-			signUpUserRequest.nickname(),
 			signUpUserRequest.phone(),
+			signUpUserRequest.nickname(),
 			null,
 			signUpUserRequest.addresses().stream()
 				.map(a -> Address.builder()

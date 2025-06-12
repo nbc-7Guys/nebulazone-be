@@ -2,31 +2,40 @@ package nbc.chillguys.nebulazone.application.products.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.auction.service.AuctionSchedulerService;
 import nbc.chillguys.nebulazone.application.products.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.request.UpdateProductRequest;
 import nbc.chillguys.nebulazone.application.products.dto.response.DeleteProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.application.products.dto.response.PurchaseProductResponse;
+import nbc.chillguys.nebulazone.application.products.dto.response.SearchProductResponse;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
+import nbc.chillguys.nebulazone.domain.catalog.service.CatalogDomainService;
 import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductFindQuery;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductPurchaseCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductSearchCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
+import nbc.chillguys.nebulazone.domain.products.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
+import nbc.chillguys.nebulazone.domain.products.vo.ProductDocument;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
@@ -43,7 +52,9 @@ public class ProductService {
 	private final AuctionDomainService auctionDomainService;
 	private final TransactionDomainService transactionDomainService;
 
-	// todo: private final CatalogDomainService catalogDomainService;
+	private final AuctionSchedulerService auctionSchedulerService;
+
+	private final CatalogDomainService catalogDomainService;
 
 	private final S3Service s3Service;
 
@@ -59,18 +70,23 @@ public class ProductService {
 			.map(s3Service::generateUploadUrlAndUploadFile)
 			.toList();
 
-		// todo: 카탈로그 도메인 서비스 생성되면 추후 붙일 예정
-		// Catalog findCatalog = catalogDomainService.getCatalogById(catalogId);
+		Catalog findCatalog = catalogDomainService.getCatalogById(catalogId);
 
-		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(findUser, null, request);
+		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(findUser, findCatalog, request);
 
-		Product createProduct = productDomainService.createProduct(productCreateCommand, productImageUrls);
+		ProductEndTime productEndTime = request.getProductEndTime();
 
-		if (createProduct.getTxMethod() == ProductTxMethod.AUCTION) {
-			auctionDomainService.createAuction(AuctionCreateCommand.of(createProduct, request.getProductEndTime()));
+		Product createdProduct = productDomainService.createProduct(productCreateCommand, productImageUrls);
+
+		productDomainService.saveProductToEs(createdProduct);
+
+		if (createdProduct.getTxMethod() == ProductTxMethod.AUCTION) {
+			AuctionCreateCommand auctionCreateCommand = AuctionCreateCommand.of(createdProduct, productEndTime);
+			Auction savedAuction = auctionDomainService.createAuction(auctionCreateCommand);
+			auctionSchedulerService.autoAuctionEndSchedule(savedAuction, createdProduct.getId());
 		}
 
-		return ProductResponse.from(createProduct, request.getProductEndTime());
+		return ProductResponse.from(createdProduct, productEndTime);
 	}
 
 	public ProductResponse updateProduct(
@@ -82,12 +98,10 @@ public class ProductService {
 	) {
 		User user = userDomainService.findActiveUserById(userId);
 		Product product = productDomainService.findActiveProductById(productId);
-
-		// todo: 카탈로그 도메인 서비스 생성 후 작업
-		Catalog catalog = null;
+		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
-		boolean hasImage = !imageFiles.isEmpty();
+		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
 		if (hasImage) {
 			List<String> newImageUrls = imageFiles.stream()
 				.map(s3Service::generateUploadUrlAndUploadFile)
@@ -102,6 +116,8 @@ public class ProductService {
 		ProductUpdateCommand command = request.toCommand(user, catalog, productId, imageUrls);
 		Product updatedProduct = productDomainService.updateProduct(command);
 
+		productDomainService.saveProductToEs(updatedProduct);
+
 		return ProductResponse.from(updatedProduct);
 	}
 
@@ -113,12 +129,12 @@ public class ProductService {
 		ChangeToAuctionTypeRequest request
 	) {
 		User user = userDomainService.findActiveUserById(userId);
-
-		// todo: 카탈로그 도메인 서비스 생성 후 작업
-		Catalog catalog = null;
+		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		ChangeToAuctionTypeCommand command = request.toCommand(user, catalog, productId);
 		Product product = productDomainService.changeToAuctionType(command);
+
+		productDomainService.saveProductToEs(product);
 
 		auctionDomainService.createAuction(AuctionCreateCommand.of(product, request.getProductEndTime()));
 
@@ -128,18 +144,17 @@ public class ProductService {
 	@Transactional
 	public DeleteProductResponse deleteProduct(Long userId, Long catalogId, Long productId) {
 		User user = userDomainService.findActiveUserById(userId);
-
-		// todo: 카탈로그 도메인 서비스 생성 후 작업
-		Catalog catalog = null;
-
-		Auction auction = auctionDomainService.findAuctionByProductId(productId);
-
-		if (auction != null) {
-			auction.delete();
-		}
+		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		ProductDeleteCommand command = ProductDeleteCommand.of(user, catalog, productId);
-		productDomainService.deleteProduct(command);
+		Product product = productDomainService.deleteProduct(command);
+
+		productDomainService.deleteProductFromEs(productId);
+
+		if (Objects.equals(product.getTxMethod(), ProductTxMethod.AUCTION)) {
+			Auction auction = auctionDomainService.findAuctionByProductId(productId);
+			auction.delete();
+		}
 
 		return DeleteProductResponse.from(productId);
 	}
@@ -148,9 +163,7 @@ public class ProductService {
 	public PurchaseProductResponse purchaseProduct(Long userId, Long catalogId, Long productId) {
 		User user = userDomainService.findActiveUserById(userId);
 		Product product = productDomainService.findAvailableProductById(productId);
-
-		// todo: 카탈로그 도메인 서비스 생성 후 작업
-		Catalog catalog = null;
+		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		user.usePoint(Math.toIntExact(product.getPrice()));
 
@@ -158,9 +171,28 @@ public class ProductService {
 		productDomainService.purchaseProduct(command);
 
 		TransactionCreateCommand txCreateCommand
-			= TransactionCreateCommand.of(user, product, product.getTxMethod().name());
+			= TransactionCreateCommand.of(user, product, product.getTxMethod().name(), product.getPrice());
 		Transaction tx = transactionDomainService.createTransaction(txCreateCommand);
 
 		return PurchaseProductResponse.from(tx);
+	}
+
+	public Page<SearchProductResponse> searchProduct(String productName, ProductTxMethod txMethod, Long priceFrom,
+		Long priceTo, int page, int size) {
+		ProductSearchCommand productSearchCommand = ProductSearchCommand.of(productName, txMethod, priceFrom,
+			priceTo, page, size);
+
+		Page<ProductDocument> productDocuments = productDomainService.searchProduct(productSearchCommand);
+
+		return productDocuments.map(SearchProductResponse::from);
+	}
+
+	public ProductResponse getProduct(Long catalogId, Long productId) {
+		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
+
+		ProductFindQuery query = ProductFindQuery.of(catalog.getId(), productId);
+		Product product = productDomainService.getProductByIdWithUserAndImages(query);
+
+		return ProductResponse.from(product);
 	}
 }

@@ -105,4 +105,22 @@ public class Post extends BaseEntity {
 		this.isDeleted = true;
 		this.deletedAt = LocalDateTime.now();
 	}
+
+	public void restore() {
+		this.isDeleted = false;
+		this.deletedAt = null;
+	}
+
+	public Long getUserId() {
+		return this.user.getId();
+	}
+
+	public String getUserNickname() {
+		return this.user.getNickname();
+	}
+
+	public void updateType(PostType type) {
+		this.type = type;
+	}
+
 }

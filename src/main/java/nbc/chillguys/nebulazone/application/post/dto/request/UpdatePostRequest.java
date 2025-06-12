@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import nbc.chillguys.nebulazone.domain.post.dto.AdminPostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 
 public record UpdatePostRequest(
@@ -19,5 +20,9 @@ public record UpdatePostRequest(
 
 	public PostUpdateCommand toCommand(Long userId, Long postId, List<String> imageUrls) {
 		return new PostUpdateCommand(userId, postId, title, content, imageUrls);
+	}
+
+	public AdminPostUpdateCommand toAdminCommand(Long postId, List<String> imageUrls) {
+		return new AdminPostUpdateCommand(postId, title, content, imageUrls);
 	}
 }

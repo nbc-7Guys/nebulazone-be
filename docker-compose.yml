@@ -34,7 +34,9 @@ services:
       - "3000:3000"
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: nebulazone-elasticsearch
     environment:
       - discovery.type=single-node
@@ -50,8 +52,9 @@ services:
       - "9300:9300"
     volumes:
       - es-data:/usr/share/elasticsearch/data
+
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.10
+    image: docker.elastic.co/kibana/kibana:8.18.1
     container_name: nebulazone-kibana
     ports:
       - "5601:5601"
@@ -59,5 +62,6 @@ services:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
       - elasticsearch
+
 volumes:
   es-data:

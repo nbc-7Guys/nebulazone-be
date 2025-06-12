@@ -56,8 +56,7 @@ public class Product extends BaseEntity {
 
 	private boolean isSold;
 
-	@Column(name = "is_deleted")
-	private boolean deleted;
+	private boolean isDeleted;
 
 	private LocalDateTime deletedAt;
 
@@ -66,12 +65,11 @@ public class Product extends BaseEntity {
 	private User seller;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "catalog_id")    // todo: 카탈로그 생성코드가 완성되면 추후 nullable = false 작성
+	@JoinColumn(name = "catalog_id", nullable = false)
 	private Catalog catalog;
 
 	@ElementCollection
 	@CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
-	@Column(name = "image_url")
 	private List<ProductImage> productImages = new ArrayList<>();
 
 	@Builder
@@ -91,7 +89,7 @@ public class Product extends BaseEntity {
 		this.price = price;
 		this.txMethod = txMethod;
 		this.isSold = isSold;
-		this.deleted = isDeleted;
+		this.isDeleted = isDeleted;
 		this.deletedAt = deletedAt;
 		this.seller = seller;
 		this.catalog = catalog;
@@ -120,44 +118,63 @@ public class Product extends BaseEntity {
 	}
 
 	public void changeToAuctionType(Long price) {
+		if (Objects.equals(getTxMethod(), ProductTxMethod.AUCTION)) {
+			throw new ProductException(ProductErrorCode.ALREADY_AUCTION_TYPE);
+		}
+
 		this.price = price;
 		this.txMethod = ProductTxMethod.AUCTION;
 	}
 
 	public void purchase() {
 		if (isSold) {
-			throw new ProductException(ProductErrorCode.SOLD_ALREADY);
+			throw new ProductException(ProductErrorCode.ALREADY_SOLD);
 		}
 
 		this.isSold = true;
 	}
 
-	public void validateBelongsToCatalog(Long catalogId) {
+	public void validBelongsToCatalog(Long catalogId) {
 		if (!Objects.equals(getCatalog().getId(), catalogId)) {
 			throw new ProductException(ProductErrorCode.NOT_BELONGS_TO_CATALOG);
 		}
 	}
 
-	public void validateProductOwner(Long userId) {
+	public void validProductOwner(Long userId) {
 		if (!Objects.equals(getSeller().getId(), userId)) {
 			throw new ProductException(ProductErrorCode.NOT_PRODUCT_OWNER);
 		}
 	}
 
-	public void validateNotSold() {
+	public void validNotSold() {
 		if (isSold()) {
-			throw new ProductException(ProductErrorCode.SOLD_ALREADY);
+			throw new ProductException(ProductErrorCode.ALREADY_SOLD);
 		}
 	}
 
-	public void validatePurchasable() {
+	public void validPurchasable() {
 		if (getTxMethod() == ProductTxMethod.AUCTION) {
 			throw new ProductException(ProductErrorCode.AUCTION_PRODUCT_NOT_PURCHASABLE);
 		}
 	}
 
 	public void delete() {
-		this.deleted = true;
+		this.isDeleted = true;
 		this.deletedAt = LocalDateTime.now();
 	}
+
+	public void changeTxMethod(ProductTxMethod txMethod, Long price) {
+		this.txMethod = txMethod;
+		this.price = price;
+	}
+
+	public void restore() {
+		this.isDeleted = false;
+		this.deletedAt = null;
+	}
+
+	public void changePrice(Long price) {
+		this.price = price;
+	}
+
 }

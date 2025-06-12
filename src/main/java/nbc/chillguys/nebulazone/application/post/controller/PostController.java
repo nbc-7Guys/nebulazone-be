@@ -2,29 +2,39 @@ package nbc.chillguys.nebulazone.application.post.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.request.UpdatePostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.response.CreatePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.DeletePostResponse;
+import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
+import nbc.chillguys.nebulazone.application.post.dto.response.SearchPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse;
 import nbc.chillguys.nebulazone.application.post.service.PostService;
+import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
+import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 
 @RestController
 @RequestMapping("/posts")
@@ -44,7 +54,10 @@ public class PostController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(postResponse);
 	}
 
-	@PutMapping("/{postId}")
+	@RequestBody(
+		content = @Content(encoding = @Encoding(name = "post", contentType = MediaType.APPLICATION_JSON_VALUE))
+	)
+	@PutMapping(path = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<UpdatePostResponse> updatePost(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("postId") Long postId,
@@ -64,6 +77,25 @@ public class PostController {
 		DeletePostResponse res = postService.deletePost(authUser.getId(), postId);
 
 		return ResponseEntity.ok(res);
+	}
+
+	@GetMapping
+	public ResponseEntity<CommonPageResponse<SearchPostResponse>> searchPost(
+		@RequestParam(value = "keyword", required = false) String keyword,
+		@RequestParam("type") PostType type,
+		@RequestParam(value = "page", defaultValue = "1") Integer page,
+		@RequestParam(value = "size", defaultValue = "10") Integer size
+	) {
+		Page<SearchPostResponse> responses = postService.searchPost(keyword, type, page, size);
+
+		return ResponseEntity.ok(CommonPageResponse.from(responses));
+	}
+
+	@GetMapping("/{postId}")
+	public ResponseEntity<GetPostResponse> getPost(@PathVariable("postId") Long postId) {
+		GetPostResponse response = postService.getPost(postId);
+
+		return ResponseEntity.ok(response);
 	}
 
 }
