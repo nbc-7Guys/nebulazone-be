@@ -62,7 +62,6 @@ class BidDomainServiceUnitTest {
 	private static final Long NEW_BID_PRICE = 650000L;
 	private static final Long LOW_BID_PRICE = 550000L;
 
-	// 공통 테스트 픽스처
 	private User seller;
 	private User bidder;
 	private User otherUser;

@@ -82,7 +82,7 @@ class TransactionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("거래내역 생성 성공 - 직거래")
-		void createTransaction_success_direct() {
+		void success_createTransaction_direct() {
 			// given
 			TransactionCreateCommand command = TransactionCreateCommand.of(
 				buyer, product, DIRECT_METHOD, TRANSACTION_PRICE);
@@ -103,7 +103,7 @@ class TransactionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("거래내역 생성 성공 - 경매")
-		void createTransaction_success_auction() {
+		void success_createTransaction_auction() {
 			// given
 			TransactionCreateCommand command = TransactionCreateCommand.of(
 				buyer, product, AUCTION_METHOD, TRANSACTION_PRICE);
@@ -124,7 +124,7 @@ class TransactionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("거래내역 생성 실패 - 유효하지 않은 거래 방법")
-		void createTransaction_fail_invalidMethod() {
+		void fail_createTransaction_invalidMethod() {
 			// given
 			TransactionCreateCommand command = TransactionCreateCommand.of(
 				buyer, product, INVALID_METHOD, TRANSACTION_PRICE);
@@ -141,7 +141,7 @@ class TransactionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("내 거래내역 전체 조회 성공")
-		void findMyTransactions_success() {
+		void success_findMyTransactions() {
 			// given
 			int page = 0;
 			int size = 10;
@@ -170,7 +170,7 @@ class TransactionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("내 거래내역 상세 조회 성공")
-		void findMyTransaction_success() {
+		void success_findMyTransaction() {
 			// given
 			Long transactionId = 100L;
 			TransactionFindDetailInfo detailInfo = createTransactionFindDetailInfo(transactionId);
@@ -191,7 +191,7 @@ class TransactionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("내 거래내역 상세 조회 실패 - 존재하지 않는 거래")
-		void findMyTransaction_fail_notFound() {
+		void fail_findMyTransaction_notFound() {
 			// given
 			Long transactionId = 999L;
 			given(transactionRepository.findTransactionWithProductAndUser(buyer, transactionId))
@@ -204,7 +204,7 @@ class TransactionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("내 거래내역 상세 조회 실패 - 다른 사용자의 거래")
-		void findMyTransaction_fail_otherUserTransaction() {
+		void fail_findMyTransaction_otherUserTransaction() {
 			// given
 			Long transactionId = 100L;
 			given(transactionRepository.findTransactionWithProductAndUser(otherUser, transactionId))
