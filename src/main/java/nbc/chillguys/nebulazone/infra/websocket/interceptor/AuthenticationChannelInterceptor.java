@@ -18,8 +18,10 @@ import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomRepository;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomUserRepository;
+import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
 import nbc.chillguys.nebulazone.infra.websocket.SessionUtil;
+import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
 
 @Slf4j
 @Component
@@ -29,6 +31,7 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 	private final JwtUtil jwtUtil;
 	private final ChatRoomRepository chatRoomRepository;
 	private final ChatRoomUserRepository chatRoomUserRepository;
+	private final WebSocketSessionRedisService webSocketSessionRedisService;
 
 	/**
 	 * WebSocket STOMP 인바운드 메시지 인증 및 권한 검증 인터셉터 <br>
@@ -58,9 +61,10 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 
 			try {
 				AuthUser authUserFromToken = jwtUtil.getAuthUserFromToken(token);
+				SessionUser user = SessionUser.from(authUserFromToken);
 
 				// 세션과 유저 매핑 (메모리 or Redis 등)
-				SessionUtil.registerUser(accessor.getSessionId(), authUserFromToken);
+				webSocketSessionRedisService.registerUser(accessor.getSessionId(), user);
 
 			} catch (Exception e) {
 				log.warn("JWT 파싱 또는 Principal 세팅 예외: {}", e);
@@ -78,7 +82,7 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 				String roomIdStr = destination.substring("/topic/chat/".length());
 				try {
 					Long roomId = Long.valueOf(roomIdStr);
-					AuthUser authUser = SessionUtil.getUserIdBySessionId(accessor.getSessionId());
+					SessionUser user = webSocketSessionRedisService.getUserIdBySessionId(accessor.getSessionId());
 
 					// 채팅방 존재 확인
 					boolean existsChatRoomById = chatRoomRepository.existsChatRoomById(roomId);
@@ -88,13 +92,13 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 
 					// 채팅방 참가자 여부 확인
 					boolean isParticipant = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId,
-						authUser.getId());
+						user.id());
 					if (!isParticipant) {
 						throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 					}
 
 					// 세션과 채팅방 매핑
-					SessionUtil.registerRoom(accessor.getSessionId(), roomId);
+					webSocketSessionRedisService.registerRoom(accessor.getSessionId(), roomId);
 				} catch (NumberFormatException e) {
 					log.warn("방번호 추출 실패: {}", roomIdStr);
 				}

@@ -25,6 +25,7 @@ import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
 
 /**
  * The type Chat service.
