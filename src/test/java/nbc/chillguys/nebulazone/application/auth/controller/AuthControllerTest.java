@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.Cookie;
 import nbc.chillguys.nebulazone.application.auth.dto.request.SignInRequest;
 import nbc.chillguys.nebulazone.application.auth.dto.response.ReissueResponse;
 import nbc.chillguys.nebulazone.application.auth.dto.response.SignInResponse;
@@ -57,10 +58,11 @@ class AuthControllerTest {
 		perform.andDo(print())
 			.andExpectAll(
 				status().isOk(),
-				jsonPath("$.accessToken")
-					.value("test_access_token"),
-				jsonPath("$.refreshToken")
-					.value("test_refresh_token")
+				jsonPath("$.accessToken").value("test_access_token"),
+				cookie().exists("Refresh_Token"),
+				cookie().value("Refresh_Token", "test_refresh_token"),
+				cookie().httpOnly("Refresh_Token", true)
+				// cookie().secure("Refresh_Token", true) // HTTPS 설정 시 추가
 			);
 
 	}
@@ -79,7 +81,9 @@ class AuthControllerTest {
 			.andExpectAll(
 				status().isOk(),
 				jsonPath("$")
-					.value("로그아웃 성공")
+					.value("로그아웃 성공"),
+				cookie().exists("Refresh_Token"),
+				cookie().maxAge("Refresh_Token", 0)
 			);
 
 	}
@@ -95,7 +99,7 @@ class AuthControllerTest {
 
 		// When
 		ResultActions perform = mockMvc.perform(post("/auth/reissue")
-			.header("Refresh-Token", "Bearer test_refresh_token"));
+			.cookie(new Cookie("Refresh_Token", "test_refresh_token")));
 
 		// Then
 		perform.andDo(print())
@@ -104,7 +108,5 @@ class AuthControllerTest {
 				jsonPath("$.accessToken")
 					.value("regenerateAccessToken")
 			);
-
 	}
-
 }
