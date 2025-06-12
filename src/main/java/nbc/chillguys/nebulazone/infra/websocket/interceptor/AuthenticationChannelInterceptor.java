@@ -59,11 +59,6 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 			try {
 				AuthUser authUserFromToken = jwtUtil.getAuthUserFromToken(token);
 
-				Principal principal = new UsernamePasswordAuthenticationToken(String.valueOf(authUserFromToken.getId()),
-					null, authUserFromToken.getAuthorities());
-
-				accessor.setUser(principal);
-
 				// 세션과 유저 매핑 (메모리 or Redis 등)
 				SessionUtil.registerUser(accessor.getSessionId(), authUserFromToken);
 
@@ -97,6 +92,7 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 					if (!isParticipant) {
 						throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 					}
+
 					// 세션과 채팅방 매핑
 					SessionUtil.registerRoom(accessor.getSessionId(), roomId);
 				} catch (NumberFormatException e) {

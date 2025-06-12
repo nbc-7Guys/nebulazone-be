@@ -37,7 +37,12 @@ public class CommentService {
 		Post post = postDomainService.findMyActivePost(postId, userId);
 
 		CommentCreateCommand command = request.toCommand(user, post);
-		Comment comment = commentDomainService.createComment(command);
+		Comment comment;
+		if (command.parentId() > 0) {
+			comment = commentDomainService.createChildComment(command);
+		} else {
+			comment = commentDomainService.createComment(command);
+		}
 
 		return CommentResponse.from(comment);
 	}

@@ -45,8 +45,8 @@ public class CommentController {
 	@GetMapping
 	public ResponseEntity<CommonPageResponse<CommentDetailResponse>> findComments(
 		@PathVariable("postId") Long postId,
-		@RequestParam(defaultValue = "1", required = false) int page,
-		@RequestParam(defaultValue = "20", required = false) int size
+		@RequestParam(value = "page", defaultValue = "1", required = false) int page,
+		@RequestParam(value = "size", defaultValue = "20", required = false) int size
 	) {
 		CommonPageResponse<CommentDetailResponse> response = commentService.findComments(postId, page, size);
 
