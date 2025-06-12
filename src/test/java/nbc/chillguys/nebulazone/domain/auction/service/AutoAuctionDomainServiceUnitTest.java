@@ -70,7 +70,7 @@ class AutoAuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("자동 경매 종료 성공 - 낙찰")
-		void endAutoAuction_success_bidWon() {
+		void success_endAutoAuction_bidWon() {
 			// given
 			Long auctionId = 1L;
 			Auction auction = createAuction(auctionId, product, START_PRICE, BID_PRICE,
@@ -90,7 +90,7 @@ class AutoAuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("자동 경매 종료 성공 - 유찰")
-		void endAutoAuction_success_bidFailed() {
+		void success_endAutoAuction_bidFailed() {
 			// given
 			Long auctionId = 1L;
 			Auction auction = createAuction(auctionId, product, START_PRICE, START_PRICE,
@@ -107,7 +107,7 @@ class AutoAuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("자동 경매 종료 실패 - 이미 낙찰된 경매")
-		void endAutoAuction_fail_alreadyWon() {
+		void fail_endAutoAuction_alreadyWon() {
 			// given
 			Long auctionId = 1L;
 			Auction alreadyWonAuction = createAuction(auctionId, product, START_PRICE, BID_PRICE,
@@ -126,7 +126,7 @@ class AutoAuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("자동 경매 종료 실패 - 삭제된 경매")
-		void endAutoAuction_fail_alreadyDeleted() {
+		void fail_endAutoAuction_alreadyDeleted() {
 			// given
 			Long auctionId = 1L;
 			Auction deletedAuction = createDeletedAuction(auctionId, product, START_PRICE, BID_PRICE);
@@ -144,7 +144,7 @@ class AutoAuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("자동 경매 종료 실패 - 낙찰과 삭제가 모두 된 경매")
-		void endAutoAuction_fail_wonAndDeleted() {
+		void fail_endAutoAuction_wonAndDeleted() {
 			// given
 			Long auctionId = 1L;
 			Auction wonAndDeletedAuction = createWonAndDeletedAuction(auctionId, product, START_PRICE, BID_PRICE);
