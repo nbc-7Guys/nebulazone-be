@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
-import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 public record ManualEndAuctionInfo(
 	Long auctionId,
@@ -17,13 +16,13 @@ public record ManualEndAuctionInfo(
 	LocalDateTime wonDate
 ) {
 
-	public static ManualEndAuctionInfo from(Auction auction, Bid wonBid, User user) {
+	public static ManualEndAuctionInfo from(Auction auction, Bid wonBid) {
 		return new ManualEndAuctionInfo(
 			auction.getId(),
 			wonBid.getId(),
-			user.getId(),
-			user.getNickname(),
-			user.getEmail(),
+			wonBid.getUser().getId(),
+			wonBid.getUser().getNickname(),
+			wonBid.getUser().getEmail(),
 			auction.getCurrentPrice(),
 			auction.getProduct().getName(),
 			auction.getEndTime()
