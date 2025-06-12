@@ -1,11 +1,13 @@
 package nbc.chillguys.nebulazone.domain.auction.dto;
 
+import java.time.LocalDateTime;
+
 import nbc.chillguys.nebulazone.application.auction.dto.request.AuctionAdminUpdateRequest;
 
 public record AuctionAdminUpdateCommand(
 	Long startPrice,
 	Long currentPrice,
-	java.time.LocalDateTime endTime,
+	LocalDateTime endTime,
 	Boolean isWon
 ) {
 	public static AuctionAdminUpdateCommand from(AuctionAdminUpdateRequest request) {
