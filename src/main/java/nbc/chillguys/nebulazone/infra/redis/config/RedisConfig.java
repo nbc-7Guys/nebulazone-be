@@ -68,13 +68,4 @@ public class RedisConfig {
 		return objectMapper;
 	}
 
-	/**
-	 * Pub/Sub용 ObjectMapper Bean
-	 * RedisMessageSubscriber에서 메시지 역직렬화 시 사용
-	 */
-	@Bean
-	public ObjectMapper objectMapper() {
-		return createObjectMapper();
-	}
-
 }

@@ -34,8 +34,6 @@ public class RedisMessagePublisher {
 
 			// Redis 채널로 메시지 발행
 			redisTemplate.convertAndSend(channelName, pubSubMessage);
-
-			log.info("Redis 채널로 메시지 발행 완료 - 채널: {}, 메시지: {}", channelName, pubSubMessage.getMessage());
 		} catch (Exception e) {
 			log.error("Redis 메시지 발행 중 오류 발생 - roomId: {}, error: {}", roomId, e.getMessage(), e);
 		}
