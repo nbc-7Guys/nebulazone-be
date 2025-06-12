@@ -30,6 +30,7 @@ import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.auction.repository.AuctionRepository;
+import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
@@ -195,7 +196,7 @@ class AuctionDomainServiceUnitTest {
 			Long auctionId = 1001L;
 			Auction auction = createAuction(auctionId, product, START_PRICE, CURRENT_PRICE,
 				LocalDateTime.now().plusDays(1), false, false);
-			nbc.chillguys.nebulazone.domain.bid.entity.Bid bid = createBid(9999L, auction, winner, CURRENT_PRICE);
+			Bid bid = createBid(9999L, auction, winner, CURRENT_PRICE);
 
 			given(auctionRepository.findById(auctionId)).willReturn(Optional.of(auction));
 
@@ -214,8 +215,8 @@ class AuctionDomainServiceUnitTest {
 		void manualEndAuction_fail_notFound() {
 			// given
 			Long auctionId = 2002L;
-			nbc.chillguys.nebulazone.domain.bid.entity.Bid bid = mock(
-				nbc.chillguys.nebulazone.domain.bid.entity.Bid.class);
+			Bid bid = mock(
+				Bid.class);
 			given(auctionRepository.findById(auctionId)).willReturn(Optional.empty());
 
 			// when & then
@@ -229,8 +230,8 @@ class AuctionDomainServiceUnitTest {
 			// given
 			Long auctionId = 2003L;
 			Auction auction = createDeletedAuction(auctionId, product, START_PRICE, CURRENT_PRICE);
-			nbc.chillguys.nebulazone.domain.bid.entity.Bid bid = mock(
-				nbc.chillguys.nebulazone.domain.bid.entity.Bid.class);
+			Bid bid = mock(
+				Bid.class);
 
 			given(auctionRepository.findById(auctionId)).willReturn(Optional.of(auction));
 
@@ -246,8 +247,8 @@ class AuctionDomainServiceUnitTest {
 			Long auctionId = 2004L;
 			Auction auction = createAuction(auctionId, product, START_PRICE, CURRENT_PRICE,
 				LocalDateTime.now().plusDays(1), false, false);
-			nbc.chillguys.nebulazone.domain.bid.entity.Bid bid = mock(
-				nbc.chillguys.nebulazone.domain.bid.entity.Bid.class);
+			Bid bid = mock(
+				Bid.class);
 
 			given(auctionRepository.findById(auctionId)).willReturn(Optional.of(auction));
 
@@ -263,7 +264,7 @@ class AuctionDomainServiceUnitTest {
 			Long auctionId = 2005L;
 			Auction auction = createAuction(auctionId, product, START_PRICE, CURRENT_PRICE,
 				LocalDateTime.now().plusDays(1), false, false);
-			nbc.chillguys.nebulazone.domain.bid.entity.Bid bid = createBid(9998L, auction, winner, MISMATCH_PRICE);
+			Bid bid = createBid(9998L, auction, winner, MISMATCH_PRICE);
 
 			given(auctionRepository.findById(auctionId)).willReturn(Optional.of(auction));
 
@@ -526,13 +527,12 @@ class AuctionDomainServiceUnitTest {
 			.build();
 	}
 
-	private nbc.chillguys.nebulazone.domain.bid.entity.Bid createBid(Long id, Auction auction, User user, Long price) {
-		nbc.chillguys.nebulazone.domain.bid.entity.Bid bid =
-			nbc.chillguys.nebulazone.domain.bid.entity.Bid.builder()
-				.auction(auction)
-				.user(user)
-				.price(price)
-				.build();
+	private Bid createBid(Long id, Auction auction, User user, Long price) {
+		Bid bid = Bid.builder()
+			.auction(auction)
+			.user(user)
+			.price(price)
+			.build();
 		ReflectionTestUtils.setField(bid, "id", id);
 		return bid;
 	}
