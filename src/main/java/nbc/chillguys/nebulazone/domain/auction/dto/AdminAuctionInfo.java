@@ -2,6 +2,8 @@ package nbc.chillguys.nebulazone.domain.auction.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 
 public record AdminAuctionInfo(
@@ -12,8 +14,11 @@ public record AdminAuctionInfo(
 	LocalDateTime endTime,
 	Boolean isWon,
 	Boolean deleted,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime deletedAt,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt
 ) {
 	public static AdminAuctionInfo from(Auction auction) {
