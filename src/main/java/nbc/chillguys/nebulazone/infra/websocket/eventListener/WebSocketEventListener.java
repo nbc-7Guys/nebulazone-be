@@ -7,6 +7,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.chat.service.ChatMessageService;
+import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
 import nbc.chillguys.nebulazone.infra.websocket.SessionUtil;
 
 @Component
@@ -14,20 +15,21 @@ import nbc.chillguys.nebulazone.infra.websocket.SessionUtil;
 public class WebSocketEventListener {
 
 	private final ChatMessageService chatMessageService;
+	private final WebSocketSessionRedisService webSocketSessionRedisService;
 
 	@EventListener
 	public void handleWebSocketDisconnect(SessionDisconnectEvent event) {
 		StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
 		String sessionId = accessor.getSessionId();
 
-		Long roomId = SessionUtil.getRoomIdBySessionId(sessionId);
+		Long roomId = webSocketSessionRedisService.getRoomIdBySessionId(sessionId);
 
 		if (roomId != null) {
 			// redis -> DB
 			chatMessageService.saveMessagesToDb(roomId);
 		}
 
-		SessionUtil.unregisterSession(sessionId);
+		webSocketSessionRedisService.unregisterSession(sessionId);
 
 	}
 

@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.config;
+package nbc.chillguys.nebulazone.infra.redis.config;
 
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -16,15 +16,15 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @EnableCaching
 public class RedisConfig {
 
+	/**
+	 * 기본 Redis Template (기존 캐싱 및 메시지 저장용)
+	 */
 	@Bean
 	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
 		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
 		redisTemplate.setConnectionFactory(redisConnectionFactory);
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JavaTimeModule());
-		objectMapper.disable(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS);
-
+		ObjectMapper objectMapper = createObjectMapper();
 		GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
 
 		redisTemplate.setKeySerializer(new StringRedisSerializer());
@@ -34,6 +34,14 @@ public class RedisConfig {
 
 		redisTemplate.afterPropertiesSet();
 		return redisTemplate;
+	}
+
+	private ObjectMapper createObjectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper.disable(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS);
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		return objectMapper;
 	}
 
 }

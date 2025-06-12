@@ -3,7 +3,6 @@ package nbc.chillguys.nebulazone.application.chat.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +17,9 @@ import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
-import nbc.chillguys.nebulazone.infra.websocket.SessionUtil;
+import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
+import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
+import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
 
 @Slf4j
 @Service
@@ -27,19 +28,20 @@ public class ChatMessageService {
 
 	private final ChatMessageRedisService chatMessageRedisService;
 	private final S3Service s3Service;
-	private final SimpMessagingTemplate messagingTemplate;
+	private final RedisMessagePublisher redisMessagePublisher;
 	private final ChatDomainService chatDomainService;
+	private final WebSocketSessionRedisService webSocketSessionRedisService;
 
 	/**
 	 * 현재 접속한 유저가 방에 참여중인지 확인
 	 */
-	private static AuthUser validateAuthUserInRoom(String sessionId, Long roomId) {
-		AuthUser authUser = SessionUtil.getUserIdBySessionId(sessionId);
-		Long roomIdBySessionId = SessionUtil.getRoomIdBySessionId(sessionId);
-		if (authUser.getId() == null || roomIdBySessionId == null || !roomIdBySessionId.equals(roomId)) {
+	private SessionUser validateSessionUserInRoom(String sessionId, Long roomId) {
+		SessionUser sessionUser = webSocketSessionRedisService.getUserIdBySessionId(sessionId);
+		Long roomIdBySessionId = webSocketSessionRedisService.getRoomIdBySessionId(sessionId);
+		if (sessionUser.id() == null || roomIdBySessionId == null || !roomIdBySessionId.equals(roomId)) {
 			throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 		}
-		return authUser;
+		return sessionUser;
 	}
 
 	/**
@@ -50,11 +52,11 @@ public class ChatMessageService {
 	 * @param command 메시지 내용, 타입
 	 */
 	public void sendTextMessage(String sessionId, Long roomId, ChatSendTextMessageCommand command) {
-		AuthUser authUser = validateAuthUserInRoom(sessionId, roomId);
+		SessionUser sessionUser = validateSessionUserInRoom(sessionId, roomId);
 
 		MessageType messageType = MessageType.valueOf(command.type());
 
-		sendAndSaveMessage(roomId, command.message(), messageType, authUser);
+		sendAndSaveMessage(roomId, command.message(), messageType, sessionUser);
 	}
 
 	/**
@@ -66,10 +68,12 @@ public class ChatMessageService {
 	 * @param type 타입
 	 */
 	public void sendImageMessage(AuthUser authUser, MultipartFile multipartFile, Long roomId, String type) {
+		SessionUser sessionUser = SessionUser.from(authUser);
+
 		chatDomainService.validateUserAccessToChatRoom(authUser, roomId);
 		String imageUrl = s3Service.generateUploadUrlAndUploadFile(multipartFile);
 		MessageType messageType = MessageType.valueOf(type);
-		sendAndSaveMessage(roomId, imageUrl, messageType, authUser);
+		sendAndSaveMessage(roomId, imageUrl, messageType, sessionUser);
 	}
 
 	/**
@@ -78,22 +82,22 @@ public class ChatMessageService {
 	 * @param roomId 메시지를 보낼 방ID
 	 * @param message 전송할 메시지(url or text)
 	 * @param messageType 메시지 타입
-	 * @param authUser 로그인한 유저 인증 객체
+	 * @param sessionUser 로그인한 유저 인증 객체
 	 */
-	private void sendAndSaveMessage(Long roomId, String message, MessageType messageType, AuthUser authUser) {
+	private void sendAndSaveMessage(Long roomId, String message, MessageType messageType, SessionUser sessionUser) {
 		// 메시지 본문 작성
 		ChatMessageInfo content = ChatMessageInfo.of(
 			roomId,
-			authUser,
+			sessionUser,
 			message,
 			messageType,
 			LocalDateTime.now()
 		);
 
-		// 메시지 전송
-		messagingTemplate.convertAndSend("/topic/chat/" + roomId, content);
+		// Redis Pub/Sub을 통해 모든 인스턴스에 메시지 발행
+		redisMessagePublisher.publishChatMessage(roomId, content);
 
-		// 레디스 저장
+		// 레디스 저장 (채팅 기록 임시 저장)
 		chatMessageRedisService.saveMessageToRedis(roomId, content);
 	}
 
