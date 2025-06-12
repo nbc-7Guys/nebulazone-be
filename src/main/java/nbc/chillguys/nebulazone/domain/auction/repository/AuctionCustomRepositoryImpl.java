@@ -19,23 +19,21 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
+import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.QAuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.QAuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
+import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 
 @Repository
+@RequiredArgsConstructor
 public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 
 	private final JPAQueryFactory jpaQueryFactory;
-
-	public AuctionCustomRepositoryImpl(EntityManager em) {
-		this.jpaQueryFactory = new JPAQueryFactory(em);
-	}
 
 	@Override
 	public Page<AuctionFindAllInfo> findAuctionsWithProduct(int page, int size) {
@@ -56,7 +54,9 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.from(auction)
 			.join(auction.product, product)
 			.leftJoin(auction.product.productImages, productImage)
-			.leftJoin(bid).on(bid.auction.eq(auction))
+			.leftJoin(bid)
+			.on(bid.auction.eq(auction),
+				bid.status.notIn(BidStatus.CANCEL))
 			.where(
 				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
@@ -71,6 +71,7 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 		JPAQuery<Long> countQuery = jpaQueryFactory
 			.select(auction.countDistinct())
 			.from(auction)
+			.join(auction.product, product)
 			.where(
 				auction.deleted.eq(false),
 				auction.deletedAt.isNull(),
@@ -104,7 +105,9 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.from(auction)
 			.join(auction.product, product)
 			.leftJoin(auction.product.productImages, productImage)
-			.leftJoin(bid).on(bid.auction.eq(auction))
+			.leftJoin(bid)
+			.on(bid.auction.eq(auction),
+				bid.status.notIn(BidStatus.CANCEL))
 			.where(
 				auction.isWon.eq(false),
 				auction.deleted.eq(false),
@@ -165,7 +168,9 @@ public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
 			.join(auction.product, product)
 			.join(product.seller, user)
 			.leftJoin(auction.product.productImages, productImage)
-			.leftJoin(bid).on(bid.auction.eq(auction))
+			.leftJoin(bid)
+			.on(bid.auction.eq(auction),
+				bid.status.notIn(BidStatus.CANCEL))
 			.where(auction.id.eq(auctionId),
 				auction.deleted.eq(false),
 				product.isDeleted.eq(false))

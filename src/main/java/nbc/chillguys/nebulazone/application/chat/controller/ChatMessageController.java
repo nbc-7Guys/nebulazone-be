@@ -30,9 +30,7 @@ public class ChatMessageController {
 		StompHeaderAccessor accessor
 	) {
 		String sessionId = accessor.getSessionId();
-
 		chatMessageService.sendTextMessage(sessionId, roomId, command);
-
 	}
 
 	@PostMapping(value = "/send/image/{roomId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

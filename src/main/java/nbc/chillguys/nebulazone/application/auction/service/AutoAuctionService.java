@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.application.auction.service;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,14 +31,16 @@ public class AutoAuctionService {
 	 * @param productId 경매 상품 id
 	 * @author 전나겸
 	 */
+	@Async
 	@Transactional
 	public void autoEndAuctionAndCreateTransaction(Long auctionId, Long productId) {
 
 		Auction auction = auctionDomainService.findActiveAuctionById(auctionId);
 		Product product = productDomainService.findActiveProductById(productId);
-		Bid wonBid = bidDomainService.findBid(auction.getId());
+		product.purchase();
 
-		autoAuctionDomainService.endAuction(auctionId, wonBid);
+		Bid wonBid = bidDomainService.findHighBidByAuction(auction.getId());
+		autoAuctionDomainService.endAutoAuction(auctionId, wonBid);
 
 		TransactionCreateCommand txCreateCommand =
 			TransactionCreateCommand.of(wonBid.getUser(), product, product.getTxMethod().name(), wonBid.getPrice());

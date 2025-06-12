@@ -24,7 +24,8 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 			.select(Projections.constructor(
 				ChatRoomInfo.class,
 				product.name,
-				user.nickname
+				user.nickname,
+				chatRoom.id
 			))
 			.from(chatRoom)
 			.join(chatRoomUser).on(chatRoomUser.chatRoom.eq(chatRoom))

@@ -5,13 +5,13 @@ import java.time.LocalDateTime;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatHistory;
 
 public record FindChatHistoryResponse(
-	String senderEmail,
+	Long senderId,
 	String message,
 	LocalDateTime sendTime
 ) {
-	public static FindChatHistoryResponse from(ChatHistory chatHistory, String senderEmail) {
+	public static FindChatHistoryResponse from(ChatHistory chatHistory) {
 		return new FindChatHistoryResponse(
-			senderEmail,
+			chatHistory.getUserId(),
 			chatHistory.getMessage(),
 			chatHistory.getSendTime()
 		);

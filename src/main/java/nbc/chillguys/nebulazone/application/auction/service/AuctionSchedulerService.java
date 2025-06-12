@@ -30,6 +30,7 @@ public class AuctionSchedulerService {
 	private final Map<Long, ScheduledFuture<?>> tasks = new ConcurrentHashMap<>();
 
 	private final AuctionDomainService auctionDomainService;
+
 	private final AutoAuctionService autoAuctionService;
 
 	/**
