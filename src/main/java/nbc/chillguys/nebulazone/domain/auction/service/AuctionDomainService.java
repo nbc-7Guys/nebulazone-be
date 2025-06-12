@@ -112,7 +112,7 @@ public class AuctionDomainService {
 		findAuction.wonAuction();
 		findAuction.updateEndTime();
 
-		return ManualEndAuctionInfo.from(findAuction, wonBid, loginUser);
+		return ManualEndAuctionInfo.from(findAuction, wonBid);
 	}
 
 	/**

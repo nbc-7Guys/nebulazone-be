@@ -36,7 +36,7 @@ public class AutoAuctionDomainService {
 		Auction endedAuction = optAuction.get();
 
 		if (endedAuction.isWon() || endedAuction.isDeleted()) {
-			log.warn("경매가 낙찰되었거나 종료 상태인 경매는 자동 종료 불가. 경매 id: {}", auctionId);
+			log.warn("경매가 낙찰되었거나 취소 상태인 경매는 자동 종료 불가. 경매 id: {}", auctionId);
 			return;
 		}
 

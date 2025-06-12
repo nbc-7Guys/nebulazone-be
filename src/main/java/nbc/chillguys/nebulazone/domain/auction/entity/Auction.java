@@ -47,6 +47,7 @@ public class Auction extends BaseEntity {
 
 	@Column(name = "is_deleted")
 	private boolean deleted;
+
 	private LocalDateTime deletedAt;
 
 	@Builder
