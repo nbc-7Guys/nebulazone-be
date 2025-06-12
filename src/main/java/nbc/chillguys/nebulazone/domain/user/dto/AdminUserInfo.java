@@ -19,7 +19,7 @@ public record AdminUserInfo(
 	String nickname,
 	Set<UserRole> roles,
 	UserStatus status,
-	int point,
+	long point,
 	OAuthType oAuthType,
 	String oAuthId,
 	Set<UserResponse.AddressResponse> addresses,

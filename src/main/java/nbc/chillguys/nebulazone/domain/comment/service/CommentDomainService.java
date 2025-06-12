@@ -23,17 +23,33 @@ public class CommentDomainService {
 	private final CommentRepository commentRepository;
 
 	/**
-	 * 댓글 혹은 대댓글 생성
+	 * 댓글 생성
 	 * @param command 댓글 생성 정보
 	 * @return comment
 	 * @author 윤정환
 	 */
 	@Transactional
 	public Comment createComment(CommentCreateCommand command) {
-		Comment parent = null;
-		if (command.parentId() > 0) {
-			parent = findActiveComment(command.parentId());
-		}
+		Comment comment = Comment.builder()
+			.post(command.post())
+			.user(command.user())
+			.content(command.content())
+			.build();
+
+		commentRepository.save(comment);
+
+		return comment;
+	}
+
+	/**
+	 * 대댓글 생성
+	 * @param command 댓글 생성 정보
+	 * @return comment
+	 * @author 윤정환
+	 */
+	@Transactional
+	public Comment createChildComment(CommentCreateCommand command) {
+		Comment parent = findActiveComment(command.parentId());
 		Comment comment = Comment.builder()
 			.post(command.post())
 			.user(command.user())

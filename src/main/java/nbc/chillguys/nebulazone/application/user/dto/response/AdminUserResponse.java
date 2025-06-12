@@ -19,7 +19,7 @@ public record AdminUserResponse(
 	String email,
 	String phone,
 	String nickname,
-	int point,
+	long point,
 	OAuthType oAuthType,
 	String oAuthId,
 	Set<AddressResponse> addresses,
