@@ -2,6 +2,8 @@ package nbc.chillguys.nebulazone.application.comment.dto.response;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import nbc.chillguys.nebulazone.domain.comment.entity.Comment;
 
 public record CommentResponse(
@@ -9,7 +11,11 @@ public record CommentResponse(
 	Long postId,
 	Long parentId,
 	String content,
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt,
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt
 ) {
 

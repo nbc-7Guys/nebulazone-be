@@ -18,7 +18,7 @@ public record UserResponse(
 	String phone,
 	String nickname,
 	String profileImageUrl,
-	int point,
+	long point,
 	OAuthType oAuthType,
 	String oAuthId,
 	Set<AddressResponse> addresses,

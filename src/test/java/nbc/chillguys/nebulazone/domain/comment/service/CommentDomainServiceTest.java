@@ -129,7 +129,7 @@ class CommentDomainServiceTest {
 			given(commentRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.ofNullable(comment));
 			given(commentRepository.save(any(Comment.class))).willReturn(childComment);
 
-			Comment comment = commentDomainService.createComment(command);
+			Comment comment = commentDomainService.createChildComment(command);
 
 			assertNotNull(comment.getParent());
 			assertEquals(childComment.getParent().getId(), comment.getParent().getId());
@@ -145,7 +145,7 @@ class CommentDomainServiceTest {
 			given(commentRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.empty());
 
 			CommentException exception = assertThrows(CommentException.class,
-				() -> commentDomainService.createComment(command));
+				() -> commentDomainService.createChildComment(command));
 			assertEquals(CommentErrorCode.COMMENT_NOT_FOUND, exception.getErrorCode());
 		}
 	}

@@ -46,7 +46,7 @@ public class User extends BaseEntity {
 
 	private String profileImage;
 
-	private int point;
+	private Long point;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -76,7 +76,7 @@ public class User extends BaseEntity {
 
 	@Builder
 	public User(String email, String password, String phone, String nickname, String profileImage,
-		int point, OAuthType oAuthType, String oAuthId, Set<UserRole> roles, Set<Address> addresses) {
+		long point, OAuthType oAuthType, String oAuthId, Set<UserRole> roles, Set<Address> addresses) {
 		this.email = email;
 		this.password = password;
 		this.phone = phone;
@@ -119,7 +119,7 @@ public class User extends BaseEntity {
 		this.password = password;
 	}
 
-	public void usePoint(int usePoint) {
+	public void usePoint(long usePoint) {
 		if (this.point < usePoint) {
 			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
 		}
