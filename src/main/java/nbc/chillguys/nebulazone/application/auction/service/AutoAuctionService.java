@@ -39,7 +39,7 @@ public class AutoAuctionService {
 		Product product = productDomainService.findActiveProductById(productId);
 		product.purchase();
 
-		Bid wonBid = bidDomainService.findHighBidByAuctionWithUser(auction.getId());
+		Bid wonBid = bidDomainService.findHighBidByAuction(auction.getId());
 		autoAuctionDomainService.endAutoAuction(auctionId, wonBid);
 
 		TransactionCreateCommand txCreateCommand =
