@@ -87,7 +87,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 생성 성공")
-		void createBid_success() {
+		void success_createBid() {
 			// given
 			given(bidRepository.findActiveBidHighestPriceByAuction(auction))
 				.willReturn(Optional.of(CURRENT_PRICE));
@@ -107,7 +107,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 생성 성공 - 첫 번째 입찰")
-		void createBid_success_firstBid() {
+		void success_createBid_firstBid() {
 			// given
 			given(bidRepository.findActiveBidHighestPriceByAuction(auction))
 				.willReturn(Optional.empty());
@@ -125,7 +125,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 생성 실패 - 경매 종료")
-		void createBid_fail_auctionClosed() {
+		void fail_createBid_auctionClosed() {
 			// given
 			Auction closedAuction = createAuction(2L, product, START_PRICE, CURRENT_PRICE,
 				LocalDateTime.now().minusHours(1), false, false);
@@ -137,7 +137,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 생성 실패 - 이미 낙찰된 경매")
-		void createBid_fail_alreadyWon() {
+		void fail_createBid_alreadyWon() {
 			// given
 			Auction wonAuction = createAuction(3L, product, START_PRICE, CURRENT_PRICE,
 				LocalDateTime.now().plusDays(1), false, true);
@@ -149,7 +149,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 생성 실패 - 경매 소유자가 입찰")
-		void createBid_fail_ownerBid() {
+		void fail_createBid_ownerBid() {
 			// when & then
 			assertBidException(() -> bidDomainService.createBid(auction, seller, NEW_BID_PRICE),
 				BidErrorCode.CANNOT_BID_OWN_AUCTION);
@@ -157,7 +157,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 생성 실패 - 입찰가가 현재가보다 낮음")
-		void createBid_fail_lowPrice() {
+		void fail_createBid_lowPrice() {
 			// given
 			given(bidRepository.findActiveBidHighestPriceByAuction(auction))
 				.willReturn(Optional.of(CURRENT_PRICE));
@@ -169,7 +169,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 생성 실패 - 입찰가가 동일함")
-		void createBid_fail_samePrice() {
+		void fail_createBid_samePrice() {
 			// given
 			given(bidRepository.findActiveBidHighestPriceByAuction(auction))
 				.willReturn(Optional.of(CURRENT_PRICE));
@@ -186,7 +186,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("특정 경매의 입찰 내역 조회 성공")
-		void findBids_success() {
+		void success_findBids() {
 			// given
 			int page = 0;
 			int size = 10;
@@ -208,7 +208,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("내 입찰 내역 조회 성공")
-		void findMyBids_success() {
+		void success_findMyBids() {
 			// given
 			int page = 0;
 			int size = 10;
@@ -237,7 +237,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 취소 성공")
-		void statusBid_success() {
+		void success_statusBid() {
 			// given
 			Long bidId = 100L;
 			Auction auctionWithEnoughTime = createAuction(5L, product, START_PRICE, CURRENT_PRICE,
@@ -259,7 +259,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 취소 성공 - 이전 최고가가 없는 경우")
-		void statusBid_success_noPreviousHighBid() {
+		void success_statusBid_noPreviousHighBid() {
 			// given
 			Long bidId = 100L;
 			Auction auctionWithEnoughTime = createAuction(5L, product, START_PRICE, CURRENT_PRICE,
@@ -281,7 +281,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 취소 실패 - 경매 종료 30분 전")
-		void statusBid_fail_timeLimitExceeded() {
+		void fail_statusBid_timeLimitExceeded() {
 			// given
 			Long bidId = 101L;
 			Auction auctionCloseToEnd = createAuction(6L, product, START_PRICE, CURRENT_PRICE,
@@ -294,7 +294,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 취소 실패 - 이미 종료된 경매")
-		void statusBid_fail_auctionClosed() {
+		void fail_statusBid_auctionClosed() {
 			// given
 			Long bidId = 102L;
 			Auction closedAuction = createAuction(7L, product, START_PRICE, CURRENT_PRICE,
@@ -307,7 +307,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 취소 실패 - 이미 낙찰된 경매")
-		void statusBid_fail_alreadyWon() {
+		void fail_statusBid_alreadyWon() {
 			// given
 			Long bidId = 103L;
 			Auction wonAuction = createAuction(8L, product, START_PRICE, CURRENT_PRICE,
@@ -320,7 +320,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 취소 실패 - 존재하지 않는 입찰")
-		void statusBid_fail_bidNotFound() {
+		void fail_statusBid_bidNotFound() {
 			// given
 			Long bidId = 999L;
 			Auction auctionWithEnoughTime = createAuction(9L, product, START_PRICE, CURRENT_PRICE,
@@ -335,7 +335,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 취소 실패 - 낙찰된 입찰")
-		void statusBid_fail_wonBid() {
+		void fail_statusBid_wonBid() {
 			// given
 			Long bidId = 104L;
 			Auction auctionWithEnoughTime = createAuction(10L, product, START_PRICE, CURRENT_PRICE,
@@ -352,7 +352,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 취소 실패 - 이미 취소된 입찰")
-		void statusBid_fail_alreadyCancelled() {
+		void fail_statusBid_alreadyCancelled() {
 			// given
 			Long bidId = 105L;
 			Auction auctionWithEnoughTime = createAuction(11L, product, START_PRICE, CURRENT_PRICE,
@@ -369,7 +369,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 취소 실패 - 입찰 소유자가 아님")
-		void statusBid_fail_notOwner() {
+		void fail_statusBid_notOwner() {
 			// given
 			Long bidId = 106L;
 			Auction auctionWithEnoughTime = createAuction(12L, product, START_PRICE, CURRENT_PRICE,
@@ -386,7 +386,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 취소 실패 - 다른 경매의 입찰")
-		void statusBid_fail_differentAuction() {
+		void fail_statusBid_differentAuction() {
 			// given
 			Long bidId = 107L;
 			Auction auctionWithEnoughTime = createAuction(13L, product, START_PRICE, CURRENT_PRICE,
@@ -410,7 +410,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("최고가 입찰 조회 성공")
-		void findHighBidByAuction_success() {
+		void success_findHighBidByAuction() {
 			// given
 			Long auctionId = 200L;
 			Bid highestBid = createBid(500L, auction, bidder, NEW_BID_PRICE, BidStatus.BID);
@@ -434,7 +434,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 조회 성공")
-		void findBid_success() {
+		void success_findBid() {
 			// given
 			Long bidId = 300L;
 			Bid bid = createBid(bidId, auction, bidder, NEW_BID_PRICE, BidStatus.BID);
@@ -452,7 +452,7 @@ class BidDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("입찰 조회 실패 - 존재하지 않는 입찰")
-		void findBid_fail_notFound() {
+		void fail_findBid_notFound() {
 			// given
 			Long bidId = 999L;
 			given(bidRepository.findBidWithWonUser(bidId)).willReturn(Optional.empty());
