@@ -1,6 +1,6 @@
 package nbc.chillguys.nebulazone.application.auction.dto.request;
 
-public record AdminAuctionSearchRequest(
+public record AuctionAdminSearchRequest(
 	String keyword,
 	Boolean deleted,
 	Boolean isWon,

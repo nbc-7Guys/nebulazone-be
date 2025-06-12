@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 
-public record AdminAuctionInfo(
+public record AuctionAdminInfo(
 	Long auctionId,
 	String productName,
 	Long startPrice,
@@ -21,8 +21,8 @@ public record AdminAuctionInfo(
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt
 ) {
-	public static AdminAuctionInfo from(Auction auction) {
-		return new AdminAuctionInfo(
+	public static AuctionAdminInfo from(Auction auction) {
+		return new AuctionAdminInfo(
 			auction.getId(),
 			auction.getProduct().getName(),
 			auction.getStartPrice(),

@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import nbc.chillguys.nebulazone.domain.auction.dto.AdminAuctionInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionAdminInfo;
 
-public record AdminAuctionResponse(
+public record AuctionAdminResponse(
 	Long auctionId,
 	String productName,
 	Long startPrice,
@@ -21,8 +21,8 @@ public record AdminAuctionResponse(
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt
 ) {
-	public static AdminAuctionResponse from(AdminAuctionInfo info) {
-		return new AdminAuctionResponse(
+	public static AuctionAdminResponse from(AuctionAdminInfo info) {
+		return new AuctionAdminResponse(
 			info.auctionId(),
 			info.productName(),
 			info.startPrice(),

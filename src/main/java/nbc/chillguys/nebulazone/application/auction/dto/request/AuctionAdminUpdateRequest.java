@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotNull;
 
-public record AdminAuctionUpdateRequest(
+public record AuctionAdminUpdateRequest(
 	@NotNull
 	Long startPrice,
 

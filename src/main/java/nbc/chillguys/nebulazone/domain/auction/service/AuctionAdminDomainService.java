@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.auction.dto.AdminAuctionInfo;
-import nbc.chillguys.nebulazone.domain.auction.dto.AdminAuctionSearchQueryCommand;
-import nbc.chillguys.nebulazone.domain.auction.dto.AdminAuctionUpdateCommand;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionAdminInfo;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionAdminSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionAdminUpdateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
@@ -16,7 +16,7 @@ import nbc.chillguys.nebulazone.domain.auction.repository.AuctionRepository;
 
 @Service
 @RequiredArgsConstructor
-public class AdminAuctionDomainService {
+public class AuctionAdminDomainService {
 	private final AuctionRepository auctionRepository;
 
 	/**
@@ -29,9 +29,9 @@ public class AdminAuctionDomainService {
 	 * @author 정석현
 	 */
 	@Transactional(readOnly = true)
-	public Page<AdminAuctionInfo> findAuctions(AdminAuctionSearchQueryCommand command, Pageable pageable) {
+	public Page<AuctionAdminInfo> findAuctions(AuctionAdminSearchQueryCommand command, Pageable pageable) {
 		return auctionRepository.searchAuctions(command, pageable)
-			.map(AdminAuctionInfo::from);
+			.map(AuctionAdminInfo::from);
 	}
 
 	/**
@@ -43,7 +43,7 @@ public class AdminAuctionDomainService {
 	 * @author 정석현
 	 */
 	@Transactional
-	public void updateAuction(Long auctionId, AdminAuctionUpdateCommand command) {
+	public void updateAuction(Long auctionId, AuctionAdminUpdateCommand command) {
 		Auction auction = findByAuctionById(auctionId);
 		auction.update(command.startPrice(), command.currentPrice(), command.endTime(), command.isWon());
 	}

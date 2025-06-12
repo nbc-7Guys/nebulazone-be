@@ -11,7 +11,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.auction.dto.AdminAuctionSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.QAuction;
 import nbc.chillguys.nebulazone.domain.products.entity.QProduct;
@@ -22,7 +22,7 @@ public class AuctionCustomAdminRepositoryImpl implements AuctionCustomAdminRepos
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Page<Auction> searchAuctions(AdminAuctionSearchQueryCommand command, Pageable pageable) {
+	public Page<Auction> searchAuctions(AuctionAdminSearchQueryCommand command, Pageable pageable) {
 		QAuction auction = QAuction.auction;
 		QProduct product = QProduct.product;
 

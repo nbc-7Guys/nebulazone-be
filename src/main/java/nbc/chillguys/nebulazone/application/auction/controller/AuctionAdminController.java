@@ -15,50 +15,50 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.auction.dto.request.AdminAuctionSearchRequest;
-import nbc.chillguys.nebulazone.application.auction.dto.request.AdminAuctionUpdateRequest;
-import nbc.chillguys.nebulazone.application.auction.dto.response.AdminAuctionResponse;
-import nbc.chillguys.nebulazone.application.auction.service.AdminAuctionService;
+import nbc.chillguys.nebulazone.application.auction.dto.request.AuctionAdminSearchRequest;
+import nbc.chillguys.nebulazone.application.auction.dto.request.AuctionAdminUpdateRequest;
+import nbc.chillguys.nebulazone.application.auction.dto.response.AuctionAdminResponse;
+import nbc.chillguys.nebulazone.application.auction.service.AuctionAdminService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 
 @RestController
 @RequestMapping("/admin/auctions")
 @RequiredArgsConstructor
-public class AdminAuctionController {
-	private final AdminAuctionService adminAuctionService;
+public class AuctionAdminController {
+	private final AuctionAdminService auctionAdminService;
 
 	@GetMapping
-	public ResponseEntity<CommonPageResponse<AdminAuctionResponse>> findAuctions(
+	public ResponseEntity<CommonPageResponse<AuctionAdminResponse>> findAuctions(
 		@RequestParam(value = "keyword", required = false) String keyword,
 		@RequestParam(value = "deleted", required = false) Boolean deleted,
 		@RequestParam(value = "isWon", required = false) Boolean isWon,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size
 	) {
-		AdminAuctionSearchRequest request = new AdminAuctionSearchRequest(keyword, deleted, isWon, page, size);
+		AuctionAdminSearchRequest request = new AuctionAdminSearchRequest(keyword, deleted, isWon, page, size);
 		Pageable pageable = PageRequest.of(page - 1, size);
-		CommonPageResponse<AdminAuctionResponse> response = adminAuctionService.findAuctions(request, pageable);
+		CommonPageResponse<AuctionAdminResponse> response = auctionAdminService.findAuctions(request, pageable);
 		return ResponseEntity.ok(response);
 	}
 
 	@PatchMapping("/{auctionId}")
 	public ResponseEntity<Void> updateAuction(
 		@PathVariable Long auctionId,
-		@RequestBody @Valid AdminAuctionUpdateRequest request
+		@RequestBody @Valid AuctionAdminUpdateRequest request
 	) {
-		adminAuctionService.updateAuction(auctionId, request);
+		auctionAdminService.updateAuction(auctionId, request);
 		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping("/{auctionId}")
 	public ResponseEntity<Void> deleteAuction(@PathVariable Long auctionId) {
-		adminAuctionService.deleteAuction(auctionId);
+		auctionAdminService.deleteAuction(auctionId);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/{auctionId}/restore")
 	public ResponseEntity<Void> restoreAuction(@PathVariable Long auctionId) {
-		adminAuctionService.restoreAuction(auctionId);
+		auctionAdminService.restoreAuction(auctionId);
 		return ResponseEntity.noContent().build();
 	}
 }
