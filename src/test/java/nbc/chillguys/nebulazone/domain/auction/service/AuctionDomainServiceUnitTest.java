@@ -81,7 +81,7 @@ class AuctionDomainServiceUnitTest {
 	class CreateAuctionTest {
 		@Test
 		@DisplayName("경매 생성 성공")
-		void createAuction_success() {
+		void success_createAuction() {
 			// given
 			LocalDateTime endTime = LocalDateTime.of(2024, 12, 31, 23, 59, 59);
 			AuctionCreateCommand command = new AuctionCreateCommand(product, endTime);
@@ -106,7 +106,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("경매 전체 조회(페이징) 성공")
-		void findAuctions_success() {
+		void success_findAuctions() {
 			// given
 			int page = 0;
 			int size = 2;
@@ -126,7 +126,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("인기 경매 조회 성공")
-		void findAuctionsBySortType_success_popular() {
+		void success_findAuctionsBySortType_popular() {
 			// given
 			AuctionFindAllInfo info = createAuctionFindAllInfo(1L, START_PRICE, 110000L, 10L);
 			given(auctionRepository.finAuctionsBySortType(AuctionSortType.POPULAR)).willReturn(List.of(info));
@@ -141,7 +141,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("마감 임박순 경매 조회 성공")
-		void findAuctionsBySortType_success_closing() {
+		void success_findAuctionsBySortType_closing() {
 			// given
 			AuctionFindAllInfo info = createAuctionFindAllInfo(2L, 120000L, 125000L, 3L);
 			given(auctionRepository.finAuctionsBySortType(AuctionSortType.CLOSING)).willReturn(List.of(info));
@@ -156,7 +156,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("경매 상세 조회 성공")
-		void findAuction_success() {
+		void success_findAuction() {
 			// given
 			Long auctionId = 11L;
 			AuctionFindDetailInfo detailInfo = createAuctionFindDetailInfo(auctionId);
@@ -173,7 +173,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("경매 상세 조회 실패 - 경매 없음")
-		void findAuction_fail_notFound() {
+		void fail_findAuction_notFound() {
 			// given
 			Long auctionId = 99L;
 			given(auctionRepository.findAuctionDetail(auctionId)).willReturn(Optional.empty());
@@ -190,7 +190,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("수동 낙찰 성공")
-		void manualEndAuction_success() {
+		void success_manualEndAuction() {
 			// given
 			Long auctionId = 1001L;
 			Auction auction = createAuction(auctionId, product, START_PRICE, CURRENT_PRICE,
@@ -211,7 +211,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("수동 낙찰 실패 - 존재하지 않는 경매")
-		void manualEndAuction_fail_notFound() {
+		void fail_manualEndAuction_notFound() {
 			// given
 			Long auctionId = 2002L;
 			Bid bid = mock(
@@ -225,7 +225,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("수동 낙찰 실패 - 이미 삭제된 경매")
-		void manualEndAuction_fail_deleted() {
+		void fail_manualEndAuction_deleted() {
 			// given
 			Long auctionId = 2003L;
 			Auction auction = createDeletedAuction(auctionId, product, START_PRICE, CURRENT_PRICE);
@@ -241,7 +241,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("수동 낙찰 실패 - 경매 작성자가 아님")
-		void manualEndAuction_fail_notOwner() {
+		void fail_manualEndAuction_notOwner() {
 			// given
 			Long auctionId = 2004L;
 			Auction auction = createAuction(auctionId, product, START_PRICE, CURRENT_PRICE,
@@ -258,7 +258,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("수동 낙찰 실패 - 요청된 입찰가와 경매 현재가 불일치")
-		void manualEndAuction_fail_mismatch_bidPrice() {
+		void fail_manualEndAuction_mismatchBidPrice() {
 			// given
 			Long auctionId = 2005L;
 			Auction auction = createAuction(auctionId, product, START_PRICE, CURRENT_PRICE,
@@ -279,7 +279,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("경매 삭제 성공")
-		void deleteAuction_success() {
+		void success_deleteAuction() {
 			// given
 			Long auctionId = 101L;
 			Auction auction = createAuction(auctionId, product, START_PRICE, START_PRICE,
@@ -297,7 +297,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("경매 삭제 실패 - 존재하지 않는 경매")
-		void deleteAuction_fail_notFound() {
+		void fail_deleteAuction_notFound() {
 			// given
 			Long auctionId = 101L;
 			given(auctionRepository.findById(auctionId)).willReturn(Optional.empty());
@@ -309,7 +309,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("경매 삭제 실패 - 이미 삭제된 경매")
-		void deleteAuction_fail_deleted() {
+		void fail_deleteAuction_deleted() {
 			// given
 			Long auctionId = 101L;
 			Auction auction = createDeletedAuction(auctionId, product, START_PRICE, START_PRICE);
@@ -323,7 +323,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("경매 삭제 실패 - 경매 소유자 아님")
-		void deleteAuction_fail_notOwner() {
+		void fail_deleteAuction_notOwner() {
 			// given
 			Long auctionId = 201L;
 			Auction auction = createAuction(auctionId, product, START_PRICE, START_PRICE,
@@ -343,7 +343,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("정상 조회")
-		void findAuctionByProductId_success() {
+		void success_findAuctionByProductId() {
 			// given
 			Long productId = 100L;
 			Auction auction = createSimpleAuction(10000L, 12000L, false, false);
@@ -359,7 +359,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("실패 - 경매 없음")
-		void findAuctionByProductId_fail_notFound() {
+		void fail_findAuctionByProductId_notFound() {
 			// given
 			Long productId = 100L;
 			given(auctionRepository.findByProduct_IdAndDeletedFalse(productId)).willReturn(Optional.empty());
@@ -376,7 +376,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("정상 조회")
-		void findActiveAuctionById_success() {
+		void success_findActiveAuctionById() {
 			// given
 			Long auctionId = 201L;
 			Auction auction = createSimpleAuction(20000L, 22000L, false, true);
@@ -392,7 +392,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("실패 - 경매 없음/삭제됨")
-		void findActiveAuctionById_fail_notFound() {
+		void fail_findActiveAuctionById_notFound() {
 			// given
 			Long auctionId = 201L;
 			given(auctionRepository.findByIdAndDeletedFalse(auctionId)).willReturn(Optional.empty());
@@ -409,7 +409,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("정상 조회")
-		void findActiveAuctionWithProductAndSellerLock_success() {
+		void success_findActiveAuctionWithProductAndSellerLock() {
 			// given
 			Long auctionId = 301L;
 			Auction auction = createSimpleAuction(30000L, 35000L, false, false);
@@ -424,7 +424,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("실패 - 경매 없음")
-		void findActiveAuctionWithProductAndSellerLock_fail_notFound() {
+		void fail_findActiveAuctionWithProductAndSellerLock_notFound() {
 			// given
 			Long auctionId = 301L;
 			given(auctionRepository.findAuctionWithProductAndSellerLock(auctionId)).willReturn(Optional.empty());
@@ -441,7 +441,7 @@ class AuctionDomainServiceUnitTest {
 
 		@Test
 		@DisplayName("정상 조회")
-		void findActiveAuctionsWithProductAndSeller_success() {
+		void success_findActiveAuctionsWithProductAndSeller() {
 			// given
 			List<Auction> auctionList = List.of(
 				createSimpleAuction(1000L, 1500L, false, false),
