@@ -36,30 +36,6 @@ public class RedisConfig {
 		return redisTemplate;
 	}
 
-	/**
-	 * Pub/Sub 전용 Redis Template
-	 * 메시지 발행(Publish) 시 사용
-	 */
-	@Bean
-	public RedisTemplate<String, Object> redisPubSubTemplate(RedisConnectionFactory redisConnectionFactory) {
-		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-		redisTemplate.setConnectionFactory(redisConnectionFactory);
-
-		ObjectMapper objectMapper = createObjectMapper();
-		GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
-
-		// Pub/Sub에서는 String 키와 JSON 값 사용
-		redisTemplate.setKeySerializer(new StringRedisSerializer());
-		redisTemplate.setValueSerializer(serializer);
-		redisTemplate.setDefaultSerializer(serializer);
-
-		redisTemplate.afterPropertiesSet();
-		return redisTemplate;
-	}
-
-	/**
-	 * ObjectMapper 공통 설정
-	 */
 	private ObjectMapper createObjectMapper() {
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new JavaTimeModule());
