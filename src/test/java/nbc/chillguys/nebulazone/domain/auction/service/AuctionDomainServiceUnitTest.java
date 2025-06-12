@@ -1,7 +1,6 @@
 package nbc.chillguys.nebulazone.domain.auction.service;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
@@ -556,7 +555,9 @@ class AuctionDomainServiceUnitTest {
 
 	// 공통 예외 검증 헬퍼 메서드
 	private void assertAuctionException(Runnable executable, AuctionErrorCode expectedErrorCode) {
-		AuctionException ex = assertThrows(AuctionException.class, executable::run);
-		assertThat(ex.getErrorCode()).isEqualTo(expectedErrorCode);
+		assertThatThrownBy(executable::run)
+			.isInstanceOf(AuctionException.class)
+			.extracting("errorCode")
+			.isEqualTo(expectedErrorCode);
 	}
 }
