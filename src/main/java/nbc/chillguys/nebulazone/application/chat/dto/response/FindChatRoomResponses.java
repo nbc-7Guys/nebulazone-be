@@ -17,13 +17,13 @@ public record FindChatRoomResponses(
     public static record FindChatRoomResponse(
         String productName,
         String sellerName,
-		Long chatRoomId
+	Long chatRoomId
     ) {
         public static FindChatRoomResponse from(ChatRoomInfo chatRoomInfo) {
             return new FindChatRoomResponse(
                 chatRoomInfo.productName(),
                 chatRoomInfo.sellerName(),
-				chatRoomInfo.ChatRoomId()
+		chatRoomInfo.ChatRoomId()
             );
         }
     }

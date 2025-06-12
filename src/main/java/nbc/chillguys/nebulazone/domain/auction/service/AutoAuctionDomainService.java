@@ -5,8 +5,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
@@ -20,9 +18,6 @@ public class AutoAuctionDomainService {
 
 	private final AuctionRepository auctionRepository;
 
-	@PersistenceContext
-	private EntityManager entityManager;
-
 	/**
 	 * 자동 경매 종료
 	 * @param auctionId 종료할 경매 id
@@ -30,7 +25,7 @@ public class AutoAuctionDomainService {
 	 * @author 전나겸
 	 */
 	@Transactional
-	public void endAuction(Long auctionId, Bid wonBid) {
+	public void endAutoAuction(Long auctionId, Bid wonBid) {
 		Optional<Auction> optAuction = auctionRepository.findById(auctionId);
 
 		if (optAuction.isEmpty()) {
@@ -52,7 +47,6 @@ public class AutoAuctionDomainService {
 
 		log.info("낙찰 - 경매 id: {}, 입찰 id: {}", auctionId, wonBid.getId());
 		wonBid.wonBid();
-		endedAuction.getProduct().purchase();
 		endedAuction.wonAuction();
 
 	}
