@@ -53,7 +53,6 @@ public class AuctionCustomAdminRepositoryImpl implements AuctionCustomAdminRepos
 		Long total = jpaQueryFactory
 			.select(auction.count())
 			.from(auction)
-			.leftJoin(auction.product, product)
 			.where(builder)
 			.fetchOne();
 
