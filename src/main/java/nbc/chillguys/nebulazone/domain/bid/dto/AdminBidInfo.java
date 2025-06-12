@@ -2,6 +2,8 @@ package nbc.chillguys.nebulazone.domain.bid.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 
 public record AdminBidInfo(
@@ -12,7 +14,9 @@ public record AdminBidInfo(
 	String userNickname,
 	Long price,
 	String status,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt
 ) {
 	public static AdminBidInfo from(Bid bid) {
