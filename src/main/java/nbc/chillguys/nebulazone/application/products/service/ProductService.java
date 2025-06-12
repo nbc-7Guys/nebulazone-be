@@ -51,11 +51,8 @@ public class ProductService {
 	private final ProductDomainService productDomainService;
 	private final AuctionDomainService auctionDomainService;
 	private final TransactionDomainService transactionDomainService;
-
 	private final AuctionSchedulerService auctionSchedulerService;
-
 	private final CatalogDomainService catalogDomainService;
-
 	private final S3Service s3Service;
 
 	@Transactional
