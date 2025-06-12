@@ -14,7 +14,7 @@ public record AuctionAdminResponse(
 	LocalDateTime endTime,
 	Boolean isWon,
 	Boolean deleted,
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime deletedAt,
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt,
