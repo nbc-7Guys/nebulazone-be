@@ -95,7 +95,7 @@ class CatalogDomainServiceTest {
 			CatalogSearchCommand command = CatalogSearchCommand.of(null, CatalogType.GPU, 1, 10);
 
 			given(catalogEsRepository.searchCatalog(any(), anyString(), any()))
-				.willReturn(new PageImpl<>(List.of(catalogDocument, catalogDocument), PageRequest.of(0, 10), 1));
+				.willReturn(new PageImpl<>(List.of(catalogDocument, catalogDocument), PageRequest.of(0, 10), 2));
 
 			// When
 			Page<CatalogDocument> catalogDocuments = catalogDomainService.searchCatalog(command);
