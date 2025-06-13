@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 
-public record AdminBidInfo(
+public record BidAdminInfo(
 	Long bidId,
 	Long auctionId,
 	String auctionProductName,
@@ -19,8 +19,8 @@ public record AdminBidInfo(
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt
 ) {
-	public static AdminBidInfo from(Bid bid) {
-		return new AdminBidInfo(
+	public static BidAdminInfo from(Bid bid) {
+		return new BidAdminInfo(
 			bid.getId(),
 			bid.getAuction() != null ? bid.getAuction().getId() : null,
 			bid.getAuction() != null ? bid.getAuction().getProduct().getName() : null,

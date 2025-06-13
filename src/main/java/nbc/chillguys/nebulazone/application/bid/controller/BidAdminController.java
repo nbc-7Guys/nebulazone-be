@@ -13,29 +13,29 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.bid.dto.request.AdminBidSearchRequest;
-import nbc.chillguys.nebulazone.application.bid.dto.response.AdminBidResponse;
-import nbc.chillguys.nebulazone.application.bid.service.AdminBidService;
+import nbc.chillguys.nebulazone.application.bid.dto.request.BidAdminSearchRequest;
+import nbc.chillguys.nebulazone.application.bid.dto.response.BidAdminResponse;
+import nbc.chillguys.nebulazone.application.bid.service.BidAdminService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 
 @RestController
 @RequestMapping("/admin/bids")
 @RequiredArgsConstructor
-public class AdminBidController {
-	private final AdminBidService adminBidService;
+public class BidAdminController {
+	private final BidAdminService bidAdminService;
 
 	@GetMapping
-	public ResponseEntity<CommonPageResponse<AdminBidResponse>> findBids(
+	public ResponseEntity<CommonPageResponse<BidAdminResponse>> findBids(
 		@RequestParam(value = "auctionId", required = false) Long auctionId,
 		@RequestParam(value = "userId", required = false) Long userId,
 		@RequestParam(value = "status", required = false) BidStatus status,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size
 	) {
-		AdminBidSearchRequest request = new AdminBidSearchRequest(auctionId, userId, status, page, size);
+		BidAdminSearchRequest request = new BidAdminSearchRequest(auctionId, userId, status, page, size);
 		Pageable pageable = PageRequest.of(page - 1, size);
-		CommonPageResponse<AdminBidResponse> response = adminBidService.findBids(request, pageable);
+		CommonPageResponse<BidAdminResponse> response = bidAdminService.findBids(request, pageable);
 		return ResponseEntity.ok(response);
 	}
 
@@ -44,13 +44,13 @@ public class AdminBidController {
 		@PathVariable Long bidId,
 		@RequestBody BidStatus status
 	) {
-		adminBidService.updateBidStatus(bidId, status);
+		bidAdminService.updateBidStatus(bidId, status);
 		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping("/{bidId}")
 	public ResponseEntity<Void> deleteBid(@PathVariable Long bidId) {
-		adminBidService.deleteBid(bidId);
+		bidAdminService.deleteBid(bidId);
 		return ResponseEntity.noContent().build();
 	}
 }

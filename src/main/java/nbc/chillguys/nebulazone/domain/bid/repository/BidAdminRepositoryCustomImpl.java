@@ -12,7 +12,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.entity.QAuction;
-import nbc.chillguys.nebulazone.domain.bid.dto.AdminBidSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.bid.dto.BidAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.entity.QBid;
 import nbc.chillguys.nebulazone.domain.user.entity.QUser;
@@ -23,7 +23,7 @@ public class BidAdminRepositoryCustomImpl implements BidAdminRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Page<Bid> searchBids(AdminBidSearchQueryCommand command, Pageable pageable) {
+	public Page<Bid> searchBids(BidAdminSearchQueryCommand command, Pageable pageable) {
 		QBid bid = QBid.bid;
 		QAuction auction = QAuction.auction;
 		QUser user = QUser.user;

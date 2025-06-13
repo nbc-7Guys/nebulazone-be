@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.bid.dto.AdminBidInfo;
-import nbc.chillguys.nebulazone.domain.bid.dto.AdminBidSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.bid.dto.BidAdminInfo;
+import nbc.chillguys.nebulazone.domain.bid.dto.BidAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
@@ -16,7 +16,7 @@ import nbc.chillguys.nebulazone.domain.bid.repository.BidRepository;
 
 @Service
 @RequiredArgsConstructor
-public class AdminBidDomainService {
+public class BidAdminDomainService {
 	private final BidRepository bidRepository;
 
 	/**
@@ -29,9 +29,9 @@ public class AdminBidDomainService {
 	 * @author 정석현
 	 */
 	@Transactional(readOnly = true)
-	public Page<AdminBidInfo> findBids(AdminBidSearchQueryCommand command, Pageable pageable) {
+	public Page<BidAdminInfo> findBids(BidAdminSearchQueryCommand command, Pageable pageable) {
 		return bidRepository.searchBids(command, pageable)
-			.map(AdminBidInfo::from);
+			.map(BidAdminInfo::from);
 	}
 
 	/**
