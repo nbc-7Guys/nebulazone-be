@@ -12,17 +12,17 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.products.dto.AdminProductSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.entity.QProduct;
 
 @Repository
 @RequiredArgsConstructor
-public class CustomProductAdminRepositoryImpl implements CustomProductAdminRepository {
+public class ProductAdminRepositoryCustomImpl implements ProductAdminRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Page<Product> searchProducts(AdminProductSearchQueryCommand command, Pageable pageable) {
+	public Page<Product> searchProducts(ProductAdminSearchQueryCommand command, Pageable pageable) {
 		QProduct product = QProduct.product;
 
 		BooleanBuilder builder = new BooleanBuilder();

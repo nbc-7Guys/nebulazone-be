@@ -4,7 +4,7 @@ import java.util.List;
 
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 
-public record AdminProductUpdateRequest(
+public record ProductAdminUpdateRequest(
 	String name,
 	String description,
 	Long price,

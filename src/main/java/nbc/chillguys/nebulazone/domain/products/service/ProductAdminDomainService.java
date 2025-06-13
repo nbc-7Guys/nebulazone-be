@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.products.dto.request.AdminProductUpdateRequest;
-import nbc.chillguys.nebulazone.domain.products.dto.AdminProductInfo;
-import nbc.chillguys.nebulazone.domain.products.dto.AdminProductSearchQueryCommand;
+import nbc.chillguys.nebulazone.application.products.dto.request.ProductAdminUpdateRequest;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductAdminInfo;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
@@ -16,24 +16,24 @@ import nbc.chillguys.nebulazone.domain.products.repository.ProductRepository;
 
 @Service
 @RequiredArgsConstructor
-public class AdminProductDomainService {
+public class ProductAdminDomainService {
 
 	private final ProductRepository productRepository;
 
 	@Transactional(readOnly = true)
-	public Page<AdminProductInfo> findProducts(AdminProductSearchQueryCommand command, Pageable pageable) {
+	public Page<ProductAdminInfo> findProducts(ProductAdminSearchQueryCommand command, Pageable pageable) {
 		Page<Product> page = productRepository.searchProducts(command, pageable);
-		return page.map(AdminProductInfo::from);
+		return page.map(ProductAdminInfo::from);
 	}
 
 	@Transactional(readOnly = true)
-	public AdminProductInfo getProduct(Long productId) {
+	public ProductAdminInfo getProduct(Long productId) {
 		Product product = findByIdWithJoin(productId);
-		return AdminProductInfo.from(product);
+		return ProductAdminInfo.from(product);
 	}
 
 	@Transactional
-	public void updateProduct(Long productId, AdminProductUpdateRequest request) {
+	public void updateProduct(Long productId, ProductAdminUpdateRequest request) {
 
 		Product product = findByIdWithJoin(productId);
 

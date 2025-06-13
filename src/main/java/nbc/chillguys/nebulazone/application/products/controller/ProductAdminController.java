@@ -14,58 +14,58 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.product.dto.response.AdminProductResponse;
-import nbc.chillguys.nebulazone.application.products.dto.request.AdminProductSearchRequest;
-import nbc.chillguys.nebulazone.application.products.dto.request.AdminProductUpdateRequest;
-import nbc.chillguys.nebulazone.application.products.service.AdminProductService;
+import nbc.chillguys.nebulazone.application.products.dto.request.ProductAdminSearchRequest;
+import nbc.chillguys.nebulazone.application.products.dto.request.ProductAdminUpdateRequest;
+import nbc.chillguys.nebulazone.application.products.dto.response.ProductAdminResponse;
+import nbc.chillguys.nebulazone.application.products.service.ProductAdminService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 
 @RestController
 @RequestMapping("/admin/products")
 @RequiredArgsConstructor
-public class AdminProductController {
-	private final AdminProductService adminProductService;
+public class ProductAdminController {
+	private final ProductAdminService productAdminService;
 
 	@GetMapping
-	public ResponseEntity<CommonPageResponse<AdminProductResponse>> findProducts(
+	public ResponseEntity<CommonPageResponse<ProductAdminResponse>> findProducts(
 		@RequestParam(value = "keyword", required = false) String keyword,
 		@RequestParam(value = "txMethod", required = false) ProductTxMethod txMethod,
 		@RequestParam(value = "isSold", required = false) Boolean isSold,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size
 	) {
-		AdminProductSearchRequest request = new AdminProductSearchRequest(keyword, txMethod, isSold, page, size);
+		ProductAdminSearchRequest request = new ProductAdminSearchRequest(keyword, txMethod, isSold, page, size);
 		Pageable pageable = PageRequest.of(page - 1, size);
-		CommonPageResponse<AdminProductResponse> response = adminProductService.findProducts(
+		CommonPageResponse<ProductAdminResponse> response = productAdminService.findProducts(
 			request, pageable);
 		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/{productId}")
-	public ResponseEntity<AdminProductResponse> getProduct(@PathVariable Long productId) {
-		AdminProductResponse response = adminProductService.getProduct(productId);
+	public ResponseEntity<ProductAdminResponse> getProduct(@PathVariable Long productId) {
+		ProductAdminResponse response = productAdminService.getProduct(productId);
 		return ResponseEntity.ok(response);
 	}
 
 	@PatchMapping("/{productId}")
 	public ResponseEntity<Void> updateProduct(
 		@PathVariable Long productId,
-		@RequestBody AdminProductUpdateRequest request
+		@RequestBody ProductAdminUpdateRequest request
 	) {
-		adminProductService.updateProduct(productId, request);
+		productAdminService.updateProduct(productId, request);
 		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping("/{productId}")
 	public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
-		adminProductService.deleteProduct(productId);
+		productAdminService.deleteProduct(productId);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/{productId}/restore")
 	public ResponseEntity<Void> restoreProduct(@PathVariable Long productId) {
-		adminProductService.restoreProduct(productId);
+		productAdminService.restoreProduct(productId);
 		return ResponseEntity.noContent().build();
 	}
 

@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 
-public interface CustomProductRepository {
+public interface ProductRepositoryCustom {
 	Optional<Product> findActiveProductById(Long productId);
 
 	Optional<Product> findActiveProductByIdWithUserAndImages(Long productId);

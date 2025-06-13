@@ -1,13 +1,13 @@
-package nbc.chillguys.nebulazone.application.product.dto.response;
+package nbc.chillguys.nebulazone.application.products.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import nbc.chillguys.nebulazone.domain.products.dto.AdminProductInfo;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductAdminInfo;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductImage;
 
-public record AdminProductResponse(
+public record ProductAdminResponse(
 	Long productId,
 	String name,
 	String description,
@@ -22,8 +22,8 @@ public record AdminProductResponse(
 	LocalDateTime createdAt,
 	LocalDateTime modifiedAt
 ) {
-	public static AdminProductResponse from(AdminProductInfo info) {
-		return new AdminProductResponse(
+	public static ProductAdminResponse from(ProductAdminInfo info) {
+		return new ProductAdminResponse(
 			info.productId(),
 			info.name(),
 			info.description(),

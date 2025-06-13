@@ -5,11 +5,11 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import nbc.chillguys.nebulazone.domain.products.dto.AdminProductSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 
-public interface CustomProductAdminRepository {
-	Page<Product> searchProducts(AdminProductSearchQueryCommand command, Pageable pageable);
+public interface ProductAdminRepositoryCustom {
+	Page<Product> searchProducts(ProductAdminSearchQueryCommand command, Pageable pageable);
 
 	Optional<Product> findByIdWithJoin(Long productId);
 

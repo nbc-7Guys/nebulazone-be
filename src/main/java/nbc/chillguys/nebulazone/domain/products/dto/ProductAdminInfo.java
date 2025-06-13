@@ -6,7 +6,7 @@ import java.util.List;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductImage;
 
-public record AdminProductInfo(
+public record ProductAdminInfo(
 	Long productId,
 	String name,
 	String description,
@@ -21,8 +21,8 @@ public record AdminProductInfo(
 	LocalDateTime createdAt,
 	LocalDateTime modifiedAt
 ) {
-	public static AdminProductInfo from(Product product) {
-		return new AdminProductInfo(
+	public static ProductAdminInfo from(Product product) {
+		return new ProductAdminInfo(
 			product.getId(),
 			product.getName(),
 			product.getDescription(),

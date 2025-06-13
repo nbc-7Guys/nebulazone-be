@@ -20,7 +20,7 @@ import nbc.chillguys.nebulazone.domain.products.vo.ProductDocument;
 
 @Repository
 @RequiredArgsConstructor
-public class CustomProductEsRepositoryImpl implements CustomProductEsRepository {
+public class ProductEsRepositoryCustomImpl implements ProductEsRepositoryCustom {
 	private final ElasticsearchOperations elasticsearchOperations;
 
 	@Override
