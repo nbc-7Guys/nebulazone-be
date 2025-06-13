@@ -50,7 +50,6 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           source: "docker/docker-compose.yml,docker/.env,prometheus/prometheus-prod.yml"
           target: "~/app"
-          strip_components: 1
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
