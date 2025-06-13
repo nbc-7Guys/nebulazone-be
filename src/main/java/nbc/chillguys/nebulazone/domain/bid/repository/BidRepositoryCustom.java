@@ -9,7 +9,7 @@ import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
-public interface BidCustomRepository {
+public interface BidRepositoryCustom {
 
 	Page<FindBidInfo> findBidsWithUserByAuction(Auction auction, int page, int size);
 
