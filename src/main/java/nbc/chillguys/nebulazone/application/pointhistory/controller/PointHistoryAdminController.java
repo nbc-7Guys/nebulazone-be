@@ -14,10 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.pointhistory.dto.request.AdminPointHistoryRequest;
+import nbc.chillguys.nebulazone.application.pointhistory.dto.request.PointHistoryAdminRequest;
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.AdminPointHistoryResponse;
-import nbc.chillguys.nebulazone.application.pointhistory.service.AdminPointHistoryService;
-import nbc.chillguys.nebulazone.application.pointhistory.service.PointHistoryService;
+import nbc.chillguys.nebulazone.application.pointhistory.service.PointHistoryAdminService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
@@ -25,9 +24,8 @@ import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 @RestController
 @RequestMapping("/admin/points")
 @RequiredArgsConstructor
-public class AdminPointHistoryController {
-	private final PointHistoryService pointHistoryService;
-	private final AdminPointHistoryService adminPointHistoryService;
+public class PointHistoryAdminController {
+	private final PointHistoryAdminService pointHistoryAdminService;
 
 	@GetMapping("/histories")
 	public ResponseEntity<CommonPageResponse<AdminPointHistoryResponse>> getAdminPointHistories(
@@ -40,25 +38,25 @@ public class AdminPointHistoryController {
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "20") int size
 	) {
-		AdminPointHistoryRequest request = new AdminPointHistoryRequest(
+		PointHistoryAdminRequest request = new PointHistoryAdminRequest(
 			email, nickname, type, status, startDate, endDate
 		);
 
 		CommonPageResponse<AdminPointHistoryResponse> response =
-			adminPointHistoryService.searchAdminPointHistories(request, PageRequest.of(page - 1, size));
+			pointHistoryAdminService.searchAdminPointHistories(request, PageRequest.of(page - 1, size));
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 
 	@PostMapping("/points/{pointHistoryId}/approve")
 	public ResponseEntity<Void> approvePointRequest(@PathVariable Long pointHistoryId) {
-		adminPointHistoryService.approvePointHistory(pointHistoryId);
+		pointHistoryAdminService.approvePointHistory(pointHistoryId);
 		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/points/{pointHistoryId}/reject")
 	public ResponseEntity<Void> rejectPointRequest(@PathVariable Long pointHistoryId) {
-		adminPointHistoryService.rejectPointHistory(pointHistoryId);
+		pointHistoryAdminService.rejectPointHistory(pointHistoryId);
 		return ResponseEntity.ok().build();
 	}
 

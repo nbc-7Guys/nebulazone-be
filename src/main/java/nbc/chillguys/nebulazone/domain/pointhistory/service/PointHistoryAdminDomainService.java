@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.pointhistory.dto.request.AdminPointHistoryRequest;
+import nbc.chillguys.nebulazone.application.pointhistory.dto.request.PointHistoryAdminRequest;
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.AdminPointHistoryResponse;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistory;
 import nbc.chillguys.nebulazone.domain.pointhistory.exception.PointHistoryErrorCode;
@@ -15,12 +15,12 @@ import nbc.chillguys.nebulazone.domain.pointhistory.repository.PointHistoryRepos
 
 @Service
 @RequiredArgsConstructor
-public class AdminPointHistoryDomainService {
+public class PointHistoryAdminDomainService {
 
 	private final PointHistoryRepository pointHistoryRepository;
 
 	public Page<AdminPointHistoryResponse> searchAdminPointHistories(
-		AdminPointHistoryRequest request, Pageable pageable) {
+		PointHistoryAdminRequest request, Pageable pageable) {
 		return pointHistoryRepository.searchAdminPointHistories(request, pageable);
 	}
 

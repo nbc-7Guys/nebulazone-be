@@ -12,17 +12,17 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.pointhistory.dto.request.AdminPointHistoryRequest;
+import nbc.chillguys.nebulazone.application.pointhistory.dto.request.PointHistoryAdminRequest;
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.AdminPointHistoryResponse;
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.QAdminPointHistoryResponse;
 import nbc.chillguys.nebulazone.domain.user.entity.QUser;
 
 @RequiredArgsConstructor
-public class PointHistoryCustomRepositoryImpl implements PointHistoryCustomRepository {
+public class PointHistoryAdminRepositoryCustomImpl implements PointHistoryAdminRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public Page<AdminPointHistoryResponse> searchAdminPointHistories(AdminPointHistoryRequest request,
+	public Page<AdminPointHistoryResponse> searchAdminPointHistories(PointHistoryAdminRequest request,
 		Pageable pageable) {
 		QUser user = pointHistory.user;
 		BooleanBuilder builder = new BooleanBuilder();

@@ -5,17 +5,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.pointhistory.dto.request.AdminPointHistoryRequest;
+import nbc.chillguys.nebulazone.application.pointhistory.dto.request.PointHistoryAdminRequest;
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.AdminPointHistoryResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
-import nbc.chillguys.nebulazone.domain.pointhistory.service.AdminPointHistoryDomainService;
-import nbc.chillguys.nebulazone.domain.pointhistory.service.PointHistoryDomainService;
+import nbc.chillguys.nebulazone.domain.pointhistory.service.PointHistoryAdminDomainService;
 
 @Service
 @RequiredArgsConstructor
-public class AdminPointHistoryService {
-	private final PointHistoryDomainService pointHistoryDomainService;
-	private final AdminPointHistoryDomainService adminPointHistoryDomainService;
+public class PointHistoryAdminService {
+	private final PointHistoryAdminDomainService pointHistoryAdminDomainService;
 
 	/**
 	 * 포인트 히스토리 목록을 검색/조회합니다.<br>
@@ -28,10 +26,10 @@ public class AdminPointHistoryService {
 	 */
 	@Transactional(readOnly = true)
 	public CommonPageResponse<AdminPointHistoryResponse> searchAdminPointHistories(
-		AdminPointHistoryRequest request, Pageable pageable) {
+		PointHistoryAdminRequest request, Pageable pageable) {
 
 		return CommonPageResponse.from(
-			adminPointHistoryDomainService.searchAdminPointHistories(request, pageable)
+			pointHistoryAdminDomainService.searchAdminPointHistories(request, pageable)
 		);
 	}
 
@@ -42,7 +40,7 @@ public class AdminPointHistoryService {
 	 * @author 정석현
 	 */
 	public void approvePointHistory(Long pointHistoryId) {
-		adminPointHistoryDomainService.approvePointHistory(pointHistoryId);
+		pointHistoryAdminDomainService.approvePointHistory(pointHistoryId);
 	}
 
 	/**
@@ -52,6 +50,6 @@ public class AdminPointHistoryService {
 	 * @author 정석현
 	 */
 	public void rejectPointHistory(Long pointHistoryId) {
-		adminPointHistoryDomainService.rejectPointHistory(pointHistoryId);
+		pointHistoryAdminDomainService.rejectPointHistory(pointHistoryId);
 	}
 }
