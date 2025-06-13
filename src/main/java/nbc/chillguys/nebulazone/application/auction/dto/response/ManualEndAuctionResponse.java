@@ -8,7 +8,7 @@ import nbc.chillguys.nebulazone.domain.auction.dto.ManualEndAuctionInfo;
 
 public record ManualEndAuctionResponse(
 	Long auctionId,
-	Long BidId,
+	Long bidId,
 	Long winnerId,
 	String winnerNickname,
 	String winnerEmail,
@@ -21,7 +21,7 @@ public record ManualEndAuctionResponse(
 	public static ManualEndAuctionResponse from(ManualEndAuctionInfo auctionInfo) {
 		return new ManualEndAuctionResponse(
 			auctionInfo.auctionId(),
-			auctionInfo.BidId(),
+			auctionInfo.bidId(),
 			auctionInfo.winnerId(),
 			auctionInfo.winnerNickname(),
 			auctionInfo.winnerEmail(),

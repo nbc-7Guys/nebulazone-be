@@ -1,7 +1,7 @@
 package nbc.chillguys.nebulazone.application.auction.dto.response;
 
 public record DeleteAuctionResponse(
-	Long AuctionId
+	Long auctionId
 ) {
 
 	public static DeleteAuctionResponse from(Long auctionId) {
