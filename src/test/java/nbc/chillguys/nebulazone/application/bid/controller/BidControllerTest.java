@@ -50,7 +50,6 @@ class BidControllerTest {
 
 	private static final Long AUCTION_ID = 1L;
 	private static final Long BID_ID = 100L;
-	private static final Long USER_ID = 10L;
 	private static final String NICKNAME = "입찰자닉네임";
 	private static final String PRODUCT_NAME = "테스트 상품";
 	private static final String BID_STATUS_MESSAGE = "입찰 성공";
@@ -96,15 +95,18 @@ class BidControllerTest {
 		@WithCustomMockUser
 		void success_findBids() throws Exception {
 			// given
-			FindBidResponse bidResponse = new FindBidResponse(
+			FindBidResponse bidContent1 = new FindBidResponse(
 				BID_ID, NICKNAME, PRODUCT_NAME, BID_STATUS_MESSAGE, BID_PRICE, bidTime
 			);
-			List<FindBidResponse> content = List.of(bidResponse);
+			FindBidResponse bidContent2 = new FindBidResponse(
+				BID_ID + 1, NICKNAME + "2", PRODUCT_NAME, BID_STATUS_MESSAGE, BID_PRICE + 10000, bidTime.plusMinutes(10)
+			);
+			List<FindBidResponse> contents = List.of(bidContent1, bidContent2);
 
-			Page<FindBidResponse> page = new PageImpl<>(content, PageRequest.of(0, 20), 1);
-			CommonPageResponse<FindBidResponse> response = CommonPageResponse.from(page);
+			Page<FindBidResponse> page = new PageImpl<>(contents, PageRequest.of(0, 20), 2);
+			CommonPageResponse<FindBidResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(bidService.findBids(AUCTION_ID, 0, 20)).willReturn(response);
+			given(bidService.findBids(AUCTION_ID, 0, 20)).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/auctions/{auctionId}/bids", AUCTION_ID))
@@ -113,7 +115,7 @@ class BidControllerTest {
 					status().isOk(),
 					content().contentType(MediaType.APPLICATION_JSON),
 					jsonPath("$.content").isArray(),
-					jsonPath("$.content.length()").value(1),
+					jsonPath("$.content.length()").value(2),
 					jsonPath("$.content[0].BidId").value(BID_ID),
 					jsonPath("$.content[0].nickname").value(NICKNAME),
 					jsonPath("$.content[0].productName").value(PRODUCT_NAME),
@@ -121,9 +123,12 @@ class BidControllerTest {
 					jsonPath("$.content[0].bidPrice").value(BID_PRICE),
 					jsonPath("$.content[0].bidTime").value(
 						bidTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))),
+					jsonPath("$.content[1].BidId").value(BID_ID + 1),
+					jsonPath("$.content[1].nickname").value(NICKNAME + "2"),
+					jsonPath("$.content[1].bidPrice").value(BID_PRICE + 10000),
 					jsonPath("$.page").value(1),
 					jsonPath("$.size").value(20),
-					jsonPath("$.totalElements").value(1)
+					jsonPath("$.totalElements").value(2)
 				);
 		}
 
@@ -133,9 +138,9 @@ class BidControllerTest {
 		void success_findBids_customPaging() throws Exception {
 			// given
 			Page<FindBidResponse> page = new PageImpl<>(List.of(), PageRequest.of(1, 10), 0);
-			CommonPageResponse<FindBidResponse> response = CommonPageResponse.from(page);
+			CommonPageResponse<FindBidResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(bidService.findBids(AUCTION_ID, 1, 10)).willReturn(response);
+			given(bidService.findBids(AUCTION_ID, 1, 10)).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/auctions/{auctionId}/bids", AUCTION_ID)
@@ -155,14 +160,15 @@ class BidControllerTest {
 		@WithCustomMockUser
 		void success_findBids_pageZeroOrBelow() throws Exception {
 			// given
-			FindBidResponse bidResponse = new FindBidResponse(
+			FindBidResponse bidContent = new FindBidResponse(
 				BID_ID, NICKNAME, PRODUCT_NAME, BID_STATUS_MESSAGE, BID_PRICE, bidTime
 			);
+			List<FindBidResponse> contents = List.of(bidContent);
 
-			Page<FindBidResponse> page = new PageImpl<>(List.of(bidResponse), PageRequest.of(0, 20), 1);
-			CommonPageResponse<FindBidResponse> response = CommonPageResponse.from(page);
+			Page<FindBidResponse> page = new PageImpl<>(contents, PageRequest.of(0, 20), 1);
+			CommonPageResponse<FindBidResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(bidService.findBids(AUCTION_ID, 0, 20)).willReturn(response);
+			given(bidService.findBids(AUCTION_ID, 0, 20)).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/auctions/{auctionId}/bids", AUCTION_ID)
@@ -181,9 +187,9 @@ class BidControllerTest {
 		void success_findBids_defaultValues() throws Exception {
 			// given
 			Page<FindBidResponse> page = new PageImpl<>(List.of(), PageRequest.of(0, 20), 0);
-			CommonPageResponse<FindBidResponse> response = CommonPageResponse.from(page);
+			CommonPageResponse<FindBidResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(bidService.findBids(AUCTION_ID, 0, 20)).willReturn(response);
+			given(bidService.findBids(AUCTION_ID, 0, 20)).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/auctions/{auctionId}/bids", AUCTION_ID))
@@ -204,15 +210,18 @@ class BidControllerTest {
 		@WithCustomMockUser
 		void success_findMyBids() throws Exception {
 			// given
-			FindBidResponse bidResponse = new FindBidResponse(
+			FindBidResponse bidContent1 = new FindBidResponse(
 				BID_ID, NICKNAME, PRODUCT_NAME, BID_STATUS_MESSAGE, BID_PRICE, bidTime
 			);
-			List<FindBidResponse> content = List.of(bidResponse);
+			FindBidResponse bidContent2 = new FindBidResponse(
+				BID_ID + 1, NICKNAME, PRODUCT_NAME + "2", BID_STATUS_MESSAGE, BID_PRICE + 5000, bidTime.plusMinutes(5)
+			);
+			List<FindBidResponse> contents = List.of(bidContent1, bidContent2);
 
-			Page<FindBidResponse> page = new PageImpl<>(content, PageRequest.of(0, 20), 1);
-			CommonPageResponse<FindBidResponse> response = CommonPageResponse.from(page);
+			Page<FindBidResponse> page = new PageImpl<>(contents, PageRequest.of(0, 20), 2);
+			CommonPageResponse<FindBidResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(bidService.findMyBids(any(AuthUser.class), eq(0), eq(20))).willReturn(response);
+			given(bidService.findMyBids(any(AuthUser.class), eq(0), eq(20))).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/bids/me"))
@@ -221,7 +230,7 @@ class BidControllerTest {
 					status().isOk(),
 					content().contentType(MediaType.APPLICATION_JSON),
 					jsonPath("$.content").isArray(),
-					jsonPath("$.content.length()").value(1),
+					jsonPath("$.content.length()").value(2),
 					jsonPath("$.content[0].BidId").value(BID_ID),
 					jsonPath("$.content[0].nickname").value(NICKNAME),
 					jsonPath("$.content[0].productName").value(PRODUCT_NAME),
@@ -229,9 +238,12 @@ class BidControllerTest {
 					jsonPath("$.content[0].bidPrice").value(BID_PRICE),
 					jsonPath("$.content[0].bidTime").value(
 						bidTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))),
+					jsonPath("$.content[1].BidId").value(BID_ID + 1),
+					jsonPath("$.content[1].productName").value(PRODUCT_NAME + "2"),
+					jsonPath("$.content[1].bidPrice").value(BID_PRICE + 5000),
 					jsonPath("$.page").value(1),
 					jsonPath("$.size").value(20),
-					jsonPath("$.totalElements").value(1)
+					jsonPath("$.totalElements").value(2)
 				);
 		}
 
@@ -241,9 +253,9 @@ class BidControllerTest {
 		void success_findMyBids_customPaging() throws Exception {
 			// given
 			Page<FindBidResponse> page = new PageImpl<>(List.of(), PageRequest.of(2, 5), 0);
-			CommonPageResponse<FindBidResponse> response = CommonPageResponse.from(page);
+			CommonPageResponse<FindBidResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(bidService.findMyBids(any(AuthUser.class), eq(2), eq(5))).willReturn(response);
+			given(bidService.findMyBids(any(AuthUser.class), eq(2), eq(5))).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/bids/me")
@@ -263,14 +275,15 @@ class BidControllerTest {
 		@WithCustomMockUser
 		void success_findMyBids_pageZeroOrBelow() throws Exception {
 			// given
-			FindBidResponse bidResponse = new FindBidResponse(
+			FindBidResponse bidContent = new FindBidResponse(
 				BID_ID, NICKNAME, PRODUCT_NAME, BID_STATUS_MESSAGE, BID_PRICE, bidTime
 			);
+			List<FindBidResponse> contents = List.of(bidContent);
 
-			Page<FindBidResponse> page = new PageImpl<>(List.of(bidResponse), PageRequest.of(0, 20), 1);
-			CommonPageResponse<FindBidResponse> response = CommonPageResponse.from(page);
+			Page<FindBidResponse> page = new PageImpl<>(contents, PageRequest.of(0, 20), 1);
+			CommonPageResponse<FindBidResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(bidService.findMyBids(any(AuthUser.class), eq(0), eq(20))).willReturn(response);
+			given(bidService.findMyBids(any(AuthUser.class), eq(0), eq(20))).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/bids/me")
@@ -289,9 +302,9 @@ class BidControllerTest {
 		void success_findMyBids_defaultValues() throws Exception {
 			// given
 			Page<FindBidResponse> page = new PageImpl<>(List.of(), PageRequest.of(0, 20), 0);
-			CommonPageResponse<FindBidResponse> response = CommonPageResponse.from(page);
+			CommonPageResponse<FindBidResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(bidService.findMyBids(any(AuthUser.class), eq(0), eq(20))).willReturn(response);
+			given(bidService.findMyBids(any(AuthUser.class), eq(0), eq(20))).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/bids/me"))
