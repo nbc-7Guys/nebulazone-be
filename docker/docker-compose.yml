@@ -66,7 +66,7 @@ services:
       - "9090:9090"
     restart: always
     volumes:
-      - ./prometheus/prometheus-prod.yml:/etc/prometheus/prometheus.yml
+      - ../prometheus/prometheus-prod.yml:/etc/prometheus/prometheus.yml
     networks:
       - nebulazone-network
 
