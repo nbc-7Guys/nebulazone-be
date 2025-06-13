@@ -2,6 +2,7 @@ package nbc.chillguys.nebulazone.application.pointhistory.dto.response;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.querydsl.core.annotations.QueryProjection;
 
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
@@ -13,6 +14,7 @@ public record AdminPointHistoryResponse(
 	String account,
 	PointHistoryType type,
 	PointHistoryStatus status,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt,
 	Long userId,
 	String email,

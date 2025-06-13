@@ -9,6 +9,6 @@ import nbc.chillguys.nebulazone.domain.review.entity.Review;
 
 @Repository
 public interface ReviewRepository
-	extends JpaRepository<Review, Long>, CustomReviewRepository, CustomReviewAdminRepository {
+	extends JpaRepository<Review, Long>, ReviewRepositoryCustom, ReviewAdminRepositoryCustom {
 	Optional<Review> findByIdAndCatalogId(Long id, Long catalogId);
 }
