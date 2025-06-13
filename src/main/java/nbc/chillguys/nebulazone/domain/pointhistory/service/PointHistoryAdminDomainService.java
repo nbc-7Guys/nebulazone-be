@@ -15,7 +15,7 @@ import nbc.chillguys.nebulazone.domain.pointhistory.repository.PointHistoryRepos
 
 @Service
 @RequiredArgsConstructor
-public class AdminPointHistoryDomainService {
+public class PointHistoryAdminDomainService {
 
 	private final PointHistoryRepository pointHistoryRepository;
 
