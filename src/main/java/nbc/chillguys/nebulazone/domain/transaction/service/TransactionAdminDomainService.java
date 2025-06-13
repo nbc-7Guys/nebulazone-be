@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.transaction.dto.AdminTransactionInfo;
-import nbc.chillguys.nebulazone.domain.transaction.dto.AdminTransactionSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionAdminInfo;
+import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
 import nbc.chillguys.nebulazone.domain.transaction.exception.TransactionErrorCode;
 import nbc.chillguys.nebulazone.domain.transaction.exception.TransactionException;
@@ -15,13 +15,13 @@ import nbc.chillguys.nebulazone.domain.transaction.repository.TransactionReposit
 
 @Service
 @RequiredArgsConstructor
-public class AdminTransactionDomainService {
+public class TransactionAdminDomainService {
 	private final TransactionRepository transactionRepository;
 
 	@Transactional(readOnly = true)
-	public Page<AdminTransactionInfo> findTransactions(AdminTransactionSearchQueryCommand command, Pageable pageable) {
+	public Page<TransactionAdminInfo> findTransactions(TransactionAdminSearchQueryCommand command, Pageable pageable) {
 		return transactionRepository.searchTransactions(command, pageable)
-			.map(AdminTransactionInfo::from);
+			.map(TransactionAdminInfo::from);
 	}
 
 	@Transactional

@@ -25,7 +25,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Repository
 @RequiredArgsConstructor
-public class TransactionCustomRepositoryImpl implements TransactionCustomRepository {
+public class TransactionRepositoryCustomImpl implements TransactionRepositoryCustom {
 
 	private final JPAQueryFactory jpaQueryFactory;
 

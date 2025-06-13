@@ -12,18 +12,18 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.products.entity.QProduct;
-import nbc.chillguys.nebulazone.domain.transaction.dto.AdminTransactionSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.QTransaction;
 import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
 import nbc.chillguys.nebulazone.domain.user.entity.QUser;
 
 @Repository
 @RequiredArgsConstructor
-public class CustomTransactionAdminRepositoryImpl implements CustomTransactionAdminRepository {
+public class TransactionAdminRepositoryCustomImpl implements TransactionAdminRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Page<Transaction> searchTransactions(AdminTransactionSearchQueryCommand command, Pageable pageable) {
+	public Page<Transaction> searchTransactions(TransactionAdminSearchQueryCommand command, Pageable pageable) {
 		QTransaction tx = QTransaction.transaction;
 		QUser user = QUser.user;
 		QProduct product = QProduct.product;

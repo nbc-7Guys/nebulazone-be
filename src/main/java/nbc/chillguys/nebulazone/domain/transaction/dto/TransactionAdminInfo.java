@@ -1,19 +1,21 @@
 package nbc.chillguys.nebulazone.domain.transaction.dto;
 
+import java.time.LocalDateTime;
+
 import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
 
-public record AdminTransactionInfo(
+public record TransactionAdminInfo(
 	Long txId,
 	Long price,
 	String method,
 	String userNickname,
 	Long productId,
 	String productName,
-	java.time.LocalDateTime createdAt,
-	java.time.LocalDateTime modifiedAt
+	LocalDateTime createdAt,
+	LocalDateTime modifiedAt
 ) {
-	public static AdminTransactionInfo from(Transaction tx) {
-		return new AdminTransactionInfo(
+	public static TransactionAdminInfo from(Transaction tx) {
+		return new TransactionAdminInfo(
 			tx.getId(),
 			tx.getPrice(),
 			tx.getMethod().name(),

@@ -8,7 +8,7 @@ import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
-public interface TransactionCustomRepository {
+public interface TransactionRepositoryCustom {
 	Page<TransactionFindAllInfo> findTransactionsWithProductAndUser(User user, int page, int size);
 
 	Optional<TransactionFindDetailInfo> findTransactionWithProductAndUser(User user, Long transactionId);
