@@ -18,7 +18,7 @@ import nbc.chillguys.nebulazone.domain.catalog.repository.CatalogRepository;
 @Service
 @RequiredArgsConstructor
 public class CatalogAdminDomainService {
-	private final CatalogAdminRepositoryCustom adminCatalogQueryRepository;
+	private final CatalogAdminRepositoryCustom catalogAdminRepositoryCustom;
 	private final CatalogRepository catalogRepository;
 
 	/**
@@ -32,7 +32,7 @@ public class CatalogAdminDomainService {
 	 */
 	@Transactional(readOnly = true)
 	public Page<CatalogAdminInfo> findCatalogs(CatalogAdminSearchQueryCommand command, Pageable pageable) {
-		return adminCatalogQueryRepository.searchCatalogs(command, pageable)
+		return catalogAdminRepositoryCustom.searchCatalogs(command, pageable)
 			.map(CatalogAdminInfo::from);
 	}
 
