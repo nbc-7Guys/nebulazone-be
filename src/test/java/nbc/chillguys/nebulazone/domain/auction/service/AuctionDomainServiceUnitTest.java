@@ -204,7 +204,7 @@ class AuctionDomainServiceUnitTest {
 
 			// then
 			assertThat(result.auctionId()).isEqualTo(auctionId);
-			assertThat(result.BidId()).isEqualTo(9999L);
+			assertThat(result.bidId()).isEqualTo(9999L);
 			assertThat(result.winnerNickname()).isEqualTo(WINNER_NICKNAME);
 			assertThat(result.wonProductPrice()).isEqualTo(CURRENT_PRICE);
 		}

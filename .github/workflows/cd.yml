@@ -42,42 +42,26 @@ jobs:
           echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> docker/.env
           chmod 644 docker/.env
 
-      - name: Copy files to EC2
+      - name: Copy files to GCP VM
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ secrets.GCP_VM_HOST }}
           username: ubuntu
-          key: ${{ secrets.EC2_KEY }}
-          source: "docker/docker-compose.yml,docker/.env"
+          key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
+          source: "docker/docker-compose.yml,docker/.env,prometheus/prometheus-prod.yml"
           target: "~/app"
           overwrite: true
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }}
+          host: ${{ secrets.GCP_VM_HOST }}
           username: ubuntu
-          key: ${{ secrets.EC2_KEY }}
+          key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
           script: |
             set -e
-
-             if ! command -v docker &> /dev/null; then
-               echo "Installing Docker..."
-               sudo apt-get update -y
-               sudo apt-get install -y ca-certificates curl
-               curl -fsSL https://get.docker.com -o get-docker.sh
-               sudo sh get-docker.sh
-               sudo usermod -aG docker ubuntu
-               echo "Docker installation completed. Please re-run the deployment."
-               exit 0
-             fi
-
-             cd ~/app
-             docker compose pull
-             docker compose down --remove-orphans || true
-             docker compose up -d
-
-             echo "Check Container"
-             docker compose ps
-
-             echo "Deployment completed successfully"
+            cd ~/app
+            docker compose pull
+            docker compose down --remove-orphans || true
+            docker compose up -d
+            docker compose ps

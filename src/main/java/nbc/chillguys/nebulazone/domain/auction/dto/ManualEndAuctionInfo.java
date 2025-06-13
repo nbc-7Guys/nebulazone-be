@@ -7,7 +7,7 @@ import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 
 public record ManualEndAuctionInfo(
 	Long auctionId,
-	Long BidId,
+	Long bidId,
 	Long winnerId,
 	String winnerNickname,
 	String winnerEmail,
