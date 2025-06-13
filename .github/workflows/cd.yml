@@ -40,7 +40,7 @@ jobs:
           echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> docker/.env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> docker/.env
           echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> docker/.env
-          chmod 600 docker/.env
+          chmod 644 docker/.env
 
       - name: Copy files to EC2
         uses: appleboy/scp-action@v0.1.7
