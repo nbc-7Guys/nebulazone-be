@@ -15,6 +15,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -77,21 +80,20 @@ class AuctionControllerTest {
 		@WithCustomMockUser
 		void success_findAuctions() throws Exception {
 			// given
-			FindAllAuctionResponse auctionResponse = new FindAllAuctionResponse(
+			FindAllAuctionResponse auctionContent1 = new FindAllAuctionResponse(
 				AUCTION_ID, START_PRICE, CURRENT_PRICE, false,
 				endTime, PRODUCT_NAME, PRODUCT_IMAGE_URL, BID_COUNT
 			);
-			List<FindAllAuctionResponse> content = List.of(auctionResponse);
+			FindAllAuctionResponse auctionContent2 = new FindAllAuctionResponse(
+				AUCTION_ID + 1, START_PRICE + 10000, CURRENT_PRICE + 20000, false,
+				endTime.plusDays(1), PRODUCT_NAME + "2", PRODUCT_IMAGE_URL, BID_COUNT + 2
+			);
+			List<FindAllAuctionResponse> contents = List.of(auctionContent1, auctionContent2);
 
-			CommonPageResponse<FindAllAuctionResponse> response = CommonPageResponse.<FindAllAuctionResponse>builder()
-				.content(content)
-				.page(1)
-				.size(20)
-				.totalElements(1)
-				.totalPages(1)
-				.build();
+			Page<FindAllAuctionResponse> page = new PageImpl<>(contents, PageRequest.of(0, 20), 2);
+			CommonPageResponse<FindAllAuctionResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(auctionService.findAuctions(0, 20)).willReturn(response);
+			given(auctionService.findAuctions(0, 20)).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/auctions"))
@@ -100,13 +102,16 @@ class AuctionControllerTest {
 					status().isOk(),
 					content().contentType(MediaType.APPLICATION_JSON),
 					jsonPath("$.content").isArray(),
-					jsonPath("$.content.length()").value(1),
+					jsonPath("$.content.length()").value(2),
 					jsonPath("$.content[0].auctionId").value(AUCTION_ID),
 					jsonPath("$.content[0].startPrice").value(START_PRICE),
 					jsonPath("$.content[0].currentPrice").value(CURRENT_PRICE),
 					jsonPath("$.content[0].productName").value(PRODUCT_NAME),
+					jsonPath("$.content[1].auctionId").value(AUCTION_ID + 1),
+					jsonPath("$.content[1].productName").value(PRODUCT_NAME + "2"),
 					jsonPath("$.page").value(1),
-					jsonPath("$.size").value(20)
+					jsonPath("$.size").value(20),
+					jsonPath("$.totalElements").value(2)
 				);
 
 		}
@@ -116,15 +121,10 @@ class AuctionControllerTest {
 		@WithCustomMockUser
 		void success_findAuctions_customPaging() throws Exception {
 			// given
-			CommonPageResponse<FindAllAuctionResponse> response = CommonPageResponse.<FindAllAuctionResponse>builder()
-				.content(List.of())
-				.page(2)
-				.size(10)
-				.totalElements(0)
-				.totalPages(0)
-				.build();
+			Page<FindAllAuctionResponse> page = new PageImpl<>(List.of(), PageRequest.of(1, 10), 0);
+			CommonPageResponse<FindAllAuctionResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(auctionService.findAuctions(1, 10)).willReturn(response);
+			given(auctionService.findAuctions(1, 10)).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/auctions")
@@ -145,20 +145,16 @@ class AuctionControllerTest {
 		@WithCustomMockUser
 		void success_findAuctions_pageZeroOrBelow() throws Exception {
 			// given
-			FindAllAuctionResponse auctionResponse = new FindAllAuctionResponse(
+			FindAllAuctionResponse auctionContent = new FindAllAuctionResponse(
 				AUCTION_ID, START_PRICE, CURRENT_PRICE, false,
 				endTime, PRODUCT_NAME, PRODUCT_IMAGE_URL, BID_COUNT
 			);
+			List<FindAllAuctionResponse> contents = List.of(auctionContent);
 
-			CommonPageResponse<FindAllAuctionResponse> response = CommonPageResponse.<FindAllAuctionResponse>builder()
-				.content(List.of(auctionResponse))
-				.page(1)
-				.size(20)
-				.totalElements(1)
-				.totalPages(1)
-				.build();
+			Page<FindAllAuctionResponse> page = new PageImpl<>(contents, PageRequest.of(0, 20), 1);
+			CommonPageResponse<FindAllAuctionResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(auctionService.findAuctions(0, 20)).willReturn(response);
+			given(auctionService.findAuctions(0, 20)).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/auctions")
@@ -177,15 +173,10 @@ class AuctionControllerTest {
 		@WithCustomMockUser
 		void success_findAuctions_defaultValues() throws Exception {
 			// given
-			CommonPageResponse<FindAllAuctionResponse> response = CommonPageResponse.<FindAllAuctionResponse>builder()
-				.content(List.of())
-				.page(1)
-				.size(20)
-				.totalElements(0)
-				.totalPages(0)
-				.build();
+			Page<FindAllAuctionResponse> page = new PageImpl<>(List.of(), PageRequest.of(0, 20), 0);
+			CommonPageResponse<FindAllAuctionResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(auctionService.findAuctions(0, 20)).willReturn(response);
+			given(auctionService.findAuctions(0, 20)).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/auctions"))
@@ -207,13 +198,17 @@ class AuctionControllerTest {
 		@WithCustomMockUser
 		void success_findAuctions_popular() throws Exception {
 			// given
-			FindAllAuctionResponse auctionResponse = new FindAllAuctionResponse(
+			FindAllAuctionResponse auctionContent1 = new FindAllAuctionResponse(
 				AUCTION_ID, START_PRICE, CURRENT_PRICE, false,
 				endTime, PRODUCT_NAME, PRODUCT_IMAGE_URL, BID_COUNT
 			);
-			List<FindAllAuctionResponse> response = List.of(auctionResponse);
+			FindAllAuctionResponse auctionContent2 = new FindAllAuctionResponse(
+				AUCTION_ID + 1, START_PRICE + 10000, CURRENT_PRICE + 20000, false,
+				endTime.plusDays(1), PRODUCT_NAME + "2", PRODUCT_IMAGE_URL, BID_COUNT + 3
+			);
+			List<FindAllAuctionResponse> expectedResponse = List.of(auctionContent1, auctionContent2);
 
-			given(auctionService.findAuctionsBySortType(AuctionSortType.POPULAR)).willReturn(response);
+			given(auctionService.findAuctionsBySortType(AuctionSortType.POPULAR)).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/auctions/sorted")
@@ -223,12 +218,14 @@ class AuctionControllerTest {
 					status().isOk(),
 					content().contentType(MediaType.APPLICATION_JSON),
 					jsonPath("$").isArray(),
-					jsonPath("$.length()").value(1),
+					jsonPath("$.length()").value(2),
 					jsonPath("$[0].auctionId").value(AUCTION_ID),
 					jsonPath("$[0].startPrice").value(START_PRICE),
 					jsonPath("$[0].currentPrice").value(CURRENT_PRICE),
 					jsonPath("$[0].productName").value(PRODUCT_NAME),
-					jsonPath("$[0].bidCount").value(BID_COUNT)
+					jsonPath("$[0].bidCount").value(BID_COUNT),
+					jsonPath("$[1].auctionId").value(AUCTION_ID + 1),
+					jsonPath("$[1].bidCount").value(BID_COUNT + 3)
 				);
 
 		}
@@ -238,13 +235,13 @@ class AuctionControllerTest {
 		@WithCustomMockUser
 		void success_findAuctions_closing() throws Exception {
 			// given
-			FindAllAuctionResponse auctionResponse = new FindAllAuctionResponse(
+			FindAllAuctionResponse auctionContent = new FindAllAuctionResponse(
 				AUCTION_ID, START_PRICE, CURRENT_PRICE, false,
 				endTime, PRODUCT_NAME, PRODUCT_IMAGE_URL, BID_COUNT
 			);
-			List<FindAllAuctionResponse> response = List.of(auctionResponse);
+			List<FindAllAuctionResponse> expectedResponse = List.of(auctionContent);
 
-			given(auctionService.findAuctionsBySortType(AuctionSortType.CLOSING)).willReturn(response);
+			given(auctionService.findAuctionsBySortType(AuctionSortType.CLOSING)).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/auctions/sorted")
