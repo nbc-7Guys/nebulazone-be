@@ -6,19 +6,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.catalog.dto.request.AdminCatalogUpdateRequest;
-import nbc.chillguys.nebulazone.domain.catalog.dto.AdminCatalogInfo;
-import nbc.chillguys.nebulazone.domain.catalog.dto.AdminCatalogSearchQueryCommand;
+import nbc.chillguys.nebulazone.application.catalog.dto.request.CatalogAdminUpdateRequest;
+import nbc.chillguys.nebulazone.domain.catalog.dto.CatalogAdminInfo;
+import nbc.chillguys.nebulazone.domain.catalog.dto.CatalogAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.catalog.exception.CatalogErrorCode;
 import nbc.chillguys.nebulazone.domain.catalog.exception.CatalogException;
+import nbc.chillguys.nebulazone.domain.catalog.repository.CatalogAdminRepositoryCustom;
 import nbc.chillguys.nebulazone.domain.catalog.repository.CatalogRepository;
-import nbc.chillguys.nebulazone.domain.catalog.repository.CustomCatalogAdminRepository;
 
 @Service
 @RequiredArgsConstructor
-public class AdminCatalogDomainService {
-	private final CustomCatalogAdminRepository adminCatalogQueryRepository;
+public class CatalogAdminDomainService {
+	private final CatalogAdminRepositoryCustom adminCatalogQueryRepository;
 	private final CatalogRepository catalogRepository;
 
 	/**
@@ -31,9 +31,9 @@ public class AdminCatalogDomainService {
 	 * @author 정석현
 	 */
 	@Transactional(readOnly = true)
-	public Page<AdminCatalogInfo> findCatalogs(AdminCatalogSearchQueryCommand command, Pageable pageable) {
+	public Page<CatalogAdminInfo> findCatalogs(CatalogAdminSearchQueryCommand command, Pageable pageable) {
 		return adminCatalogQueryRepository.searchCatalogs(command, pageable)
-			.map(AdminCatalogInfo::from);
+			.map(CatalogAdminInfo::from);
 	}
 
 	/**
@@ -45,7 +45,7 @@ public class AdminCatalogDomainService {
 	 * @author 정석현
 	 */
 	@Transactional
-	public void updateCatalog(Long catalogId, AdminCatalogUpdateRequest request) {
+	public void updateCatalog(Long catalogId, CatalogAdminUpdateRequest request) {
 
 		Catalog catalog = findCatalogId(catalogId);
 

@@ -22,7 +22,7 @@ import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 @RestController
 @RequestMapping("/admin/reviews")
 @RequiredArgsConstructor
-public class AdminReviewController {
+public class ReviewAdminController {
 	private final AdminReviewService adminReviewService;
 
 	@GetMapping

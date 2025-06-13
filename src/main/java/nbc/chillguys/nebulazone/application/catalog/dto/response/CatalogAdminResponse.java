@@ -2,18 +2,22 @@ package nbc.chillguys.nebulazone.application.catalog.dto.response;
 
 import java.time.LocalDateTime;
 
-import nbc.chillguys.nebulazone.domain.catalog.dto.AdminCatalogInfo;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
-public record AdminCatalogResponse(
+import nbc.chillguys.nebulazone.domain.catalog.dto.CatalogAdminInfo;
+
+public record CatalogAdminResponse(
 	Long catalogId,
 	String name,
 	String description,
 	String type,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt
 ) {
-	public static AdminCatalogResponse from(AdminCatalogInfo info) {
-		return new AdminCatalogResponse(
+	public static CatalogAdminResponse from(CatalogAdminInfo info) {
+		return new CatalogAdminResponse(
 			info.catalogId(),
 			info.name(),
 			info.description(),

@@ -11,17 +11,17 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.catalog.dto.AdminCatalogSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.catalog.dto.CatalogAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.catalog.entity.QCatalog;
 
 @Repository
 @RequiredArgsConstructor
-public class CustomCatalogAdminRepositoryImpl implements CustomCatalogAdminRepository {
+public class CatalogAdminRepositoryCustomImpl implements CatalogAdminRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Page<Catalog> searchCatalogs(AdminCatalogSearchQueryCommand command, Pageable pageable) {
+	public Page<Catalog> searchCatalogs(CatalogAdminSearchQueryCommand command, Pageable pageable) {
 		QCatalog catalog = QCatalog.catalog;
 		BooleanBuilder builder = new BooleanBuilder();
 

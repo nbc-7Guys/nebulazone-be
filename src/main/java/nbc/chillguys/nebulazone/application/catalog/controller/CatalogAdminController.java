@@ -13,44 +13,44 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.catalog.dto.request.AdminCatalogSearchRequest;
-import nbc.chillguys.nebulazone.application.catalog.dto.request.AdminCatalogUpdateRequest;
-import nbc.chillguys.nebulazone.application.catalog.dto.response.AdminCatalogResponse;
-import nbc.chillguys.nebulazone.application.catalog.service.AdminCatalogService;
+import nbc.chillguys.nebulazone.application.catalog.dto.request.CatalogAdminSearchRequest;
+import nbc.chillguys.nebulazone.application.catalog.dto.request.CatalogAdminUpdateRequest;
+import nbc.chillguys.nebulazone.application.catalog.dto.response.CatalogAdminResponse;
+import nbc.chillguys.nebulazone.application.catalog.service.CatalogAdminService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
 
 @RestController
 @RequestMapping("/admin/catalogs")
 @RequiredArgsConstructor
-public class AdminCatalogController {
-	private final AdminCatalogService adminCatalogService;
+public class CatalogAdminController {
+	private final CatalogAdminService catalogAdminService;
 
 	@GetMapping
-	public ResponseEntity<CommonPageResponse<AdminCatalogResponse>> findCatalogs(
+	public ResponseEntity<CommonPageResponse<CatalogAdminResponse>> findCatalogs(
 		@RequestParam(value = "keyword", required = false) String keyword,
 		@RequestParam(value = "type", required = false) CatalogType type,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size
 	) {
-		AdminCatalogSearchRequest request = new AdminCatalogSearchRequest(keyword, type, page, size);
+		CatalogAdminSearchRequest request = new CatalogAdminSearchRequest(keyword, type, page, size);
 		Pageable pageable = PageRequest.of(page - 1, size);
-		CommonPageResponse<AdminCatalogResponse> response = adminCatalogService.findCatalogs(request, pageable);
+		CommonPageResponse<CatalogAdminResponse> response = catalogAdminService.findCatalogs(request, pageable);
 		return ResponseEntity.ok(response);
 	}
 
 	@PatchMapping("/{catalogId}")
 	public ResponseEntity<Void> updateCatalog(
 		@PathVariable Long catalogId,
-		@RequestBody AdminCatalogUpdateRequest request
+		@RequestBody CatalogAdminUpdateRequest request
 	) {
-		adminCatalogService.updateCatalog(catalogId, request);
+		catalogAdminService.updateCatalog(catalogId, request);
 		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping("/{catalogId}")
 	public ResponseEntity<Void> deleteCatalog(@PathVariable Long catalogId) {
-		adminCatalogService.deleteCatalog(catalogId);
+		catalogAdminService.deleteCatalog(catalogId);
 		return ResponseEntity.noContent().build();
 	}
 }

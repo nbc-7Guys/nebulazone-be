@@ -4,5 +4,5 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 
 import nbc.chillguys.nebulazone.domain.catalog.vo.CatalogDocument;
 
-public interface CatalogEsRepository extends ElasticsearchRepository<CatalogDocument, Long>, CustomCatalogEsRepository {
+public interface CatalogEsRepository extends ElasticsearchRepository<CatalogDocument, Long>, CatalogEsRepositoryCustom {
 }

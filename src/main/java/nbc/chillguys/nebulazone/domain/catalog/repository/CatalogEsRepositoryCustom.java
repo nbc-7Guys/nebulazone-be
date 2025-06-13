@@ -5,6 +5,6 @@ import org.springframework.data.domain.Pageable;
 
 import nbc.chillguys.nebulazone.domain.catalog.vo.CatalogDocument;
 
-public interface CustomCatalogEsRepository {
+public interface CatalogEsRepositoryCustom {
 	Page<CatalogDocument> searchCatalog(String keyword, String type, Pageable pageable);
 }
