@@ -18,7 +18,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t shlee054/nebulazone-app:latest .
+          docker build -t shlee054/nebulazone-app:latest -f docker/Dockerfile .
           docker push shlee054/nebulazone-app:latest
 
       - name: Create .env file
