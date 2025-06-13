@@ -14,7 +14,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.UserStatus;
 
 @Repository
 @RequiredArgsConstructor
-public class UserCustomRepositoryImpl implements UserCustomRepository {
+public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override

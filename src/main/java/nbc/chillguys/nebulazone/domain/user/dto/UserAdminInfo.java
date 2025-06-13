@@ -12,7 +12,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.domain.user.entity.UserStatus;
 
-public record AdminUserInfo(
+public record UserAdminInfo(
 	Long userId,
 	String email,
 	String phone,
@@ -28,8 +28,8 @@ public record AdminUserInfo(
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt
 ) {
-	public static AdminUserInfo from(User user) {
-		return new AdminUserInfo(
+	public static UserAdminInfo from(User user) {
+		return new UserAdminInfo(
 			user.getId(),
 			user.getEmail(),
 			user.getPhone(),

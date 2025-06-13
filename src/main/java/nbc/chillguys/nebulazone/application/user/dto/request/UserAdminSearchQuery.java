@@ -5,7 +5,7 @@ import java.util.Set;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.domain.user.entity.UserStatus;
 
-public record AdminUserSearchQuery(
+public record UserAdminSearchQuery(
 	String keyword,
 	UserStatus status,
 	Set<UserRole> roles,

@@ -11,17 +11,17 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.user.dto.AdminUserSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.user.dto.UserAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.QUser;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Repository
 @RequiredArgsConstructor
-public class AdminUserQueryRepositoryImpl implements AdminUserQueryRepository {
+public class UserAdminRepositoryCustomImpl implements UserAdminRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Page<User> searchUsers(AdminUserSearchQueryCommand query, Pageable pageable) {
+	public Page<User> searchUsers(UserAdminSearchQueryCommand query, Pageable pageable) {
 		QUser user = QUser.user;
 
 		BooleanBuilder builder = new BooleanBuilder();

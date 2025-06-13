@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.user.dto.request.AdminUserUpdateRequest;
-import nbc.chillguys.nebulazone.domain.user.dto.AdminUserInfo;
-import nbc.chillguys.nebulazone.domain.user.dto.AdminUserSearchQueryCommand;
+import nbc.chillguys.nebulazone.application.user.dto.request.UserAdminUpdateRequest;
+import nbc.chillguys.nebulazone.domain.user.dto.UserAdminInfo;
+import nbc.chillguys.nebulazone.domain.user.dto.UserAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.domain.user.entity.UserStatus;
@@ -20,13 +20,13 @@ import nbc.chillguys.nebulazone.domain.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
-public class AdminUserDomainService {
+public class UserAdminDomainService {
 
 	private final UserRepository userRepository;
 
-	public Page<AdminUserInfo> findUsers(AdminUserSearchQueryCommand query, Pageable pageable) {
+	public Page<UserAdminInfo> findUsers(UserAdminSearchQueryCommand query, Pageable pageable) {
 		return userRepository.searchUsers(query, pageable)
-			.map(AdminUserInfo::from);
+			.map(UserAdminInfo::from);
 	}
 
 	public User findActiveUserById(Long userId) {
@@ -49,7 +49,7 @@ public class AdminUserDomainService {
 		user.updateRoles(roles);
 	}
 
-	public void updateUser(Long userId, AdminUserUpdateRequest request) {
+	public void updateUser(Long userId, UserAdminUpdateRequest request) {
 		User user = findActiveUserById(userId);
 
 		if (request.email() != null) {

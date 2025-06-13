@@ -7,14 +7,14 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import nbc.chillguys.nebulazone.domain.user.dto.AdminUserInfo;
+import nbc.chillguys.nebulazone.domain.user.dto.UserAdminInfo;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.domain.user.entity.UserStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record AdminUserResponse(
+public record UserAdminResponse(
 	Long userId,
 	String email,
 	String phone,
@@ -44,8 +44,8 @@ public record AdminUserResponse(
 		}
 	}
 
-	public static AdminUserResponse from(AdminUserInfo info) {
-		return new AdminUserResponse(
+	public static UserAdminResponse from(UserAdminInfo info) {
+		return new UserAdminResponse(
 			info.userId(),
 			info.email(),
 			info.phone(),

@@ -1,6 +1,6 @@
 package nbc.chillguys.nebulazone.application.user.dto.request;
 
-public record AdminUserUpdateRequest(
+public record UserAdminUpdateRequest(
 	String email,
 	String phone,
 	String nickname,

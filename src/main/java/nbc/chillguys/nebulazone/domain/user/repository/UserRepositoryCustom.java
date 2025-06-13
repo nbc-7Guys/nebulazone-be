@@ -5,7 +5,7 @@ import java.util.Optional;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
-public interface UserCustomRepository {
+public interface UserRepositoryCustom {
 	Optional<User> findActiveUserByEmail(String email);
 
 	Optional<User> findActiveUserById(Long userId);

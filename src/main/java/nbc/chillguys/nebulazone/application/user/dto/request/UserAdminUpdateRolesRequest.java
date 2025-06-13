@@ -4,7 +4,7 @@ import java.util.Set;
 
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 
-public record AdminUserUpdateRolesRequest(
+public record UserAdminUpdateRolesRequest(
 	Set<UserRole> roles
 ) {
 }
