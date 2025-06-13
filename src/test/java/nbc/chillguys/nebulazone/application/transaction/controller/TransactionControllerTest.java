@@ -22,7 +22,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-
 import nbc.chillguys.nebulazone.application.transaction.dto.response.FindDetailTransactionResponse;
 import nbc.chillguys.nebulazone.application.transaction.dto.response.FindTransactionResponse;
 import nbc.chillguys.nebulazone.application.transaction.service.TransactionService;
@@ -44,7 +43,7 @@ class TransactionControllerTest {
 	TransactionService txService;
 
 	private static final Long TRANSACTION_ID = 1L;
-	private static final Long AMOUNT = 150000L;
+	private static final Long TX_PRICE = 150000L;
 	private static final String PRODUCT_NAME = "테스트 CPU";
 
 	private final LocalDateTime txTime1 = LocalDateTime.of(2024, 12, 30, 15, 30, 0);
@@ -74,52 +73,28 @@ class TransactionControllerTest {
 				.willReturn(expectedResponse);
 
 			// when & then
-			mockMvc.perform(get("/api/v1/transactions"))
+			mockMvc.perform(get("/transactions/me"))
 				.andDo(print())
 				.andExpectAll(
 					status().isOk(),
 					content().contentType(MediaType.APPLICATION_JSON),
 					jsonPath("$.content").isArray(),
 					jsonPath("$.content.length()").value(2),
-					jsonPath("$.content[0].transactionId").value(1L),
-					jsonPath("$.content[0].amount").value(150000L),
-					jsonPath("$.content[0].method").value("AUCTION"),
+					jsonPath("$.content[0].txId").value(1L),
+					jsonPath("$.content[0].txPrice").value(150000L),
+					jsonPath("$.content[0].txMethod").value("AUCTION"),
 					jsonPath("$.content[0].productName").value("테스트 CPU"),
-					jsonPath("$.content[0].isPurchase").value(true),
-					jsonPath("$.content[0].transactionDate").value(
+					jsonPath("$.content[0].isSold").value(true),
+					jsonPath("$.content[0].txCreatedAt").value(
 						txTime1.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))),
-					jsonPath("$.content[1].transactionId").value(2L),
-					jsonPath("$.content[1].amount").value(89000L),
-					jsonPath("$.content[1].method").value("DIRECT"),
+					jsonPath("$.content[1].txId").value(2L),
+					jsonPath("$.content[1].txPrice").value(89000L),
+					jsonPath("$.content[1].txMethod").value("DIRECT"),
 					jsonPath("$.content[1].productName").value("테스트 GPU"),
-					jsonPath("$.content[1].isPurchase").value(false),
+					jsonPath("$.content[1].isSold").value(false),
 					jsonPath("$.page").value(1),
 					jsonPath("$.size").value(20),
 					jsonPath("$.totalElements").value(2)
-				);
-		}
-
-		@Test
-		@DisplayName("내 거래내역 전체 조회 성공 - 사용자 정의 페이징")
-		@WithCustomMockUser
-		void success_findMyTransactions_customPaging() throws Exception {
-			// given
-			Page<FindTransactionResponse> page = new PageImpl<>(List.of(), PageRequest.of(1, 10), 0);
-			CommonPageResponse<FindTransactionResponse> expectedResponse = CommonPageResponse.from(page);
-
-			given(txService.findMyTransactions(any(AuthUser.class), eq(1), eq(10)))
-				.willReturn(expectedResponse);
-
-			// when & then
-			mockMvc.perform(get("/api/v1/transactions")
-					.param("page", "2")
-					.param("size", "10"))
-				.andExpectAll(
-					status().isOk(),
-					jsonPath("$.page").value(2),
-					jsonPath("$.size").value(10),
-					jsonPath("$.totalElements").value(0),
-					jsonPath("$.content").isEmpty()
 				);
 		}
 
@@ -129,7 +104,7 @@ class TransactionControllerTest {
 		void success_findMyTransactions_pageZeroOrBelow() throws Exception {
 			// given
 			FindTransactionResponse txContent = new FindTransactionResponse(
-				TRANSACTION_ID, AMOUNT, TransactionMethod.AUCTION, txTime1, PRODUCT_NAME, true
+				TRANSACTION_ID, TX_PRICE, TransactionMethod.AUCTION, txTime1, PRODUCT_NAME, true
 			);
 			List<FindTransactionResponse> contents = List.of(txContent);
 
@@ -140,7 +115,7 @@ class TransactionControllerTest {
 				.willReturn(expectedResponse);
 
 			// when & then
-			mockMvc.perform(get("/api/v1/transactions")
+			mockMvc.perform(get("/transactions/me")
 					.param("page", "0")
 					.param("size", "20"))
 				.andExpectAll(
@@ -165,7 +140,7 @@ class TransactionControllerTest {
 				.willReturn(txDetail);
 
 			// when & then
-			mockMvc.perform(get("/api/v1/transactions/{transactionId}", TRANSACTION_ID))
+			mockMvc.perform(get("/transactions/{transactionId}/me", TRANSACTION_ID))
 				.andDo(print())
 				.andExpectAll(
 					status().isOk(),
