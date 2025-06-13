@@ -36,7 +36,7 @@ import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 @RequestMapping("/admin/posts")
 @RequiredArgsConstructor
 public class PostAdminController {
-	private final PostAdminService adminPostService;
+	private final PostAdminService postAdminService;
 
 	@GetMapping
 	public ResponseEntity<CommonPageResponse<PostAdminResponse>> findPosts(
@@ -48,13 +48,13 @@ public class PostAdminController {
 	) {
 		PostAdminSearchRequest request = new PostAdminSearchRequest(keyword, type, includeDeleted, page, size);
 		Pageable pageable = PageRequest.of(page - 1, size);
-		CommonPageResponse<PostAdminResponse> response = adminPostService.findPosts(request, pageable);
+		CommonPageResponse<PostAdminResponse> response = postAdminService.findPosts(request, pageable);
 		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/{postId}")
 	public ResponseEntity<GetPostResponse> getAdminPost(@PathVariable("postId") Long postId) {
-		GetPostResponse response = adminPostService.getAdminPost(postId);
+		GetPostResponse response = postAdminService.getAdminPost(postId);
 
 		return ResponseEntity.ok(response);
 	}
@@ -65,7 +65,7 @@ public class PostAdminController {
 		@Valid @RequestPart("post") UpdatePostRequest request,
 		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles
 	) {
-		UpdatePostResponse response = adminPostService.updateAdminPost(postId, request, imageFiles);
+		UpdatePostResponse response = postAdminService.updateAdminPost(postId, request, imageFiles);
 
 		return ResponseEntity.ok(response);
 	}
@@ -75,7 +75,7 @@ public class PostAdminController {
 		@PathVariable Long postId,
 		@RequestBody PostAdminUpdateTypeRequest request
 	) {
-		adminPostService.updatePostType(postId, request);
+		postAdminService.updatePostType(postId, request);
 		return ResponseEntity.ok().build();
 	}
 
@@ -83,14 +83,14 @@ public class PostAdminController {
 	public ResponseEntity<DeletePostResponse> deletePost(
 		@PathVariable("postId") Long postId
 	) {
-		DeletePostResponse response = adminPostService.deleteAdminPost(postId);
+		DeletePostResponse response = postAdminService.deleteAdminPost(postId);
 
 		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping("/{postId}/restore")
 	public ResponseEntity<Void> restorePost(@PathVariable Long postId) {
-		adminPostService.restorePost(postId);
+		postAdminService.restorePost(postId);
 		return ResponseEntity.noContent().build();
 	}
 

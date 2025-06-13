@@ -28,7 +28,7 @@ import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
 @RequiredArgsConstructor
 public class PostAdminService {
 
-	private final PostAdminDomainService adminPostDomainService;
+	private final PostAdminDomainService postsAdminDomainService;
 	private final S3Service s3Service;
 
 	public CommonPageResponse<PostAdminResponse> findPosts(PostAdminSearchRequest request, Pageable pageable) {
@@ -37,12 +37,12 @@ public class PostAdminService {
 			request.type(),
 			request.includeDeleted()
 		);
-		Page<PostAdminInfo> infoPage = this.adminPostDomainService.findPosts(command, pageable);
+		Page<PostAdminInfo> infoPage = this.postsAdminDomainService.findPosts(command, pageable);
 		return CommonPageResponse.from(infoPage.map(PostAdminResponse::from));
 	}
 
 	public GetPostResponse getAdminPost(Long postId) {
-		Post post = adminPostDomainService.getActivePostWithUserAndImages(postId);
+		Post post = postsAdminDomainService.getActivePostWithUserAndImages(postId);
 
 		return GetPostResponse.from(post);
 	}
@@ -52,7 +52,7 @@ public class PostAdminService {
 		UpdatePostRequest request,
 		List<MultipartFile> imageFiles
 	) {
-		Post post = adminPostDomainService.findMyActivePost(postId);
+		Post post = postsAdminDomainService.findMyActivePost(postId);
 
 		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
 		boolean hasImage = !imageFiles.isEmpty();
@@ -69,27 +69,27 @@ public class PostAdminService {
 
 		PostAdminUpdateCommand command = request.toAdminCommand(postId, imageUrls);
 
-		Post updatedPost = adminPostDomainService.updatePost(command);
+		Post updatedPost = postsAdminDomainService.updatePost(command);
 
-		adminPostDomainService.savePostToEs(updatedPost);
+		postsAdminDomainService.savePostToEs(updatedPost);
 
 		return UpdatePostResponse.from(updatedPost);
 	}
 
 	public void updatePostType(Long postId, PostAdminUpdateTypeRequest request) {
-		adminPostDomainService.updatePostType(postId, request.type());
+		postsAdminDomainService.updatePostType(postId, request.type());
 	}
 
 	public DeletePostResponse deleteAdminPost(Long postId) {
-		adminPostDomainService.deletePost(postId);
+		postsAdminDomainService.deletePost(postId);
 
-		adminPostDomainService.deletePostFromEs(postId);
+		postsAdminDomainService.deletePostFromEs(postId);
 
 		return DeletePostResponse.from(postId);
 	}
 
 	public void restorePost(Long postId) {
-		adminPostDomainService.restorePost(postId);
+		postsAdminDomainService.restorePost(postId);
 	}
 
 }
