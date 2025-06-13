@@ -31,7 +31,7 @@ import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 
 @Repository
 @RequiredArgsConstructor
-public class AuctionCustomRepositoryImpl implements AuctionCustomRepository {
+public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 
 	private final JPAQueryFactory jpaQueryFactory;
 

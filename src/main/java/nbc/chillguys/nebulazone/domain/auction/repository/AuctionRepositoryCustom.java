@@ -10,7 +10,7 @@ import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 
-public interface AuctionCustomRepository {
+public interface AuctionRepositoryCustom {
 	Page<AuctionFindAllInfo> findAuctionsWithProduct(int page, int size);
 
 	List<AuctionFindAllInfo> finAuctionsBySortType(AuctionSortType sortType);

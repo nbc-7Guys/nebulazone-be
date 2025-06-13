@@ -18,7 +18,7 @@ import nbc.chillguys.nebulazone.domain.products.entity.QProduct;
 
 @Repository
 @RequiredArgsConstructor
-public class AuctionCustomAdminRepositoryImpl implements AuctionCustomAdminRepository {
+public class AuctionAdminRepositoryCustomImpl implements AuctionAdminRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override

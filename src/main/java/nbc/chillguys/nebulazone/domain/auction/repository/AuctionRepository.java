@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 
 public interface AuctionRepository
-	extends JpaRepository<Auction, Long>, AuctionCustomRepository, AuctionCustomAdminRepository {
+	extends JpaRepository<Auction, Long>, AuctionRepositoryCustom, AuctionAdminRepositoryCustom {
 
 	Optional<Auction> findByIdAndDeletedFalse(Long id);
 
