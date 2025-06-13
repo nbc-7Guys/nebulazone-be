@@ -1,6 +1,6 @@
 package nbc.chillguys.nebulazone.domain.comment.dto;
 
-public record AdminCommentSearchQueryCommand(
+public record CommentAdminSearchQueryCommand(
 	String keyword,
 	Boolean deleted
 ) {

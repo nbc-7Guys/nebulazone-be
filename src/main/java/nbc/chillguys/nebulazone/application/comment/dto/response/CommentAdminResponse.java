@@ -2,9 +2,11 @@ package nbc.chillguys.nebulazone.application.comment.dto.response;
 
 import java.time.LocalDateTime;
 
-import nbc.chillguys.nebulazone.domain.comment.dto.AdminCommentInfo;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
-public record AdminCommentResponse(
+import nbc.chillguys.nebulazone.domain.comment.dto.CommentAdminInfo;
+
+public record CommentAdminResponse(
 	Long commentId,
 	String content,
 	String writer,
@@ -12,12 +14,15 @@ public record AdminCommentResponse(
 	String postTitle,
 	Long parentId,                // 대댓글일 경우
 	Boolean deleted,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime deletedAt,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt
 ) {
-	public static AdminCommentResponse from(AdminCommentInfo info) {
-		return new AdminCommentResponse(
+	public static CommentAdminResponse from(CommentAdminInfo info) {
+		return new CommentAdminResponse(
 			info.commentId(),
 			info.content(),
 			info.writer(),

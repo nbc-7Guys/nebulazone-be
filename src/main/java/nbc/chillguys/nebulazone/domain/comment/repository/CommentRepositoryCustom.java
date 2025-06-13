@@ -5,6 +5,6 @@ import org.springframework.data.domain.Page;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentListFindQuery;
 import nbc.chillguys.nebulazone.domain.comment.dto.CommentWithUserInfo;
 
-public interface CommentCustomRepository {
+public interface CommentRepositoryCustom {
 	Page<CommentWithUserInfo> findComments(CommentListFindQuery query);
 }

@@ -11,7 +11,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.comment.dto.AdminCommentSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.comment.dto.CommentAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.comment.entity.Comment;
 import nbc.chillguys.nebulazone.domain.comment.entity.QComment;
 import nbc.chillguys.nebulazone.domain.post.entity.QPost;
@@ -19,11 +19,11 @@ import nbc.chillguys.nebulazone.domain.user.entity.QUser;
 
 @Repository
 @RequiredArgsConstructor
-public class CustomCommentAdminRepositoryImpl implements CustomCommentAdminRepository {
+public class CommentAdminRepositoryCustomImpl implements CommentAdminRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Page<Comment> searchComments(AdminCommentSearchQueryCommand command, Pageable pageable) {
+	public Page<Comment> searchComments(CommentAdminSearchQueryCommand command, Pageable pageable) {
 		QComment comment = QComment.comment;
 		QUser user = QUser.user;
 		QPost post = QPost.post;

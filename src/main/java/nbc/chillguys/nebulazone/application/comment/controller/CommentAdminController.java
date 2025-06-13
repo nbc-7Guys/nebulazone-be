@@ -14,49 +14,49 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.comment.dto.request.AdminCommentSearchRequest;
-import nbc.chillguys.nebulazone.application.comment.dto.request.AdminCommentUpdateRequest;
-import nbc.chillguys.nebulazone.application.comment.dto.response.AdminCommentResponse;
-import nbc.chillguys.nebulazone.application.comment.service.AdminCommentService;
+import nbc.chillguys.nebulazone.application.comment.dto.request.CommentAdminSearchRequest;
+import nbc.chillguys.nebulazone.application.comment.dto.request.CommentAdminUpdateRequest;
+import nbc.chillguys.nebulazone.application.comment.dto.response.CommentAdminResponse;
+import nbc.chillguys.nebulazone.application.comment.service.CommentAdminService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 
 @RestController
 @RequestMapping("/admin/comments")
 @RequiredArgsConstructor
-public class AdminCommentController {
-	private final AdminCommentService adminCommentService;
+public class CommentAdminController {
+	private final CommentAdminService commentAdminService;
 
 	@GetMapping
-	public ResponseEntity<CommonPageResponse<AdminCommentResponse>> findComments(
+	public ResponseEntity<CommonPageResponse<CommentAdminResponse>> findComments(
 		@RequestParam(value = "keyword", required = false) String keyword,
 		@RequestParam(value = "deleted", required = false) Boolean deleted,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size
 	) {
-		AdminCommentSearchRequest request = new AdminCommentSearchRequest(keyword, deleted, page, size);
+		CommentAdminSearchRequest request = new CommentAdminSearchRequest(keyword, deleted, page, size);
 		Pageable pageable = PageRequest.of(page - 1, size);
-		CommonPageResponse<AdminCommentResponse> response = adminCommentService.findComments(request, pageable);
+		CommonPageResponse<CommentAdminResponse> response = commentAdminService.findComments(request, pageable);
 		return ResponseEntity.ok(response);
 	}
 
 	@PatchMapping("/{commentId}")
 	public ResponseEntity<Void> updateComment(
 		@PathVariable Long commentId,
-		@RequestBody AdminCommentUpdateRequest request
+		@RequestBody CommentAdminUpdateRequest request
 	) {
-		adminCommentService.updateComment(commentId, request);
+		commentAdminService.updateComment(commentId, request);
 		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping("/{commentId}")
 	public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
-		adminCommentService.deleteComment(commentId);
+		commentAdminService.deleteComment(commentId);
 		return ResponseEntity.noContent().build();
 	}
 
 	@PostMapping("/{commentId}/restore")
 	public ResponseEntity<Void> restoreComment(@PathVariable Long commentId) {
-		adminCommentService.restoreComment(commentId);
+		commentAdminService.restoreComment(commentId);
 		return ResponseEntity.noContent().build();
 	}
 

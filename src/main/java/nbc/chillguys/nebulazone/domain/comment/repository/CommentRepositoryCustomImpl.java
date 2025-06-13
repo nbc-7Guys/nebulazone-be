@@ -23,7 +23,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.QUser;
 
 @RequiredArgsConstructor
 @Repository
-public class CommentCustomRepositoryImpl implements CommentCustomRepository {
+public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
 
 	private final JPAQueryFactory jpaQueryFactory;
 
@@ -44,7 +44,7 @@ public class CommentCustomRepositoryImpl implements CommentCustomRepository {
 				comment.parent.isNull()
 			)
 			.orderBy(comment.id.desc())
-			.offset( (long)page * size)
+			.offset((long)page * size)
 			.limit(size)
 			.fetch();
 
