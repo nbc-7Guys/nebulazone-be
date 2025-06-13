@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.post.dto.AdminPostInfo;
-import nbc.chillguys.nebulazone.domain.post.dto.AdminPostSearchQueryCommand;
-import nbc.chillguys.nebulazone.domain.post.dto.AdminPostUpdateCommand;
+import nbc.chillguys.nebulazone.domain.post.dto.PostAdminInfo;
+import nbc.chillguys.nebulazone.domain.post.dto.PostAdminSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.post.dto.PostAdminUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 import nbc.chillguys.nebulazone.domain.post.exception.PostErrorCode;
@@ -19,19 +19,19 @@ import nbc.chillguys.nebulazone.domain.post.vo.PostDocument;
 
 @Service
 @RequiredArgsConstructor
-public class AdminPostDomainService {
+public class PostAdminDomainService {
 
 	private final PostRepository postRepository;
 	private final PostEsRepository postEsRepository;
 
 	@Transactional(readOnly = true)
-	public Page<AdminPostInfo> findPosts(AdminPostSearchQueryCommand command, Pageable pageable) {
+	public Page<PostAdminInfo> findPosts(PostAdminSearchQueryCommand command, Pageable pageable) {
 		return postRepository.searchPosts(command, pageable)
-			.map(AdminPostInfo::from);
+			.map(PostAdminInfo::from);
 	}
 
 	@Transactional
-	public Post updatePost(AdminPostUpdateCommand command) {
+	public Post updatePost(PostAdminUpdateCommand command) {
 		Post post = findActivePost(command.postId());
 
 		post.update(command.title(), command.content(), command.imageUrls());

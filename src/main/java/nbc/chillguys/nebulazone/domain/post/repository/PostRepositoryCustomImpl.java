@@ -12,7 +12,7 @@ import nbc.chillguys.nebulazone.domain.post.entity.QPost;
 
 @Repository
 @RequiredArgsConstructor
-public class CustomPostRepositoryImpl implements CustomPostRepository {
+public class PostRepositoryCustomImpl implements PostRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Override

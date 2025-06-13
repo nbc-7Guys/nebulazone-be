@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 
-public record AdminPostInfo(
+public record PostAdminInfo(
 	Long postId,
 	String title,
 	String nickname,
@@ -15,8 +15,8 @@ public record AdminPostInfo(
 	LocalDateTime createdAt,
 	LocalDateTime modifiedAt
 ) {
-	public static AdminPostInfo from(Post post) {
-		return new AdminPostInfo(
+	public static PostAdminInfo from(Post post) {
+		return new PostAdminInfo(
 			post.getId(),
 			post.getTitle(),
 			post.getUser().getNickname(),

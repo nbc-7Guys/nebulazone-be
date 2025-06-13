@@ -20,7 +20,7 @@ import nbc.chillguys.nebulazone.domain.post.vo.PostDocument;
 
 @Repository
 @RequiredArgsConstructor
-public class CustomPostEsRepositoryImpl implements CustomPostEsRepository {
+public class PostEsRepositoryCustomImpl implements PostEsRepositoryCustom {
 	private final ElasticsearchOperations elasticsearchOperations;
 
 	@Override

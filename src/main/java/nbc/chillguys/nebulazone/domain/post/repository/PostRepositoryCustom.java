@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 
-public interface CustomPostRepository {
+public interface PostRepositoryCustom {
 	Optional<Post> findActivePostById(Long postId);
 
 	Optional<Post> findActivePostByIdWithUser(Long postId);

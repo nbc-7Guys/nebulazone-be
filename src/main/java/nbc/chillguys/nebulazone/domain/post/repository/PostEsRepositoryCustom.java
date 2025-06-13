@@ -5,6 +5,6 @@ import org.springframework.data.domain.Pageable;
 
 import nbc.chillguys.nebulazone.domain.post.vo.PostDocument;
 
-public interface CustomPostEsRepository {
+public interface PostEsRepositoryCustom {
 	Page<PostDocument> searchPost(String keyword, String type, Pageable pageable);
 }

@@ -20,14 +20,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.post.dto.request.AdminPostSearchRequest;
-import nbc.chillguys.nebulazone.application.post.dto.request.AdminPostUpdateTypeRequest;
+import nbc.chillguys.nebulazone.application.post.dto.request.PostAdminSearchRequest;
+import nbc.chillguys.nebulazone.application.post.dto.request.PostAdminUpdateTypeRequest;
 import nbc.chillguys.nebulazone.application.post.dto.request.UpdatePostRequest;
-import nbc.chillguys.nebulazone.application.post.dto.response.AdminPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.DeletePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
+import nbc.chillguys.nebulazone.application.post.dto.response.PostAdminResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse;
-import nbc.chillguys.nebulazone.application.post.service.AdminPostService;
+import nbc.chillguys.nebulazone.application.post.service.PostAdminService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
@@ -35,20 +35,20 @@ import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 @RestController
 @RequestMapping("/admin/posts")
 @RequiredArgsConstructor
-public class AdminPostController {
-	private final AdminPostService adminPostService;
+public class PostAdminController {
+	private final PostAdminService adminPostService;
 
 	@GetMapping
-	public ResponseEntity<CommonPageResponse<AdminPostResponse>> findPosts(
+	public ResponseEntity<CommonPageResponse<PostAdminResponse>> findPosts(
 		@RequestParam(value = "keyword", required = false) String keyword,
 		@RequestParam(value = "type", required = false) PostType type,
 		@RequestParam(value = "includeDeleted", required = false, defaultValue = "false") boolean includeDeleted,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size
 	) {
-		AdminPostSearchRequest request = new AdminPostSearchRequest(keyword, type, includeDeleted, page, size);
+		PostAdminSearchRequest request = new PostAdminSearchRequest(keyword, type, includeDeleted, page, size);
 		Pageable pageable = PageRequest.of(page - 1, size);
-		CommonPageResponse<AdminPostResponse> response = adminPostService.findPosts(request, pageable);
+		CommonPageResponse<PostAdminResponse> response = adminPostService.findPosts(request, pageable);
 		return ResponseEntity.ok(response);
 	}
 
@@ -65,15 +65,15 @@ public class AdminPostController {
 		@Valid @RequestPart("post") UpdatePostRequest request,
 		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles
 	) {
-		UpdatePostResponse res = adminPostService.updateAdminPost(postId, request, imageFiles);
+		UpdatePostResponse response = adminPostService.updateAdminPost(postId, request, imageFiles);
 
-		return ResponseEntity.ok(res);
+		return ResponseEntity.ok(response);
 	}
 
 	@PatchMapping("/{postId}/type")
 	public ResponseEntity<Void> updatePostType(
 		@PathVariable Long postId,
-		@RequestBody AdminPostUpdateTypeRequest request
+		@RequestBody PostAdminUpdateTypeRequest request
 	) {
 		adminPostService.updatePostType(postId, request);
 		return ResponseEntity.ok().build();
@@ -83,9 +83,9 @@ public class AdminPostController {
 	public ResponseEntity<DeletePostResponse> deletePost(
 		@PathVariable("postId") Long postId
 	) {
-		DeletePostResponse res = adminPostService.deleteAdminPost(postId);
+		DeletePostResponse response = adminPostService.deleteAdminPost(postId);
 
-		return ResponseEntity.ok(res);
+		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping("/{postId}/restore")
