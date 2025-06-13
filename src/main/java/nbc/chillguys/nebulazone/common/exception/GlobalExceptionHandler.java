@@ -117,4 +117,12 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.badRequest()
 			.body(CommonResponse.of(HttpStatus.BAD_REQUEST.value(), "요청 값의 형식이 올바르지 않습니다."));
 	}
+
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<CommonResponse> handleAllExceptions(Exception ex) {
+		log.error("Unhandled exception: ", ex);
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+			.body(CommonResponse.of(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버 내부 오류가 발생했습니다."));
+	}
+
 }
