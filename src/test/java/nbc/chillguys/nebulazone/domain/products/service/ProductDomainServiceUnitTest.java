@@ -15,9 +15,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
@@ -25,14 +29,18 @@ import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.products.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductDeleteCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductFindQuery;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductPurchaseCommand;
+import nbc.chillguys.nebulazone.domain.products.dto.ProductSearchCommand;
 import nbc.chillguys.nebulazone.domain.products.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
 import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
+import nbc.chillguys.nebulazone.domain.products.repository.ProductEsRepository;
 import nbc.chillguys.nebulazone.domain.products.repository.ProductRepository;
+import nbc.chillguys.nebulazone.domain.products.vo.ProductDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -44,6 +52,9 @@ class ProductDomainServiceUnitTest {
 
 	@Mock
 	private ProductRepository productRepository;
+
+	@Mock
+	private ProductEsRepository productEsRepository;
 
 	@InjectMocks
 	private ProductDomainService productDomainService;
@@ -319,7 +330,6 @@ class ProductDomainServiceUnitTest {
 		void fail_changeToAuctionType_productNotFound() {
 			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
 
-
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
 			ProductException exception = assertThrows(ProductException.class,
@@ -410,6 +420,182 @@ class ProductDomainServiceUnitTest {
 			ProductException exception = assertThrows(ProductException.class,
 				() -> productDomainService.purchaseProduct(command));
 			assertEquals(ProductErrorCode.AUCTION_PRODUCT_NOT_PURCHASABLE, exception.getErrorCode());
+		}
+	}
+
+	@Nested
+	@DisplayName("ES 상품 저장 테스트")
+	class SaveProductToEsTest {
+		@Test
+		@DisplayName("ES에 상품 저장 성공")
+		void success_saveProductToEs() {
+			// Given
+			ProductDocument expectedDoc = ProductDocument.from(product);
+
+			// When
+			productDomainService.saveProductToEs(product);
+
+			// Then
+			ArgumentCaptor<ProductDocument> captor = ArgumentCaptor.forClass(ProductDocument.class);
+			verify(productEsRepository).save(captor.capture());
+
+			ProductDocument actualDoc = captor.getValue();
+			assertThat(actualDoc.name()).isEqualTo(expectedDoc.name());
+			assertThat(actualDoc.txMethod()).isEqualTo(expectedDoc.txMethod());
+			assertThat(actualDoc.price()).isEqualTo(expectedDoc.price());
+			verifyNoMoreInteractions(productEsRepository);
+
+		}
+	}
+
+	@Nested
+	@DisplayName("상품 검색 테스트")
+	class SearchProductTest {
+		@Test
+		@DisplayName("상품 검색 성공 - 모든 조건")
+		void success_searchProduct_allParameters() {
+			// Given
+			ProductSearchCommand command = new ProductSearchCommand(product.getName(), product.getTxMethod().name(),
+				1_000_000L, 2_000_000L, 1, 10);
+
+			given(productEsRepository.searchProduct(anyString(), anyString(), anyLong(), anyLong(), any()))
+				.willReturn(new PageImpl<>(List.of(ProductDocument.from(product)),
+					PageRequest.of(0, 10), 1L));
+
+			// When
+			Page<ProductDocument> productDocuments = productDomainService.searchProduct(command);
+
+			// Then
+			verify(productEsRepository, times(1))
+				.searchProduct(product.getName(), product.getTxMethod().name(), 1_000_000L, 2_000_000L,
+					PageRequest.of(0, 10));
+			assertThat(productDocuments.getContent().size())
+				.isEqualTo(1);
+			assertThat(productDocuments.getTotalElements())
+				.isEqualTo(1);
+			assertThat(productDocuments.getContent().getFirst().name())
+				.isEqualTo(product.getName());
+			assertThat(productDocuments.getContent().getFirst().price())
+				.isLessThanOrEqualTo(2_000_000L)
+				.isGreaterThanOrEqualTo(1_000_000L);
+
+		}
+
+		@Test
+		@DisplayName("상품 검색 성공 - 상품 유형만 검색")
+		void success_searchProduct_noParameters() {
+			// Given
+			ProductSearchCommand command = new ProductSearchCommand(null, product.getTxMethod().name(),
+				null, null, 1, 10);
+
+			given(productEsRepository.searchProduct(any(), anyString(), any(), any(), any()))
+				.willReturn(new PageImpl<>(List.of(ProductDocument.from(product), ProductDocument.from(product)),
+					PageRequest.of(0, 10), 2L));
+
+			// When
+			Page<ProductDocument> productDocuments = productDomainService.searchProduct(command);
+
+			// Then
+			verify(productEsRepository, times(1))
+				.searchProduct(null, product.getTxMethod().name(), null, null,
+					PageRequest.of(0, 10));
+			assertThat(productDocuments.getContent().size())
+				.isEqualTo(2);
+			assertThat(productDocuments.getTotalElements())
+				.isEqualTo(2);
+
+		}
+	}
+
+	@Nested
+	@DisplayName("ES 상품 삭제 테스트")
+	class DeleteProductFromEsTest {
+		@Test
+		@DisplayName("ES에 상품 삭제 성공")
+		void success_deleteProductFromEs() {
+			// Given
+			Long productId = 1L;
+
+			// When
+			productDomainService.deleteProductFromEs(productId);
+
+			// Then
+			verify(productEsRepository, times(1)).deleteById(productId);
+			verifyNoMoreInteractions(productEsRepository);
+
+		}
+	}
+
+	@Nested
+	@DisplayName("상품 조회 테스트")
+	class GetProductTest {
+		@Test
+		@DisplayName("상품 조회 성공")
+		void success_getProductByIdWithUserAndImages() {
+			// Given
+			Long productId = 1L;
+			Long catalogId = 1L;
+			ProductFindQuery query = new ProductFindQuery(productId, catalogId);
+
+			Product mockProduct = mock(Product.class);
+			given(productRepository.findActiveProductByIdWithUserAndImages(anyLong()))
+				.willReturn(Optional.of(mockProduct));
+
+			// When
+			Product result = productDomainService.getProductByIdWithUserAndImages(query);
+
+			// Then
+			assertEquals(mockProduct, result);
+
+			verify(productRepository, times(1)).findActiveProductByIdWithUserAndImages(productId);
+			verify(mockProduct, times(1)).validBelongsToCatalog(catalogId);
+		}
+
+		@Test
+		@DisplayName("상품 조회 실패 - 상품이 존재 하지 않음")
+		void fail_getProductByIdWithUserAndImages_productNotFound() {
+			// Given
+			Long productId = 2L;
+			Long catalogId = 20L;
+			ProductFindQuery query = new ProductFindQuery(catalogId, productId);
+
+			given(productRepository.findActiveProductByIdWithUserAndImages(anyLong()))
+				.willReturn(Optional.empty());
+
+			// When
+			ProductException exception = assertThrows(ProductException.class,
+				() -> productDomainService.getProductByIdWithUserAndImages(query));
+
+			// Then
+			assertEquals(ProductErrorCode.PRODUCT_NOT_FOUND, exception.getErrorCode());
+
+			verify(productRepository, times(1)).findActiveProductByIdWithUserAndImages(productId);
+			verifyNoMoreInteractions(productRepository);
+		}
+
+		@Test
+		@DisplayName("상품 조회 실패 - 해당 카탈로그에 존재하지 않는 상품")
+		void fail_getProductByIdWithUserAndImages_notBelongsToCatalog() {
+			// Given
+			Long productId = 1L;
+			Long catalogId = 30L;
+			ProductFindQuery query = new ProductFindQuery(catalogId, productId);
+
+			Product mockProduct = mock(Product.class);
+			given(productRepository.findActiveProductByIdWithUserAndImages(productId))
+				.willReturn(Optional.of(mockProduct));
+			doThrow(new ProductException(ProductErrorCode.NOT_BELONGS_TO_CATALOG))
+				.when(mockProduct).validBelongsToCatalog(catalogId);
+
+			// When
+			ProductException exception = assertThrows(ProductException.class, () ->
+				productDomainService.getProductByIdWithUserAndImages(query));
+
+			// Then
+			assertEquals(ProductErrorCode.NOT_BELONGS_TO_CATALOG, exception.getErrorCode());
+
+			verify(productRepository, times(1)).findActiveProductByIdWithUserAndImages(productId);
+			verify(mockProduct, times(1)).validBelongsToCatalog(catalogId);
 		}
 	}
 }
