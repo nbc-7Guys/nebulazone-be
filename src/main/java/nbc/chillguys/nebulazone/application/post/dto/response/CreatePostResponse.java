@@ -3,6 +3,8 @@ package nbc.chillguys.nebulazone.application.post.dto.response;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 
@@ -11,6 +13,7 @@ public record CreatePostResponse(
 	String title,
 	String content,
 	PostType type,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt,
 	List<String> imageUrls) {
 
