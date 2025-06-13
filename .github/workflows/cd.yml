@@ -40,6 +40,7 @@ jobs:
           echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> docker/.env
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> docker/.env
           echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> docker/.env
+          echo "ES_URI=${{ secrets.ES_URI }}" >> docker/.env
           chmod 644 docker/.env
 
       - name: Copy files to GCP VM
