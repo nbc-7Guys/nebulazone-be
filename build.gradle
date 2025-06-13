@@ -37,10 +37,11 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt:0.12.6'
 
     // queryDSL
-    implementation "com.querydsl:querydsl-jpa:5.0.0:jakarta"
-    annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
-    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
-    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+    implementation 'io.github.openfeign.querydsl:querydsl-jpa:6.11'
+    annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:6.11:jpa'
+    //  "cannot find symbol: annotation Entity" 또는 "package jakarta.annotation does not exist" 오류 발생시 주석 풀고 추가
+//    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+//    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
 
     // swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
@@ -53,6 +54,16 @@ dependencies {
 
     // tika
     implementation 'org.apache.tika:tika-core:3.1.0'
+
+    // s3
+    implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.3.0')
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
+
+    // LocalDateTime 직렬화
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    // ES
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'

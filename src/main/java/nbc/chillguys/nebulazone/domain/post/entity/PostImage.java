@@ -5,12 +5,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 @Embeddable
+@NoArgsConstructor
 public class PostImage {
+
 	private String url;
 
 	public PostImage(String url) {
 		this.url = url;
 	}
+
 }

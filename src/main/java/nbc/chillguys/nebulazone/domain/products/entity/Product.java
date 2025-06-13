@@ -1,8 +1,13 @@
 package nbc.chillguys.nebulazone.domain.products.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,7 +25,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
-import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
+import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
+import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Getter
@@ -46,7 +52,7 @@ public class Product extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private TransactionMethod method;
+	private ProductTxMethod txMethod;
 
 	private boolean isSold;
 
@@ -55,19 +61,23 @@ public class Product extends BaseEntity {
 	private LocalDateTime deletedAt;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "seller_user_id")
+	@JoinColumn(name = "seller_user_id", nullable = false)
 	private User seller;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "catalog_id")
+	@JoinColumn(name = "catalog_id", nullable = false)
 	private Catalog catalog;
 
+	@ElementCollection
+	@CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
+	private List<ProductImage> productImages = new ArrayList<>();
+
 	@Builder
-	public Product(
+	private Product(
 		String name,
 		String description,
 		Long price,
-		TransactionMethod method,
+		ProductTxMethod txMethod,
 		boolean isSold,
 		boolean isDeleted,
 		LocalDateTime deletedAt,
@@ -77,11 +87,94 @@ public class Product extends BaseEntity {
 		this.name = name;
 		this.description = description;
 		this.price = price;
-		this.method = method;
+		this.txMethod = txMethod;
 		this.isSold = isSold;
 		this.isDeleted = isDeleted;
 		this.deletedAt = deletedAt;
 		this.seller = seller;
 		this.catalog = catalog;
 	}
+
+	public void addProductImages(List<String> productImageUrls) {
+		if (productImageUrls != null) {
+			this.productImages.addAll(productImageUrls.stream()
+				.map(ProductImage::new)
+				.toList());
+		}
+
+	}
+
+	public void update(String name, String description, List<String> imageUrls) {
+		this.name = name;
+		this.description = description;
+		this.productImages.clear();
+
+		boolean hasImage = !imageUrls.isEmpty();
+		if (hasImage) {
+			this.productImages.addAll(imageUrls.stream()
+				.map(ProductImage::new)
+				.toList());
+		}
+	}
+
+	public void changeToAuctionType(Long price) {
+		if (Objects.equals(getTxMethod(), ProductTxMethod.AUCTION)) {
+			throw new ProductException(ProductErrorCode.ALREADY_AUCTION_TYPE);
+		}
+
+		this.price = price;
+		this.txMethod = ProductTxMethod.AUCTION;
+	}
+
+	public void purchase() {
+		if (isSold) {
+			throw new ProductException(ProductErrorCode.ALREADY_SOLD);
+		}
+
+		this.isSold = true;
+	}
+
+	public void validBelongsToCatalog(Long catalogId) {
+		if (!Objects.equals(getCatalog().getId(), catalogId)) {
+			throw new ProductException(ProductErrorCode.NOT_BELONGS_TO_CATALOG);
+		}
+	}
+
+	public void validProductOwner(Long userId) {
+		if (!Objects.equals(getSeller().getId(), userId)) {
+			throw new ProductException(ProductErrorCode.NOT_PRODUCT_OWNER);
+		}
+	}
+
+	public void validNotSold() {
+		if (isSold()) {
+			throw new ProductException(ProductErrorCode.ALREADY_SOLD);
+		}
+	}
+
+	public void validPurchasable() {
+		if (getTxMethod() == ProductTxMethod.AUCTION) {
+			throw new ProductException(ProductErrorCode.AUCTION_PRODUCT_NOT_PURCHASABLE);
+		}
+	}
+
+	public void delete() {
+		this.isDeleted = true;
+		this.deletedAt = LocalDateTime.now();
+	}
+
+	public void changeTxMethod(ProductTxMethod txMethod, Long price) {
+		this.txMethod = txMethod;
+		this.price = price;
+	}
+
+	public void restore() {
+		this.isDeleted = false;
+		this.deletedAt = null;
+	}
+
+	public void changePrice(Long price) {
+		this.price = price;
+	}
+
 }

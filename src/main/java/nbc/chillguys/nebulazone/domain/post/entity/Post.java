@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.domain.post.entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -23,6 +24,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
+import nbc.chillguys.nebulazone.domain.post.exception.PostErrorCode;
+import nbc.chillguys.nebulazone.domain.post.exception.PostException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Getter
@@ -60,12 +63,64 @@ public class Post extends BaseEntity {
 	@Column(name = "image_url")
 	private List<PostImage> postImages = new ArrayList<>();
 
-
 	@Builder
-	public Post(String title, String content, PostType type, User user) {
+	private Post(String title, String content, PostType type, User user) {
 		this.title = title;
 		this.content = content;
 		this.type = type;
 		this.user = user;
 	}
+
+	public void addPostImages(List<String> postImagesUrl) {
+		if (postImagesUrl != null) {
+			this.postImages.addAll(postImagesUrl.stream()
+				.map(PostImage::new)
+				.toList());
+		}
+
+	}
+
+	public void update(String title, String content, List<String> imageUrls) {
+		this.title = title;
+		this.content = content;
+		this.postImages.clear();
+
+		boolean hasImage = !imageUrls.isEmpty();
+		if (hasImage) {
+			this.postImages.addAll(
+				imageUrls.stream()
+					.map(PostImage::new)
+					.toList()
+			);
+		}
+	}
+
+	public void validatePostOwner(Long userId) {
+		if (!Objects.equals(getUser().getId(), userId)) {
+			throw new PostException(PostErrorCode.NOT_POST_OWNER);
+		}
+	}
+
+	public void delete() {
+		this.isDeleted = true;
+		this.deletedAt = LocalDateTime.now();
+	}
+
+	public void restore() {
+		this.isDeleted = false;
+		this.deletedAt = null;
+	}
+
+	public Long getUserId() {
+		return this.user.getId();
+	}
+
+	public String getUserNickname() {
+		return this.user.getNickname();
+	}
+
+	public void updateType(PostType type) {
+		this.type = type;
+	}
+
 }

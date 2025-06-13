@@ -27,7 +27,7 @@ public class Review extends BaseEntity {
 	@Column(name = "review_id")
 	private Long id;
 
-	@Column(nullable = false)
+	@Column(nullable = false, columnDefinition = "TEXT")
 	private String content;
 
 	@Column(nullable = false)
@@ -43,4 +43,14 @@ public class Review extends BaseEntity {
 		this.star = star;
 		this.catalog = catalog;
 	}
+
+	public void update(String content, Integer star) {
+		if (content != null) {
+			this.content = content;
+		}
+		if (star != null) {
+			this.star = star;
+		}
+	}
+
 }

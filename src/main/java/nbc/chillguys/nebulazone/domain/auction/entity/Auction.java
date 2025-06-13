@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
 import nbc.chillguys.nebulazone.domain.products.entity.Product;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Getter
 @Entity
@@ -42,27 +43,65 @@ public class Auction extends BaseEntity {
 	private LocalDateTime endTime;
 
 	@Column(nullable = false)
-	private boolean isClosed;
+	private boolean isWon;
 
-	@Column(nullable = false)
-	private LocalDateTime closedAt;
+	@Column(name = "is_deleted")
+	private boolean deleted;
 
-	private boolean isDeleted;
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public Auction(
-		Long startPrice, Long currentPrice,
-		LocalDateTime endTime,
-		boolean isClosed, LocalDateTime closedAt,
+	private Auction(
+		Product product, Long startPrice, Long currentPrice,
+		LocalDateTime endTime, boolean isWon,
 		boolean isDeleted, LocalDateTime deletedAt
 	) {
+		this.product = product;
 		this.startPrice = startPrice;
 		this.currentPrice = currentPrice;
 		this.endTime = endTime;
-		this.isClosed = isClosed;
-		this.closedAt = closedAt;
-		this.isDeleted = isDeleted;
+		this.isWon = isWon;
+		this.deleted = isDeleted;
 		this.deletedAt = deletedAt;
+	}
+
+	public Long delete() {
+		this.deleted = true;
+		this.deletedAt = LocalDateTime.now();
+		return id;
+	}
+
+	public void update(Long startPrice, Long currentPrice, LocalDateTime endTime, Boolean isWon) {
+		this.startPrice = startPrice;
+		this.currentPrice = currentPrice;
+		this.endTime = endTime;
+		if (isWon != null) {
+			this.isWon = isWon;
+		}
+	}
+
+	public void restore() {
+		this.deleted = false;
+		this.deletedAt = null;
+	}
+
+	public void wonAuction() {
+		isWon = true;
+	}
+
+	public void updateBidPrice(Long price) {
+		this.currentPrice = price;
+	}
+
+	public boolean isAuctionOwner(User user) {
+		return product.getSeller().getId().equals(user.getId());
+	}
+
+	public boolean isDeleted() {
+		return deleted && deletedAt != null;
+	}
+
+	public void updateEndTime() {
+		this.endTime = LocalDateTime.now();
 	}
 }

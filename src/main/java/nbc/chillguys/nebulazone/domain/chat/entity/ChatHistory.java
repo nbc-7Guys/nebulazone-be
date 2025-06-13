@@ -1,7 +1,15 @@
 package nbc.chillguys.nebulazone.domain.chat.entity;
 
+import java.time.LocalDateTime;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,8 +27,9 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 @Entity
 @Table(name = "chat_histories")
 @Getter
+@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ChatHistory extends BaseEntity {
+public class ChatHistory {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,10 +46,23 @@ public class ChatHistory extends BaseEntity {
 	@Column(nullable = false)
 	private String message;
 
+	@Column(nullable = false)
+	private LocalDateTime sendTime;
+
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private MessageType messageType;
+
+	@CreatedDate
+	@Column(updatable = false, nullable = false)
+	private LocalDateTime createdAt;
+
 	@Builder
-	public ChatHistory(ChatRoom chatRoom, User user, String message) {
+	public ChatHistory(ChatRoom chatRoom, Long userId, String message, LocalDateTime sendtime, MessageType messageType) {
 		this.chatRoom = chatRoom;
-		this.userId = user.getId();
+		this.userId = userId;
 		this.message = message;
+		this.sendTime = sendtime;
+		this.messageType = messageType;
 	}
 }

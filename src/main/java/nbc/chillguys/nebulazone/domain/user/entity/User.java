@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -12,12 +13,15 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
+import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
+import nbc.chillguys.nebulazone.domain.user.exception.UserException;
 
 @Getter
 @Entity
@@ -34,7 +38,7 @@ public class User extends BaseEntity {
 
 	private String password;
 
-	@Column(unique = true, nullable = false)
+	@Column(unique = true)
 	private String phone;
 
 	@Column(unique = true, nullable = false)
@@ -42,58 +46,108 @@ public class User extends BaseEntity {
 
 	private String profileImage;
 
-	private int point;
+	private Long point;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private OAuthType oauthType;
+	private OAuthType oAuthType;
 
-	private Long oauthId;
-
-	private String providerId;
+	private String oAuthId;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private UserStatus status;
 
 	@ElementCollection
+	@CollectionTable(
+		name = "user_roles",
+		joinColumns = @JoinColumn(name = "user_id")
+	)
 	private Set<UserRole> roles;
 
 	@ElementCollection
+	@CollectionTable(
+		name = "user_addresses",
+		joinColumns = @JoinColumn(name = "user_id")
+	)
 	private Set<Address> addresses;
 
 	private LocalDateTime deletedAt;
 
 	@Builder
 	public User(String email, String password, String phone, String nickname, String profileImage,
-		int point, OAuthType oauthType, Long oauthId, String providerId, Set<UserRole> roles, Set<Address> addresses) {
+		long point, OAuthType oAuthType, String oAuthId, Set<UserRole> roles, Set<Address> addresses) {
 		this.email = email;
 		this.password = password;
 		this.phone = phone;
 		this.nickname = nickname;
 		this.profileImage = profileImage;
 		this.point = point;
-		this.oauthType = oauthType;
-		this.oauthId = oauthId;
-		this.providerId = providerId;
+		this.oAuthType = oAuthType;
+		this.oAuthId = oAuthId;
 		this.roles = roles != null ? roles : new HashSet<>();
-		this.addresses = this.addresses != null ? addresses : new HashSet<>();
+		this.addresses = addresses != null ? addresses : new HashSet<>();
+		this.status = UserStatus.ACTIVE;
 	}
 
 	public void addRole(UserRole role) {
 		this.roles.add(role);
 	}
 
-	public void addAddress(String roadAddress, String detailAddress) {
-		this.addresses.add(Address.builder()
-			.roadAddress(roadAddress)
-			.detailAddress(detailAddress)
-			.build());
-	}
-
-	public void delete() {
+	public void withdraw() {
 		this.status = UserStatus.INACTIVE;
 		this.deletedAt = LocalDateTime.now();
 	}
+
+	public void updateEmail(String email) {
+		this.email = email;
+	}
+
+	public void updatePhone(String phone) {
+		this.phone = phone;
+	}
+
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
+	public void updateProfileImage(String profileImage) {
+		this.profileImage = profileImage;
+	}
+
+	public void updatePassword(String password) {
+		this.password = password;
+	}
+
+	public void usePoint(long usePoint) {
+		if (this.point < usePoint) {
+			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
+		}
+
+		this.point -= point;
+	}
+
+	public boolean hasNotEnoughPoint(int price) {
+		return this.point < price;
+	}
+
+	public void changeStatus(UserStatus status) {
+		if (status == UserStatus.INACTIVE) {
+			this.status = UserStatus.INACTIVE;
+			this.deletedAt = LocalDateTime.now();
+		} else if (status == UserStatus.ACTIVE) {
+			this.status = UserStatus.ACTIVE;
+			this.deletedAt = null;
+		}
+	}
+
+	public void updateRoles(Set<UserRole> roles) {
+		if (roles == null || roles.isEmpty()) {
+			throw new UserException(UserErrorCode.WRONG_ROLES);
+		}
+		this.roles.clear();
+		this.roles.addAll(roles);
+	}
+
 }
 
