@@ -60,8 +60,8 @@ jobs:
           key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
           script: |
             set -e
-            cd ~/app
+            cd /ubuntu/app
             docker compose pull
             docker compose down --remove-orphans || true
             docker compose up -d
-            docker compose ps
+            docker ps

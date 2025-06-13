@@ -37,7 +37,7 @@ public class TransactionController {
 	}
 
 	@GetMapping("/{transactionId}/me")
-	public ResponseEntity<FindDetailTransactionResponse> findMyTransactionById(
+	public ResponseEntity<FindDetailTransactionResponse> findMyTransaction(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable("transactionId") Long transactionId) {
 
