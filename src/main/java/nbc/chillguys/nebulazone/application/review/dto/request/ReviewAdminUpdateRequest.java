@@ -1,6 +1,6 @@
 package nbc.chillguys.nebulazone.application.review.dto.request;
 
-public record AdminReviewUpdateRequest(
+public record ReviewAdminUpdateRequest(
 	String content,
 	Integer star
 ) {

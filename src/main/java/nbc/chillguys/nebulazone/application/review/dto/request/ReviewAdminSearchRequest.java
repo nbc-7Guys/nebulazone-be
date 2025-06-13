@@ -1,6 +1,6 @@
 package nbc.chillguys.nebulazone.application.review.dto.request;
 
-public record AdminReviewSearchRequest(
+public record ReviewAdminSearchRequest(
 	String keyword,
 	Boolean isDeleted,
 	int page,

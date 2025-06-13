@@ -12,17 +12,17 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.catalog.entity.QCatalog;
-import nbc.chillguys.nebulazone.domain.review.dto.AdminReviewSearchQueryCommand;
+import nbc.chillguys.nebulazone.domain.review.dto.ReviewAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.review.entity.QReview;
 import nbc.chillguys.nebulazone.domain.review.entity.Review;
 
 @Repository
 @RequiredArgsConstructor
-public class CustomReviewAdminRepositoryImpl implements CustomReviewAdminRepository {
+public class ReviewAdminRepositoryCustomImpl implements ReviewAdminRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Page<Review> searchReviews(AdminReviewSearchQueryCommand command, Pageable pageable) {
+	public Page<Review> searchReviews(ReviewAdminSearchQueryCommand command, Pageable pageable) {
 		QReview review = QReview.review;
 		QCatalog catalog = QCatalog.catalog;
 

@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import nbc.chillguys.nebulazone.domain.review.entity.Review;
 
-public record AdminReviewInfo(
+public record ReviewAdminInfo(
 	Long reviewId,
 	String content,
 	int star,
@@ -13,8 +13,8 @@ public record AdminReviewInfo(
 	LocalDateTime createdAt,
 	LocalDateTime modifiedAt
 ) {
-	public static AdminReviewInfo from(Review review) {
-		return new AdminReviewInfo(
+	public static ReviewAdminInfo from(Review review) {
+		return new ReviewAdminInfo(
 			review.getId(),
 			review.getContent(),
 			review.getStar(),
