@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import nbc.chillguys.nebulazone.domain.products.dto.ProductAdminInfo;
 import nbc.chillguys.nebulazone.domain.products.entity.ProductImage;
 
@@ -18,8 +20,11 @@ public record ProductAdminResponse(
 	String catalogName,
 	List<ImageResponse> images,
 	Boolean isDeleted,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime deletedAt,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt
 ) {
 	public static ProductAdminResponse from(ProductAdminInfo info) {
