@@ -48,7 +48,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_KEY }}
-          source: "docker/docker-compose.yml,docker/.env,prometheus/prometheus-prod.yml"
+          source: "docker/docker-compose.yml,docker/.env"
           target: "~/app"
           overwrite: true
 
