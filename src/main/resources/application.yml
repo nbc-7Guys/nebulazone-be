@@ -80,7 +80,7 @@ spring:
             user-name-attribute: response
 
   elasticsearch:
-    uris: http://localhost:9200
+    uris: ${ES_URI}
 
 jwt:
   secret:
