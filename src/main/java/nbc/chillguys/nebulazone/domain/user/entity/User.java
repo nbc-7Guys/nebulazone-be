@@ -91,10 +91,6 @@ public class User extends BaseEntity {
 		this.status = UserStatus.ACTIVE;
 	}
 
-	public void addRole(UserRole role) {
-		this.roles.add(role);
-	}
-
 	public void withdraw() {
 		this.status = UserStatus.INACTIVE;
 		this.deletedAt = LocalDateTime.now();
