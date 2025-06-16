@@ -66,7 +66,7 @@ public class OAuthService extends DefaultOAuth2UserService {
 			.build();
 	}
 
-	public User getOrCreateUser(OAuth2UserInfo oAuth2UserInfo) {
+	private User getOrCreateUser(OAuth2UserInfo oAuth2UserInfo) {
 		User user;
 
 		try {
