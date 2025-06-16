@@ -28,14 +28,15 @@ public record FindDetailAuctionResponse(
 	Long bidCount) {
 
 	public static FindDetailAuctionResponse from(AuctionFindDetailInfo findInfo, Bid bid) {
+
 		return new FindDetailAuctionResponse(
 			findInfo.auctionId(),
 			findInfo.sellerId(),
 			findInfo.sellerNickname(),
 			findInfo.sellerEmail(),
-			bid.getUser().getId(),
-			bid.getUser().getNickname(),
-			bid.getUser().getEmail(),
+			bid == null ? null : bid.getUser().getId(),
+			bid == null ? null : bid.getUser().getNickname(),
+			bid == null ? null : bid.getUser().getEmail(),
 			findInfo.startPrice(),
 			findInfo.currentPrice(),
 			findInfo.isWon(),

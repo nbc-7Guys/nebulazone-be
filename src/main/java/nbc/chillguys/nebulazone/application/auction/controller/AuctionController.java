@@ -44,7 +44,7 @@ public class AuctionController {
 	}
 
 	@GetMapping("/sorted")
-	public ResponseEntity<List<FindAllAuctionResponse>> findAuctions(
+	public ResponseEntity<List<FindAllAuctionResponse>> findAuctionsSortType(
 		@RequestParam("sort") String sortType) {
 
 		List<FindAllAuctionResponse> response = auctionService.findAuctionsBySortType(AuctionSortType.of(sortType));
@@ -54,7 +54,7 @@ public class AuctionController {
 	}
 
 	@GetMapping("/{auctionId}")
-	public ResponseEntity<FindDetailAuctionResponse> findAuctions(@PathVariable("auctionId") Long auctionId) {
+	public ResponseEntity<FindDetailAuctionResponse> findAuction(@PathVariable("auctionId") Long auctionId) {
 
 		FindDetailAuctionResponse response = auctionService.findAuction(auctionId);
 
