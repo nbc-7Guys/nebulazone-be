@@ -35,6 +35,7 @@ public class PostAdminDomainService {
 		Post post = findActivePost(command.postId());
 
 		post.update(command.title(), command.content(), command.imageUrls());
+		savePostToEs(post);
 
 		return post;
 	}
@@ -49,6 +50,7 @@ public class PostAdminDomainService {
 	public void updatePostType(Long postId, PostType type) {
 		Post post = findActivePost(postId);
 		post.updateType(type);
+		savePostToEs(post);
 	}
 
 	@Transactional
@@ -58,6 +60,7 @@ public class PostAdminDomainService {
 		post.validatePostOwner(postId);
 
 		post.delete();
+		deletePostFromEs(postId);
 	}
 
 	@Transactional
