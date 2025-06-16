@@ -110,15 +110,9 @@ class AutoAuctionServiceUnitTest {
 			verify(bidDomainService).findHighBidByAuction(auctionId);
 			verify(autoAuctionDomainService).endAutoAuction(auctionId, wonBid);
 
-			// 트랜잭션 생성에 전달된 인자 검증까지!
-			verify(txDomainService).createTransaction(
-				argThat(cmd ->
-					cmd.user().equals(wonBid.getUser()) &&
-						cmd.product().equals(product) &&
-						cmd.txMethod().equals(product.getTxMethod().name()) &&
-						cmd.price().equals(wonBid.getPrice())
-				)
-			);
+			verify(txDomainService).createTransaction(argThat(
+				cmd -> cmd.user().equals(wonBid.getUser()) && cmd.product().equals(product) && cmd.txMethod()
+					.equals(product.getTxMethod().name()) && cmd.price().equals(wonBid.getPrice())));
 		}
 
 		@Test
@@ -147,14 +141,13 @@ class AutoAuctionServiceUnitTest {
 			Long auctionId = 999L;
 			Long productId = product.getId();
 
-			given(auctionDomainService.findActiveAuctionById(auctionId))
-				.willThrow(new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
+			given(auctionDomainService.findActiveAuctionById(auctionId)).willThrow(
+				new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 
 			// when & then
-			assertThatThrownBy(() -> autoAuctionService.autoEndAuctionAndCreateTransaction(auctionId, productId))
-				.isInstanceOf(AuctionException.class)
-				.extracting("errorCode")
-				.isEqualTo(AuctionErrorCode.AUCTION_NOT_FOUND);
+			assertThatThrownBy(
+				() -> autoAuctionService.autoEndAuctionAndCreateTransaction(auctionId, productId)).isInstanceOf(
+				AuctionException.class).extracting("errorCode").isEqualTo(AuctionErrorCode.AUCTION_NOT_FOUND);
 		}
 
 		@Test
@@ -165,14 +158,13 @@ class AutoAuctionServiceUnitTest {
 			Long productId = 999L;
 
 			given(auctionDomainService.findActiveAuctionById(auctionId)).willReturn(auction);
-			given(productDomainService.findActiveProductById(productId))
-				.willThrow(new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+			given(productDomainService.findActiveProductById(productId)).willThrow(
+				new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 			// when & then
-			assertThatThrownBy(() -> autoAuctionService.autoEndAuctionAndCreateTransaction(auctionId, productId))
-				.isInstanceOf(ProductException.class)
-				.extracting("errorCode")
-				.isEqualTo(ProductErrorCode.PRODUCT_NOT_FOUND);
+			assertThatThrownBy(
+				() -> autoAuctionService.autoEndAuctionAndCreateTransaction(auctionId, productId)).isInstanceOf(
+				ProductException.class).extracting("errorCode").isEqualTo(ProductErrorCode.PRODUCT_NOT_FOUND);
 		}
 	}
 
@@ -189,11 +181,7 @@ class AutoAuctionServiceUnitTest {
 	}
 
 	private Catalog createCatalog(Long id, String name, String description) {
-		Catalog catalog = Catalog.builder()
-			.name(name)
-			.description(description)
-			.type(CatalogType.CPU)
-			.build();
+		Catalog catalog = Catalog.builder().name(name).description(description).type(CatalogType.CPU).build();
 		ReflectionTestUtils.setField(catalog, "id", id);
 		return catalog;
 	}
@@ -211,8 +199,8 @@ class AutoAuctionServiceUnitTest {
 		return product;
 	}
 
-	private Auction createAuction(Long id, Product product, Long startPrice, Long currentPrice,
-		LocalDateTime endTime, boolean isDeleted, boolean isWon) {
+	private Auction createAuction(Long id, Product product, Long startPrice, Long currentPrice, LocalDateTime endTime,
+		boolean isDeleted, boolean isWon) {
 		Auction auction = Auction.builder()
 			.product(product)
 			.startPrice(startPrice)
@@ -226,11 +214,7 @@ class AutoAuctionServiceUnitTest {
 	}
 
 	private Bid createBid(Long id, Auction auction, User user, Long price) {
-		Bid bid = Bid.builder()
-			.auction(auction)
-			.user(user)
-			.price(price)
-			.build();
+		Bid bid = Bid.builder().auction(auction).user(user).price(price).build();
 		ReflectionTestUtils.setField(bid, "id", id);
 		return bid;
 	}
