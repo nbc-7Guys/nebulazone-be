@@ -162,6 +162,7 @@ public class ProductService {
 		Product product = productDomainService.findAvailableProductById(productId);
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
+		product.validPurchasable(user.getId());
 		user.usePoint(product.getPrice());
 
 		ProductPurchaseCommand command = ProductPurchaseCommand.of(user, catalog, productId);

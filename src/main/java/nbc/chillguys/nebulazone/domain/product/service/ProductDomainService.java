@@ -92,7 +92,7 @@ public class ProductDomainService {
 		Product product = findActiveProductById(command.productId());
 
 		product.validBelongsToCatalog(command.catalog().getId());
-		product.validProductOwner(command.user().getId());
+		product.validNotProductOwner(command.user().getId());
 
 		product.update(command.name(), command.description(), command.imageUrls());
 
@@ -110,7 +110,7 @@ public class ProductDomainService {
 		Product product = findActiveProductById(command.productId());
 
 		product.validBelongsToCatalog(command.catalog().getId());
-		product.validProductOwner(command.user().getId());
+		product.validNotProductOwner(command.user().getId());
 
 		product.changeToAuctionType(command.price());
 
@@ -127,7 +127,7 @@ public class ProductDomainService {
 		Product product = findActiveProductById(command.productId());
 
 		product.validBelongsToCatalog(command.catalog().getId());
-		product.validProductOwner(command.user().getId());
+		product.validNotProductOwner(command.user().getId());
 
 		product.delete();
 

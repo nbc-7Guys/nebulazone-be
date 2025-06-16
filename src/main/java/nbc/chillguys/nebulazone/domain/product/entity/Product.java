@@ -140,9 +140,15 @@ public class Product extends BaseEntity {
 		}
 	}
 
-	public void validProductOwner(Long userId) {
+	public void validNotProductOwner(Long userId) {
 		if (!Objects.equals(getSeller().getId(), userId)) {
 			throw new ProductException(ProductErrorCode.NOT_PRODUCT_OWNER);
+		}
+	}
+
+	public void validPurchasable(Long userId) {
+		if (Objects.equals(getSeller().getId(), userId)) {
+			throw new ProductException(ProductErrorCode.CANT_PURCHASE);
 		}
 	}
 
