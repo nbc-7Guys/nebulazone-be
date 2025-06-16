@@ -7,7 +7,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -29,11 +28,10 @@ public class Catalog extends BaseEntity {
 	@Column(nullable = false)
 	private String name;
 
-	@Column(name = "product_code")
+	@Column(name = "product_code", nullable = false)
 	private Long productCode;
 
-	@Lob
-	@Column(nullable = false)
+	@Column(columnDefinition = "LONGTEXT NOT NULL")
 	private String description;
 
 	@Enumerated(EnumType.STRING)
