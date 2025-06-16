@@ -64,7 +64,7 @@ public class AuctionAdminDomainService {
 	public void deleteAuction(Long auctionId) {
 		Auction auction = findByAuctionById(auctionId);
 		auction.delete(); // 소프트 딜리트: deleted=true, deletedAt=now
-		productDomainService.deleteProductFromEs(auctionId);
+		productDomainService.deleteProductFromEs(auction.getProduct().getId());
 	}
 
 	/**
