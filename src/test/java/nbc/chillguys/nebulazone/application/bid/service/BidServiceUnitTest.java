@@ -167,13 +167,13 @@ class BidServiceUnitTest {
 			given(auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId)).willReturn(auction);
 			given(userDomainService.findActiveUserById(authUser.getId())).willReturn(bidder);
 			given(bidDomainService.createBid(auction, bidder, BID_PRICE))
-				.willThrow(new BidException(BidErrorCode.BID_PRICE_TOO_LOW));
+				.willThrow(new BidException(BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE));
 
 			// when & then
 			assertThatThrownBy(() -> bidService.createBid(auctionId, authUser, createBidRequest))
 				.isInstanceOf(BidException.class)
 				.extracting("errorCode")
-				.isEqualTo(BidErrorCode.BID_PRICE_TOO_LOW);
+				.isEqualTo(BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE);
 
 			verify(auctionDomainService).findActiveAuctionWithProductAndSellerLock(auctionId);
 			verify(userDomainService).findActiveUserById(authUser.getId());
