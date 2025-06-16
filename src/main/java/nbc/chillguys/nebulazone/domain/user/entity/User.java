@@ -63,6 +63,7 @@ public class User extends BaseEntity {
 		name = "user_roles",
 		joinColumns = @JoinColumn(name = "user_id")
 	)
+	@Enumerated(EnumType.STRING)
 	private Set<UserRole> roles;
 
 	@ElementCollection
@@ -88,10 +89,6 @@ public class User extends BaseEntity {
 		this.roles = roles != null ? roles : new HashSet<>();
 		this.addresses = addresses != null ? addresses : new HashSet<>();
 		this.status = UserStatus.ACTIVE;
-	}
-
-	public void addRole(UserRole role) {
-		this.roles.add(role);
 	}
 
 	public void withdraw() {

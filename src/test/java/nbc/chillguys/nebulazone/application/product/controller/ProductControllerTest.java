@@ -174,16 +174,18 @@ class ProductControllerTest {
 		void success_searchProduct() throws Exception {
 			// Given
 			SearchProductResponse response = new SearchProductResponse(1L, "testProduct",
-				1000L, ProductTxMethod.DIRECT.name(), LocalDateTime.now(), List.of());
+				1L, 1L, "testSellerNickname", 1000L, ProductTxMethod.DIRECT.name(),
+				LocalDateTime.now(), List.of());
 			Page<SearchProductResponse> page = new PageImpl<>(List.of(response),
 				PageRequest.of(0, 10), 1);
 
-			given(productService.searchProduct(anyString(), any(), any(), any(), anyInt(), anyInt()))
+			given(productService.searchProduct(anyString(), anyString(), any(), any(), any(), anyInt(), anyInt()))
 				.willReturn(page);
 
 			// When
 			ResultActions perform = mockMvc.perform(get("/products")
-				.param("name", "testProduct")
+				.param("productname", "testProduct")
+				.param("sellernickname", "testSellerNickname")
 				.param("type", ProductTxMethod.DIRECT.name())
 				.param("from", "1000")
 				.param("to", "2000")
@@ -199,6 +201,8 @@ class ProductControllerTest {
 						.value(1L),
 					jsonPath("$.content[0].productName")
 						.value("testProduct"),
+					jsonPath("$.content[0].sellerNickname")
+						.value("testSellerNickname"),
 					jsonPath("$.content[0].productPrice")
 						.value(1000L),
 					jsonPath("$.content[0].txMethod")

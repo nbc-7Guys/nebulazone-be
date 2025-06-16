@@ -165,7 +165,7 @@ class ProductServiceTest {
 		@DisplayName("상품 검색 성공")
 		void success_searchProduct() {
 			// Given
-			ProductSearchCommand command = ProductSearchCommand.of("테스트", ProductTxMethod.DIRECT,
+			ProductSearchCommand command = ProductSearchCommand.of("테스트", "test", ProductTxMethod.DIRECT,
 				0L, 10000L, 1, 10);
 
 			given(productDomainService.searchProduct(command))
@@ -173,8 +173,8 @@ class ProductServiceTest {
 					PageRequest.of(0, 10), 1L));
 
 			// When
-			Page<SearchProductResponse> responses = productService.searchProduct("테스트", ProductTxMethod.DIRECT,
-				0L, 10000L, 1, 10);
+			Page<SearchProductResponse> responses = productService.searchProduct("테스트", "test",
+				ProductTxMethod.DIRECT, 0L, 10000L, 1, 10);
 
 			// Then
 			assertThat(responses.getContent()).hasSize(1);
@@ -236,7 +236,7 @@ class ProductServiceTest {
 				.willReturn(user);
 			given(catalogDomainService.getCatalogById(catalogId))
 				.willReturn(catalog);
-			given(productDomainService.createProduct(any(ProductCreateCommand.class), any(List.class)))
+			given(productDomainService.createProduct(any(ProductCreateCommand.class), any()))
 				.willReturn(product);
 
 			// When
@@ -251,7 +251,8 @@ class ProductServiceTest {
 
 			verify(userDomainService, times(1)).findActiveUserById(authUser.getId());
 			verify(catalogDomainService, times(1)).getCatalogById(catalogId);
-			verify(productDomainService, times(1)).createProduct(any(ProductCreateCommand.class), any(List.class));
+			verify(productDomainService, times(1))
+				.createProduct(any(ProductCreateCommand.class), any());
 			verify(auctionDomainService, never()).createAuction(any());
 			verify(auctionSchedulerService, never()).autoAuctionEndSchedule(any(), any());
 		}
@@ -274,7 +275,7 @@ class ProductServiceTest {
 				.willReturn(user);
 			given(catalogDomainService.getCatalogById(catalogId))
 				.willReturn(catalog);
-			given(productDomainService.createProduct(any(ProductCreateCommand.class), any(List.class)))
+			given(productDomainService.createProduct(any(ProductCreateCommand.class), any()))
 				.willReturn(auctionProduct);
 			given(auctionDomainService.createAuction(any(AuctionCreateCommand.class)))
 				.willReturn(auction);
@@ -291,7 +292,8 @@ class ProductServiceTest {
 
 			verify(userDomainService, times(1)).findActiveUserById(authUser.getId());
 			verify(catalogDomainService, times(1)).getCatalogById(catalogId);
-			verify(productDomainService, times(1)).createProduct(any(ProductCreateCommand.class), any(List.class));
+			verify(productDomainService, times(1)).createProduct(any(ProductCreateCommand.class),
+				any());
 			verify(auctionDomainService, times(1)).createAuction(any(AuctionCreateCommand.class));
 			verify(auctionSchedulerService, times(1)).autoAuctionEndSchedule(auction, auctionProduct.getId());
 		}

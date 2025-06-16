@@ -175,10 +175,11 @@ public class ProductService {
 		return PurchaseProductResponse.from(tx);
 	}
 
-	public Page<SearchProductResponse> searchProduct(String productName, ProductTxMethod txMethod, Long priceFrom,
+	public Page<SearchProductResponse> searchProduct(String productName, String sellerNickname,
+		ProductTxMethod txMethod, Long priceFrom,
 		Long priceTo, int page, int size) {
-		ProductSearchCommand productSearchCommand = ProductSearchCommand.of(productName, txMethod, priceFrom,
-			priceTo, page, size);
+		ProductSearchCommand productSearchCommand = ProductSearchCommand.of(productName, sellerNickname, txMethod,
+			priceFrom, priceTo, page, size);
 
 		Page<ProductDocument> productDocuments = productDomainService.searchProduct(productSearchCommand);
 

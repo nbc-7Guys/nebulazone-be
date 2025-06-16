@@ -111,14 +111,16 @@ public class ProductController {
 
 	@GetMapping("/products")
 	public ResponseEntity<CommonPageResponse<SearchProductResponse>> searchProduct(
-		@RequestParam(value = "name", required = false) String name,
+		@RequestParam(value = "productname", required = false) String productName,
+		@RequestParam(value = "sellernickname", required = false) String sellerNickname,
 		@RequestParam("type") ProductTxMethod type,
 		@RequestParam(value = "from", required = false) Long priceFrom,
 		@RequestParam(value = "to", required = false) Long priceTo,
 		@RequestParam(value = "page", defaultValue = "1") Integer page,
 		@RequestParam(value = "size", defaultValue = "10") Integer size
 	) {
-		Page<SearchProductResponse> responses = productService.searchProduct(name, type, priceFrom, priceTo, page,
+		Page<SearchProductResponse> responses = productService.searchProduct(productName, sellerNickname, type,
+			priceFrom, priceTo, page,
 			size);
 
 		return ResponseEntity.ok(CommonPageResponse.from(responses));

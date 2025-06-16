@@ -440,7 +440,7 @@ class ProductDomainServiceUnitTest {
 			verify(productEsRepository).save(captor.capture());
 
 			ProductDocument actualDoc = captor.getValue();
-			assertThat(actualDoc.name()).isEqualTo(expectedDoc.name());
+			assertThat(actualDoc.productName()).isEqualTo(expectedDoc.productName());
 			assertThat(actualDoc.txMethod()).isEqualTo(expectedDoc.txMethod());
 			assertThat(actualDoc.price()).isEqualTo(expectedDoc.price());
 			verifyNoMoreInteractions(productEsRepository);
@@ -455,10 +455,10 @@ class ProductDomainServiceUnitTest {
 		@DisplayName("상품 검색 성공 - 모든 조건")
 		void success_searchProduct_allParameters() {
 			// Given
-			ProductSearchCommand command = new ProductSearchCommand(product.getName(), product.getTxMethod().name(),
-				1_000_000L, 2_000_000L, 1, 10);
+			ProductSearchCommand command = new ProductSearchCommand(product.getName(), user.getNickname(),
+				product.getTxMethod().name(), 1_000_000L, 2_000_000L, 1, 10);
 
-			given(productEsRepository.searchProduct(anyString(), anyString(), anyLong(), anyLong(), any()))
+			given(productEsRepository.searchProduct(anyString(), anyString(), anyString(), anyLong(), anyLong(), any()))
 				.willReturn(new PageImpl<>(List.of(ProductDocument.from(product)),
 					PageRequest.of(0, 10), 1L));
 
@@ -467,13 +467,14 @@ class ProductDomainServiceUnitTest {
 
 			// Then
 			verify(productEsRepository, times(1))
-				.searchProduct(product.getName(), product.getTxMethod().name(), 1_000_000L, 2_000_000L,
+				.searchProduct(product.getName(), user.getNickname(), product.getTxMethod().name(), 1_000_000L,
+					2_000_000L,
 					PageRequest.of(0, 10));
 			assertThat(productDocuments.getContent().size())
 				.isEqualTo(1);
 			assertThat(productDocuments.getTotalElements())
 				.isEqualTo(1);
-			assertThat(productDocuments.getContent().getFirst().name())
+			assertThat(productDocuments.getContent().getFirst().productName())
 				.isEqualTo(product.getName());
 			assertThat(productDocuments.getContent().getFirst().price())
 				.isLessThanOrEqualTo(2_000_000L)
@@ -485,10 +486,10 @@ class ProductDomainServiceUnitTest {
 		@DisplayName("상품 검색 성공 - 상품 유형만 검색")
 		void success_searchProduct_noParameters() {
 			// Given
-			ProductSearchCommand command = new ProductSearchCommand(null, product.getTxMethod().name(),
+			ProductSearchCommand command = new ProductSearchCommand(null, null, product.getTxMethod().name(),
 				null, null, 1, 10);
 
-			given(productEsRepository.searchProduct(any(), anyString(), any(), any(), any()))
+			given(productEsRepository.searchProduct(any(), any(), anyString(), any(), any(), any()))
 				.willReturn(new PageImpl<>(List.of(ProductDocument.from(product), ProductDocument.from(product)),
 					PageRequest.of(0, 10), 2L));
 
@@ -497,7 +498,7 @@ class ProductDomainServiceUnitTest {
 
 			// Then
 			verify(productEsRepository, times(1))
-				.searchProduct(null, product.getTxMethod().name(), null, null,
+				.searchProduct(null, null, product.getTxMethod().name(), null, null,
 					PageRequest.of(0, 10));
 			assertThat(productDocuments.getContent().size())
 				.isEqualTo(2);
