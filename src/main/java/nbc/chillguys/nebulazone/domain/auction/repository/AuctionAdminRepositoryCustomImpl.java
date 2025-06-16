@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.QAuction;
-import nbc.chillguys.nebulazone.domain.products.entity.QProduct;
+import nbc.chillguys.nebulazone.domain.product.entity.QProduct;
 
 @Repository
 @RequiredArgsConstructor

@@ -1,6 +1,6 @@
 package nbc.chillguys.nebulazone.domain.transaction.repository;
 
-import static nbc.chillguys.nebulazone.domain.products.entity.QProduct.*;
+import static nbc.chillguys.nebulazone.domain.product.entity.QProduct.*;
 import static nbc.chillguys.nebulazone.domain.transaction.entity.QTransaction.*;
 import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 

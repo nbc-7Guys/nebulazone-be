@@ -2,7 +2,7 @@ package nbc.chillguys.nebulazone.domain.chat.repository;
 
 import static nbc.chillguys.nebulazone.domain.chat.entity.QChatRoom.*;
 import static nbc.chillguys.nebulazone.domain.chat.entity.QChatRoomUser.*;
-import static nbc.chillguys.nebulazone.domain.products.entity.QProduct.*;
+import static nbc.chillguys.nebulazone.domain.product.entity.QProduct.*;
 import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 
 import java.util.List;
@@ -12,7 +12,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
-import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 
 @RequiredArgsConstructor
 public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {

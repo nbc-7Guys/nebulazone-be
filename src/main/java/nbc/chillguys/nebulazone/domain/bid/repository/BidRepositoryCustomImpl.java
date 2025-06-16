@@ -1,7 +1,7 @@
 package nbc.chillguys.nebulazone.domain.bid.repository;
 
 import static nbc.chillguys.nebulazone.domain.bid.entity.QBid.*;
-import static nbc.chillguys.nebulazone.domain.products.entity.QProduct.*;
+import static nbc.chillguys.nebulazone.domain.product.entity.QProduct.*;
 import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 
 import java.util.List;

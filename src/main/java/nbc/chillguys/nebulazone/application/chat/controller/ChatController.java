@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.chat.dto.request.CreateChatRoomRequest;
+import nbc.chillguys.nebulazone.application.chat.dto.response.CreateChatRoomResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponses;
 import nbc.chillguys.nebulazone.application.chat.service.ChatService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
-import nbc.chillguys.nebulazone.application.chat.dto.response.CreateChatRoomResponse;
 
 @RequiredArgsConstructor
 @RestController
