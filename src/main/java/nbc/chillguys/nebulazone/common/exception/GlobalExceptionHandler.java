@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(BaseException.class)
 	public ResponseEntity<CommonResponse> handleException(BaseException ex) {
-		log.warn("BaseException : {}", ex.getMessage(), ex);
+		log.warn("BaseException : {}", ex.getErrorCode().getMessage(), ex);
 
 		return ResponseEntity
 			.status(ex.getErrorCode().getStatus())
