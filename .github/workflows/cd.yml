@@ -34,7 +34,7 @@ jobs:
           echo "SPRING_CLOUD_AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> docker/.env
           echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KAKAO_CLIENT-ID=${{ secrets.KAKAO_API_KEY }}" >> docker/.env
           echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT-ID=${{ secrets.NAVER_API_KEY }}" >> docker/.env
-          echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT-SECRET=${{ secrets.NAVER_SECRET_API_KEY }}" >> docker/.env
+          echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT-SECRET=${{ secrets.NAVER_API_SECRET_KEY }}" >> docker/.env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> docker/.env
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> docker/.env
           echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> docker/.env
