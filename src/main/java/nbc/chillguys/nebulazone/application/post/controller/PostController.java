@@ -43,6 +43,9 @@ public class PostController {
 
 	private final PostService postService;
 
+	@RequestBody(
+		content = @Content(encoding = @Encoding(name = "post", contentType = MediaType.APPLICATION_JSON_VALUE))
+	)
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<CreatePostResponse> createPost(
 		@AuthenticationPrincipal AuthUser authUser,
