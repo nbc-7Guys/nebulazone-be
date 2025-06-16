@@ -63,6 +63,7 @@ public class User extends BaseEntity {
 		name = "user_roles",
 		joinColumns = @JoinColumn(name = "user_id")
 	)
+	@Enumerated(EnumType.STRING)
 	private Set<UserRole> roles;
 
 	@ElementCollection
