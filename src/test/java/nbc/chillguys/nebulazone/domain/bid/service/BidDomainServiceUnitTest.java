@@ -163,7 +163,7 @@ class BidDomainServiceUnitTest {
 
 			// when & then
 			assertBidException(() -> bidDomainService.createBid(auction, bidder, LOW_BID_PRICE),
-				BidErrorCode.BID_PRICE_TOO_LOW);
+				BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE);
 		}
 
 		@Test
@@ -175,7 +175,7 @@ class BidDomainServiceUnitTest {
 
 			// when & then
 			assertBidException(() -> bidDomainService.createBid(auction, bidder, CURRENT_PRICE),
-				BidErrorCode.BID_PRICE_TOO_LOW);
+				BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE);
 		}
 	}
 

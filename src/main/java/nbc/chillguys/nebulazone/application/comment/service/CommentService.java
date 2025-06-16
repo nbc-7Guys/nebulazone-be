@@ -34,7 +34,7 @@ public class CommentService {
 
 	public CommentResponse createComment(Long userId, Long postId, CreateCommentRequest request) {
 		User user = userDomainService.findActiveUserById(userId);
-		Post post = postDomainService.findMyActivePost(postId, userId);
+		Post post = postDomainService.findActivePost(postId);
 
 		CommentCreateCommand command = request.toCommand(user, post);
 		Comment comment;

@@ -42,6 +42,10 @@ public class BidDomainService {
 			throw new AuctionException(AuctionErrorCode.ALREADY_CLOSED_AUCTION);
 		}
 
+		if (lockAuction.getStartPrice() > price) {
+			throw new BidException(BidErrorCode.BID_PRICE_TOO_LOW_START_PRICE);
+		}
+
 		if (lockAuction.isWon()) {
 			throw new AuctionException(AuctionErrorCode.ALREADY_WON_AUCTION);
 		}
@@ -53,7 +57,7 @@ public class BidDomainService {
 		Optional<Long> highestPrice = bidRepository.findActiveBidHighestPriceByAuction(lockAuction);
 
 		if (highestPrice.isPresent() && highestPrice.get() >= price) {
-			throw new BidException(BidErrorCode.BID_PRICE_TOO_LOW);
+			throw new BidException(BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE);
 		}
 
 		lockAuction.updateBidPrice(price);
