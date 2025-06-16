@@ -2,10 +2,7 @@ package nbc.chillguys.nebulazone.application.product.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.product.dto.request.ProductAdminSearchRequest;
@@ -44,10 +41,8 @@ public class ProductAdminService {
 		productAdminDomainService.deleteProduct(productId);
 	}
 
-	@PostMapping("/{productId}/restore")
-	public ResponseEntity<Void> restoreProduct(@PathVariable Long productId) {
+	public void restoreProduct(Long productId) {
 		productAdminDomainService.restoreProduct(productId);
-		return ResponseEntity.noContent().build();
 	}
 
 }

@@ -102,7 +102,7 @@ public class SecurityConfig {
 			"https://nebulazone-fe.vercel.app/"
 		));
 		configuration.setAllowedMethods(List.of(
-			"GET", "POST", "PUT", "DELETE", "OPTIONS"
+			"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
 		));
 		configuration.setAllowedHeaders(List.of(
 			"Authorization",

@@ -24,10 +24,15 @@ public class ProductEsRepositoryCustomImpl implements ProductEsRepositoryCustom 
 	private final ElasticsearchOperations elasticsearchOperations;
 
 	@Override
-	public Page<ProductDocument> searchProduct(String productName, String txMethod, Long priceFrom, Long priceTo,
+	public Page<ProductDocument> searchProduct(String productName, String sellerNickname, String txMethod,
+		Long priceFrom, Long priceTo,
 		Pageable pageable) {
 		BoolQuery.Builder builder = QueryBuilders.bool()
 			.must(m -> m.term(t -> t.field("txMethod").value(txMethod)));
+
+		if (StringUtils.hasText(sellerNickname)) {
+			builder.must(m -> m.term(t -> t.field("sellerNickname").value(sellerNickname)));
+		}
 
 		if (StringUtils.hasText(productName)) {
 			builder.must(m -> m.match(t -> t.field("name").query(productName)));
