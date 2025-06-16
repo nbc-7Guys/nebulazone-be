@@ -33,14 +33,14 @@ public class ChatMessageController {
 		chatMessageService.sendTextMessage(sessionId, roomId, command);
 	}
 
-	@PostMapping(value = "/send/image/{roomId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public void sendImage(
-		@AuthenticationPrincipal AuthUser authUser,
-		@PathVariable Long roomId,
-		@RequestPart("images") MultipartFile multipartFile,
-		@RequestPart("meta") String type
-	) {
-		chatMessageService.sendImageMessage(authUser, multipartFile, roomId, type);
-	}
+	// @PostMapping(value = "/send/image/{roomId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	// public void sendImage(
+	// 	@AuthenticationPrincipal AuthUser authUser,
+	// 	@PathVariable Long roomId,
+	// 	@RequestPart("images") MultipartFile multipartFile,
+	// 	@RequestPart("meta") String type
+	// ) {
+	// 	chatMessageService.sendImageMessage(authUser, multipartFile, roomId, type);
+	// }
 
 }
