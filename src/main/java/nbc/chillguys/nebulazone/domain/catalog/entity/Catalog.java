@@ -29,6 +29,9 @@ public class Catalog extends BaseEntity {
 	@Column(nullable = false)
 	private String name;
 
+	@Column(name = "product_code")
+	private Long productCode;
+
 	@Lob
 	@Column(nullable = false)
 	private String description;
