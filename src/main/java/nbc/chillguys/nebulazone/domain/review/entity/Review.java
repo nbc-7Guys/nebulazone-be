@@ -27,7 +27,7 @@ public class Review extends BaseEntity {
 	@Column(name = "review_id")
 	private Long id;
 
-	@Column(nullable = false, columnDefinition = "TEXT")
+	@Column(columnDefinition = "TEXT NOT NULL")
 	private String content;
 
 	@Column(nullable = false)
