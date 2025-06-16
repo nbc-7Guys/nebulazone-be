@@ -13,11 +13,14 @@ import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.auction.repository.AuctionRepository;
+import nbc.chillguys.nebulazone.domain.product.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 
 @Service
 @RequiredArgsConstructor
 public class AuctionAdminDomainService {
 	private final AuctionRepository auctionRepository;
+	private final ProductDomainService productDomainService;
 
 	/**
 	 * 어드민 경매장 목록을 조건에 맞게 페이징 조회합니다.<br>
@@ -46,6 +49,8 @@ public class AuctionAdminDomainService {
 	public void updateAuction(Long auctionId, AuctionAdminUpdateCommand command) {
 		Auction auction = findByAuctionById(auctionId);
 		auction.update(command.startPrice(), command.currentPrice(), command.endTime(), command.isWon());
+		Product product = auction.getProduct();
+		productDomainService.saveProductToEs(product);
 	}
 
 	/**
@@ -59,6 +64,7 @@ public class AuctionAdminDomainService {
 	public void deleteAuction(Long auctionId) {
 		Auction auction = findByAuctionById(auctionId);
 		auction.delete(); // 소프트 딜리트: deleted=true, deletedAt=now
+		productDomainService.deleteProductFromEs(auctionId);
 	}
 
 	/**
@@ -72,6 +78,8 @@ public class AuctionAdminDomainService {
 	public void restoreAuction(Long auctionId) {
 		Auction auction = findByAuctionById(auctionId);
 		auction.restore();
+		Product product = auction.getProduct();
+		productDomainService.saveProductToEs(product);
 	}
 
 	/**
