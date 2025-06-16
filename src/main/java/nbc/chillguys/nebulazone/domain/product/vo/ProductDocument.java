@@ -13,7 +13,7 @@ import org.springframework.data.elasticsearch.annotations.Setting;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductImage;
 
-@Document(indexName = "product")
+@Document(indexName = "products")
 @Setting(settingPath = "/elastic/settings.json")
 public record ProductDocument(
 	@Id
