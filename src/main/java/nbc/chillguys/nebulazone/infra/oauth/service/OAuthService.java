@@ -24,7 +24,7 @@ import nbc.chillguys.nebulazone.infra.oauth.exception.OAuthErrorCode;
 import nbc.chillguys.nebulazone.infra.oauth.exception.OAuthException;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
 
-@Service
+// @Service
 @RequiredArgsConstructor
 public class OAuthService extends DefaultOAuth2UserService {
 	private final UserDomainService userDomainService;
@@ -67,31 +67,20 @@ public class OAuthService extends DefaultOAuth2UserService {
 	}
 
 	private User getOrCreateUser(OAuth2UserInfo oAuth2UserInfo) {
-		// User user;
+		User user;
 
-		if (userDomainService.isEmailExist(oAuth2UserInfo.getEmail())) {
-			return userDomainService.findActiveUserByEmailAndOAuthType(
-				oAuth2UserInfo.getEmail(),
-				oAuth2UserInfo.getOAuthType()
-			);
-		} else {
-			userDomainService.validNickname(oAuth2UserInfo.getNickname());
-
-			return userDomainService.createUser(UserSignUpCommand.from(oAuth2UserInfo));
+		try {
+			userDomainService.validEmail(oAuth2UserInfo.getEmail());
+		} catch (UserException e) {
+			return userDomainService.findActiveUserByEmailAndOAuthType(oAuth2UserInfo.getEmail(),
+				oAuth2UserInfo.getOAuthType());
 		}
 
-		// try {
-		// 	userDomainService.validEmail(oAuth2UserInfo.getEmail());
-		// } catch (UserException e) {
-		// 	return userDomainService.findActiveUserByEmailAndOAuthType(oAuth2UserInfo.getEmail(),
-		// 		oAuth2UserInfo.getOAuthType());
-		// }
-		//
-		// userDomainService.validNickname(oAuth2UserInfo.getNickname());
-		//
-		// user = userDomainService.createUser(UserSignUpCommand.from(oAuth2UserInfo));
-		//
-		// return user;
+		userDomainService.validNickname(oAuth2UserInfo.getNickname());
+
+		user = userDomainService.createUser(UserSignUpCommand.from(oAuth2UserInfo));
+
+		return user;
 	}
 
 }
