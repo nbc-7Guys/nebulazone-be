@@ -25,11 +25,11 @@ import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
-import nbc.chillguys.nebulazone.domain.products.entity.Product;
-import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
-import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
-import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
-import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
+import nbc.chillguys.nebulazone.domain.product.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.exception.ProductErrorCode;
+import nbc.chillguys.nebulazone.domain.product.exception.ProductException;
+import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -110,15 +110,11 @@ class AutoAuctionServiceUnitTest {
 			verify(bidDomainService).findHighBidByAuction(auctionId);
 			verify(autoAuctionDomainService).endAutoAuction(auctionId, wonBid);
 
-			// 트랜잭션 생성에 전달된 인자 검증까지!
-			verify(txDomainService).createTransaction(
-				argThat(cmd ->
-					cmd.user().equals(wonBid.getUser()) &&
-						cmd.product().equals(product) &&
-						cmd.txMethod().equals(product.getTxMethod().name()) &&
-						cmd.price().equals(wonBid.getPrice())
-				)
-			);
+			verify(txDomainService).createTransaction(argThat(
+				cmd -> cmd.user().equals(wonBid.getUser())
+					&& cmd.product().equals(product)
+					&& cmd.txMethod().equals(product.getTxMethod().name())
+					&& cmd.price().equals(wonBid.getPrice())));
 		}
 
 		@Test
@@ -147,14 +143,13 @@ class AutoAuctionServiceUnitTest {
 			Long auctionId = 999L;
 			Long productId = product.getId();
 
-			given(auctionDomainService.findActiveAuctionById(auctionId))
-				.willThrow(new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
+			given(auctionDomainService.findActiveAuctionById(auctionId)).willThrow(
+				new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 
 			// when & then
-			assertThatThrownBy(() -> autoAuctionService.autoEndAuctionAndCreateTransaction(auctionId, productId))
-				.isInstanceOf(AuctionException.class)
-				.extracting("errorCode")
-				.isEqualTo(AuctionErrorCode.AUCTION_NOT_FOUND);
+			assertThatThrownBy(
+				() -> autoAuctionService.autoEndAuctionAndCreateTransaction(auctionId, productId)).isInstanceOf(
+				AuctionException.class).extracting("errorCode").isEqualTo(AuctionErrorCode.AUCTION_NOT_FOUND);
 		}
 
 		@Test
@@ -165,14 +160,13 @@ class AutoAuctionServiceUnitTest {
 			Long productId = 999L;
 
 			given(auctionDomainService.findActiveAuctionById(auctionId)).willReturn(auction);
-			given(productDomainService.findActiveProductById(productId))
-				.willThrow(new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+			given(productDomainService.findActiveProductById(productId)).willThrow(
+				new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 			// when & then
-			assertThatThrownBy(() -> autoAuctionService.autoEndAuctionAndCreateTransaction(auctionId, productId))
-				.isInstanceOf(ProductException.class)
-				.extracting("errorCode")
-				.isEqualTo(ProductErrorCode.PRODUCT_NOT_FOUND);
+			assertThatThrownBy(
+				() -> autoAuctionService.autoEndAuctionAndCreateTransaction(auctionId, productId)).isInstanceOf(
+				ProductException.class).extracting("errorCode").isEqualTo(ProductErrorCode.PRODUCT_NOT_FOUND);
 		}
 	}
 
@@ -189,11 +183,7 @@ class AutoAuctionServiceUnitTest {
 	}
 
 	private Catalog createCatalog(Long id, String name, String description) {
-		Catalog catalog = Catalog.builder()
-			.name(name)
-			.description(description)
-			.type(CatalogType.CPU)
-			.build();
+		Catalog catalog = Catalog.builder().name(name).description(description).type(CatalogType.CPU).build();
 		ReflectionTestUtils.setField(catalog, "id", id);
 		return catalog;
 	}
@@ -211,8 +201,8 @@ class AutoAuctionServiceUnitTest {
 		return product;
 	}
 
-	private Auction createAuction(Long id, Product product, Long startPrice, Long currentPrice,
-		LocalDateTime endTime, boolean isDeleted, boolean isWon) {
+	private Auction createAuction(Long id, Product product, Long startPrice, Long currentPrice, LocalDateTime endTime,
+		boolean isDeleted, boolean isWon) {
 		Auction auction = Auction.builder()
 			.product(product)
 			.startPrice(startPrice)
@@ -226,11 +216,7 @@ class AutoAuctionServiceUnitTest {
 	}
 
 	private Bid createBid(Long id, Auction auction, User user, Long price) {
-		Bid bid = Bid.builder()
-			.auction(auction)
-			.user(user)
-			.price(price)
-			.build();
+		Bid bid = Bid.builder().auction(auction).user(user).price(price).build();
 		ReflectionTestUtils.setField(bid, "id", id);
 		return bid;
 	}

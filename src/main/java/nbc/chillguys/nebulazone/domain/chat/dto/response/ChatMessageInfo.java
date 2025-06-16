@@ -2,7 +2,6 @@ package nbc.chillguys.nebulazone.domain.chat.dto.response;
 
 import java.time.LocalDateTime;
 
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.chat.entity.MessageType;
 import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
 

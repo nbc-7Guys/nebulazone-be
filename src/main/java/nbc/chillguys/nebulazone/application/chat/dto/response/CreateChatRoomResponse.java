@@ -1,7 +1,7 @@
 package nbc.chillguys.nebulazone.application.chat.dto.response;
 
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
-import nbc.chillguys.nebulazone.domain.products.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 public record CreateChatRoomResponse(

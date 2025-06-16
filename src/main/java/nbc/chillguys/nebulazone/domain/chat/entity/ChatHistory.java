@@ -21,8 +21,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
-import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Entity
 @Table(name = "chat_histories")
@@ -58,7 +56,8 @@ public class ChatHistory {
 	private LocalDateTime createdAt;
 
 	@Builder
-	public ChatHistory(ChatRoom chatRoom, Long userId, String message, LocalDateTime sendtime, MessageType messageType) {
+	public ChatHistory(ChatRoom chatRoom, Long userId, String message, LocalDateTime sendtime,
+		MessageType messageType) {
 		this.chatRoom = chatRoom;
 		this.userId = userId;
 		this.message = message;

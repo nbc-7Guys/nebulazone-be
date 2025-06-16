@@ -20,12 +20,11 @@ import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomHistoryRepository;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomRepository;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomUserRepository;
-import nbc.chillguys.nebulazone.domain.products.entity.Product;
-import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
-import nbc.chillguys.nebulazone.domain.products.exception.ProductErrorCode;
-import nbc.chillguys.nebulazone.domain.products.exception.ProductException;
+import nbc.chillguys.nebulazone.domain.product.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.exception.ProductErrorCode;
+import nbc.chillguys.nebulazone.domain.product.exception.ProductException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
 
 /**
  * The type Chat service.

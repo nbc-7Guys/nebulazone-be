@@ -20,8 +20,8 @@ public class ChatMessageRedisService {
 	private static final String CHAT_MESSAGE_KEY_PREFIX = "chat:message:";
 
 	/**
-     * 채팅 메시지 Redis에 저장
-     */
+	 * 채팅 메시지 Redis에 저장
+	 */
 	public void saveMessageToRedis(Long roomId, ChatMessageInfo messageInfo) {
 		try {
 			String key = CHAT_MESSAGE_KEY_PREFIX + roomId;
@@ -32,23 +32,24 @@ public class ChatMessageRedisService {
 	}
 
 	/**
-     * 채팅방 메시지 전체 조회
-     */
-    public List<ChatMessageInfo> getMessagesFromRedis(Long roomId) {
-        String key = CHAT_MESSAGE_KEY_PREFIX + roomId;
+	 * 채팅방 메시지 전체 조회
+	 */
+	public List<ChatMessageInfo> getMessagesFromRedis(Long roomId) {
+		String key = CHAT_MESSAGE_KEY_PREFIX + roomId;
 
 		List<Object> raw = Optional.ofNullable(redisTemplate.opsForList().range(key, 0, -1)).orElse(List.of());
 
 		return raw.stream()
-			.map(o -> objectMapper.convertValue(o, ChatMessageInfo.class)) // ObjectMapper.convertValue를 통해 ChatMessageInfo객체로 변환
+			.map(o -> objectMapper.convertValue(o,
+				ChatMessageInfo.class)) // ObjectMapper.convertValue를 통해 ChatMessageInfo객체로 변환
 			.toList();
-    }
+	}
 
 	/**
-     * 채팅방 메시지 삭제
-     */
-    public void deleteMessagesInRedis(Long roomId) {
-        redisTemplate.delete(CHAT_MESSAGE_KEY_PREFIX + roomId);
-    }
+	 * 채팅방 메시지 삭제
+	 */
+	public void deleteMessagesInRedis(Long roomId) {
+		redisTemplate.delete(CHAT_MESSAGE_KEY_PREFIX + roomId);
+	}
 
 }

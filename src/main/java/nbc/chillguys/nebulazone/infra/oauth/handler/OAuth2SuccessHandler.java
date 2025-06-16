@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 		oAuth2User.attributes().get("authorities");
 
 		response.setHeader("Authorization", "Bearer " + oAuth2User.accessToken());
-		response.setHeader("Refresh-Token", "Bearer " + oAuth2User.refreshToken());
+		Cookie cookie = new Cookie("Refresh_Token", oAuth2User.refreshToken());
+		cookie.setHttpOnly(true);
+		// https 통신이 아니기 때문에 임시 주석
+		// cookie.setSecure(true);
+		cookie.setPath("/");
+		cookie.setMaxAge(2 * 24 * 60 * 60);
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		response.setStatus(HttpServletResponse.SC_OK);

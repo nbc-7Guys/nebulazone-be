@@ -1,6 +1,5 @@
 package nbc.chillguys.nebulazone.domain.chat.repository;
 
-
 import static nbc.chillguys.nebulazone.domain.chat.entity.QChatHistory.*;
 
 import java.util.List;

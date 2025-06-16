@@ -16,7 +16,8 @@ public class CommentWithUserInfo {
 	private final LocalDateTime modifiedAt;
 	private final List<CommentWithUserInfo> children;
 
-	public CommentWithUserInfo(Long commentId, String content, String author, Long parentId, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+	public CommentWithUserInfo(Long commentId, String content, String author,
+		Long parentId, LocalDateTime createdAt, LocalDateTime modifiedAt) {
 		this.commentId = commentId;
 		this.content = content;
 		this.author = author;

@@ -2,8 +2,8 @@ package nbc.chillguys.nebulazone.domain.auction.dto;
 
 import java.time.LocalDateTime;
 
-import nbc.chillguys.nebulazone.domain.products.entity.Product;
-import nbc.chillguys.nebulazone.domain.products.entity.ProductEndTime;
+import nbc.chillguys.nebulazone.domain.product.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 
 public record AuctionCreateCommand(
 	Product product,
