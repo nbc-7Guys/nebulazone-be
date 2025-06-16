@@ -19,8 +19,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.oauth.handler.OAuth2SuccessHandler;
 import nbc.chillguys.nebulazone.infra.oauth.service.OAuthService;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
@@ -29,37 +27,18 @@ import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
-	// private final CustomAuthenticationEntryPoint entryPoint;
-	// private final JwtAuthenticationFilter jwtAuthenticationFilter;
-	// private final OAuthService oAuthService;
+	private final CustomAuthenticationEntryPoint entryPoint;
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final OAuthService oAuthService;
 	private final OAuth2SuccessHandler oAuth2SuccessHandler;
-	private final UserDomainService userDomainService;
-	private final JwtUtil jwtUtil;
-	private final ObjectMapper objectMapper;
 
-	// public SecurityConfig(ObjectMapper objectMapper, JwtUtil jwtUtil, OAuthService oAuthService,
-	// 	OAuth2SuccessHandler oAuth2SuccessHandler) {
-	// 	this.entryPoint = new CustomAuthenticationEntryPoint(objectMapper);
-	// 	this.jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, entryPoint);
-	// 	this.oAuthService = oAuthService;
-	// 	this.oAuth2SuccessHandler = oAuth2SuccessHandler;
-	// }
-
-	@Bean
-	public OAuthService oAuthService() {
-		return new OAuthService(userDomainService, jwtUtil, objectMapper);
-	}
-
-	@Bean
-	public CustomAuthenticationEntryPoint customAuthenticationEntryPoint() {
-		return new CustomAuthenticationEntryPoint(objectMapper);
-	}
-
-	@Bean
-	public JwtAuthenticationFilter jwtAuthenticationFilter() {
-		return new JwtAuthenticationFilter(jwtUtil, customAuthenticationEntryPoint());
+	public SecurityConfig(ObjectMapper objectMapper, JwtUtil jwtUtil, OAuthService oAuthService,
+		OAuth2SuccessHandler oAuth2SuccessHandler) {
+		this.entryPoint = new CustomAuthenticationEntryPoint(objectMapper);
+		this.jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, entryPoint);
+		this.oAuthService = oAuthService;
+		this.oAuth2SuccessHandler = oAuth2SuccessHandler;
 	}
 
 	@Bean
@@ -101,11 +80,11 @@ public class SecurityConfig {
 				.anyRequest().authenticated())
 			.oauth2Login(oauth2 -> oauth2
 				.userInfoEndpoint(userInfo -> userInfo
-					.userService(oAuthService()))
+					.userService(oAuthService))
 				.successHandler(oAuth2SuccessHandler))
 			.exceptionHandling(exception ->
-				exception.authenticationEntryPoint(customAuthenticationEntryPoint()))
-			.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+				exception.authenticationEntryPoint(entryPoint))
+			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.build();
 	}
 
@@ -119,7 +98,8 @@ public class SecurityConfig {
 			"http://localhost:5173",    // 최종 배포 후 삭제
 			"http://34.10.98.247:8080",    // 최종 배포 후 삭제
 			"http://34.10.98.247:5173",    // 최종 배포 후 삭제
-			"https://nebulazone-bz7n3o4r7-uguls-projects.vercel.app/"
+			"https://nebulazone-bz7n3o4r7-uguls-projects.vercel.app/",
+			"https://nebulazone-fe.vercel.app/"
 		));
 		configuration.setAllowedMethods(List.of(
 			"GET", "POST", "PUT", "DELETE", "OPTIONS"
