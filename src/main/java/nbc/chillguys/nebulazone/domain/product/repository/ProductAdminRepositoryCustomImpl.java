@@ -51,6 +51,7 @@ public class ProductAdminRepositoryCustomImpl implements ProductAdminRepositoryC
 			.selectFrom(product)
 			.leftJoin(product.seller).fetchJoin()
 			.leftJoin(product.catalog).fetchJoin()
+			.leftJoin(product.productImages).fetchJoin()
 			.where(builder)
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
@@ -74,6 +75,7 @@ public class ProductAdminRepositoryCustomImpl implements ProductAdminRepositoryC
 			.selectFrom(product)
 			.leftJoin(product.seller).fetchJoin()
 			.leftJoin(product.catalog).fetchJoin()
+			.leftJoin(product.productImages).fetchJoin()
 			.where(product.id.eq(productId))
 			.fetchOne();
 		return Optional.ofNullable(result);
