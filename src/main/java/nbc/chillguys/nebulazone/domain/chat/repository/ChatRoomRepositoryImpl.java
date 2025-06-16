@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.domain.chat.repository;
 
+import static nbc.chillguys.nebulazone.domain.catalog.entity.QCatalog.*;
 import static nbc.chillguys.nebulazone.domain.chat.entity.QChatRoom.*;
 import static nbc.chillguys.nebulazone.domain.chat.entity.QChatRoomUser.*;
 import static nbc.chillguys.nebulazone.domain.product.entity.QProduct.*;
@@ -11,6 +12,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.domain.catalog.entity.QCatalog;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 
 @RequiredArgsConstructor
@@ -24,12 +26,17 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 				ChatRoomInfo.class,
 				product.name,
 				user.nickname,
-				chatRoom.id
+				chatRoom.id,
+				product.catalog.id,
+				product.id,
+				product.price,
+				product.isSold
 			))
 			.from(chatRoom)
 			.join(chatRoomUser).on(chatRoomUser.chatRoom.eq(chatRoom))
 			.join(chatRoom.product, product)
 			.join(product.seller, user)
+			.join(product.catalog, catalog)
 			.where(chatRoomUser.user.id.eq(userId))
 			.fetch();
 	}
