@@ -1,6 +1,6 @@
 package nbc.chillguys.nebulazone.domain.transaction.dto;
 
-import nbc.chillguys.nebulazone.domain.products.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 public record TransactionCreateCommand(

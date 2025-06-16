@@ -18,11 +18,10 @@ import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
-import nbc.chillguys.nebulazone.domain.products.entity.Product;
-import nbc.chillguys.nebulazone.domain.products.service.ProductDomainService;
+import nbc.chillguys.nebulazone.domain.product.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
-import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
 
 @Slf4j
 @Service

@@ -11,7 +11,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.products.entity.QProduct;
+import nbc.chillguys.nebulazone.domain.product.entity.QProduct;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.QTransaction;
 import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
