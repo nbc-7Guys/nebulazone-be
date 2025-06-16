@@ -61,7 +61,7 @@ public class PointHistoryAdminRepositoryCustomImpl implements PointHistoryAdminR
 				user.nickname
 			))
 			.from(pointHistory)
-			.join(pointHistory.user, user)
+			.leftJoin(pointHistory.user, user).fetchJoin()
 			.where(builder)
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
@@ -71,7 +71,7 @@ public class PointHistoryAdminRepositoryCustomImpl implements PointHistoryAdminR
 		Long total = queryFactory
 			.select(pointHistory.count())
 			.from(pointHistory)
-			.join(pointHistory.user, user)
+			.leftJoin(pointHistory.user, user)
 			.where(builder)
 			.fetchOne();
 
