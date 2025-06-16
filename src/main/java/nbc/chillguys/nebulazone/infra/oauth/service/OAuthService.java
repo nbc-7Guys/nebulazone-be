@@ -24,7 +24,7 @@ import nbc.chillguys.nebulazone.infra.oauth.exception.OAuthErrorCode;
 import nbc.chillguys.nebulazone.infra.oauth.exception.OAuthException;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
 
-// @Service
+@Service
 @RequiredArgsConstructor
 public class OAuthService extends DefaultOAuth2UserService {
 	private final UserDomainService userDomainService;
