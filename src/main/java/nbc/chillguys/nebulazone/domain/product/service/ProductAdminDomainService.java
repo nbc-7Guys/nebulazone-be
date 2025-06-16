@@ -19,6 +19,7 @@ import nbc.chillguys.nebulazone.domain.product.repository.ProductRepository;
 public class ProductAdminDomainService {
 
 	private final ProductRepository productRepository;
+	private final ProductDomainService productDomainService;
 
 	@Transactional(readOnly = true)
 	public Page<ProductAdminInfo> findProducts(ProductAdminSearchQueryCommand command, Pageable pageable) {
@@ -48,17 +49,20 @@ public class ProductAdminDomainService {
 		} else if (request.price() != null && !request.price().equals(product.getPrice())) {
 			product.changePrice(request.price());
 		}
+		productDomainService.saveProductToEs(product);
 	}
 
 	@Transactional
 	public void deleteProduct(Long productId) {
 		Product product = findByIdWithJoin(productId);
 		product.delete();
+		productDomainService.deleteProductFromEs(productId);
 	}
 
 	public void restoreProduct(Long productId) {
 		Product product = findByIdWithJoin(productId);
 		product.restore();
+		productDomainService.saveProductToEs(product);
 	}
 
 	public Product findByIdWithJoin(Long productId) {
