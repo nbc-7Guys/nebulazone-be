@@ -403,6 +403,7 @@ class BidServiceUnitTest {
 		User user = User.builder()
 			.email(email)
 			.nickname(nickname)
+			.point(100000000L)
 			.oAuthType(OAuthType.DOMAIN)
 			.roles(Set.of(UserRole.ROLE_USER))
 			.build();
