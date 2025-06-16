@@ -33,6 +33,7 @@ public class BidService {
 		Auction lockAuction = auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId);
 
 		User user = userDomainService.findActiveUserById(authUser.getId());
+		user.usePoint(request.price());
 
 		Bid createBid = bidDomainService.createBid(lockAuction, user, request.price());
 		return CreateBidResponse.from(createBid);
