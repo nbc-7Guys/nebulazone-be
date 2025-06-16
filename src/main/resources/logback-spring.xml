@@ -40,9 +40,9 @@
         </filter>
     </appender>
 
-    <logger name="org.springframework" level="info"/>
+    <logger name="org.springframework" level="warn"/>
     <logger name="org.hibernate" level="warn"/>
-    <logger name="nbc.chillguys.nebulazone" level="info"/>
+    <logger name="nbc.chillguys.nebulazone" level="warn"/>
 
     <root level="warn">
         <appender-ref ref="CONSOLE"/>
