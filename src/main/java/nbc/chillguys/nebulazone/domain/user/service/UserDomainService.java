@@ -201,4 +201,16 @@ public class UserDomainService {
 
 		return user;
 	}
+
+	/**
+	 * 전화번호 검증
+	 * @param phone 전화번호
+	 * @throws UserException 중복된 전화번호 존재할 시 예외 발생
+	 * @author 이승현
+	 */
+	public void validPhone(String phone) {
+		if (userRepository.existsByPhone(phone)) {
+			throw new UserException(UserErrorCode.ALREADY_EXISTS_PHONE);
+		}
+	}
 }

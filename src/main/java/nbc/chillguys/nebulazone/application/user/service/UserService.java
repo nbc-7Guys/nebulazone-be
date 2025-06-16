@@ -30,6 +30,8 @@ public class UserService {
 
 		userDomainService.validNickname(signUpUserRequest.nickname());
 
+		userDomainService.validPhone(signUpUserRequest.phone());
+
 		User user = userDomainService.createUser(UserSignUpCommand.from(signUpUserRequest));
 
 		return UserResponse.from(user);
