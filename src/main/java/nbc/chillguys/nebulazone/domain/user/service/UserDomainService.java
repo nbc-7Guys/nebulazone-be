@@ -100,6 +100,10 @@ public class UserDomainService {
 		}
 	}
 
+	public boolean isEmailExist(String email) {
+		return userRepository.existsByEmail(email);
+	}
+
 	/**
 	 * 닉네임 검증
 	 * @param nickname 닉네임

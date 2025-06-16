@@ -67,20 +67,31 @@ public class OAuthService extends DefaultOAuth2UserService {
 	}
 
 	private User getOrCreateUser(OAuth2UserInfo oAuth2UserInfo) {
-		User user;
+		// User user;
 
-		try {
-			userDomainService.validEmail(oAuth2UserInfo.getEmail());
-		} catch (UserException e) {
-			return userDomainService.findActiveUserByEmailAndOAuthType(oAuth2UserInfo.getEmail(),
-				oAuth2UserInfo.getOAuthType());
+		if (userDomainService.isEmailExist(oAuth2UserInfo.getEmail())) {
+			return userDomainService.findActiveUserByEmailAndOAuthType(
+				oAuth2UserInfo.getEmail(),
+				oAuth2UserInfo.getOAuthType()
+			);
+		} else {
+			userDomainService.validNickname(oAuth2UserInfo.getNickname());
+
+			return userDomainService.createUser(UserSignUpCommand.from(oAuth2UserInfo));
 		}
 
-		userDomainService.validNickname(oAuth2UserInfo.getNickname());
-
-		user = userDomainService.createUser(UserSignUpCommand.from(oAuth2UserInfo));
-
-		return user;
+		// try {
+		// 	userDomainService.validEmail(oAuth2UserInfo.getEmail());
+		// } catch (UserException e) {
+		// 	return userDomainService.findActiveUserByEmailAndOAuthType(oAuth2UserInfo.getEmail(),
+		// 		oAuth2UserInfo.getOAuthType());
+		// }
+		//
+		// userDomainService.validNickname(oAuth2UserInfo.getNickname());
+		//
+		// user = userDomainService.createUser(UserSignUpCommand.from(oAuth2UserInfo));
+		//
+		// return user;
 	}
 
 }

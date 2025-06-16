@@ -92,16 +92,23 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(List.of(
-			"*"
+			"http://127.0.0.1:8080",    // 최종 배포 후 삭제
+			"http://localhost:8080",    // 최종 배포 후 삭제
+			"http://127.0.0.1:5173",    // 최종 배포 후 삭제
+			"http://localhost:5173",    // 최종 배포 후 삭제
+			"http://34.10.98.247:8080",    // 최종 배포 후 삭제
+			"http://34.10.98.247:5173"    // 최종 배포 후 삭제
 		));
 		configuration.setAllowedMethods(List.of(
 			"GET", "POST", "PUT", "DELETE", "OPTIONS"
 		));
 		configuration.setAllowedHeaders(List.of(
-			"*"
+			"Authorization",
+			"Content-Type",
+			"X-Requested-With"
 		));
 		configuration.setExposedHeaders(List.of(
-			"*"
+			"X-Total-Count"
 		));
 		configuration.setAllowCredentials(true);
 		configuration.setMaxAge(3600L);
