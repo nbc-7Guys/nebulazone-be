@@ -33,17 +33,17 @@ public class PointHistoryAdminController {
 		@RequestParam(value = "nickname", required = false) String nickname,
 		@RequestParam(value = "type", required = false) PointHistoryType type,
 		@RequestParam(value = "status", required = false) PointHistoryStatus status,
-		@RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-		@RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+		@RequestParam(value = "startDate", required = false)
+		@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+		@RequestParam(value = "endDate", required = false)
+		@DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
 		@RequestParam(value = "page", defaultValue = "1") int page,
-		@RequestParam(value = "size", defaultValue = "20") int size
-	) {
-		PointHistoryAdminRequest request = new PointHistoryAdminRequest(
-			email, nickname, type, status, startDate, endDate
-		);
+		@RequestParam(value = "size", defaultValue = "20") int size) {
+		PointHistoryAdminRequest request = new PointHistoryAdminRequest(email, nickname, type, status, startDate,
+			endDate);
 
-		CommonPageResponse<AdminPointHistoryResponse> response =
-			pointHistoryAdminService.searchAdminPointHistories(request, PageRequest.of(page - 1, size));
+		CommonPageResponse<AdminPointHistoryResponse> response = pointHistoryAdminService.searchAdminPointHistories(
+			request, PageRequest.of(page - 1, size));
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
