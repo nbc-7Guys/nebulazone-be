@@ -111,8 +111,10 @@ class AutoAuctionServiceUnitTest {
 			verify(autoAuctionDomainService).endAutoAuction(auctionId, wonBid);
 
 			verify(txDomainService).createTransaction(argThat(
-				cmd -> cmd.user().equals(wonBid.getUser()) && cmd.product().equals(product) && cmd.txMethod()
-					.equals(product.getTxMethod().name()) && cmd.price().equals(wonBid.getPrice())));
+				cmd -> cmd.user().equals(wonBid.getUser())
+					&& cmd.product().equals(product)
+					&& cmd.txMethod().equals(product.getTxMethod().name())
+					&& cmd.price().equals(wonBid.getPrice())));
 		}
 
 		@Test
