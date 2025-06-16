@@ -183,4 +183,16 @@ public class Product extends BaseEntity {
 		this.price = price;
 	}
 
+	public Long getCatalogId() {
+		return catalog.getId();
+	}
+
+	public Long getSellerId() {
+		return seller.getId();
+	}
+
+	public String getSellerNickname() {
+		return seller.getNickname();
+	}
+
 }

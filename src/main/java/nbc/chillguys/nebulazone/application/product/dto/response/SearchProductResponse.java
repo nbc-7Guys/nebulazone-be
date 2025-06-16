@@ -10,6 +10,9 @@ import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
 public record SearchProductResponse(
 	Long productId,
 	String productName,
+	Long categoryId,
+	Long sellerId,
+	String sellerNickname,
 	Long productPrice,
 	String txMethod,
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -19,7 +22,10 @@ public record SearchProductResponse(
 	public static SearchProductResponse from(ProductDocument productDocument) {
 		return new SearchProductResponse(
 			productDocument.productId(),
-			productDocument.name(),
+			productDocument.productName(),
+			productDocument.catalogId(),
+			productDocument.sellerId(),
+			productDocument.sellerNickname(),
 			productDocument.price(),
 			productDocument.txMethod(),
 			productDocument.createdAt(),

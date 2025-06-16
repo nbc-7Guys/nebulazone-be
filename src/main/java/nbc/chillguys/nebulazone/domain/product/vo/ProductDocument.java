@@ -21,13 +21,22 @@ public record ProductDocument(
 	Long productId,
 
 	@Field(type = FieldType.Text, analyzer = "korean_english")
-	String name,
+	String productName,
 
 	@Field(type = FieldType.Long)
 	Long price,
 
 	@Field(type = FieldType.Keyword)
 	String txMethod,
+
+	@Field(type = FieldType.Long)
+	Long catalogId,
+
+	@Field(type = FieldType.Long)
+	Long sellerId,
+
+	@Field(type = FieldType.Keyword)
+	String sellerNickname,
 
 	@Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
 	LocalDateTime createdAt,
@@ -41,6 +50,9 @@ public record ProductDocument(
 			product.getName(),
 			product.getPrice(),
 			product.getTxMethod().name(),
+			product.getCatalogId(),
+			product.getSellerId(),
+			product.getSellerNickname(),
 			product.getCreatedAt(),
 			product.getProductImages().stream()
 				.map(ProductImage::getUrl)

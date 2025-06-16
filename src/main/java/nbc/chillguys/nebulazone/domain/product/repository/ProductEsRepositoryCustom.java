@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
 
 public interface ProductEsRepositoryCustom {
-	Page<ProductDocument> searchProduct(String productName, String txMethod, Long priceFrom, Long priceTo,
+	Page<ProductDocument> searchProduct(String productName, String sellerNickname, String txMethod, Long priceFrom,
+		Long priceTo,
 		Pageable pageable);
 }

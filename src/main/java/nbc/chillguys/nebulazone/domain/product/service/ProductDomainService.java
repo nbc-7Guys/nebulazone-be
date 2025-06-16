@@ -160,8 +160,8 @@ public class ProductDomainService {
 	public Page<ProductDocument> searchProduct(ProductSearchCommand command) {
 		Pageable pageable = PageRequest.of(command.page() - 1, command.size());
 
-		return productEsRepository.searchProduct(command.productName(), command.txMethod(), command.priceFrom(),
-			command.priceTo(), pageable);
+		return productEsRepository.searchProduct(command.productName(), command.sellerNickname(), command.txMethod(),
+			command.priceFrom(), command.priceTo(), pageable);
 	}
 
 	/**
