@@ -25,13 +25,14 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import nbc.chillguys.nebulazone.application.products.dto.request.CreateProductRequest;
-import nbc.chillguys.nebulazone.application.products.dto.response.ProductResponse;
-import nbc.chillguys.nebulazone.application.products.dto.response.SearchProductResponse;
-import nbc.chillguys.nebulazone.application.products.service.ProductService;
+import nbc.chillguys.nebulazone.application.product.controller.ProductController;
+import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
+import nbc.chillguys.nebulazone.application.product.dto.response.ProductResponse;
+import nbc.chillguys.nebulazone.application.product.dto.response.SearchProductResponse;
+import nbc.chillguys.nebulazone.application.product.service.ProductService;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
-import nbc.chillguys.nebulazone.domain.products.entity.ProductEndTime;
-import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
+import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import(TestSecurityConfig.class)

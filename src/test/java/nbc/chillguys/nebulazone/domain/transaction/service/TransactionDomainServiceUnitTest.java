@@ -22,8 +22,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
-import nbc.chillguys.nebulazone.domain.products.entity.Product;
-import nbc.chillguys.nebulazone.domain.products.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindDetailInfo;

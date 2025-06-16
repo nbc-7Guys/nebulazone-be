@@ -12,10 +12,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoomUser;
-import nbc.chillguys.nebulazone.domain.user.entity.QUser;
 
 @RequiredArgsConstructor
-public class ChatRoomUserRepositoryImpl implements ChatRoomUserRepositoryCustom{
+public class ChatRoomUserRepositoryImpl implements ChatRoomUserRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
@@ -33,12 +32,12 @@ public class ChatRoomUserRepositoryImpl implements ChatRoomUserRepositoryCustom{
 	public Optional<ChatRoomUser> findByIdUserIdAndIdChatRoomId(Long userId, Long chatRoomId) {
 		return Optional.ofNullable(
 			jpaQueryFactory
-			.selectFrom(chatRoomUser)
-			.where(
-				chatRoomUser.id.userId.eq(userId),
-				chatRoomUser.id.chatRoomId.eq(chatRoomId)
-			)
-			.fetchOne()
+				.selectFrom(chatRoomUser)
+				.where(
+					chatRoomUser.id.userId.eq(userId),
+					chatRoomUser.id.chatRoomId.eq(chatRoomId)
+				)
+				.fetchOne()
 		);
 	}
 

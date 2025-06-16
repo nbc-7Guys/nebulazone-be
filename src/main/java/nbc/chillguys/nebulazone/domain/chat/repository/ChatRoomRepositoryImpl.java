@@ -12,7 +12,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
-import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 
 @RequiredArgsConstructor
 public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
