@@ -49,7 +49,6 @@ class PointHistoryServiceTest {
 			Long userId = 1L;
 			User mockUser = mock(User.class);
 			PointRequest req = new PointRequest(1000, PointHistoryType.CHARGE, "123-456-789");
-			PointHistoryCommand command = PointHistoryCommand.of(req, mockUser);
 			PointHistory mockPointHistory = mock(PointHistory.class);
 
 			given(userDomainService.findActiveUserById(userId)).willReturn(mockUser);
@@ -114,7 +113,7 @@ class PointHistoryServiceTest {
 
 			// then
 			assertThat(result).hasSize(1);
-			assertThat(result.get(0).price()).isEqualTo(1000);
+			assertThat(result.getFirst().price()).isEqualTo(1000);
 		}
 
 		@Test
@@ -122,7 +121,8 @@ class PointHistoryServiceTest {
 		void success_findMyPointHistories() {
 			// given
 			Long userId = 1L;
-			int page = 1, size = 2;
+			int page = 1;
+			int size = 2;
 			PointHistory point1 = mock(PointHistory.class);
 			PointHistory point2 = mock(PointHistory.class);
 			given(point1.getPrice()).willReturn(1000);
