@@ -7,7 +7,6 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -33,7 +32,6 @@ public class OAuthService extends DefaultOAuth2UserService {
 	private final ObjectMapper objectMapper;
 
 	@Override
-	@Transactional
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 		String registrationId = userRequest.getClientRegistration().getRegistrationId();
 		OAuth2User oAuth2User = super.loadUser(userRequest);
@@ -68,7 +66,7 @@ public class OAuthService extends DefaultOAuth2UserService {
 			.build();
 	}
 
-	private User getOrCreateUser(OAuth2UserInfo oAuth2UserInfo) {
+	public User getOrCreateUser(OAuth2UserInfo oAuth2UserInfo) {
 		User user;
 
 		try {
