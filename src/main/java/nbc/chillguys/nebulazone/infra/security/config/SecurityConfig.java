@@ -97,7 +97,8 @@ public class SecurityConfig {
 			"http://127.0.0.1:5173",    // 최종 배포 후 삭제
 			"http://localhost:5173",    // 최종 배포 후 삭제
 			"http://34.10.98.247:8080",    // 최종 배포 후 삭제
-			"http://34.10.98.247:5173"    // 최종 배포 후 삭제
+			"http://34.10.98.247:5173",    // 최종 배포 후 삭제
+			"https://nebulazone-bz7n3o4r7-uguls-projects.vercel.app/"
 		));
 		configuration.setAllowedMethods(List.of(
 			"GET", "POST", "PUT", "DELETE", "OPTIONS"
