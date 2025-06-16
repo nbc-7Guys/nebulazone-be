@@ -42,6 +42,9 @@ public class ProductController {
 
 	private final ProductService productService;
 
+	@io.swagger.v3.oas.annotations.parameters.RequestBody(
+		content = @Content(encoding = @Encoding(name = "product", contentType = MediaType.APPLICATION_JSON_VALUE))
+	)
 	@PostMapping(value = "/catalogs/{catalogId}/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ProductResponse> createProduct(
 		@AuthenticationPrincipal AuthUser authUser,

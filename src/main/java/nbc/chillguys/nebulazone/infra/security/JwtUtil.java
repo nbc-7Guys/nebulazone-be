@@ -23,6 +23,8 @@ import nbc.chillguys.nebulazone.infra.security.constant.JwtConstants;
 import nbc.chillguys.nebulazone.infra.security.constant.TokenExpiredConstant;
 import nbc.chillguys.nebulazone.infra.security.exception.JwtTokenErrorCode;
 import nbc.chillguys.nebulazone.infra.security.exception.JwtTokenException;
+import nbc.chillguys.nebulazone.infra.security.filter.exception.JwtFilterErrorCode;
+import nbc.chillguys.nebulazone.infra.security.filter.exception.JwtFilterException;
 
 @Component
 public class JwtUtil {
@@ -99,15 +101,15 @@ public class JwtUtil {
 				.parseSignedClaims(token)
 				.getPayload();
 		} catch (ExpiredJwtException expiredJwtException) {
-			throw new JwtTokenException(JwtTokenErrorCode.EXPIRED_JWT_TOKEN);
+			throw new JwtFilterException(JwtFilterErrorCode.EXPIRED_JWT_TOKEN);
 		} catch (MalformedJwtException malformedJwtException) {
-			throw new JwtTokenException(JwtTokenErrorCode.NOT_VALID_JWT_TOKEN);
+			throw new JwtFilterException(JwtFilterErrorCode.NOT_VALID_JWT_TOKEN);
 		} catch (SignatureException signatureException) {
-			throw new JwtTokenException(JwtTokenErrorCode.NOT_VALID_SIGNATURE);
+			throw new JwtFilterException(JwtFilterErrorCode.NOT_VALID_SIGNATURE);
 		} catch (UnsupportedJwtException unsupportedJwtException) {
-			throw new JwtTokenException(JwtTokenErrorCode.NOT_VALID_CONTENT);
+			throw new JwtFilterException(JwtFilterErrorCode.NOT_VALID_CONTENT);
 		} catch (Exception e) {
-			throw new JwtTokenException(JwtTokenErrorCode.BAD_REQUEST);
+			throw new JwtFilterException(JwtFilterErrorCode.BAD_REQUEST);
 		}
 	}
 }
