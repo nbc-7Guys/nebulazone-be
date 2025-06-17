@@ -13,11 +13,10 @@ import com.nimbusds.jose.util.StandardCharset;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.common.response.CommonResponse;
+import nbc.chillguys.nebulazone.common.util.LogUtils;
 import nbc.chillguys.nebulazone.infra.security.filter.exception.JwtFilterException;
 
-@Slf4j
 @RequiredArgsConstructor
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 	private final ObjectMapper objectMapper;
@@ -26,7 +25,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 		AuthenticationException authException) throws IOException {
 		if (authException instanceof JwtFilterException jwtFilterException) {
-			log.error("exception : {}", jwtFilterException.getMessage(), jwtFilterException);
+			LogUtils.logWarn(jwtFilterException);
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 			response.setCharacterEncoding(StandardCharset.UTF_8.name());
@@ -36,7 +35,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 			return;
 		}
 
-		log.error("exception : {}", authException.getMessage(), authException);
+		LogUtils.logWarn(authException);
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setCharacterEncoding(StandardCharset.UTF_8.name());

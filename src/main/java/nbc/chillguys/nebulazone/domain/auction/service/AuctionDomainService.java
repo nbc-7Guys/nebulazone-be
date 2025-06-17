@@ -100,6 +100,10 @@ public class AuctionDomainService {
 			throw new AuctionException(AuctionErrorCode.ALREADY_DELETED_AUCTION);
 		}
 
+		if (findAuction.isWon()) {
+			throw new AuctionException(AuctionErrorCode.ALREADY_WON_AUCTION);
+		}
+
 		if (!findAuction.isAuctionOwner(loginUser)) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
 		}

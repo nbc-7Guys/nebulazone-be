@@ -23,6 +23,7 @@ import nbc.chillguys.nebulazone.infra.oauth.handler.OAuth2SuccessHandler;
 import nbc.chillguys.nebulazone.infra.oauth.service.OAuthService;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
 import nbc.chillguys.nebulazone.infra.security.filter.CustomAuthenticationEntryPoint;
+import nbc.chillguys.nebulazone.infra.security.filter.ExceptionLoggingFilter;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
 
 @Configuration
@@ -32,13 +33,15 @@ public class SecurityConfig {
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final OAuthService oAuthService;
 	private final OAuth2SuccessHandler oAuth2SuccessHandler;
+	private final ExceptionLoggingFilter exceptionLoggingFilter;
 
 	public SecurityConfig(ObjectMapper objectMapper, JwtUtil jwtUtil, OAuthService oAuthService,
-		OAuth2SuccessHandler oAuth2SuccessHandler) {
+		OAuth2SuccessHandler oAuth2SuccessHandler, ExceptionLoggingFilter exceptionLoggingFilter) {
 		this.entryPoint = new CustomAuthenticationEntryPoint(objectMapper);
 		this.jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, entryPoint);
 		this.oAuthService = oAuthService;
 		this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+		this.exceptionLoggingFilter = exceptionLoggingFilter;
 	}
 
 	@Bean
@@ -84,6 +87,7 @@ public class SecurityConfig {
 				.successHandler(oAuth2SuccessHandler))
 			.exceptionHandling(exception ->
 				exception.authenticationEntryPoint(entryPoint))
+			.addFilterBefore(exceptionLoggingFilter, UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.build();
 	}
@@ -96,10 +100,12 @@ public class SecurityConfig {
 			"http://localhost:8080",    // 최종 배포 후 삭제
 			"http://127.0.0.1:5173",    // 최종 배포 후 삭제
 			"http://localhost:5173",    // 최종 배포 후 삭제
-			"http://34.10.98.247:8080",    // 최종 배포 후 삭제
-			"http://34.10.98.247:5173",    // 최종 배포 후 삭제
-			"https://nebulazone-bz7n3o4r7-uguls-projects.vercel.app/",
-			"https://nebulazone-fe.vercel.app/"
+			"http://34.64.102.202:8080",    // 최종 배포 후 삭제
+			"http://34.64.102.202:5173",    // 최종 배포 후 삭제
+			"https://nebulazone-bz7n3o4r7-uguls-projects.vercel.app",
+			"https://nebulazone-fe.vercel.app",
+			"https://nebulazone.store",
+			"https://www.nebulazone.store"
 		));
 		configuration.setAllowedMethods(List.of(
 			"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
