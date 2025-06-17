@@ -1,7 +1,5 @@
 package nbc.chillguys.nebulazone.application.bid.service;
 
-import java.util.Optional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,13 +42,12 @@ public class BidService {
 
 		User user = userDomainService.findActiveUserById(authUser.getId());
 
-		Optional<Bid> optBidByUser = bidDomainService.findBidByAuctionIdAndUserId(lockAuction.getId(), user.getId());
+		Bid finBid = bidDomainService.findBidByAuctionIdAndUserId(lockAuction.getId(), user.getId())
+			.orElseGet(() -> bidDomainService.createBid(lockAuction, user, request.price()));
 
-		Bid upsertBid = optBidByUser.isPresent()
-			? bidDomainService.updateBid(lockAuction, optBidByUser.get(), user, request.price())
-			: bidDomainService.createBid(lockAuction, user, request.price());
+		bidDomainService.updateBid(lockAuction, finBid, user, request.price());
 
-		return CreateBidResponse.from(upsertBid);
+		return CreateBidResponse.from(finBid);
 
 	}
 

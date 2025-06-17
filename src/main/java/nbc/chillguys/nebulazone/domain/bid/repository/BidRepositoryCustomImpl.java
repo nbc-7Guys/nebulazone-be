@@ -56,7 +56,8 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 	public Page<FindBidInfo> findMyBids(User loginUser, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		List<FindBidInfo> contents = jpaQueryFactory.select(
+		List<FindBidInfo> contents = jpaQueryFactory
+			.select(
 				new QFindBidInfo(bid.id, bid.price, bid.createdAt, bid.status, user.nickname, product.name))
 			.from(bid)
 			.join(bid.user, user)
@@ -75,7 +76,8 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 	@Override
 	public Optional<Long> findActiveBidHighestPriceByAuction(Auction auction) {
 
-		return Optional.ofNullable(jpaQueryFactory.select(bid.price.max())
+		return Optional.ofNullable(jpaQueryFactory
+			.select(bid.price.max())
 			.from(bid)
 			.where(bid.auction.eq(auction), bid.status.notIn(BidStatus.CANCEL))
 			.fetchOne());
@@ -84,7 +86,8 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 	@Override
 	public Bid findHighestPriceBidByAuctionWithUser(Long auctionId) {
 
-		return jpaQueryFactory.selectFrom(bid)
+		return jpaQueryFactory
+			.selectFrom(bid)
 			.join(bid.user, user)
 			.fetchJoin()
 			.where(bid.auction.id.eq(auctionId), bid.status.eq(BidStatus.BID))
@@ -98,8 +101,7 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 
 		return Optional.ofNullable(
 			jpaQueryFactory
-				.select(bid)
-				.from(bid)
+				.selectFrom(bid)
 				.join(bid.user, user).fetchJoin()
 				.where(bid.id.eq(bidId))
 				.fetchOne());
@@ -111,8 +113,7 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 
 		return Optional.ofNullable(
 			jpaQueryFactory
-				.select(bid)
-				.from(bid)
+				.selectFrom(bid)
 				.join(bid.user, user).fetchJoin()
 				.where(bid.auction.id.eq(auctionId))
 				.fetchOne());

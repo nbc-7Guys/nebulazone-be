@@ -59,12 +59,18 @@ public class User extends BaseEntity {
 	private UserStatus status;
 
 	@ElementCollection
-	@CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+	@CollectionTable(
+		name = "user_roles",
+		joinColumns = @JoinColumn(name = "user_id")
+	)
 	@Enumerated(EnumType.STRING)
 	private Set<UserRole> roles;
 
 	@ElementCollection
-	@CollectionTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"))
+	@CollectionTable(
+		name = "user_addresses",
+		joinColumns = @JoinColumn(name = "user_id")
+	)
 	private Set<Address> addresses;
 
 	private LocalDateTime deletedAt;

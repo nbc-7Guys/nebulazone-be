@@ -29,8 +29,7 @@ public class ProductAdminRepositoryCustomImpl implements ProductAdminRepositoryC
 
 		// 키워드 검색 (이름/설명)
 		if (command.keyword() != null && !command.keyword().isBlank()) {
-			builder.and(product.name.containsIgnoreCase(command.keyword())
-				.or(product.description.containsIgnoreCase(command.keyword())));
+			builder.and(product.name.containsIgnoreCase(command.keyword()));
 		}
 
 		// 거래방식(ProductTxMethod) 필터
