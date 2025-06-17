@@ -106,7 +106,7 @@ class BidServiceUnitTest {
 			given(bidDomainService.createBid(auction, bidder, BID_PRICE)).willReturn(createdBid);
 
 			// when
-			CreateBidResponse result = bidService.createBid(auctionId, authUser, createBidRequest);
+			CreateBidResponse result = bidService.upsertBid(auctionId, authUser, createBidRequest);
 
 			// then
 			assertThat(result.bidId()).isEqualTo(100L);
@@ -127,7 +127,7 @@ class BidServiceUnitTest {
 				.willThrow(new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 
 			// when & then
-			assertThatThrownBy(() -> bidService.createBid(auctionId, authUser, createBidRequest))
+			assertThatThrownBy(() -> bidService.upsertBid(auctionId, authUser, createBidRequest))
 				.isInstanceOf(AuctionException.class)
 				.extracting("errorCode")
 				.isEqualTo(AuctionErrorCode.AUCTION_NOT_FOUND);
@@ -148,7 +148,7 @@ class BidServiceUnitTest {
 				.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
 
 			// when & then
-			assertThatThrownBy(() -> bidService.createBid(auctionId, authUser, createBidRequest))
+			assertThatThrownBy(() -> bidService.upsertBid(auctionId, authUser, createBidRequest))
 				.isInstanceOf(UserException.class)
 				.extracting("errorCode")
 				.isEqualTo(UserErrorCode.USER_NOT_FOUND);
@@ -170,7 +170,7 @@ class BidServiceUnitTest {
 				.willThrow(new BidException(BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE));
 
 			// when & then
-			assertThatThrownBy(() -> bidService.createBid(auctionId, authUser, createBidRequest))
+			assertThatThrownBy(() -> bidService.upsertBid(auctionId, authUser, createBidRequest))
 				.isInstanceOf(BidException.class)
 				.extracting("errorCode")
 				.isEqualTo(BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE);
