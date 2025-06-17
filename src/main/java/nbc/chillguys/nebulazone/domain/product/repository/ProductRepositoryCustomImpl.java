@@ -21,6 +21,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
 		return Optional.ofNullable(
 			queryFactory.selectFrom(product)
+				.join(product.seller).fetchJoin()
 				.where(
 					product.id.eq(productId),
 					product.isDeleted.isFalse()

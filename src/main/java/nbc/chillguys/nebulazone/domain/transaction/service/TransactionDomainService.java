@@ -32,6 +32,7 @@ public class TransactionDomainService {
 	public Transaction createTransaction(TransactionCreateCommand command) {
 		Transaction tx = Transaction.builder()
 			.product(command.product())
+			.userType(command.userType())
 			.user(command.user())
 			.method(TransactionMethod.of(command.txMethod()))
 			.price(command.price())

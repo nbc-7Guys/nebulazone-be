@@ -37,6 +37,10 @@ public class Transaction extends BaseEntity {
 	@Column(nullable = false)
 	private TransactionMethod method;
 
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private UserType userType;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
@@ -46,10 +50,11 @@ public class Transaction extends BaseEntity {
 	private Product product;
 
 	@Builder
-	public Transaction(Long price, TransactionMethod method, User user, Product product) {
+	public Transaction(Long price, TransactionMethod method, User user, UserType userType, Product product) {
 		this.price = price;
 		this.method = method;
 		this.user = user;
+		this.userType = userType;
 		this.product = product;
 	}
 }
