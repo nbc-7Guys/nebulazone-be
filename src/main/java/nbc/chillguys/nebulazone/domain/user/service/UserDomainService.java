@@ -5,6 +5,7 @@ import java.util.Set;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.user.dto.UserSignUpCommand;
@@ -71,11 +72,20 @@ public class UserDomainService {
 	 */
 	@Transactional
 	public User createUser(UserSignUpCommand userSignUpCommand) {
+		String phone = null;
+		if (StringUtils.hasText(userSignUpCommand.phone())) {
+			phone = userSignUpCommand.phone().replaceAll("-", "");
+		}
+
+		String password = null;
+		if (StringUtils.hasText(userSignUpCommand.password())) {
+			password = passwordEncoder.encode(userSignUpCommand.password());
+		}
+
 		User user = User.builder()
 			.email(userSignUpCommand.email())
-			.password(userSignUpCommand.password() != null
-				? passwordEncoder.encode(userSignUpCommand.password()) : null)
-			.phone(userSignUpCommand.phone().replaceAll("-", ""))
+			.password(password)
+			.phone(phone)
 			.nickname(userSignUpCommand.nickname())
 			.profileImage(userSignUpCommand.profileImageUrl())
 			.point(0)
