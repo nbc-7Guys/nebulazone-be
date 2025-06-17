@@ -27,16 +27,27 @@ public class BidService {
 	private final UserDomainService userDomainService;
 	private final AuctionDomainService auctionDomainService;
 
+	/**
+	 * 경매에 기존 입찰 내역이 없다면 입찰 생성, 있다면 입찰 수정
+	 * @param auctionId 대상 경매
+	 * @param authUser 인증 유저
+	 * @param request 입찰 정보
+	 * @return 입찰 후 반환값
+	 * @author 전나겸
+	 */
 	@Transactional
-	public CreateBidResponse createBid(Long auctionId, AuthUser authUser, CreateBidRequest request) {
+	public CreateBidResponse upsertBid(Long auctionId, AuthUser authUser, CreateBidRequest request) {
 
 		Auction lockAuction = auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId);
 
 		User user = userDomainService.findActiveUserById(authUser.getId());
-		user.usePoint(request.price());
 
-		Bid createBid = bidDomainService.createBid(lockAuction, user, request.price());
-		return CreateBidResponse.from(createBid);
+		Bid finBid = bidDomainService.findBidByAuctionIdAndUserId(lockAuction.getId(), user.getId())
+			.orElseGet(() -> bidDomainService.createBid(lockAuction, user, request.price()));
+
+		bidDomainService.updateBid(lockAuction, finBid, user, request.price());
+
+		return CreateBidResponse.from(finBid);
 
 	}
 

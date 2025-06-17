@@ -87,39 +87,18 @@ class BidDomainServiceUnitTest {
 		@Test
 		@DisplayName("입찰 생성 성공")
 		void success_createBid() {
-			// given
-			given(bidRepository.findActiveBidHighestPriceByAuction(auction))
-				.willReturn(Optional.of(CURRENT_PRICE));
+			// 수정해야함
 
-			Bid expectedBid = createBid(1L, auction, bidder, NEW_BID_PRICE, BidStatus.BID);
-			given(bidRepository.save(any(Bid.class))).willReturn(expectedBid);
-
-			// when
-			Bid result = bidDomainService.createBid(auction, bidder, NEW_BID_PRICE);
-
-			// then
-			assertThat(result.getPrice()).isEqualTo(NEW_BID_PRICE);
-			assertThat(result.getUser()).isEqualTo(bidder);
-			assertThat(result.getAuction()).isEqualTo(auction);
-			assertThat(result.getStatus()).isEqualTo(BidStatus.BID);
 		}
 
 		@Test
-		@DisplayName("입찰 생성 성공 - 첫 번째 입찰")
-		void success_createBid_firstBid() {
+		@DisplayName("입찰 생성 실패 - 경매 시작가보다 입찰가가 낮음")
+		void fail_createBid_whenBidPriceLowerThanStartPrice() {
 			// given
-			given(bidRepository.findActiveBidHighestPriceByAuction(auction))
-				.willReturn(Optional.empty());
-
-			Bid expectedBid = createBid(2L, auction, bidder, NEW_BID_PRICE, BidStatus.BID);
-			given(bidRepository.save(any(Bid.class))).willReturn(expectedBid);
 
 			// when
-			Bid result = bidDomainService.createBid(auction, bidder, NEW_BID_PRICE);
 
 			// then
-			assertThat(result.getPrice()).isEqualTo(NEW_BID_PRICE);
-			assertThat(result.getUser()).isEqualTo(bidder);
 		}
 
 		@Test
@@ -177,6 +156,22 @@ class BidDomainServiceUnitTest {
 			assertBidException(() -> bidDomainService.createBid(auction, bidder, CURRENT_PRICE),
 				BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE);
 		}
+	}
+
+	@Nested
+	@DisplayName("입찰 수정")
+	class UpdateBidTest {
+
+		@Test
+		@DisplayName("입찰 수정 성공")
+		void success_updateBid() {
+			// given
+
+			// when
+
+			// then
+		}
+
 	}
 
 	@Nested

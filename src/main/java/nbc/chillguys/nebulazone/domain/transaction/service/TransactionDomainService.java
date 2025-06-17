@@ -41,7 +41,7 @@ public class TransactionDomainService {
 	}
 
 	/**
-	 * 내 거래내역 전체 조회
+	 * 내 거래내역 전체 조회3
 	 * @param user 로그인 user
 	 * @param page page
 	 * @param size size

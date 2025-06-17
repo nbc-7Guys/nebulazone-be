@@ -64,12 +64,12 @@ class BidControllerTest {
 		@Test
 		@DisplayName("입찰 생성 성공")
 		@WithCustomMockUser
-		void success_createBid() throws Exception {
+		void success_upsertBid() throws Exception {
 			// given
 			CreateBidRequest request = new CreateBidRequest(BID_PRICE);
 			CreateBidResponse response = new CreateBidResponse(BID_ID, BID_PRICE);
 
-			given(bidService.createBid(eq(AUCTION_ID), any(AuthUser.class), eq(request)))
+			given(bidService.upsertBid(eq(AUCTION_ID), any(AuthUser.class), eq(request)))
 				.willReturn(response);
 
 			// when & then

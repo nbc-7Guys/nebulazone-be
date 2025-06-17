@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.application.auction.service;
 
+import java.util.List;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,9 +49,14 @@ public class AutoAuctionService {
 			return;
 		}
 
+		List<Bid> bidList = bidDomainService.findBidsByAuctionIdAndStatusBid(auctionId);
+		bidList.forEach(bid -> bid.getUser().addPoint(bid.getPrice()));
+
+		product.getSeller().addPoint(wonBid.getPrice());
+
 		TransactionCreateCommand buyerTxCreateCommand =
-			TransactionCreateCommand.of(wonBid.getUser(), UserType.BUYER, product, product.getTxMethod().name(),
-				wonBid.getPrice());
+			TransactionCreateCommand.of(wonBid.getUser(), UserType.BUYER,
+				product, product.getTxMethod().name(), wonBid.getPrice());
 
 		txDomainService.createTransaction(buyerTxCreateCommand);
 
