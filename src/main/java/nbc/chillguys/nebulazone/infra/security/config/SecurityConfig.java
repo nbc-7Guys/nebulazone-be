@@ -33,6 +33,7 @@ public class SecurityConfig {
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final OAuthService oAuthService;
 	private final OAuth2SuccessHandler oAuth2SuccessHandler;
+	private final ExceptionLoggingFilter exceptionLoggingFilter;
 
 	public SecurityConfig(ObjectMapper objectMapper, JwtUtil jwtUtil, OAuthService oAuthService,
 		OAuth2SuccessHandler oAuth2SuccessHandler) {
@@ -40,6 +41,7 @@ public class SecurityConfig {
 		this.jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, entryPoint);
 		this.oAuthService = oAuthService;
 		this.oAuth2SuccessHandler = oAuth2SuccessHandler;
+		this.exceptionLoggingFilter = new ExceptionLoggingFilter();
 	}
 
 	@Bean
@@ -85,7 +87,7 @@ public class SecurityConfig {
 				.successHandler(oAuth2SuccessHandler))
 			.exceptionHandling(exception ->
 				exception.authenticationEntryPoint(entryPoint))
-			.addFilterBefore(new ExceptionLoggingFilter(), UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(exceptionLoggingFilter, UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.build();
 	}
