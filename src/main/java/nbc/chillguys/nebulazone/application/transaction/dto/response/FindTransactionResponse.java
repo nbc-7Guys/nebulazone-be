@@ -15,6 +15,7 @@ public record FindTransactionResponse(
 	LocalDateTime txCreatedAt,
 	String productName,
 	boolean isSold,
+	Long userId,
 	String userNickname,
 	String userType
 ) {
@@ -27,6 +28,7 @@ public record FindTransactionResponse(
 			txFindAllInfo.txCreateAt(),
 			txFindAllInfo.productName(),
 			txFindAllInfo.isSold(),
+			txFindAllInfo.userId(),
 			txFindAllInfo.userNickname(),
 			txFindAllInfo.userType().name()
 		);
