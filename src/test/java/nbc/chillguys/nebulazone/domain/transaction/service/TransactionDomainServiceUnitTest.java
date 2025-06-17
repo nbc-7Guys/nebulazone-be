@@ -186,7 +186,7 @@ class TransactionDomainServiceUnitTest {
 			assertThat(result.txId()).isEqualTo(transactionId);
 			assertThat(result.txPrice()).isEqualTo(TRANSACTION_PRICE);
 			assertThat(result.productName()).isEqualTo(PRODUCT_NAME);
-			assertThat(result.sellerNickname()).isEqualTo(SELLER_NICKNAME);
+			assertThat(result.userNickname()).isEqualTo(SELLER_NICKNAME);
 			assertThat(result.txMethod()).isEqualTo(TransactionMethod.DIRECT);
 		}
 
@@ -267,9 +267,9 @@ class TransactionDomainServiceUnitTest {
 	private List<TransactionFindAllInfo> createTransactionFindAllInfoList() {
 		return List.of(
 			new TransactionFindAllInfo(1L, TRANSACTION_PRICE, TransactionMethod.DIRECT,
-				LocalDateTime.now(), PRODUCT_NAME, true, buyer.getNickname(), UserType.BUYER),
+				LocalDateTime.now(), PRODUCT_NAME, true, 1L, buyer.getNickname(), UserType.BUYER),
 			new TransactionFindAllInfo(2L, TRANSACTION_PRICE + 50000L, TransactionMethod.AUCTION,
-				LocalDateTime.now().minusHours(1), PRODUCT_NAME, true, buyer.getNickname(), UserType.BUYER)
+				LocalDateTime.now().minusHours(1), PRODUCT_NAME, true, 1L, buyer.getNickname(), UserType.BUYER)
 		);
 	}
 

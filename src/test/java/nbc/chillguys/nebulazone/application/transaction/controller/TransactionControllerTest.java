@@ -61,11 +61,11 @@ class TransactionControllerTest {
 			// given
 			FindTransactionResponse txContent1 = new FindTransactionResponse(
 				1L, 150000L, TransactionMethod.AUCTION, txTime1, "테스트 CPU", true,
-				"test", UserType.BUYER.name()
+				1L, "test", UserType.BUYER.name()
 			);
 			FindTransactionResponse txContent2 = new FindTransactionResponse(
 				2L, 89000L, TransactionMethod.DIRECT, txTime2, "테스트 GPU", false,
-				"test", UserType.SELLER.name()
+				1L, "test", UserType.SELLER.name()
 			);
 			List<FindTransactionResponse> contents = List.of(txContent1, txContent2);
 
@@ -108,7 +108,7 @@ class TransactionControllerTest {
 			// given
 			FindTransactionResponse txContent = new FindTransactionResponse(
 				TRANSACTION_ID, TX_PRICE, TransactionMethod.AUCTION, txTime1, PRODUCT_NAME, true,
-				"test", UserType.BUYER.name()
+				1L, "test", UserType.BUYER.name()
 			);
 			List<FindTransactionResponse> contents = List.of(txContent);
 

@@ -26,9 +26,9 @@ public record FindDetailTransactionResponse(
 	public static FindDetailTransactionResponse from(TransactionFindDetailInfo detailInfo) {
 		return new FindDetailTransactionResponse(
 			detailInfo.txId(),
-			detailInfo.sellerId(),
-			detailInfo.sellerNickname(),
-			detailInfo.sellerEmail(),
+			detailInfo.userId(),
+			detailInfo.userNickname(),
+			detailInfo.userEmail(),
 			detailInfo.txPrice(),
 			detailInfo.txCreatedAt(),
 			detailInfo.txMethod(),
