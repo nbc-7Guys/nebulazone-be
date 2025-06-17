@@ -75,7 +75,7 @@ public class UserDomainService {
 			.email(userSignUpCommand.email())
 			.password(userSignUpCommand.password() != null
 				? passwordEncoder.encode(userSignUpCommand.password()) : null)
-			.phone(userSignUpCommand.phone())
+			.phone(userSignUpCommand.phone().replaceAll("-", ""))
 			.nickname(userSignUpCommand.nickname())
 			.profileImage(userSignUpCommand.profileImageUrl())
 			.point(0)
