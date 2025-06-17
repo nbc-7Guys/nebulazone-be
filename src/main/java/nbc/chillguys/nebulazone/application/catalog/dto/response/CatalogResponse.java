@@ -1,9 +1,11 @@
 package nbc.chillguys.nebulazone.application.catalog.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import nbc.chillguys.nebulazone.application.review.dto.response.ReviewResponse;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 
 public record CatalogResponse(
@@ -14,7 +16,8 @@ public record CatalogResponse(
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt,
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	LocalDateTime modifiedAt
+	LocalDateTime modifiedAt,
+	List<ReviewResponse> reviews
 ) {
 	public static CatalogResponse from(Catalog catalog) {
 		return new CatalogResponse(
@@ -23,7 +26,10 @@ public record CatalogResponse(
 			catalog.getDescription(),
 			catalog.getType().name(),
 			catalog.getCreatedAt(),
-			catalog.getModifiedAt()
+			catalog.getModifiedAt(),
+			catalog.getReviews().stream()
+				.map(ReviewResponse::from)
+				.toList()
 		);
 	}
 }
