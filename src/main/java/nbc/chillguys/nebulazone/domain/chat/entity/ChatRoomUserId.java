@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.domain.chat.entity;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -22,4 +23,16 @@ public class ChatRoomUserId implements Serializable {
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
 
+	@Override
+	public boolean equals(Object o) {
+		if (o == null || getClass() != o.getClass())
+			return false;
+		ChatRoomUserId that = (ChatRoomUserId)o;
+		return Objects.equals(chatRoomId, that.chatRoomId) && Objects.equals(userId, that.userId);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(chatRoomId, userId);
+	}
 }
