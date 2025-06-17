@@ -23,6 +23,7 @@ import nbc.chillguys.nebulazone.infra.oauth.handler.OAuth2SuccessHandler;
 import nbc.chillguys.nebulazone.infra.oauth.service.OAuthService;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
 import nbc.chillguys.nebulazone.infra.security.filter.CustomAuthenticationEntryPoint;
+import nbc.chillguys.nebulazone.infra.security.filter.ExceptionLoggingFilter;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
 
 @Configuration
@@ -84,6 +85,7 @@ public class SecurityConfig {
 				.successHandler(oAuth2SuccessHandler))
 			.exceptionHandling(exception ->
 				exception.authenticationEntryPoint(entryPoint))
+			.addFilterBefore(new ExceptionLoggingFilter(), UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.build();
 	}

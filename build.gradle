@@ -60,10 +60,13 @@ dependencies {
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
 
     // LocalDateTime 직렬화
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
     // ES
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
+    // AOP
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
