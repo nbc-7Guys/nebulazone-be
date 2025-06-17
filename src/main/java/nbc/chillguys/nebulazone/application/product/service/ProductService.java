@@ -38,6 +38,7 @@ import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
+import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
@@ -168,11 +169,16 @@ public class ProductService {
 		ProductPurchaseCommand command = ProductPurchaseCommand.of(user, catalog, productId);
 		productDomainService.purchaseProduct(command);
 
-		TransactionCreateCommand txCreateCommand
-			= TransactionCreateCommand.of(user, product, product.getTxMethod().name(), product.getPrice());
-		Transaction tx = transactionDomainService.createTransaction(txCreateCommand);
+		TransactionCreateCommand buyerTxCreateCommand
+			= TransactionCreateCommand.of(user, UserType.BUYER, product, product.getTxMethod().name(),
+			product.getPrice());
+		Transaction buyerTx = transactionDomainService.createTransaction(buyerTxCreateCommand);
+		TransactionCreateCommand sellerTxCreateCommand
+			= TransactionCreateCommand.of(product.getSeller(), UserType.SELLER, product, product.getTxMethod().name(),
+			product.getPrice());
+		Transaction sellerTx = transactionDomainService.createTransaction(sellerTxCreateCommand);
 
-		return PurchaseProductResponse.from(tx);
+		return PurchaseProductResponse.from(buyerTx, sellerTx);
 	}
 
 	public Page<SearchProductResponse> searchProduct(String productName, String sellerNickname,

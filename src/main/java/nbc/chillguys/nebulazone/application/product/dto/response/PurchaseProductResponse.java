@@ -7,13 +7,15 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
 
 public record PurchaseProductResponse(
-	Long txId,
+	Long buyerTxId,
+
+	Long sellerTxId,
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt
 ) {
 
-	public static PurchaseProductResponse from(Transaction tx) {
-		return new PurchaseProductResponse(tx.getId(), tx.getCreatedAt());
+	public static PurchaseProductResponse from(Transaction buyerTx, Transaction sellerTx) {
+		return new PurchaseProductResponse(buyerTx.getId(), sellerTx.getId(), buyerTx.getCreatedAt());
 	}
 }
