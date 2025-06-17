@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.querydsl.core.annotations.QueryProjection;
 
 import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
+import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 
 public record TransactionFindAllInfo(
 	Long txId,
@@ -12,7 +13,9 @@ public record TransactionFindAllInfo(
 	TransactionMethod txMethod,
 	LocalDateTime txCreateAt,
 	String productName,
-	boolean isSold
+	boolean isSold,
+	String userNickname,
+	UserType userType
 ) {
 
 	@QueryProjection

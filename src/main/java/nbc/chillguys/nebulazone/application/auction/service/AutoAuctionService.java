@@ -15,6 +15,7 @@ import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
+import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 
 @Service
@@ -55,7 +56,16 @@ public class AutoAuctionService {
 
 		TransactionCreateCommand txCreateCommand =
 			TransactionCreateCommand.of(wonBid.getUser(), product, product.getTxMethod().name(), wonBid.getPrice());
+		TransactionCreateCommand buyerTxCreateCommand =
+			TransactionCreateCommand.of(wonBid.getUser(), UserType.BUYER, product, product.getTxMethod().name(),
+				wonBid.getPrice());
 
-		txDomainService.createTransaction(txCreateCommand);
+		txDomainService.createTransaction(buyerTxCreateCommand);
+
+		TransactionCreateCommand sellerTxCreateCommand =
+			TransactionCreateCommand.of(product.getSeller(), UserType.SELLER, product, product.getTxMethod().name(),
+				wonBid.getPrice());
+
+		txDomainService.createTransaction(sellerTxCreateCommand);
 	}
 }

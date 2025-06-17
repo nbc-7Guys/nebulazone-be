@@ -29,6 +29,7 @@ import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
 import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
+import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.exception.TransactionErrorCode;
 import nbc.chillguys.nebulazone.domain.transaction.exception.TransactionException;
 import nbc.chillguys.nebulazone.domain.transaction.repository.TransactionRepository;
@@ -85,7 +86,7 @@ class TransactionDomainServiceUnitTest {
 		void success_createTransaction_direct() {
 			// given
 			TransactionCreateCommand command = TransactionCreateCommand.of(
-				buyer, product, DIRECT_METHOD, TRANSACTION_PRICE);
+				buyer, UserType.BUYER, product, DIRECT_METHOD, TRANSACTION_PRICE);
 			Transaction expectedTransaction = createTransaction(1L, buyer, product,
 				TransactionMethod.DIRECT, TRANSACTION_PRICE);
 
@@ -106,7 +107,7 @@ class TransactionDomainServiceUnitTest {
 		void success_createTransaction_auction() {
 			// given
 			TransactionCreateCommand command = TransactionCreateCommand.of(
-				buyer, product, AUCTION_METHOD, TRANSACTION_PRICE);
+				buyer, UserType.BUYER, product, AUCTION_METHOD, TRANSACTION_PRICE);
 			Transaction expectedTransaction = createTransaction(2L, buyer, product,
 				TransactionMethod.AUCTION, TRANSACTION_PRICE);
 
@@ -127,7 +128,7 @@ class TransactionDomainServiceUnitTest {
 		void fail_createTransaction_invalidMethod() {
 			// given
 			TransactionCreateCommand command = TransactionCreateCommand.of(
-				buyer, product, INVALID_METHOD, TRANSACTION_PRICE);
+				buyer, UserType.BUYER, product, INVALID_METHOD, TRANSACTION_PRICE);
 
 			// when & then
 			assertTransactionException(() -> transactionDomainService.createTransaction(command),
@@ -266,9 +267,9 @@ class TransactionDomainServiceUnitTest {
 	private List<TransactionFindAllInfo> createTransactionFindAllInfoList() {
 		return List.of(
 			new TransactionFindAllInfo(1L, TRANSACTION_PRICE, TransactionMethod.DIRECT,
-				LocalDateTime.now(), PRODUCT_NAME, true),
+				LocalDateTime.now(), PRODUCT_NAME, true, buyer.getNickname(), UserType.BUYER),
 			new TransactionFindAllInfo(2L, TRANSACTION_PRICE + 50000L, TransactionMethod.AUCTION,
-				LocalDateTime.now().minusHours(1), PRODUCT_NAME, true)
+				LocalDateTime.now().minusHours(1), PRODUCT_NAME, true, buyer.getNickname(), UserType.BUYER)
 		);
 	}
 

@@ -40,7 +40,9 @@ public class TransactionRepositoryCustomImpl implements TransactionRepositoryCus
 				transaction.method,
 				transaction.createdAt,
 				product.name,
-				product.isSold
+				product.isSold,
+				transaction.user.nickname,
+				transaction.userType
 			))
 			.from(transaction)
 			.join(transaction.user, user)

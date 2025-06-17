@@ -121,7 +121,7 @@ class CatalogDomainServiceTest {
 			Long catalogId = 1L;
 
 			Catalog mockCatalog = mock(Catalog.class);
-			given(catalogRepository.findById(anyLong()))
+			given(catalogRepository.findWithReviewById(anyLong()))
 				.willReturn(Optional.ofNullable(mockCatalog));
 
 			// When
@@ -130,7 +130,7 @@ class CatalogDomainServiceTest {
 			// Then
 			assertEquals(mockCatalog, result);
 
-			verify(catalogRepository, times(1)).findById(catalogId);
+			verify(catalogRepository, times(1)).findWithReviewById(catalogId);
 
 		}
 
@@ -140,7 +140,7 @@ class CatalogDomainServiceTest {
 			// Given
 			Long postId = 2L;
 
-			given(catalogRepository.findById(anyLong()))
+			given(catalogRepository.findWithReviewById(anyLong()))
 				.willReturn(Optional.empty());
 
 			// When
@@ -150,7 +150,7 @@ class CatalogDomainServiceTest {
 			// Then
 			assertEquals(CatalogErrorCode.CATALOG_NOT_FOUND, exception.getErrorCode());
 
-			verify(catalogRepository, times(1)).findById(postId);
+			verify(catalogRepository, times(1)).findWithReviewById(postId);
 			verifyNoMoreInteractions(catalogRepository);
 		}
 	}

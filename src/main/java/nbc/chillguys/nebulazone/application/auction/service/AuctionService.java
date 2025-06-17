@@ -24,6 +24,7 @@ import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
+import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
@@ -75,6 +76,10 @@ public class AuctionService {
 
 		ManualEndAuctionInfo auctionInfo = auctionDomainService.manualEndAuction(loginUser, wonBid, auctionId);
 
+		TransactionCreateCommand buyerTxCreateCommand = TransactionCreateCommand.of(wonBid.getUser(), UserType.BUYER,
+			product, product.getTxMethod().name(), auctionInfo.wonProductPrice());
+
+		txDomainService.createTransaction(buyerTxCreateCommand);
 		List<Bid> bidList = bidDomainService.findBidsByAuctionIdAndStatusBid(auctionId);
 		bidList.forEach(bid -> bid.getUser().addPoint(bid.getPrice()));
 
@@ -83,7 +88,10 @@ public class AuctionService {
 		TransactionCreateCommand txCreateCommand = TransactionCreateCommand.of(wonBid.getUser(), product,
 			product.getTxMethod().name(), auctionInfo.wonProductPrice());
 
-		txDomainService.createTransaction(txCreateCommand);
+		TransactionCreateCommand sellerTxCreateCommand = TransactionCreateCommand.of(product.getSeller(),
+			UserType.SELLER, product, product.getTxMethod().name(), auctionInfo.wonProductPrice());
+
+		txDomainService.createTransaction(sellerTxCreateCommand);
 
 		return ManualEndAuctionResponse.from(auctionInfo);
 	}
