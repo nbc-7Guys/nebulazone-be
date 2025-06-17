@@ -229,10 +229,12 @@ public class BidDomainService {
 
 	/**
 	 * 해당 경매의 입찰 전체조회
-	 * @param auctionId
-	 * @return
+	 * @param auctionId 조회할 경매
+	 * @return 조회된 BidList
+	 * @author 전나겸
 	 */
 	public List<Bid> findBidsByAuctionIdAndStatusBid(Long auctionId) {
 		return bidRepository.findBidsByAuctionIdAndStatusBid(auctionId);
 	}
 }
+4
