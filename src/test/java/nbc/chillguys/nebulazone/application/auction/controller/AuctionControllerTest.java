@@ -267,7 +267,7 @@ class AuctionControllerTest {
 			// given
 			FindDetailAuctionResponse detailResponse = new FindDetailAuctionResponse(
 				AUCTION_ID, SELLER_ID, SELLER_NICKNAME, SELLER_EMAIL,
-				USER_ID, WINNER_NICKNAME, WINNER_EMAIL,
+				BID_ID, USER_ID, WINNER_NICKNAME, WINNER_EMAIL,
 				START_PRICE, CURRENT_PRICE, false, endTime,
 				PRODUCT_ID, PRODUCT_NAME, PRODUCT_IMAGE_URL, productCreatedAt, BID_COUNT
 			);
