@@ -42,12 +42,11 @@ public class BidService {
 
 		User user = userDomainService.findActiveUserById(authUser.getId());
 
-		Bid finBid = bidDomainService.findBidByAuctionIdAndUserId(lockAuction.getId(), user.getId())
+		Bid resultBid = bidDomainService.findBidByAuctionIdAndUserId(lockAuction.getId(), user.getId())
+			.map(findBid -> bidDomainService.updateBid(lockAuction, findBid, user, request.price()))
 			.orElseGet(() -> bidDomainService.createBid(lockAuction, user, request.price()));
 
-		bidDomainService.updateBid(lockAuction, finBid, user, request.price());
-
-		return CreateBidResponse.from(finBid);
+		return CreateBidResponse.from(resultBid);
 
 	}
 
