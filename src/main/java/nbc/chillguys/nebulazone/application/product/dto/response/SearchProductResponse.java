@@ -13,6 +13,7 @@ public record SearchProductResponse(
 	Long categoryId,
 	Long sellerId,
 	String sellerNickname,
+	boolean isSold,
 	Long productPrice,
 	String txMethod,
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -26,6 +27,7 @@ public record SearchProductResponse(
 			productDocument.catalogId(),
 			productDocument.sellerId(),
 			productDocument.sellerNickname(),
+			productDocument.isSold(),
 			productDocument.price(),
 			productDocument.txMethod(),
 			productDocument.createdAt(),
