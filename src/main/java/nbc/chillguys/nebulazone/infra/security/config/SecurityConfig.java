@@ -36,12 +36,12 @@ public class SecurityConfig {
 	private final ExceptionLoggingFilter exceptionLoggingFilter;
 
 	public SecurityConfig(ObjectMapper objectMapper, JwtUtil jwtUtil, OAuthService oAuthService,
-		OAuth2SuccessHandler oAuth2SuccessHandler) {
+		OAuth2SuccessHandler oAuth2SuccessHandler, ExceptionLoggingFilter exceptionLoggingFilter) {
 		this.entryPoint = new CustomAuthenticationEntryPoint(objectMapper);
 		this.jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, entryPoint);
 		this.oAuthService = oAuthService;
 		this.oAuth2SuccessHandler = oAuth2SuccessHandler;
-		this.exceptionLoggingFilter = new ExceptionLoggingFilter();
+		this.exceptionLoggingFilter = exceptionLoggingFilter;
 	}
 
 	@Bean
