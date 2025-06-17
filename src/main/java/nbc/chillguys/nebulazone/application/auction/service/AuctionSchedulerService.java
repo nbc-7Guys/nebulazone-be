@@ -30,7 +30,6 @@ public class AuctionSchedulerService {
 	private final Map<Long, ScheduledFuture<?>> tasks = new ConcurrentHashMap<>();
 
 	private final AuctionDomainService auctionDomainService;
-
 	private final AutoAuctionService autoAuctionService;
 
 	/**
@@ -83,7 +82,7 @@ public class AuctionSchedulerService {
 		auctionList.stream()
 			.filter(auction -> !auction.isWon())
 			.filter(auction -> Duration.between(LocalDateTime.now(), auction.getEndTime()).isPositive())
-			.forEach(auction -> autoAuctionEndSchedule(auction, auction.getProduct().getId()));
+			.forEach(auction -> autoAuctionEndSchedule(auction, auction.getProductId()));
 	}
 
 	/**
