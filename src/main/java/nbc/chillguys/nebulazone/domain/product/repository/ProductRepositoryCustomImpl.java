@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.domain.product.repository;
 
+import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
+
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;

@@ -8,9 +8,9 @@ import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
 
 public record TransactionFindDetailInfo(
 	Long txId,
-	Long sellerId,
-	String sellerNickname,
-	String sellerEmail,
+	Long userId,
+	String userNickname,
+	String userEmail,
 	Long txPrice,
 	LocalDateTime txCreatedAt,
 	TransactionMethod txMethod,

@@ -14,6 +14,7 @@ public record TransactionFindAllInfo(
 	LocalDateTime txCreateAt,
 	String productName,
 	boolean isSold,
+	Long userId,
 	String userNickname,
 	UserType userType
 ) {

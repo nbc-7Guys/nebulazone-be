@@ -99,6 +99,7 @@ class TransactionServiceUnitTest {
 			LocalDateTime.now(),
 			"테스트 상품",
 			true,
+			1L,
 			user.getNickname(),
 			UserType.BUYER
 		);

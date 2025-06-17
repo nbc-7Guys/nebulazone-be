@@ -104,4 +104,8 @@ public class Auction extends BaseEntity {
 	public void updateEndTime() {
 		this.endTime = LocalDateTime.now();
 	}
+
+	public Long getProductId() {
+		return this.product.getId();
+	}
 }

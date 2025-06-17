@@ -35,7 +35,7 @@ public class ProductEsRepositoryCustomImpl implements ProductEsRepositoryCustom 
 		}
 
 		if (StringUtils.hasText(productName)) {
-			builder.must(m -> m.match(t -> t.field("name").query(productName)));
+			builder.must(m -> m.match(t -> t.field("productName").query(productName)));
 		}
 
 		if (priceFrom != null && priceTo != null) {

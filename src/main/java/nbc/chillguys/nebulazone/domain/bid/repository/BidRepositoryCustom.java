@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.domain.bid.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -20,4 +21,8 @@ public interface BidRepositoryCustom {
 	Bid findHighestPriceBidByAuctionWithUser(Long auctionId);
 
 	Optional<Bid> findBidWithWonUser(Long bidId);
+
+	Optional<Bid> findBidByAuctionIdAndUserId(Long auctionId, Long userId);
+
+	List<Bid> findBidsByAuctionIdAndStatusBid(Long auctionId);
 }

@@ -71,6 +71,7 @@ class ProductControllerTest {
 				"테스트 경매 상품 설명",
 				1500000L,
 				ProductTxMethod.AUCTION,
+				false,
 				ProductEndTime.HOUR_12,
 				fixedCreatedAt,
 				fixedModifiedAt,
@@ -130,7 +131,7 @@ class ProductControllerTest {
 			LocalDateTime fixedModifiedAt = LocalDateTime.of(2025, 6, 13, 16, 0, 0);
 
 			ProductResponse expectedResponse = new ProductResponse(2L, "테스트 즉시거래 상품", "테스트 즉시거래 상품 설명",
-				800000L, ProductTxMethod.DIRECT, null, fixedCreatedAt, fixedModifiedAt,
+				800000L, ProductTxMethod.DIRECT, false, null, fixedCreatedAt, fixedModifiedAt,
 				List.of("direct_image1.jpg"));
 
 			given(productService.createProduct(any(), eq(catalogId), any(CreateProductRequest.class), any()))
@@ -226,7 +227,7 @@ class ProductControllerTest {
 			Long catalogId = 1L;
 			Long productId = 1L;
 			ProductResponse response = new ProductResponse(productId, "testProduct", "testDescription",
-				1000L, ProductTxMethod.DIRECT, ProductEndTime.HOUR_12, LocalDateTime.now(), LocalDateTime.now(),
+				1000L, ProductTxMethod.DIRECT, false, ProductEndTime.HOUR_12, LocalDateTime.now(), LocalDateTime.now(),
 				List.of());
 
 			given(productService.getProduct(catalogId, productId)).willReturn(response);
