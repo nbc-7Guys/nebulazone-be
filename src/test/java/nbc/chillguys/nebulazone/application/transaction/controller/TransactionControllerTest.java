@@ -29,6 +29,7 @@ import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
+import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("거래 내역 컨트롤러 단위 테스트")
@@ -59,10 +60,12 @@ class TransactionControllerTest {
 		void success_findMyTransactions() throws Exception {
 			// given
 			FindTransactionResponse txContent1 = new FindTransactionResponse(
-				1L, 150000L, TransactionMethod.AUCTION, txTime1, "테스트 CPU", true
+				1L, 150000L, TransactionMethod.AUCTION, txTime1, "테스트 CPU", true,
+				"test", UserType.BUYER.name()
 			);
 			FindTransactionResponse txContent2 = new FindTransactionResponse(
-				2L, 89000L, TransactionMethod.DIRECT, txTime2, "테스트 GPU", false
+				2L, 89000L, TransactionMethod.DIRECT, txTime2, "테스트 GPU", false,
+				"test", UserType.SELLER.name()
 			);
 			List<FindTransactionResponse> contents = List.of(txContent1, txContent2);
 
@@ -104,7 +107,8 @@ class TransactionControllerTest {
 		void success_findMyTransactions_pageZeroOrBelow() throws Exception {
 			// given
 			FindTransactionResponse txContent = new FindTransactionResponse(
-				TRANSACTION_ID, TX_PRICE, TransactionMethod.AUCTION, txTime1, PRODUCT_NAME, true
+				TRANSACTION_ID, TX_PRICE, TransactionMethod.AUCTION, txTime1, PRODUCT_NAME, true,
+				"test", UserType.BUYER.name()
 			);
 			List<FindTransactionResponse> contents = List.of(txContent);
 

@@ -29,6 +29,7 @@ import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
+import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.exception.TransactionErrorCode;
 import nbc.chillguys.nebulazone.domain.transaction.exception.TransactionException;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
@@ -97,7 +98,9 @@ class TransactionServiceUnitTest {
 			TransactionMethod.DIRECT,
 			LocalDateTime.now(),
 			"테스트 상품",
-			true
+			true,
+			user.getNickname(),
+			UserType.BUYER
 		);
 
 		transactionFindDetailInfo = new TransactionFindDetailInfo(

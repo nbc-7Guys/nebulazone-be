@@ -14,7 +14,9 @@ public record FindTransactionResponse(
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime txCreatedAt,
 	String productName,
-	boolean isSold
+	boolean isSold,
+	String userNickname,
+	String userType
 ) {
 
 	public static FindTransactionResponse from(TransactionFindAllInfo txFindAllInfo) {
@@ -24,7 +26,9 @@ public record FindTransactionResponse(
 			txFindAllInfo.txMethod(),
 			txFindAllInfo.txCreateAt(),
 			txFindAllInfo.productName(),
-			txFindAllInfo.isSold()
+			txFindAllInfo.isSold(),
+			txFindAllInfo.userNickname(),
+			txFindAllInfo.userType().name()
 		);
 	}
 }

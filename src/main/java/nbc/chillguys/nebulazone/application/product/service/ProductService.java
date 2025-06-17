@@ -174,7 +174,7 @@ public class ProductService {
 			product.getPrice());
 		Transaction buyerTx = transactionDomainService.createTransaction(buyerTxCreateCommand);
 		TransactionCreateCommand sellerTxCreateCommand
-			= TransactionCreateCommand.of(user, UserType.SELLER, product, product.getTxMethod().name(),
+			= TransactionCreateCommand.of(product.getSeller(), UserType.SELLER, product, product.getTxMethod().name(),
 			product.getPrice());
 		Transaction sellerTx = transactionDomainService.createTransaction(sellerTxCreateCommand);
 

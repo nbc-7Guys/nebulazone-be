@@ -267,9 +267,9 @@ class TransactionDomainServiceUnitTest {
 	private List<TransactionFindAllInfo> createTransactionFindAllInfoList() {
 		return List.of(
 			new TransactionFindAllInfo(1L, TRANSACTION_PRICE, TransactionMethod.DIRECT,
-				LocalDateTime.now(), PRODUCT_NAME, true),
+				LocalDateTime.now(), PRODUCT_NAME, true, buyer.getNickname(), UserType.BUYER),
 			new TransactionFindAllInfo(2L, TRANSACTION_PRICE + 50000L, TransactionMethod.AUCTION,
-				LocalDateTime.now().minusHours(1), PRODUCT_NAME, true)
+				LocalDateTime.now().minusHours(1), PRODUCT_NAME, true, buyer.getNickname(), UserType.BUYER)
 		);
 	}
 
