@@ -175,8 +175,8 @@ class ProductControllerTest {
 		void success_searchProduct() throws Exception {
 			// Given
 			SearchProductResponse response = new SearchProductResponse(1L, "testProduct",
-				1L, 1L, "testSellerNickname", 1000L, ProductTxMethod.DIRECT.name(),
-				LocalDateTime.now(), List.of());
+				1L, 1L, "testSellerNickname", false, 1000L,
+				ProductTxMethod.DIRECT.name(), LocalDateTime.now(), List.of());
 			Page<SearchProductResponse> page = new PageImpl<>(List.of(response),
 				PageRequest.of(0, 10), 1);
 
