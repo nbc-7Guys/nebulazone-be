@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.domain.product.repository;
 
+import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
+
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -21,6 +23,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
 		return Optional.ofNullable(
 			queryFactory.selectFrom(product)
+				.join(product.seller, user).fetchJoin()
 				.where(
 					product.id.eq(productId),
 					product.isDeleted.isFalse()

@@ -59,25 +59,19 @@ public class User extends BaseEntity {
 	private UserStatus status;
 
 	@ElementCollection
-	@CollectionTable(
-		name = "user_roles",
-		joinColumns = @JoinColumn(name = "user_id")
-	)
+	@CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
 	@Enumerated(EnumType.STRING)
 	private Set<UserRole> roles;
 
 	@ElementCollection
-	@CollectionTable(
-		name = "user_addresses",
-		joinColumns = @JoinColumn(name = "user_id")
-	)
+	@CollectionTable(name = "user_addresses", joinColumns = @JoinColumn(name = "user_id"))
 	private Set<Address> addresses;
 
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public User(String email, String password, String phone, String nickname, String profileImage,
-		long point, OAuthType oAuthType, String oAuthId, Set<UserRole> roles, Set<Address> addresses) {
+	public User(String email, String password, String phone, String nickname, String profileImage, long point,
+		OAuthType oAuthType, String oAuthId, Set<UserRole> roles, Set<Address> addresses) {
 		this.email = email;
 		this.password = password;
 		this.phone = phone;
@@ -121,7 +115,16 @@ public class User extends BaseEntity {
 			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
 		}
 
-		this.point -= point;
+		this.point -= usePoint;
+	}
+
+	public void updatePoint(long beforePoint, long afterPoint) {
+
+		long differentPrice = afterPoint - beforePoint;
+		if (differentPrice > 0 && this.point < differentPrice) {
+			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
+		}
+		this.point -= differentPrice;
 	}
 
 	public boolean hasNotEnoughPoint(int price) {
@@ -144,6 +147,10 @@ public class User extends BaseEntity {
 		}
 		this.roles.clear();
 		this.roles.addAll(roles);
+	}
+
+	public void addPoint(Long point) {
+		this.point += point;
 	}
 
 }

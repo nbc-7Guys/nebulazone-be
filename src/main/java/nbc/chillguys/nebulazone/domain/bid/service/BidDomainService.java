@@ -2,6 +2,7 @@ package nbc.chillguys.nebulazone.domain.bid.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -28,7 +29,7 @@ public class BidDomainService {
 	private final BidRepository bidRepository;
 
 	/**
-	 * 입찰 생성
+	 * 특정 경매의 입찰 생성 - 최초 입찰
 	 * @param lockAuction 삭제되지 않은 비관적 락이 적용된 Auction(상품, 셀러 정보 포함)
 	 * @param user 입찰자
 	 * @param price 입찰 가격
@@ -61,6 +62,8 @@ public class BidDomainService {
 		}
 
 		lockAuction.updateBidPrice(price);
+		user.usePoint(price);
+
 		Bid bid = Bid.builder()
 			.auction(lockAuction)
 			.user(user)
@@ -68,6 +71,50 @@ public class BidDomainService {
 			.build();
 
 		return bidRepository.save(bid);
+	}
+
+	/**
+	 * 특정 경매의 입찰 수정 - 기존 입찰이 존재할 때
+	 * @param lockAuction 경매
+	 * @param findBid 기존 입찰 내역
+	 * @param user 로그인 유저
+	 * @param price 입찰가
+	 * @return bid
+	 * @author 전나겸
+	 */
+	@Transactional
+	public Bid updateBid(Auction lockAuction, Bid findBid, User user, Long price) {
+
+		if (Duration.between(LocalDateTime.now(), lockAuction.getEndTime()).isNegative()) {
+			throw new AuctionException(AuctionErrorCode.ALREADY_CLOSED_AUCTION);
+		}
+
+		if (findBid.isNotBidOwner(user)) {
+			throw new BidException(BidErrorCode.BID_NOT_OWNER);
+		}
+
+		if (findBid.isDifferentAuction(lockAuction)) {
+			throw new BidException(BidErrorCode.BID_AUCTION_MISMATCH);
+		}
+
+		if (lockAuction.isAuctionOwner(user)) {
+			throw new BidException(BidErrorCode.CANNOT_BID_OWN_AUCTION);
+		}
+
+		if (lockAuction.isWon()) {
+			throw new AuctionException(AuctionErrorCode.ALREADY_WON_AUCTION);
+		}
+
+		Optional<Long> highestPrice = bidRepository.findActiveBidHighestPriceByAuction(lockAuction);
+
+		if (highestPrice.isPresent() && highestPrice.get() >= price) {
+			throw new BidException(BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE);
+		}
+
+		lockAuction.updateBidPrice(price);
+		user.updatePoint(findBid.getPrice(), price);
+		findBid.updateBidPrice(price);
+		return findBid;
 	}
 
 	/**
@@ -169,4 +216,23 @@ public class BidDomainService {
 			.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
 	}
 
+	/**
+	 * 특정 경매의 유저가 입찰한 bid 조회
+	 * @param auctionId 특정 경매 id
+	 * @param userId 조회할 유저 id
+	 * @return 조회된 Bid
+	 * @author 전나겸
+	 */
+	public Optional<Bid> findBidByAuctionIdAndUserId(Long auctionId, Long userId) {
+		return bidRepository.findBidByAuctionIdAndUserId(auctionId, userId);
+	}
+
+	/**
+	 * 해당 경매의 입찰 전체조회
+	 * @param auctionId
+	 * @return
+	 */
+	public List<Bid> findBidsByAuctionIdAndStatusBid(Long auctionId) {
+		return bidRepository.findBidsByAuctionIdAndStatusBid(auctionId);
+	}
 }

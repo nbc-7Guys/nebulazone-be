@@ -73,4 +73,8 @@ public class Bid extends BaseEntity {
 		return !this.auction.equals(auction);
 	}
 
+	public void updateBidPrice(Long price) {
+		this.price = price;
+	}
+
 }

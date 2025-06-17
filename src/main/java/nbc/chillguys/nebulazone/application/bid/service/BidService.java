@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.application.bid.service;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,16 +29,28 @@ public class BidService {
 	private final UserDomainService userDomainService;
 	private final AuctionDomainService auctionDomainService;
 
+	/**
+	 * 경매에 기존 입찰 내역이 없다면 입찰 생성, 있다면 입찰 수정
+	 * @param auctionId 대상 경매
+	 * @param authUser 인증 유저
+	 * @param request 입찰 정보
+	 * @return 입찰 후 반환값
+	 * @author 전나겸
+	 */
 	@Transactional
-	public CreateBidResponse createBid(Long auctionId, AuthUser authUser, CreateBidRequest request) {
+	public CreateBidResponse upsertBid(Long auctionId, AuthUser authUser, CreateBidRequest request) {
 
 		Auction lockAuction = auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId);
 
 		User user = userDomainService.findActiveUserById(authUser.getId());
-		user.usePoint(request.price());
 
-		Bid createBid = bidDomainService.createBid(lockAuction, user, request.price());
-		return CreateBidResponse.from(createBid);
+		Optional<Bid> optBidByUser = bidDomainService.findBidByAuctionIdAndUserId(lockAuction.getId(), user.getId());
+
+		Bid upsertBid = optBidByUser.isPresent()
+			? bidDomainService.updateBid(lockAuction, optBidByUser.get(), user, request.price())
+			: bidDomainService.createBid(lockAuction, user, request.price());
+
+		return CreateBidResponse.from(upsertBid);
 
 	}
 

@@ -28,12 +28,12 @@ public class BidController {
 	private final BidService bidService;
 
 	@PostMapping("/auctions/{auctionId}/bids")
-	public ResponseEntity<CreateBidResponse> createBid(
+	public ResponseEntity<CreateBidResponse> upsertBid(
 		@PathVariable("auctionId") Long auctionId,
 		@AuthenticationPrincipal AuthUser authUser,
 		@Valid @RequestBody CreateBidRequest request) {
 
-		CreateBidResponse response = bidService.createBid(auctionId, authUser, request);
+		CreateBidResponse response = bidService.upsertBid(auctionId, authUser, request);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}

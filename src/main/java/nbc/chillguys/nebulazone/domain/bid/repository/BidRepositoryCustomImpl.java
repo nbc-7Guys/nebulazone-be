@@ -105,4 +105,27 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 				.fetchOne());
 
 	}
+
+	@Override
+	public Optional<Bid> findBidByAuctionIdAndUserId(Long auctionId, Long userId) {
+
+		return Optional.ofNullable(
+			jpaQueryFactory
+				.select(bid)
+				.from(bid)
+				.join(bid.user, user).fetchJoin()
+				.where(bid.auction.id.eq(auctionId))
+				.fetchOne());
+	}
+
+	@Override
+	public List<Bid> findBidsByAuctionIdAndStatusBid(Long auctionId) {
+
+		return jpaQueryFactory
+			.select(bid)
+			.from(bid)
+			.join(bid.user, user).fetchJoin()
+			.where(bid.auction.id.eq(auctionId), bid.status.eq(BidStatus.BID))
+			.fetch();
+	}
 }
