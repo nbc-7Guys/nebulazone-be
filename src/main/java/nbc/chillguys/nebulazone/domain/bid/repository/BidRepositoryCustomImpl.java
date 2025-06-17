@@ -115,7 +115,7 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 			jpaQueryFactory
 				.selectFrom(bid)
 				.join(bid.user, user).fetchJoin()
-				.where(bid.auction.id.eq(auctionId))
+				.where(bid.auction.id.eq(auctionId), user.id.eq(userId))
 				.fetchOne());
 	}
 
