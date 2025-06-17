@@ -349,6 +349,23 @@ class UserDomainServiceTest {
 				.isEqualTo(UserErrorCode.ALREADY_EXISTS_NICKNAME);
 
 		}
+
+		@Test
+		@DisplayName("전화번호 검증 실패 - 이미 존재하는 전화번호")
+		void fail_validPhone_alreadyExistsPhone() {
+			// Given
+			given(userRepository.existsByPhone("01012345678"))
+				.willReturn(true);
+
+			// When
+			UserException exception = assertThrows(UserException.class,
+				() -> userDomainService.validPhone("01012345678"));
+
+			// Then
+			assertThat(exception.getErrorCode())
+				.isEqualTo(UserErrorCode.ALREADY_EXISTS_PHONE);
+
+		}
 	}
 
 	@Nested

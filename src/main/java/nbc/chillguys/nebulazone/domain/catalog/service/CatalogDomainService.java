@@ -41,7 +41,7 @@ public class CatalogDomainService {
 	 * @author 이승현
 	 */
 	public Catalog getCatalogById(Long catalogId) {
-		return catalogRepository.findById(catalogId)
+		return catalogRepository.findWithReviewById(catalogId)
 			.orElseThrow(() -> new CatalogException(CatalogErrorCode.CATALOG_NOT_FOUND));
 	}
 }

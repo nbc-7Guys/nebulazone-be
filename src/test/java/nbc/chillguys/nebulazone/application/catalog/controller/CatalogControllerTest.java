@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import nbc.chillguys.nebulazone.application.catalog.dto.response.CatalogResponse;
 import nbc.chillguys.nebulazone.application.catalog.dto.response.SearchCatalogResponse;
 import nbc.chillguys.nebulazone.application.catalog.service.CatalogService;
+import nbc.chillguys.nebulazone.application.review.dto.response.ReviewResponse;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
 
@@ -76,7 +77,8 @@ class CatalogControllerTest {
 		// Given
 		Long catalogId = 1L;
 		CatalogResponse response = new CatalogResponse(catalogId, "test", "desc",
-			CatalogType.GPU.name(), LocalDateTime.now(), LocalDateTime.now());
+			CatalogType.GPU.name(), LocalDateTime.now(), LocalDateTime.now(),
+			List.of(new ReviewResponse(1L, "review", 1, LocalDateTime.now())));
 
 		given(catalogService.getCatalog(catalogId))
 			.willReturn(response);
@@ -95,7 +97,13 @@ class CatalogControllerTest {
 				jsonPath("$.catalogDescription")
 					.value("desc"),
 				jsonPath("$.catalogType")
-					.value("GPU")
+					.value("GPU"),
+				jsonPath("$.reviews.[0].id")
+					.value(1L),
+				jsonPath("$.reviews.[0].content")
+					.value("review"),
+				jsonPath("$.reviews.[0].star")
+					.value(1)
 			);
 	}
 
