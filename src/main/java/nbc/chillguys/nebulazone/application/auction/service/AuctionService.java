@@ -74,19 +74,17 @@ public class AuctionService {
 		Product product = productDomainService.findActiveProductById(request.productId());
 		product.purchase();
 
+		List<Bid> bidList = bidDomainService.findBidsByAuctionIdAndStatusBid(auctionId);
+		bidList.forEach(bid -> bid.getUser().addPoint(bid.getPrice()));
+
+		product.getSeller().addPoint(wonBid.getPrice());
+
 		ManualEndAuctionInfo auctionInfo = auctionDomainService.manualEndAuction(loginUser, wonBid, auctionId);
 
 		TransactionCreateCommand buyerTxCreateCommand = TransactionCreateCommand.of(wonBid.getUser(), UserType.BUYER,
 			product, product.getTxMethod().name(), auctionInfo.wonProductPrice());
 
 		txDomainService.createTransaction(buyerTxCreateCommand);
-		List<Bid> bidList = bidDomainService.findBidsByAuctionIdAndStatusBid(auctionId);
-		bidList.forEach(bid -> bid.getUser().addPoint(bid.getPrice()));
-
-		product.getSeller().addPoint(wonBid.getPrice());
-
-		TransactionCreateCommand txCreateCommand = TransactionCreateCommand.of(wonBid.getUser(), product,
-			product.getTxMethod().name(), auctionInfo.wonProductPrice());
 
 		TransactionCreateCommand sellerTxCreateCommand = TransactionCreateCommand.of(product.getSeller(),
 			UserType.SELLER, product, product.getTxMethod().name(), auctionInfo.wonProductPrice());

@@ -54,11 +54,9 @@ public class AutoAuctionService {
 
 		product.getSeller().addPoint(wonBid.getPrice());
 
-		TransactionCreateCommand txCreateCommand =
-			TransactionCreateCommand.of(wonBid.getUser(), product, product.getTxMethod().name(), wonBid.getPrice());
 		TransactionCreateCommand buyerTxCreateCommand =
-			TransactionCreateCommand.of(wonBid.getUser(), UserType.BUYER, product, product.getTxMethod().name(),
-				wonBid.getPrice());
+			TransactionCreateCommand.of(wonBid.getUser(), UserType.BUYER,
+				product, product.getTxMethod().name(), wonBid.getPrice());
 
 		txDomainService.createTransaction(buyerTxCreateCommand);
 

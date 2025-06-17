@@ -237,4 +237,4 @@ public class BidDomainService {
 		return bidRepository.findBidsByAuctionIdAndStatusBid(auctionId);
 	}
 }
-4
+
