@@ -38,6 +38,9 @@ public record ProductDocument(
 	@Field(type = FieldType.Keyword)
 	String sellerNickname,
 
+	@Field(type = FieldType.Boolean)
+	boolean isSold,
+
 	@Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
 	LocalDateTime createdAt,
 
@@ -53,6 +56,7 @@ public record ProductDocument(
 			product.getCatalogId(),
 			product.getSellerId(),
 			product.getSellerNickname(),
+			product.isSold(),
 			product.getCreatedAt(),
 			product.getProductImages().stream()
 				.map(ProductImage::getUrl)
