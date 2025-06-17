@@ -17,6 +17,7 @@ public record ProductResponse(
 	String productDescription,
 	Long productPrice,
 	ProductTxMethod productTxMethod,
+	boolean isSold,
 	ProductEndTime endTime,
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt,
@@ -31,6 +32,7 @@ public record ProductResponse(
 			product.getDescription(),
 			product.getPrice(),
 			product.getTxMethod(),
+			product.isSold(),
 			endTime,
 			product.getCreatedAt(),
 			product.getModifiedAt(),
@@ -47,6 +49,7 @@ public record ProductResponse(
 			product.getDescription(),
 			product.getPrice(),
 			product.getTxMethod(),
+			product.isSold(),
 			null,
 			product.getCreatedAt(),
 			product.getModifiedAt(),
