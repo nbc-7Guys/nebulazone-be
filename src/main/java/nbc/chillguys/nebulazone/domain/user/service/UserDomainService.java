@@ -189,7 +189,7 @@ public class UserDomainService {
 	 */
 	@Transactional
 	public User updateUserNicknameOrPassword(UserUpdateCommand userUpdateCommand) {
-		User user = findActiveUserById(userUpdateCommand.userId());
+		User user = userUpdateCommand.user();
 
 		if (userUpdateCommand.nickname() == null && userUpdateCommand.oldPassword() == null
 			&& userUpdateCommand.newPassword() == null) {
@@ -210,7 +210,7 @@ public class UserDomainService {
 			user.updatePassword(passwordEncoder.encode(userUpdateCommand.newPassword()));
 		}
 
-		return user;
+		return userRepository.save(user);
 	}
 
 	/**
@@ -220,6 +220,8 @@ public class UserDomainService {
 	 * @author 이승현
 	 */
 	public void validPhone(String phone) {
+		phone = phone.replaceAll("-", "");
+
 		if (userRepository.existsByPhone(phone)) {
 			throw new UserException(UserErrorCode.ALREADY_EXISTS_PHONE);
 		}

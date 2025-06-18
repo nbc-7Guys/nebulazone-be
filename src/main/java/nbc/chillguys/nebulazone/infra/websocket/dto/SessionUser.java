@@ -1,15 +1,15 @@
 package nbc.chillguys.nebulazone.infra.websocket.dto;
 
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 public record SessionUser(
 	Long id,
 	String email
 ) {
-	public static SessionUser from(AuthUser authUser) {
+	public static SessionUser from(User user) {
 		return new SessionUser(
-			authUser.getId(),
-			authUser.getEmail()
+			user.getId(),
+			user.getEmail()
 		);
 	}
 }

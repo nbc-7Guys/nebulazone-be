@@ -375,11 +375,8 @@ class UserDomainServiceTest {
 		@DisplayName("유저 닉네임 변경 성공")
 		void success_updateUserNicknameOrPassword_nickname() {
 			// Given
-			UserUpdateCommand userUpdateCommand = new UserUpdateCommand(1L, "newTest", null, null);
+			UserUpdateCommand userUpdateCommand = new UserUpdateCommand(user, "newTest", null, null);
 			String originalNickname = user.getNickname();
-
-			given(userRepository.findActiveUserById(anyLong()))
-				.willReturn(Optional.ofNullable(user));
 
 			// When
 			userDomainService.updateUserNicknameOrPassword(userUpdateCommand);
@@ -395,11 +392,9 @@ class UserDomainServiceTest {
 		@DisplayName("유저 비밀번호 변경 성공")
 		void success_updateUserNicknameOrPassword_password() {
 			// Given
-			UserUpdateCommand userUpdateCommand = new UserUpdateCommand(1L, null, "encodedPassword", "newPassword");
+			UserUpdateCommand userUpdateCommand = new UserUpdateCommand(user, null, "encodedPassword", "newPassword");
 			String originalPassword = user.getPassword();
 
-			given(userRepository.findActiveUserById(anyLong()))
-				.willReturn(Optional.ofNullable(user));
 			given(passwordEncoder.matches("encodedPassword", user.getPassword()))
 				.willReturn(true);
 			given(passwordEncoder.encode("newPassword"))
@@ -419,13 +414,11 @@ class UserDomainServiceTest {
 		@DisplayName("유저 비밀번호, 닉네임 변경 성공")
 		void success_updateUserNicknameOrPassword_all() {
 			// Given
-			UserUpdateCommand userUpdateCommand = new UserUpdateCommand(1L, "newTest", "encodedPassword",
+			UserUpdateCommand userUpdateCommand = new UserUpdateCommand(user, "newTest", "encodedPassword",
 				"newPassword");
 			String originalNickname = user.getNickname();
 			String originalPassword = user.getPassword();
 
-			given(userRepository.findActiveUserById(anyLong()))
-				.willReturn(Optional.ofNullable(user));
 			given(passwordEncoder.matches("encodedPassword", user.getPassword()))
 				.willReturn(true);
 			given(passwordEncoder.encode("newPassword"))
@@ -446,31 +439,10 @@ class UserDomainServiceTest {
 		}
 
 		@Test
-		@DisplayName("유저 닉네임, 비밀번호 수정 실패 - 유저를 찾을 수 없음")
-		void fail_updateUserNicknameOrPassword_userNotFound() {
-			// Given
-			UserUpdateCommand userUpdateCommand = new UserUpdateCommand(1L, "newTest", "encodedPassword",
-				"newPassword");
-			given(userRepository.findActiveUserById(anyLong()))
-				.willReturn(Optional.empty());
-
-			// When
-			UserException exception = assertThrows(UserException.class, () ->
-				userDomainService.updateUserNicknameOrPassword(userUpdateCommand));
-
-			// Then
-			assertThat(exception.getErrorCode())
-				.isEqualTo(UserErrorCode.USER_NOT_FOUND);
-
-		}
-
-		@Test
 		@DisplayName("유저 닉네임, 비밀번호 수정 실패 - 수정 사항이 존재하지 않음")
 		void fail_updateUserNicknameOrPassword_nothingToUpdate() {
 			// Given
-			UserUpdateCommand userUpdateCommand = new UserUpdateCommand(1L, null, null, null);
-			given(userRepository.findActiveUserById(anyLong()))
-				.willReturn(Optional.ofNullable(user));
+			UserUpdateCommand userUpdateCommand = new UserUpdateCommand(user, null, null, null);
 
 			// When
 			UserException exception = assertThrows(UserException.class, () ->

@@ -1,8 +1,13 @@
 package nbc.chillguys.nebulazone.domain.user.entity;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -16,6 +21,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +33,7 @@ import nbc.chillguys.nebulazone.domain.user.exception.UserException;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class User extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -157,6 +164,13 @@ public class User extends BaseEntity {
 
 	public void addPoint(Long point) {
 		this.point += point;
+	}
+
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return this.roles.stream()
+			.map(role -> new SimpleGrantedAuthority(role.name()))
+			.collect(Collectors.toSet());
+
 	}
 
 }

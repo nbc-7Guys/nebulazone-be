@@ -9,13 +9,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.chat.dto.request.ChatSendTextMessageCommand;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.MessageType;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
 import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
 import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
@@ -62,15 +62,15 @@ public class ChatMessageService {
 	/**
 	 * 메세지 전송(이미지).
 	 *
-	 * @param authUser 접속한 유저의 인증 객체
+	 * @param user 접속한 유저의 인증 객체
 	 * @param multipartFile 전송할 이미지 파일
 	 * @param roomId 메시지를 보낼 방ID
 	 * @param type 타입
 	 */
-	public void sendImageMessage(AuthUser authUser, MultipartFile multipartFile, Long roomId, String type) {
-		SessionUser sessionUser = SessionUser.from(authUser);
+	public void sendImageMessage(User user, MultipartFile multipartFile, Long roomId, String type) {
+		SessionUser sessionUser = SessionUser.from(user);
 
-		chatDomainService.validateUserAccessToChatRoom(authUser, roomId);
+		chatDomainService.validateUserAccessToChatRoom(user, roomId);
 		String imageUrl = s3Service.generateUploadUrlAndUploadFile(multipartFile);
 		MessageType messageType = MessageType.valueOf(type);
 		sendAndSaveMessage(roomId, imageUrl, messageType, sessionUser);

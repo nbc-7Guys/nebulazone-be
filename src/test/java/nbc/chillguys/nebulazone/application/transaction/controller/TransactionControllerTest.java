@@ -27,9 +27,9 @@ import nbc.chillguys.nebulazone.application.transaction.dto.response.FindTransac
 import nbc.chillguys.nebulazone.application.transaction.service.TransactionService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("거래 내역 컨트롤러 단위 테스트")
@@ -72,7 +72,7 @@ class TransactionControllerTest {
 			Page<FindTransactionResponse> page = new PageImpl<>(contents, PageRequest.of(0, 20), 2);
 			CommonPageResponse<FindTransactionResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(txService.findMyTransactions(any(AuthUser.class), eq(0), eq(20)))
+			given(txService.findMyTransactions(any(User.class), eq(0), eq(20)))
 				.willReturn(expectedResponse);
 
 			// when & then
@@ -115,7 +115,7 @@ class TransactionControllerTest {
 			Page<FindTransactionResponse> page = new PageImpl<>(contents, PageRequest.of(0, 20), 1);
 			CommonPageResponse<FindTransactionResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(txService.findMyTransactions(any(AuthUser.class), eq(0), eq(20)))
+			given(txService.findMyTransactions(any(User.class), eq(0), eq(20)))
 				.willReturn(expectedResponse);
 
 			// when & then
@@ -140,7 +140,7 @@ class TransactionControllerTest {
 				50L, "고급 그래픽카드", txTime1.minusDays(5), true
 			);
 
-			given(txService.findMyTransaction(any(AuthUser.class), eq(TRANSACTION_ID)))
+			given(txService.findMyTransaction(any(User.class), eq(TRANSACTION_ID)))
 				.willReturn(txDetail);
 
 			// when & then

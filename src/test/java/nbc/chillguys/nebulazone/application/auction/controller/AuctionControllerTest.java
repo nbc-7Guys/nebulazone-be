@@ -33,7 +33,7 @@ import nbc.chillguys.nebulazone.application.auction.service.AuctionService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("경매 컨트롤러 단위 테스트")
@@ -317,7 +317,7 @@ class AuctionControllerTest {
 				WON_PRICE, PRODUCT_NAME, wonDate
 			);
 
-			given(auctionService.manualEndAuction(eq(AUCTION_ID), any(AuthUser.class), eq(request)))
+			given(auctionService.manualEndAuction(eq(AUCTION_ID), any(User.class), eq(request)))
 				.willReturn(manualEndResponse);
 
 			// when & then
@@ -350,7 +350,7 @@ class AuctionControllerTest {
 		void success_deleteAuction() throws Exception {
 			// given
 			DeleteAuctionResponse deleteResponse = new DeleteAuctionResponse(AUCTION_ID);
-			given(auctionService.deleteAuction(eq(AUCTION_ID), any(AuthUser.class))).willReturn(deleteResponse);
+			given(auctionService.deleteAuction(eq(AUCTION_ID), any(User.class))).willReturn(deleteResponse);
 
 			// when & then
 			mockMvc.perform(delete("/auctions/{auctionId}", AUCTION_ID))
