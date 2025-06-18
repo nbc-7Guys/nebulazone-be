@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <title>결제 성공</title></head>
+<body>
+<h2>결제 성공!</h2>
+<div id="params"></div>
+<button id="confirmBtn">결제 승인 처리(백엔드 호출)</button>
+<script>
+    // URL 쿼리파라미터 추출
+    const params = new URLSearchParams(window.location.search);
+    const paymentKey = params.get('paymentKey');
+    const orderId = params.get('orderId');
+    const point = params.get('point');
+    document.getElementById('params').innerText =
+        `paymentKey: ${paymentKey}\norderId: ${orderId}\npoint: ${point}`;
+    // 백엔드 결제 승인(Confirm) 호출
+    document.getElementById('confirmBtn').onclick = function () {
+        fetch('http://localhost:8080/payments/confirm', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({paymentKey, orderId, point: Number(point)})
+        })
+            .then(res => res.json())
+            .then(data => alert('백엔드 응답: ' + JSON.stringify(data)))
+            .catch(e => alert('에러: ' + e));
+    };
+</script>
+</body>
+</html>
