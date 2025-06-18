@@ -200,28 +200,6 @@ class PostServiceTest {
 			verify(s3Service, times(1)).generateUploadUrlAndUploadFile(mockFile);
 			verify(postDomainService, times(1)).createPost(any(PostCreateCommand.class), any(List.class));
 		}
-
-		// @Test
-		// @DisplayName("게시글 생성 실패 - 존재하지 않는 사용자")
-		// void fail_createPost_userNotFound() {
-		// 	// Given
-		// 	CreatePostRequest request = new CreatePostRequest(
-		// 		"테스트 게시글 제목",
-		// 		"테스트 게시글 내용",
-		// 		"free"
-		// 	);
-		// 	List<MultipartFile> files = List.of();
-		//
-		// 	given(userDomainService.findActiveUserById(user2.getId()))
-		// 		.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
-		//
-		// 	// When & Then
-		// 	assertThatThrownBy(() -> postService.createPost(user2, request, files))
-		// 		.isInstanceOf(UserException.class)
-		// 		.hasFieldOrPropertyWithValue("errorCode", UserErrorCode.USER_NOT_FOUND);
-		//
-		// 	verify(userDomainService, times(1)).findActiveUserById(user2.getId());
-		// }
 	}
 
 }

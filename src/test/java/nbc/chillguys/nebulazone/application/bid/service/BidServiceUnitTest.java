@@ -42,6 +42,8 @@ import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
+import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
+import nbc.chillguys.nebulazone.domain.user.exception.UserException;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @DisplayName("입찰 서비스 단위 테스트")
@@ -103,7 +105,7 @@ class BidServiceUnitTest {
 			given(bidDomainService.createBid(auction, bidder, BID_PRICE)).willReturn(createdBid);
 
 			// when
-			CreateBidResponse result = bidService.upsertBid(auctionId, bidder, createBidRequest);
+			CreateBidResponse result = bidService.upsertBid(auctionId, loggedInUser, createBidRequest);
 
 			// then
 			assertThat(result.bidId()).isEqualTo(100L);
@@ -134,26 +136,26 @@ class BidServiceUnitTest {
 			verify(bidDomainService, never()).createBid(any(), any(), any());
 		}
 
-		// @Test
-		// @DisplayName("입찰 생성 실패 - 사용자를 찾을 수 없음")
-		// void fail_createBid_userNotFound() {
-		// 	// given
-		// 	Long auctionId = 1L;
-		//
-		// 	given(auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId)).willReturn(auction);
-		// 	given(userDomainService.findActiveUserById(user.getId()))
-		// 		.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
-		//
-		// 	// when & then
-		// 	assertThatThrownBy(() -> bidService.upsertBid(auctionId, user, createBidRequest))
-		// 		.isInstanceOf(UserException.class)
-		// 		.extracting("errorCode")
-		// 		.isEqualTo(UserErrorCode.USER_NOT_FOUND);
-		//
-		// 	verify(auctionDomainService).findActiveAuctionWithProductAndSellerLock(auctionId);
-		// 	verify(userDomainService).findActiveUserById(user.getId());
-		// 	verify(bidDomainService, never()).createBid(any(), any(), any());
-		// }
+		@Test
+		@DisplayName("입찰 생성 실패 - 사용자를 찾을 수 없음")
+		void fail_createBid_userNotFound() {
+			// given
+			Long auctionId = 1L;
+
+			given(auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId)).willReturn(auction);
+			given(userDomainService.findActiveUserById(loggedInUser.getId()))
+				.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
+
+			// when & then
+			assertThatThrownBy(() -> bidService.upsertBid(auctionId, loggedInUser, createBidRequest))
+				.isInstanceOf(UserException.class)
+				.extracting("errorCode")
+				.isEqualTo(UserErrorCode.USER_NOT_FOUND);
+
+			verify(auctionDomainService).findActiveAuctionWithProductAndSellerLock(auctionId);
+			verify(userDomainService).findActiveUserById(loggedInUser.getId());
+			verify(bidDomainService, never()).createBid(any(), any(), any());
+		}
 
 		@Test
 		@DisplayName("입찰 생성 실패 - 현재 입찰가보다 낮은 가격으로 입찰")
@@ -256,26 +258,6 @@ class BidServiceUnitTest {
 			verify(auctionDomainService).findActiveAuctionById(auctionId);
 			verify(bidDomainService, never()).findBids(any(), anyInt(), anyInt());
 		}
-
-		// @Test
-		// @DisplayName("내 입찰 목록 조회 실패 - 사용자를 찾을 수 없음")
-		// void fail_findMyBids_userNotFound() {
-		// 	// given
-		// 	int page = 0;
-		// 	int size = 10;
-		//
-		// 	given(userDomainService.findActiveUserById(user.getId()))
-		// 		.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
-		//
-		// 	// when & then
-		// 	assertThatThrownBy(() -> bidService.findMyBids(user, page, size))
-		// 		.isInstanceOf(UserException.class)
-		// 		.extracting("errorCode")
-		// 		.isEqualTo(UserErrorCode.USER_NOT_FOUND);
-		//
-		// 	verify(userDomainService).findActiveUserById(user.getId());
-		// 	verify(bidDomainService, never()).findMyBids(any(), anyInt(), anyInt());
-		// }
 	}
 
 	@Nested
@@ -301,27 +283,6 @@ class BidServiceUnitTest {
 			verify(auctionDomainService).findActiveAuctionWithProductAndSellerLock(auctionId);
 			verify(bidDomainService).statusBid(auction, bidder, bidId);
 		}
-
-		// @Test
-		// @DisplayName("입찰 취소 실패 - 사용자를 찾을 수 없음")
-		// void fail_statusBid_userNotFound() {
-		// 	// given
-		// 	Long auctionId = 1L;
-		// 	Long bidId = 100L;
-		//
-		// 	given(userDomainService.findActiveUserById(user.getId()))
-		// 		.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
-		//
-		// 	// when & then
-		// 	assertThatThrownBy(() -> bidService.statusBid(user, auctionId, bidId))
-		// 		.isInstanceOf(UserException.class)
-		// 		.extracting("errorCode")
-		// 		.isEqualTo(UserErrorCode.USER_NOT_FOUND);
-		//
-		// 	verify(userDomainService).findActiveUserById(user.getId());
-		// 	verify(auctionDomainService, never()).findActiveAuctionWithProductAndSellerLock(any());
-		// 	verify(bidDomainService, never()).statusBid(any(), any(), any());
-		// }
 
 		@Test
 		@DisplayName("입찰 취소 실패 - 경매를 찾을 수 없음")

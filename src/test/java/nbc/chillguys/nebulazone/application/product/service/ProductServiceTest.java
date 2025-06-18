@@ -279,31 +279,6 @@ class ProductServiceTest {
 			verify(auctionSchedulerService, times(1)).autoAuctionEndSchedule(auction, auctionProduct.getId());
 		}
 
-		// @Test
-		// @DisplayName("상품 생성 실패 - 존재하지 않는 유저")
-		// void fail_createProduct_userNotFound() {
-		// 	// Given
-		// 	Long catalogId = 1L;
-		// 	CreateProductRequest request = new CreateProductRequest(
-		// 		"테스트 상품",
-		// 		"테스트 상품 설명",
-		// 		"direct",
-		// 		50000L,
-		// 		null
-		// 	);
-		// 	List<MultipartFile> files = List.of();
-		//
-		// 	given(userDomainService.findActiveUserById(User.getId()))
-		// 		.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
-		//
-		// 	// When & Then
-		// 	assertThatThrownBy(() -> productService.createProduct(user, catalogId, request, files))
-		// 		.isInstanceOf(UserException.class)
-		// 		.hasFieldOrPropertyWithValue("errorCode", UserErrorCode.USER_NOT_FOUND);
-		//
-		// 	verify(userDomainService, times(1)).findActiveUserById(User.getId());
-		// }
-
 		@Test
 		@DisplayName("상품 생성 실패 - 존재하지 않는 카탈로그")
 		void fail_createProduct_catalogNotFound() {

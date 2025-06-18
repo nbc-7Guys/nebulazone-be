@@ -143,21 +143,6 @@ class TransactionServiceUnitTest {
 
 			verify(txDomainService, times(1)).findMyTransactions(user, page, size);
 		}
-
-		// @Test
-		// @DisplayName("내 거래내역 전체 조회 실패 - 존재하지 않는 사용자")
-		// void fail_findMyTransactions_userNotFound() {
-		// 	// Given
-		// 	int page = 1;
-		// 	int size = 10;
-		//
-		// 	// When & Then
-		// 	assertThatThrownBy(() -> txService.findMyTransactions(user, page, size))
-		// 		.isInstanceOf(UserException.class)
-		// 		.hasFieldOrPropertyWithValue("errorCode", UserErrorCode.USER_NOT_FOUND);
-		//
-		// 	verify(txDomainService, never()).findMyTransactions(any(), anyInt(), anyInt());
-		// }
 	}
 
 	@Nested
@@ -189,23 +174,6 @@ class TransactionServiceUnitTest {
 
 			verify(txDomainService, times(1)).findMyTransaction(user, transactionId);
 		}
-
-		// @Test
-		// @DisplayName("내 거래내역 상세 조회 실패 - 존재하지 않는 사용자")
-		// void fail_findMyTransaction_userNotFound() {
-		// 	// Given
-		// 	Long transactionId = 1L;
-		//
-		// 	given(userDomainService.findActiveUserById(User.getId()))
-		// 		.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
-		//
-		// 	// When & Then
-		// 	assertThatThrownBy(() -> txService.findMyTransaction(User, transactionId))
-		// 		.isInstanceOf(UserException.class)
-		// 		.hasFieldOrPropertyWithValue("errorCode", UserErrorCode.USER_NOT_FOUND);
-		//
-		// 	verify(userDomainService, times(1)).findActiveUserById(User.getId());
-		// }
 
 		@Test
 		@DisplayName("내 거래내역 상세 조회 실패 - 존재하지 않는 거래내역")

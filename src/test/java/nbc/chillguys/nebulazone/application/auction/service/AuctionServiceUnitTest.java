@@ -185,22 +185,6 @@ class AuctionServiceUnitTest {
 			verify(auctionDomainService).deleteAuction(auctionId, seller);
 			verify(auctionSchedulerService).cancelSchedule(auctionId);
 		}
-
-		// @Test
-		// @DisplayName("경매 삭제 실패 - 사용자를 찾을 수 없음")
-		// void fail_deleteAuction_userNotFound() {
-		// 	// given
-		// 	Long auctionId = 1L;
-		//
-		// 	given(userDomainService.findActiveUserById(user.getId()))
-		// 		.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
-		//
-		// 	// when & then
-		// 	assertThatThrownBy(() -> auctionService.deleteAuction(auctionId, user))
-		// 		.isInstanceOf(UserException.class)
-		// 		.extracting("errorCode")
-		// 		.isEqualTo(UserErrorCode.USER_NOT_FOUND);
-		// }
 	}
 
 	@Nested
