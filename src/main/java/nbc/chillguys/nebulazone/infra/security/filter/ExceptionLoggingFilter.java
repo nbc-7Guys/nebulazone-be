@@ -45,7 +45,7 @@ public class ExceptionLoggingFilter extends OncePerRequestFilter {
 		MDC.put("method", method);
 		MDC.put("traceId", traceId);
 
-		log.warn("[REQUEST] {} {} | IP={} | traceId={}", method, uri, ip, traceId);
+		log.info("[REQUEST] {} {} | IP={} | traceId={}", method, uri, ip, traceId);
 
 		try {
 			filterChain.doFilter(request, response);
@@ -56,7 +56,7 @@ public class ExceptionLoggingFilter extends OncePerRequestFilter {
 			throw e; // 꼭 다시 던져야 ExceptionHandler에서 처리됨
 		} finally {
 			// (옵션) 응답 로그
-			log.warn("[RESPONSE] {} {} | status={} | IP={} | traceId={}", method, uri, response.getStatus(), ip,
+			log.info("[RESPONSE] {} {} | status={} | IP={} | traceId={}", method, uri, response.getStatus(), ip,
 				traceId);
 			// MDC 초기화 (메모리릭 방지)
 			MDC.clear();
