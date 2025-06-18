@@ -49,7 +49,7 @@ jobs:
           host: ${{ secrets.GCP_VM_HOST }}
           username: ubuntu
           key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
-          source: "docker/docker-compose.yml,docker/.env,prometheus/prometheus-prod.yml,filebeat/filebeat-prod.yml,logstash/config/pipelines-prod.yml,logstash/pipeline/pipeline-prod.conf,logstash/pipeline/pipeline2-prod.conf"
+          source: "docker/docker-compose.yml,docker/.env,prometheus/prometheus-prod.yml,filebeat/filebeat-prod.yml,logstash/config/pipelines-prod.yml,logstash/pipeline/pipeline-prod.conf"
           target: "~/app"
           overwrite: true
 
