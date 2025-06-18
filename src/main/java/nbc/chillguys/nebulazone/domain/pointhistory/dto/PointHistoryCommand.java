@@ -8,7 +8,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 @Builder
 public record PointHistoryCommand(
 	User user,
-	Integer price,
+	Long price,
 	String account,
 	PointHistoryType type
 ) {

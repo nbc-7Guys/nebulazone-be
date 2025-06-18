@@ -48,14 +48,14 @@ class PointHistoryServiceTest {
 			// given
 			Long userId = 1L;
 			User mockUser = mock(User.class);
-			PointRequest req = new PointRequest(1000, PointHistoryType.CHARGE, "123-456-789");
+			PointRequest req = new PointRequest(1000L, PointHistoryType.CHARGE, "123-456-789");
 			PointHistory mockPointHistory = mock(PointHistory.class);
 
 			given(userDomainService.findActiveUserById(userId)).willReturn(mockUser);
 			given(pointHistoryDomainService.createPointHistory(any(PointHistoryCommand.class))).willReturn(
 				mockPointHistory);
 			given(mockPointHistory.getId()).willReturn(1L);
-			given(mockPointHistory.getPrice()).willReturn(1000);
+			given(mockPointHistory.getPrice()).willReturn(1000L);
 			given(mockPointHistory.getPointHistoryType()).willReturn(PointHistoryType.CHARGE);
 			given(mockPointHistory.getPointHistoryStatus()).willReturn(PointHistoryStatus.PENDING);
 			given(mockPointHistory.getCreatedAt()).willReturn(LocalDateTime.now());
@@ -74,7 +74,7 @@ class PointHistoryServiceTest {
 			// given
 			Long userId = 1L;
 			User mockUser = mock(User.class);
-			PointRequest req = new PointRequest(3000, PointHistoryType.EXCHANGE, "321-654-987");
+			PointRequest req = new PointRequest(3000L, PointHistoryType.EXCHANGE, "321-654-987");
 			PointHistory mockPointHistory = mock(PointHistory.class);
 
 			given(userDomainService.findActiveUserById(userId)).willReturn(mockUser);
@@ -85,7 +85,7 @@ class PointHistoryServiceTest {
 			pointHistoryService.createPointHistory(req, userId);
 
 			// then
-			verify(userDomainService).validEnoughPoint(mockUser, 3000);
+			verify(userDomainService).validEnoughPoint(mockUser, 3000L);
 		}
 	}
 
@@ -99,7 +99,7 @@ class PointHistoryServiceTest {
 			Long userId = 1L;
 			PointHistoryStatus status = PointHistoryStatus.PENDING;
 			PointHistory point1 = mock(PointHistory.class);
-			given(point1.getPrice()).willReturn(1000);
+			given(point1.getPrice()).willReturn(1000L);
 			given(point1.getAccount()).willReturn("123-456-789");
 			given(point1.getPointHistoryType()).willReturn(PointHistoryType.CHARGE);
 			given(point1.getPointHistoryStatus()).willReturn(PointHistoryStatus.PENDING);
@@ -125,8 +125,8 @@ class PointHistoryServiceTest {
 			int size = 2;
 			PointHistory point1 = mock(PointHistory.class);
 			PointHistory point2 = mock(PointHistory.class);
-			given(point1.getPrice()).willReturn(1000);
-			given(point2.getPrice()).willReturn(500);
+			given(point1.getPrice()).willReturn(1000L);
+			given(point2.getPrice()).willReturn(500L);
 			given(point1.getPointHistoryType()).willReturn(PointHistoryType.CHARGE);
 			given(point2.getPointHistoryType()).willReturn(PointHistoryType.EXCHANGE);
 

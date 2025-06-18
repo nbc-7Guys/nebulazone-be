@@ -10,7 +10,7 @@ import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 @Builder
 public record PointResponse(
 	Long id,
-	Integer price,
+	Long price,
 	PointHistoryType type,
 	PointHistoryStatus status,
 	LocalDateTime createdAt

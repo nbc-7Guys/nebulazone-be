@@ -133,7 +133,7 @@ public class User extends BaseEntity {
 		this.point -= differentPrice;
 	}
 
-	public boolean hasNotEnoughPoint(int price) {
+	public boolean hasNotEnoughPoint(Long price) {
 		return this.point < price;
 	}
 
