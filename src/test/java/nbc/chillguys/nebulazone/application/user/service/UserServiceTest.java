@@ -30,6 +30,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 
 @DisplayName("유저 어플리케이션 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +40,9 @@ class UserServiceTest {
 
 	@Mock
 	private S3Service s3Service;
+
+	@Mock
+	private UserCacheService userCacheService;
 
 	@InjectMocks
 	private UserService userService;
@@ -179,6 +183,7 @@ class UserServiceTest {
 			UserResponse response = userService.updateUserProfileImage(mockImage, user);
 
 			// Then
+			verify(userCacheService).deleteUserById(user.getId());
 			verify(s3Service).generateDeleteUrlAndDeleteFile("test_profile_image_url");
 			verify(s3Service).generateUploadUrlAndUploadFile(mockImage);
 			verify(userDomainService).updateUserProfileImage("new_image_url", user);
@@ -201,6 +206,7 @@ class UserServiceTest {
 			UserResponse response = userService.updateUserNicknameOrPassword(request, user);
 
 			// Then
+			verify(userCacheService).deleteUserById(user.getId());
 			verify(userDomainService).updateUserNicknameOrPassword(any());
 
 			assertThat(response)
@@ -221,6 +227,7 @@ class UserServiceTest {
 			WithdrawUserResponse response = userService.withdrawUser(withdrawUserRequest, user);
 
 			// Then
+			verify(userCacheService).deleteUserById(user.getId());
 			verify(userDomainService).validPassword("encodedPassword", "encodedPassword");
 			verify(userDomainService).withdrawUser(user);
 
