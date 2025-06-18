@@ -20,7 +20,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import nbc.chillguys.nebulazone.application.auth.dto.request.SignInRequest;
 import nbc.chillguys.nebulazone.application.auth.dto.response.SignInResponse;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -72,9 +71,9 @@ class AuthServiceTest {
 
 		given(userDomainService.findActiveUserByEmail(anyString()))
 			.willReturn(user);
-		given(jwtUtil.generateAccessToken(any(AuthUser.class)))
+		given(jwtUtil.generateAccessToken(any(User.class)))
 			.willReturn("test_access_token");
-		given(jwtUtil.generateRefreshToken(any(AuthUser.class)))
+		given(jwtUtil.generateRefreshToken(any(User.class)))
 			.willReturn("test_refresh_token");
 
 		// When
@@ -83,8 +82,8 @@ class AuthServiceTest {
 		// Then
 		verify(userDomainService, times(1)).findActiveUserByEmail(anyString());
 		verify(userDomainService, times(1)).validPassword(anyString(), anyString());
-		verify(jwtUtil, times(1)).generateAccessToken(any(AuthUser.class));
-		verify(jwtUtil, times(1)).generateRefreshToken(any(AuthUser.class));
+		verify(jwtUtil, times(1)).generateAccessToken(any(User.class));
+		verify(jwtUtil, times(1)).generateRefreshToken(any(User.class));
 
 		assertThat(response)
 			.isNotNull();

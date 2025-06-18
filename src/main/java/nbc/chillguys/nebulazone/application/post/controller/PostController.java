@@ -32,9 +32,9 @@ import nbc.chillguys.nebulazone.application.post.dto.response.SearchPostResponse
 import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse;
 import nbc.chillguys.nebulazone.application.post.service.PostService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @RestController
 @RequestMapping("/posts")
@@ -48,11 +48,11 @@ public class PostController {
 	)
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<CreatePostResponse> createPost(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@Valid @RequestPart("post") CreatePostRequest request,
 		@RequestPart(value = "images", required = false) List<MultipartFile> multipartFiles) {
 
-		CreatePostResponse postResponse = postService.createPost(authUser, request, multipartFiles);
+		CreatePostResponse postResponse = postService.createPost(user, request, multipartFiles);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(postResponse);
 	}
@@ -62,22 +62,22 @@ public class PostController {
 	)
 	@PutMapping(path = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<UpdatePostResponse> updatePost(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("postId") Long postId,
 		@Valid @RequestPart("post") UpdatePostRequest request,
 		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles
 	) {
-		UpdatePostResponse res = postService.updatePost(authUser.getId(), postId, request, imageFiles);
+		UpdatePostResponse res = postService.updatePost(user.getId(), postId, request, imageFiles);
 
 		return ResponseEntity.ok(res);
 	}
 
 	@DeleteMapping("/{postId}")
 	public ResponseEntity<DeletePostResponse> deletePost(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("postId") Long postId
 	) {
-		DeletePostResponse res = postService.deletePost(authUser.getId(), postId);
+		DeletePostResponse res = postService.deletePost(user.getId(), postId);
 
 		return ResponseEntity.ok(res);
 	}

@@ -13,7 +13,7 @@ import nbc.chillguys.nebulazone.application.transaction.dto.response.FindDetailT
 import nbc.chillguys.nebulazone.application.transaction.dto.response.FindTransactionResponse;
 import nbc.chillguys.nebulazone.application.transaction.service.TransactionService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,24 +24,24 @@ public class TransactionController {
 
 	@GetMapping("/me")
 	public ResponseEntity<CommonPageResponse<FindTransactionResponse>> findMyTransactions(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@RequestParam(defaultValue = "1", value = "page") int page,
 		@RequestParam(defaultValue = "20", value = "size") int size) {
 
 		int zeroBasedPage = Math.max(page - 1, 0);
 
 		CommonPageResponse<FindTransactionResponse> response =
-			txService.findMyTransactions(authUser, zeroBasedPage, size);
+			txService.findMyTransactions(user, zeroBasedPage, size);
 
 		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/{transactionId}/me")
 	public ResponseEntity<FindDetailTransactionResponse> findMyTransaction(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("transactionId") Long transactionId) {
 
-		FindDetailTransactionResponse response = txService.findMyTransaction(authUser, transactionId);
+		FindDetailTransactionResponse response = txService.findMyTransaction(user, transactionId);
 		return ResponseEntity.ok(response);
 	}
 }

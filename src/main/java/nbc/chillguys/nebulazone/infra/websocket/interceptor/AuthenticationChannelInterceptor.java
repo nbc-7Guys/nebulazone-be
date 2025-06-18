@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomRepository;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomUserRepository;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
 import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
@@ -56,8 +56,8 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 			}
 
 			try {
-				AuthUser authUserFromToken = jwtUtil.getAuthUserFromToken(token);
-				SessionUser user = SessionUser.from(authUserFromToken);
+				User userFromToken = jwtUtil.getUserFromToken(token);
+				SessionUser user = SessionUser.from(userFromToken);
 
 				// 세션과 유저 매핑 (메모리 or Redis 등)
 				webSocketSessionRedisService.registerUser(accessor.getSessionId(), user);

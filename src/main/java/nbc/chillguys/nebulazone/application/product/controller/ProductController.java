@@ -32,9 +32,9 @@ import nbc.chillguys.nebulazone.application.product.dto.response.PurchaseProduct
 import nbc.chillguys.nebulazone.application.product.dto.response.SearchProductResponse;
 import nbc.chillguys.nebulazone.application.product.service.ProductService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,12 +47,12 @@ public class ProductController {
 	)
 	@PostMapping(value = "/catalogs/{catalogId}/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ProductResponse> createProduct(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("catalogId") Long catalogId,
 		@Valid @RequestPart("product") CreateProductRequest request,
 		@RequestPart(value = "images", required = false) List<MultipartFile> multipartFiles) {
 
-		ProductResponse productResponse = productService.createProduct(authUser, catalogId, request,
+		ProductResponse productResponse = productService.createProduct(user, catalogId, request,
 			multipartFiles);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(productResponse);
@@ -63,48 +63,48 @@ public class ProductController {
 	)
 	@PutMapping(path = "/catalogs/{catalogId}/products/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ProductResponse> updateProduct(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("catalogId") Long catalogId,
 		@PathVariable("productId") Long productId,
 		@Valid @RequestPart("product") UpdateProductRequest request,
 		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles
 	) {
 		ProductResponse response
-			= productService.updateProduct(authUser.getId(), catalogId, productId, request, imageFiles);
+			= productService.updateProduct(user, catalogId, productId, request, imageFiles);
 
 		return ResponseEntity.ok(response);
 	}
 
 	@PatchMapping("/catalogs/{catalogId}/products/{productId}/auction-type")
 	public ResponseEntity<ProductResponse> changeToAuctionType(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("catalogId") Long catalogId,
 		@PathVariable("productId") Long productId,
 		@Valid @RequestBody ChangeToAuctionTypeRequest request
 	) {
-		ProductResponse response = productService.changeToAuctionType(authUser.getId(), catalogId, productId, request);
+		ProductResponse response = productService.changeToAuctionType(user, catalogId, productId, request);
 
 		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/catalogs/{catalogId}/products/{productId}")
 	public ResponseEntity<DeleteProductResponse> deleteProduct(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("catalogId") Long catalogId,
 		@PathVariable("productId") Long productId
 	) {
-		DeleteProductResponse response = productService.deleteProduct(authUser.getId(), catalogId, productId);
+		DeleteProductResponse response = productService.deleteProduct(user, catalogId, productId);
 
 		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping("/catalogs/{catalogId}/products/{productId}/purchase")
 	public ResponseEntity<PurchaseProductResponse> purchaseProduct(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("catalogId") Long catalogId,
 		@PathVariable("productId") Long productId
 	) {
-		PurchaseProductResponse response = productService.purchaseProduct(authUser.getId(), catalogId, productId);
+		PurchaseProductResponse response = productService.purchaseProduct(user, catalogId, productId);
 
 		return ResponseEntity.ok(response);
 	}

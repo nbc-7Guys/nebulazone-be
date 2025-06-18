@@ -29,10 +29,7 @@ public class PointHistoryService {
 	private final PointHistoryDomainService pointHistoryDomainService;
 	private final UserDomainService userDomainService;
 
-	public PointResponse createPointHistory(PointRequest request, Long userId) {
-
-		User user = userDomainService.findActiveUserById(userId);
-
+	public PointResponse createPointHistory(PointRequest request, User user) {
 		// 환전일 경우 포인트 충분한지 검증 매서드
 		if (request.type() == PointHistoryType.EXCHANGE) {
 			userDomainService.validEnoughPoint(user, request.price());

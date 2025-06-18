@@ -22,7 +22,7 @@ import nbc.chillguys.nebulazone.application.comment.dto.response.CommentResponse
 import nbc.chillguys.nebulazone.application.comment.dto.response.DeleteCommentResponse;
 import nbc.chillguys.nebulazone.application.comment.service.CommentService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @RequiredArgsConstructor
 @RestController
@@ -33,11 +33,11 @@ public class CommentController {
 
 	@PostMapping
 	public ResponseEntity<CommentResponse> createComment(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("postId") Long postId,
 		@Valid @RequestBody CreateCommentRequest request
 	) {
-		CommentResponse response = commentService.createComment(authUser.getId(), postId, request);
+		CommentResponse response = commentService.createComment(user, postId, request);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
@@ -55,23 +55,23 @@ public class CommentController {
 
 	@PutMapping("/{commentId}")
 	public ResponseEntity<CommentResponse> updateComment(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("postId") Long postId,
 		@PathVariable("commentId") Long commentId,
 		@Valid @RequestBody UpdateCommentRequest request
 	) {
-		CommentResponse response = commentService.updateComment(authUser.getId(), postId, commentId, request);
+		CommentResponse response = commentService.updateComment(user, postId, commentId, request);
 
 		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/{commentId}")
 	public ResponseEntity<DeleteCommentResponse> deleteComment(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("postId") Long postId,
 		@PathVariable("commentId") Long commentId
 	) {
-		DeleteCommentResponse response = commentService.deleteComment(authUser.getId(), postId, commentId);
+		DeleteCommentResponse response = commentService.deleteComment(user, postId, commentId);
 
 		return ResponseEntity.ok(response);
 	}

@@ -42,19 +42,19 @@ public class ChatService {
 	 * 채팅방 생성 또는 기존에 채팅방 조회.<br/>
 	 * 채팅방이 없다면 생성하고 있다면 기존 채팅방 정보를 가져온다.<br/>
 	 *
-	 * @param authUser the auth user
+	 * @param user the auth user
 	 * @param request the request
 	 * @return the chat room info
 	 */
 	@Transactional
-	public CreateChatRoomResponse getOrCreate(AuthUser authUser, CreateChatRoomRequest request) {
+	public CreateChatRoomResponse getOrCreate(User user, CreateChatRoomRequest request) {
 
 		// 구매자와 판매자가 동일 유저인지 확인
-		validateBuyerIsNotSeller(authUser.getId(), request.productId());
+		validateBuyerIsNotSeller(user.getId(), request.productId());
 
 		// 로그인한 유저가 특정 상품에 대해 참여중인 채팅방이 있는지 확인
-		ChatRoom result = chatDomainService.findExistingChatRoom(authUser.getId(), request.productId())
-			.orElseGet(() -> createChatRoom(authUser, request));
+		ChatRoom result = chatDomainService.findExistingChatRoom(user.getId(), request.productId())
+			.orElseGet(() -> createChatRoom(user, request));
 
 		return CreateChatRoomResponse.from(result);
 	}
@@ -73,10 +73,10 @@ public class ChatService {
 		}
 	}
 
-	public ChatRoom createChatRoom(AuthUser authUser, CreateChatRoomRequest request) {
+	public ChatRoom createChatRoom(User user, CreateChatRoomRequest request) {
 		// 기존에 참여중인 방이 없다면 거래상품 구매자, 판매자 생성
 		Product product = productDomainService.findAvailableProductById(request.productId());
-		User buyer = userDomainService.findActiveUserByEmail(authUser.getEmail());
+		User buyer = userDomainService.findActiveUserByEmail(user.getEmail());
 		User seller = product.getSeller();
 
 		NotificationMessage notificationMessage = NotificationMessage.of(
@@ -102,26 +102,26 @@ public class ChatService {
 	/**
 	 * 유저가 참여중인 모든 채팅방 조회
 	 *
-	 * @param authUser the auth user
+	 * @param user the auth user
 	 */
 	@Transactional(readOnly = true)
-	public FindChatRoomResponses findChatRooms(AuthUser authUser) {
+	public FindChatRoomResponses findChatRooms(User user) {
 		// 로그인한 유저 ID를 기반으로 해당 유저가 참여중인 모든 채팅방 찾기
-		List<ChatRoomInfo> chatRooms = chatDomainService.findChatRooms(authUser);
+		List<ChatRoomInfo> chatRooms = chatDomainService.findChatRooms(user);
 		return FindChatRoomResponses.of(chatRooms);
 	}
 
 	/**
 	 * 채팅 기록 조회
 	 *
-	 * @param authUser the auth user
+	 * @param user the auth user
 	 * @param roomId the room id
 	 * @return the find chat room response
 	 */
 	@Transactional(readOnly = true)
-	public List<FindChatHistoryResponse> findChatHistories(AuthUser authUser, Long roomId) {
+	public List<FindChatHistoryResponse> findChatHistories(User user, Long roomId) {
 
-		chatDomainService.validateUserAccessToChatRoom(authUser, roomId);
+		chatDomainService.validateUserAccessToChatRoom(user, roomId);
 
 		List<FindChatHistoryResponse> responses = chatDomainService.findChatHistoryResponses(roomId);
 
@@ -130,12 +130,12 @@ public class ChatService {
 
 	/**
 	 * 채팅방 나가기
-	 * @param authUser the auth user
+	 * @param user the auth user
 	 * @param roomId the room id
 	 */
 	@Transactional
-	public void exitChatRoom(AuthUser authUser, Long roomId) {
-		String leftUser = chatDomainService.deleteUserFromChatRoom(authUser.getId(), roomId);
+	public void exitChatRoom(User user, Long roomId) {
+		String leftUser = chatDomainService.deleteUserFromChatRoom(user.getId(), roomId);
 		String message = leftUser + " 님이 채팅방을 나갔습니다.";
 
 		messagingTemplate.convertAndSend("/topic/chat/" + roomId, message);

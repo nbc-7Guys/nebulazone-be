@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryResponse;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatHistory;
@@ -52,12 +51,12 @@ public class ChatDomainService {
 	/**
 	 * 참여중인 채팅방들 조회.
 	 *
-	 * @param authUser 인증된 사용자
+	 * @param user 인증된 사용자
 	 * @return 사용자가 참여중인 채팅방들
 	 */
 	@Transactional(readOnly = true)
-	public List<ChatRoomInfo> findChatRooms(AuthUser authUser) {
-		List<ChatRoomInfo> chatRooms = chatRoomRepository.findAllByUserId(authUser.getId());
+	public List<ChatRoomInfo> findChatRooms(User user) {
+		List<ChatRoomInfo> chatRooms = chatRoomRepository.findAllByUserId(user.getId());
 
 		return chatRooms;
 	}
@@ -66,12 +65,12 @@ public class ChatDomainService {
 	 * 인증된 사용자가 특정 채팅방에 참여중인지 확인<br/>
 	 * 참여중이지 않으면 예외를 발생시킴
 	 *
-	 * @param authUser 참여 중인지 확인할 인증된 사용자
+	 * @param user 참여 중인지 확인할 인증된 사용자
 	 * @param roomId 확인할 채팅방의 ID
 	 * @throws ChatException 접근이 거부될 경우 CHAT_ROOM_ACCESS_DENIED 에러 코드와 함께 발생
 	 */
-	public void validateUserAccessToChatRoom(AuthUser authUser, Long roomId) {
-		if (!chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId, authUser.getId())) {
+	public void validateUserAccessToChatRoom(User user, Long roomId) {
+		if (!chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId, user.getId())) {
 			throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 		}
 	}

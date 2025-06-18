@@ -30,7 +30,6 @@ import nbc.chillguys.nebulazone.application.product.dto.response.SearchProductRe
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.catalog.exception.CatalogErrorCode;
 import nbc.chillguys.nebulazone.domain.catalog.exception.CatalogException;
@@ -48,16 +47,11 @@ import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
-import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
-import nbc.chillguys.nebulazone.domain.user.exception.UserException;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
 
 @DisplayName("상품 애플리케이션 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
-	@Mock
-	private UserDomainService userDomainService;
 
 	@Mock
 	private ProductDomainService productDomainService;
@@ -85,7 +79,6 @@ class ProductServiceTest {
 	private Product product;
 	private Product auctionProduct;
 	private Auction auction;
-	private AuthUser authUser;
 
 	@BeforeEach
 	void init() {
@@ -150,12 +143,6 @@ class ProductServiceTest {
 			.build();
 
 		ReflectionTestUtils.setField(auction, "id", 1L);
-
-		authUser = AuthUser.builder()
-			.id(1L)
-			.email("test@test.com")
-			.roles(Set.of(UserRole.ROLE_USER))
-			.build();
 	}
 
 	@Nested
@@ -232,15 +219,13 @@ class ProductServiceTest {
 			);
 			List<MultipartFile> files = List.of();
 
-			given(userDomainService.findActiveUserById(authUser.getId()))
-				.willReturn(user);
 			given(catalogDomainService.getCatalogById(catalogId))
 				.willReturn(catalog);
 			given(productDomainService.createProduct(any(ProductCreateCommand.class), any()))
 				.willReturn(product);
 
 			// When
-			ProductResponse result = productService.createProduct(authUser, catalogId, request, files);
+			ProductResponse result = productService.createProduct(user, catalogId, request, files);
 
 			// Then
 			assertThat(result.productId()).isEqualTo(1L);
@@ -249,7 +234,6 @@ class ProductServiceTest {
 			assertThat(result.productTxMethod()).isEqualTo(ProductTxMethod.DIRECT);
 			assertThat(result.endTime()).isNull();
 
-			verify(userDomainService, times(1)).findActiveUserById(authUser.getId());
 			verify(catalogDomainService, times(1)).getCatalogById(catalogId);
 			verify(productDomainService, times(1))
 				.createProduct(any(ProductCreateCommand.class), any());
@@ -271,8 +255,6 @@ class ProductServiceTest {
 			);
 			List<MultipartFile> files = List.of();
 
-			given(userDomainService.findActiveUserById(authUser.getId()))
-				.willReturn(user);
 			given(catalogDomainService.getCatalogById(catalogId))
 				.willReturn(catalog);
 			given(productDomainService.createProduct(any(ProductCreateCommand.class), any()))
@@ -281,7 +263,7 @@ class ProductServiceTest {
 				.willReturn(auction);
 
 			// When
-			ProductResponse result = productService.createProduct(authUser, catalogId, request, files);
+			ProductResponse result = productService.createProduct(user, catalogId, request, files);
 
 			// Then
 			assertThat(result.productId()).isEqualTo(2L);
@@ -290,37 +272,11 @@ class ProductServiceTest {
 			assertThat(result.productTxMethod()).isEqualTo(ProductTxMethod.AUCTION);
 			assertThat(result.endTime()).isEqualTo(ProductEndTime.HOUR_12);
 
-			verify(userDomainService, times(1)).findActiveUserById(authUser.getId());
 			verify(catalogDomainService, times(1)).getCatalogById(catalogId);
 			verify(productDomainService, times(1)).createProduct(any(ProductCreateCommand.class),
 				any());
 			verify(auctionDomainService, times(1)).createAuction(any(AuctionCreateCommand.class));
 			verify(auctionSchedulerService, times(1)).autoAuctionEndSchedule(auction, auctionProduct.getId());
-		}
-
-		@Test
-		@DisplayName("상품 생성 실패 - 존재하지 않는 유저")
-		void fail_createProduct_userNotFound() {
-			// Given
-			Long catalogId = 1L;
-			CreateProductRequest request = new CreateProductRequest(
-				"테스트 상품",
-				"테스트 상품 설명",
-				"direct",
-				50000L,
-				null
-			);
-			List<MultipartFile> files = List.of();
-
-			given(userDomainService.findActiveUserById(authUser.getId()))
-				.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
-
-			// When & Then
-			assertThatThrownBy(() -> productService.createProduct(authUser, catalogId, request, files))
-				.isInstanceOf(UserException.class)
-				.hasFieldOrPropertyWithValue("errorCode", UserErrorCode.USER_NOT_FOUND);
-
-			verify(userDomainService, times(1)).findActiveUserById(authUser.getId());
 		}
 
 		@Test
@@ -337,17 +293,14 @@ class ProductServiceTest {
 			);
 			List<MultipartFile> files = List.of();
 
-			given(userDomainService.findActiveUserById(authUser.getId()))
-				.willReturn(user);
 			given(catalogDomainService.getCatalogById(catalogId))
 				.willThrow(new CatalogException(CatalogErrorCode.CATALOG_NOT_FOUND));
 
 			// When & Then
-			assertThatThrownBy(() -> productService.createProduct(authUser, catalogId, request, files))
+			assertThatThrownBy(() -> productService.createProduct(user, catalogId, request, files))
 				.isInstanceOf(CatalogException.class)
 				.hasFieldOrPropertyWithValue("errorCode", CatalogErrorCode.CATALOG_NOT_FOUND);
 
-			verify(userDomainService, times(1)).findActiveUserById(authUser.getId());
 			verify(catalogDomainService, times(1)).getCatalogById(catalogId);
 			verify(productDomainService, never()).createProduct(any(), any());
 		}
