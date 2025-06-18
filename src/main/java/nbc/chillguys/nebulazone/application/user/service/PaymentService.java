@@ -25,11 +25,10 @@ public class PaymentService {
 	private final PointHistoryDomainService pointHistoryDomainService;
 
 	@Transactional
-	public PointChargeResponse chargePointWithToss(Long userId, TossPaymentConfirmRequest request) {
+	public PointChargeResponse chargePointWithToss(User user, TossPaymentConfirmRequest request) {
 		TossPaymentConfirmResponse tossResult = paymentClient.confirmTossPayment(request);
 
-		UserPointChargeCommand command = new UserPointChargeCommand(userId, request.point());
-		User user = userDomainService.findActiveUserById(command.userId());
+		UserPointChargeCommand command = new UserPointChargeCommand(user.getId(), request.point());
 		userDomainService.chargeUserPoint(command);
 
 		PointHistoryCommand historyCommand = new PointHistoryCommand(user, request.point(), null,
@@ -39,8 +38,7 @@ public class PaymentService {
 	}
 
 	@Transactional
-	public void requestPointCharge(Long userId, UserPointRequest request) {
-		User user = userDomainService.findActiveUserById(userId);
+	public void requestPointCharge(User user, UserPointRequest request) {
 
 		PointHistoryCommand historyCommand = new PointHistoryCommand(user, request.price(), null,
 			PointHistoryType.CHARGE);
