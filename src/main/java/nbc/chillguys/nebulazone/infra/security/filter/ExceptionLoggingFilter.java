@@ -20,7 +20,7 @@ public class ExceptionLoggingFilter extends OncePerRequestFilter {
 
 	private static final Logger log = LoggerFactory.getLogger(ExceptionLoggingFilter.class);
 	private static final Set<String> EXCLUDED_PATHS = Set.of(
-		"/actuator/prometheus", "/actuator/health", "/actuator/info"
+		"/actuator/prometheus", "/actuator/health", "/actuator/info", "/ws/**", "/ws", "/swagger-ui/**"
 	);
 
 	@Override
