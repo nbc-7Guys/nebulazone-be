@@ -10,7 +10,7 @@ import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
 public record SearchProductResponse(
 	Long productId,
 	String productName,
-	Long categoryId,
+	Long catalogId,
 	Long sellerId,
 	String sellerNickname,
 	boolean isSold,
