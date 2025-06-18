@@ -54,8 +54,8 @@ class PointHistoryControllerTest {
 		@WithCustomMockUser
 		@DisplayName("성공: 포인트 내역 생성")
 		void success_createPointHistory() throws Exception {
-			PointRequest req = new PointRequest(1000, PointHistoryType.CHARGE, "174-598-453");
-			PointResponse res = new PointResponse(1L, 1000, PointHistoryType.CHARGE, PointHistoryStatus.PENDING,
+			PointRequest req = new PointRequest(1000L, PointHistoryType.CHARGE, "174-598-453");
+			PointResponse res = new PointResponse(1L, 1000L, PointHistoryType.CHARGE, PointHistoryStatus.PENDING,
 				LocalDateTime.now());
 
 			// GIVEN
@@ -84,14 +84,14 @@ class PointHistoryControllerTest {
 			// Given
 			List<PointHistoryResponse> responseList = List.of(
 				new PointHistoryResponse(
-					10000,
+					10000L,
 					"123-456-789",
 					PointHistoryType.CHARGE,
 					PointHistoryStatus.PENDING,
 					LocalDateTime.now()
 				),
 				new PointHistoryResponse(
-					5000,
+					5000L,
 					"987-654-321",
 					PointHistoryType.CHARGE,
 					PointHistoryStatus.PENDING,
@@ -124,14 +124,14 @@ class PointHistoryControllerTest {
 				// Given
 				List<PointHistoryResponse> list = List.of(
 					new PointHistoryResponse(
-						1000,
+						1000L,
 						"123-456-789",
 						PointHistoryType.CHARGE,
 						PointHistoryStatus.PENDING,
 						LocalDateTime.now()
 					),
 					new PointHistoryResponse(
-						500,
+						500L,
 						"987-654-321",
 						PointHistoryType.CHARGE,
 						PointHistoryStatus.PENDING,
