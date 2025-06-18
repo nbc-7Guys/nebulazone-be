@@ -31,7 +31,7 @@ import nbc.chillguys.nebulazone.application.bid.dto.response.FindBidResponse;
 import nbc.chillguys.nebulazone.application.bid.service.BidService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("입찰 컨트롤러 단위 테스트")
@@ -69,7 +69,7 @@ class BidControllerTest {
 			CreateBidRequest request = new CreateBidRequest(BID_PRICE);
 			CreateBidResponse response = new CreateBidResponse(BID_ID, BID_PRICE);
 
-			given(bidService.upsertBid(eq(AUCTION_ID), any(AuthUser.class), eq(request)))
+			given(bidService.upsertBid(eq(AUCTION_ID), any(User.class), eq(request)))
 				.willReturn(response);
 
 			// when & then
@@ -221,7 +221,7 @@ class BidControllerTest {
 			Page<FindBidResponse> page = new PageImpl<>(contents, PageRequest.of(0, 20), 2);
 			CommonPageResponse<FindBidResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(bidService.findMyBids(any(AuthUser.class), eq(0), eq(20))).willReturn(expectedResponse);
+			given(bidService.findMyBids(any(User.class), eq(0), eq(20))).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/bids/me"))
@@ -255,7 +255,7 @@ class BidControllerTest {
 			Page<FindBidResponse> page = new PageImpl<>(List.of(), PageRequest.of(2, 5), 0);
 			CommonPageResponse<FindBidResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(bidService.findMyBids(any(AuthUser.class), eq(2), eq(5))).willReturn(expectedResponse);
+			given(bidService.findMyBids(any(User.class), eq(2), eq(5))).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/bids/me")
@@ -283,7 +283,7 @@ class BidControllerTest {
 			Page<FindBidResponse> page = new PageImpl<>(contents, PageRequest.of(0, 20), 1);
 			CommonPageResponse<FindBidResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(bidService.findMyBids(any(AuthUser.class), eq(0), eq(20))).willReturn(expectedResponse);
+			given(bidService.findMyBids(any(User.class), eq(0), eq(20))).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/bids/me")
@@ -304,7 +304,7 @@ class BidControllerTest {
 			Page<FindBidResponse> page = new PageImpl<>(List.of(), PageRequest.of(0, 20), 0);
 			CommonPageResponse<FindBidResponse> expectedResponse = CommonPageResponse.from(page);
 
-			given(bidService.findMyBids(any(AuthUser.class), eq(0), eq(20))).willReturn(expectedResponse);
+			given(bidService.findMyBids(any(User.class), eq(0), eq(20))).willReturn(expectedResponse);
 
 			// when & then
 			mockMvc.perform(get("/bids/me"))
@@ -327,7 +327,7 @@ class BidControllerTest {
 			// given
 			DeleteBidResponse response = new DeleteBidResponse(BID_ID);
 
-			given(bidService.statusBid(any(AuthUser.class), eq(AUCTION_ID), eq(BID_ID)))
+			given(bidService.statusBid(any(User.class), eq(AUCTION_ID), eq(BID_ID)))
 				.willReturn(response);
 
 			// when & then

@@ -32,6 +32,7 @@ import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("포인트 히스토리 컨트롤러 테스트")
@@ -58,7 +59,7 @@ class PointHistoryControllerTest {
 				LocalDateTime.now());
 
 			// GIVEN
-			BDDMockito.given(pointHistoryService.createPointHistory(any(PointRequest.class), any(Long.class)))
+			BDDMockito.given(pointHistoryService.createPointHistory(any(PointRequest.class), any(User.class)))
 				.willReturn(res);
 
 			// WHEN - THEN

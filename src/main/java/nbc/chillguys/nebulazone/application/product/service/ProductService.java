@@ -21,7 +21,6 @@ import nbc.chillguys.nebulazone.application.product.dto.response.SearchProductRe
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.catalog.service.CatalogDomainService;
 import nbc.chillguys.nebulazone.domain.product.dto.ChangeToAuctionTypeCommand;
@@ -41,14 +40,12 @@ import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
-	private final UserDomainService userDomainService;
 	private final ProductDomainService productDomainService;
 	private final AuctionDomainService auctionDomainService;
 	private final TransactionDomainService transactionDomainService;
@@ -57,10 +54,8 @@ public class ProductService {
 	private final S3Service s3Service;
 
 	@Transactional
-	public ProductResponse createProduct(AuthUser authUser, Long catalogId, CreateProductRequest request,
+	public ProductResponse createProduct(User user, Long catalogId, CreateProductRequest request,
 		List<MultipartFile> multipartFiles) {
-
-		User findUser = userDomainService.findActiveUserById(authUser.getId());
 
 		List<String> productImageUrls = multipartFiles == null
 			? List.of()
@@ -70,7 +65,7 @@ public class ProductService {
 
 		Catalog findCatalog = catalogDomainService.getCatalogById(catalogId);
 
-		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(findUser, findCatalog, request);
+		ProductCreateCommand productCreateCommand = ProductCreateCommand.of(user, findCatalog, request);
 
 		ProductEndTime productEndTime = request.getProductEndTime();
 
@@ -88,13 +83,12 @@ public class ProductService {
 	}
 
 	public ProductResponse updateProduct(
-		Long userId,
+		User user,
 		Long catalogId,
 		Long productId,
 		UpdateProductRequest request,
 		List<MultipartFile> imageFiles
 	) {
-		User user = userDomainService.findActiveUserById(userId);
 		Product product = productDomainService.findActiveProductById(productId);
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
@@ -121,12 +115,11 @@ public class ProductService {
 
 	@Transactional
 	public ProductResponse changeToAuctionType(
-		Long userId,
+		User user,
 		Long catalogId,
 		Long productId,
 		ChangeToAuctionTypeRequest request
 	) {
-		User user = userDomainService.findActiveUserById(userId);
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		ChangeToAuctionTypeCommand command = request.toCommand(user, catalog, productId);
@@ -140,8 +133,7 @@ public class ProductService {
 	}
 
 	@Transactional
-	public DeleteProductResponse deleteProduct(Long userId, Long catalogId, Long productId) {
-		User user = userDomainService.findActiveUserById(userId);
+	public DeleteProductResponse deleteProduct(User user, Long catalogId, Long productId) {
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		ProductDeleteCommand command = ProductDeleteCommand.of(user, catalog, productId);
@@ -158,8 +150,7 @@ public class ProductService {
 	}
 
 	@Transactional
-	public PurchaseProductResponse purchaseProduct(Long userId, Long catalogId, Long productId) {
-		User user = userDomainService.findActiveUserById(userId);
+	public PurchaseProductResponse purchaseProduct(User user, Long catalogId, Long productId) {
 		Product product = productDomainService.findAvailableProductById(productId);
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 

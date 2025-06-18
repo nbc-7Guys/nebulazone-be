@@ -24,8 +24,8 @@ import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
 import nbc.chillguys.nebulazone.application.user.dto.response.WithdrawUserResponse;
 import nbc.chillguys.nebulazone.application.user.service.UserService;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @RestController
 @RequestMapping("/users")
@@ -53,9 +53,9 @@ public class UserController {
 	@PatchMapping
 	public ResponseEntity<UserResponse> updateUserNicknameOrPassword(
 		@Valid @RequestBody UpdateUserRequest updateUserRequest,
-		@AuthenticationPrincipal AuthUser authUser
+		@AuthenticationPrincipal User user
 	) {
-		UserResponse response = userService.updateUserNicknameOrPassword(updateUserRequest, authUser);
+		UserResponse response = userService.updateUserNicknameOrPassword(updateUserRequest, user);
 
 		return ResponseEntity.ok(response);
 	}
@@ -63,9 +63,9 @@ public class UserController {
 	@PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<UserResponse> updateUserProfileImage(
 		@ImageFile @RequestPart("profileImage") MultipartFile profileImage,
-		@AuthenticationPrincipal AuthUser authUser
+		@AuthenticationPrincipal User user
 	) {
-		UserResponse response = userService.updateUserProfileImage(profileImage, authUser);
+		UserResponse response = userService.updateUserProfileImage(profileImage, user);
 
 		return ResponseEntity.ok(response);
 	}
@@ -73,9 +73,9 @@ public class UserController {
 	@DeleteMapping
 	public ResponseEntity<WithdrawUserResponse> withdrawUser(
 		@Valid @RequestBody WithdrawUserRequest withdrawUserRequest,
-		@AuthenticationPrincipal AuthUser authUser
+		@AuthenticationPrincipal User user
 	) {
-		WithdrawUserResponse response = userService.withdrawUser(withdrawUserRequest, authUser);
+		WithdrawUserResponse response = userService.withdrawUser(withdrawUserRequest, user);
 
 		return ResponseEntity.ok(response);
 	}

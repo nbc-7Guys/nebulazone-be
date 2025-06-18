@@ -25,7 +25,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import nbc.chillguys.nebulazone.application.transaction.dto.response.FindDetailTransactionResponse;
 import nbc.chillguys.nebulazone.application.transaction.dto.response.FindTransactionResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
@@ -54,19 +53,12 @@ class TransactionServiceUnitTest {
 	@InjectMocks
 	private TransactionService txService;
 
-	private AuthUser authUser;
 	private User user;
 	private TransactionFindAllInfo transactionFindAllInfo;
 	private TransactionFindDetailInfo transactionFindDetailInfo;
 
 	@BeforeEach
 	void init() {
-		authUser = AuthUser.builder()
-			.id(1L)
-			.email("test@test.com")
-			.roles(Set.of(UserRole.ROLE_USER))
-			.build();
-
 		HashSet<Address> addresses = new HashSet<>();
 
 		IntStream.range(1, 4)
@@ -130,9 +122,6 @@ class TransactionServiceUnitTest {
 			int page = 1;
 			int size = 10;
 
-			given(userDomainService.findActiveUserById(authUser.getId()))
-				.willReturn(user);
-
 			Page<TransactionFindAllInfo> mockPage = new PageImpl<>(
 				List.of(transactionFindAllInfo),
 				PageRequest.of(0, 10),
@@ -143,7 +132,7 @@ class TransactionServiceUnitTest {
 				.willReturn(mockPage);
 
 			// When
-			CommonPageResponse<FindTransactionResponse> result = txService.findMyTransactions(authUser, page, size);
+			CommonPageResponse<FindTransactionResponse> result = txService.findMyTransactions(user, page, size);
 
 			// Then
 			assertThat(result.content()).hasSize(1);
@@ -158,28 +147,23 @@ class TransactionServiceUnitTest {
 			assertThat(response.productName()).isEqualTo("테스트 상품");
 			assertThat(response.isSold()).isTrue();
 
-			verify(userDomainService, times(1)).findActiveUserById(authUser.getId());
 			verify(txDomainService, times(1)).findMyTransactions(user, page, size);
 		}
 
-		@Test
-		@DisplayName("내 거래내역 전체 조회 실패 - 존재하지 않는 사용자")
-		void fail_findMyTransactions_userNotFound() {
-			// Given
-			int page = 1;
-			int size = 10;
-
-			given(userDomainService.findActiveUserById(authUser.getId()))
-				.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
-
-			// When & Then
-			assertThatThrownBy(() -> txService.findMyTransactions(authUser, page, size))
-				.isInstanceOf(UserException.class)
-				.hasFieldOrPropertyWithValue("errorCode", UserErrorCode.USER_NOT_FOUND);
-
-			verify(userDomainService, times(1)).findActiveUserById(authUser.getId());
-			verify(txDomainService, never()).findMyTransactions(any(), anyInt(), anyInt());
-		}
+		// @Test
+		// @DisplayName("내 거래내역 전체 조회 실패 - 존재하지 않는 사용자")
+		// void fail_findMyTransactions_userNotFound() {
+		// 	// Given
+		// 	int page = 1;
+		// 	int size = 10;
+		//
+		// 	// When & Then
+		// 	assertThatThrownBy(() -> txService.findMyTransactions(user, page, size))
+		// 		.isInstanceOf(UserException.class)
+		// 		.hasFieldOrPropertyWithValue("errorCode", UserErrorCode.USER_NOT_FOUND);
+		//
+		// 	verify(txDomainService, never()).findMyTransactions(any(), anyInt(), anyInt());
+		// }
 	}
 
 	@Nested
@@ -192,14 +176,11 @@ class TransactionServiceUnitTest {
 			// Given
 			Long transactionId = 1L;
 
-			given(userDomainService.findActiveUserById(authUser.getId()))
-				.willReturn(user);
-
 			given(txDomainService.findMyTransaction(user, transactionId))
 				.willReturn(transactionFindDetailInfo);
 
 			// When
-			FindDetailTransactionResponse result = txService.findMyTransaction(authUser, transactionId);
+			FindDetailTransactionResponse result = txService.findMyTransaction(user, transactionId);
 
 			// Then
 			assertThat(result.txId()).isEqualTo(1L);
@@ -212,26 +193,25 @@ class TransactionServiceUnitTest {
 			assertThat(result.productName()).isEqualTo("테스트 상품");
 			assertThat(result.isSold()).isTrue();
 
-			verify(userDomainService, times(1)).findActiveUserById(authUser.getId());
 			verify(txDomainService, times(1)).findMyTransaction(user, transactionId);
 		}
 
-		@Test
-		@DisplayName("내 거래내역 상세 조회 실패 - 존재하지 않는 사용자")
-		void fail_findMyTransaction_userNotFound() {
-			// Given
-			Long transactionId = 1L;
-
-			given(userDomainService.findActiveUserById(authUser.getId()))
-				.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
-
-			// When & Then
-			assertThatThrownBy(() -> txService.findMyTransaction(authUser, transactionId))
-				.isInstanceOf(UserException.class)
-				.hasFieldOrPropertyWithValue("errorCode", UserErrorCode.USER_NOT_FOUND);
-
-			verify(userDomainService, times(1)).findActiveUserById(authUser.getId());
-		}
+		// @Test
+		// @DisplayName("내 거래내역 상세 조회 실패 - 존재하지 않는 사용자")
+		// void fail_findMyTransaction_userNotFound() {
+		// 	// Given
+		// 	Long transactionId = 1L;
+		//
+		// 	given(userDomainService.findActiveUserById(User.getId()))
+		// 		.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
+		//
+		// 	// When & Then
+		// 	assertThatThrownBy(() -> txService.findMyTransaction(User, transactionId))
+		// 		.isInstanceOf(UserException.class)
+		// 		.hasFieldOrPropertyWithValue("errorCode", UserErrorCode.USER_NOT_FOUND);
+		//
+		// 	verify(userDomainService, times(1)).findActiveUserById(User.getId());
+		// }
 
 		@Test
 		@DisplayName("내 거래내역 상세 조회 실패 - 존재하지 않는 거래내역")
@@ -239,14 +219,11 @@ class TransactionServiceUnitTest {
 			// Given
 			Long transactionId = 999L;
 
-			given(userDomainService.findActiveUserById(authUser.getId()))
-				.willReturn(user);
-
 			given(txDomainService.findMyTransaction(user, transactionId))
 				.willThrow(new TransactionException(TransactionErrorCode.NOT_FOUNT_TRANSACTION));
 
 			// When & Then
-			assertThatThrownBy(() -> txService.findMyTransaction(authUser, transactionId))
+			assertThatThrownBy(() -> txService.findMyTransaction(user, transactionId))
 				.isInstanceOf(TransactionException.class)
 				.hasFieldOrPropertyWithValue("errorCode", TransactionErrorCode.NOT_FOUNT_TRANSACTION);
 

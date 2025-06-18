@@ -19,7 +19,7 @@ import nbc.chillguys.nebulazone.application.bid.dto.response.DeleteBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.FindBidResponse;
 import nbc.chillguys.nebulazone.application.bid.service.BidService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,10 +30,10 @@ public class BidController {
 	@PostMapping("/auctions/{auctionId}/bids")
 	public ResponseEntity<CreateBidResponse> upsertBid(
 		@PathVariable("auctionId") Long auctionId,
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@Valid @RequestBody CreateBidRequest request) {
 
-		CreateBidResponse response = bidService.upsertBid(auctionId, authUser, request);
+		CreateBidResponse response = bidService.upsertBid(auctionId, user, request);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
@@ -51,23 +51,23 @@ public class BidController {
 
 	@GetMapping("/bids/me")
 	public ResponseEntity<CommonPageResponse<FindBidResponse>> findMyBids(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@RequestParam(defaultValue = "1", value = "page") int page,
 		@RequestParam(defaultValue = "20", value = "size") int size) {
 
-		CommonPageResponse<FindBidResponse> response = bidService.findMyBids(authUser, toZeroBasedPage(page), size);
+		CommonPageResponse<FindBidResponse> response = bidService.findMyBids(user, toZeroBasedPage(page), size);
 
 		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/auctions/{auctionId}/bids/{bidId}")
 	public ResponseEntity<DeleteBidResponse> statusBid(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("auctionId") Long auctionId,
 		@PathVariable("bidId") Long bidId
 	) {
 
-		DeleteBidResponse response = bidService.statusBid(authUser, auctionId, bidId);
+		DeleteBidResponse response = bidService.statusBid(user, auctionId, bidId);
 
 		return ResponseEntity.ok(response);
 	}

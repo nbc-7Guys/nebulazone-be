@@ -24,7 +24,6 @@ import nbc.chillguys.nebulazone.application.user.dto.request.UpdateUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
 import nbc.chillguys.nebulazone.application.user.dto.response.WithdrawUserResponse;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -47,8 +46,6 @@ class UserServiceTest {
 	@Spy
 	private User user;
 
-	private AuthUser authUser;
-
 	@BeforeEach
 	void init() {
 		user = User.builder()
@@ -65,12 +62,6 @@ class UserServiceTest {
 				.roadAddress("test_road_address")
 				.detailAddress("test_detail_address")
 				.build()))
-			.build();
-
-		authUser = AuthUser.builder()
-			.id(1L)
-			.email("test@test.com")
-			.roles(Set.of(UserRole.ROLE_USER))
 			.build();
 
 		ReflectionTestUtils.setField(user, "id", 1L);
@@ -181,16 +172,13 @@ class UserServiceTest {
 			MultipartFile mockImage = new MockMultipartFile("image", "test.jpg", "image/jpeg",
 				"content".getBytes());
 
-			given(userDomainService.findActiveUserById(anyLong()))
-				.willReturn(user);
 			given(s3Service.generateUploadUrlAndUploadFile(any()))
 				.willReturn("new_image_url");
 
 			// When
-			UserResponse response = userService.updateUserProfileImage(mockImage, authUser);
+			UserResponse response = userService.updateUserProfileImage(mockImage, user);
 
 			// Then
-			verify(userDomainService).findActiveUserById(anyLong());
 			verify(s3Service).generateDeleteUrlAndDeleteFile("test_profile_image_url");
 			verify(s3Service).generateUploadUrlAndUploadFile(mockImage);
 			verify(userDomainService).updateUserProfileImage("new_image_url", user);
@@ -205,11 +193,12 @@ class UserServiceTest {
 			// Given
 			UpdateUserRequest request = new UpdateUserRequest("newNickname",
 				new UpdateUserRequest.PasswordChangeForm("encodedPassword", "newPassword"));
+
 			given(userDomainService.updateUserNicknameOrPassword(any()))
 				.willReturn(user);
 
 			// When
-			UserResponse response = userService.updateUserNicknameOrPassword(request, authUser);
+			UserResponse response = userService.updateUserNicknameOrPassword(request, user);
 
 			// Then
 			verify(userDomainService).updateUserNicknameOrPassword(any());
@@ -228,14 +217,10 @@ class UserServiceTest {
 			// Given
 			WithdrawUserRequest withdrawUserRequest = new WithdrawUserRequest("encodedPassword");
 
-			given(userDomainService.findActiveUserById(anyLong()))
-				.willReturn(user);
-
 			// When
-			WithdrawUserResponse response = userService.withdrawUser(withdrawUserRequest, authUser);
+			WithdrawUserResponse response = userService.withdrawUser(withdrawUserRequest, user);
 
 			// Then
-			verify(userDomainService).findActiveUserById(anyLong());
 			verify(userDomainService).validPassword("encodedPassword", "encodedPassword");
 			verify(userDomainService).withdrawUser(user);
 

@@ -11,7 +11,6 @@ import nbc.chillguys.nebulazone.application.user.dto.request.UpdateUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
 import nbc.chillguys.nebulazone.application.user.dto.response.WithdrawUserResponse;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.user.dto.UserSignUpCommand;
 import nbc.chillguys.nebulazone.domain.user.dto.UserUpdateCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -43,18 +42,16 @@ public class UserService {
 		return UserResponse.from(targetUser);
 	}
 
-	public UserResponse updateUserNicknameOrPassword(UpdateUserRequest updateUserRequest, AuthUser authUser) {
+	public UserResponse updateUserNicknameOrPassword(UpdateUserRequest updateUserRequest, User loggedInUser) {
 		User user = userDomainService.updateUserNicknameOrPassword(
-			UserUpdateCommand.of(updateUserRequest, authUser.getId())
+			UserUpdateCommand.of(updateUserRequest, loggedInUser)
 		);
 
 		return UserResponse.from(user);
 	}
 
 	@Transactional
-	public UserResponse updateUserProfileImage(MultipartFile profileImage, AuthUser authUser) {
-		User user = userDomainService.findActiveUserById(authUser.getId());
-
+	public UserResponse updateUserProfileImage(MultipartFile profileImage, User user) {
 		if (user.getProfileImage() != null) {
 			s3Service.generateDeleteUrlAndDeleteFile(user.getProfileImage());
 		}
@@ -67,9 +64,7 @@ public class UserService {
 		return UserResponse.from(user);
 	}
 
-	public WithdrawUserResponse withdrawUser(WithdrawUserRequest withdrawUserRequest, AuthUser authUser) {
-		User user = userDomainService.findActiveUserById(authUser.getId());
-
+	public WithdrawUserResponse withdrawUser(WithdrawUserRequest withdrawUserRequest, User user) {
 		userDomainService.validPassword(withdrawUserRequest.password(), user.getPassword());
 
 		userDomainService.withdrawUser(user);
