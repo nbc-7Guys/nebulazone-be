@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
 import nbc.chillguys.nebulazone.infra.security.constant.JwtConstants;
 import nbc.chillguys.nebulazone.infra.security.filter.exception.JwtFilterErrorCode;
@@ -69,9 +69,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	private void setAuthentication(String accessToken) {
-		AuthUser authUser = jwtUtil.getAuthUserFromToken(accessToken);
+		User user = jwtUtil.getUserFromToken(accessToken);
 		Authentication authentication = new UsernamePasswordAuthenticationToken(
-			authUser, accessToken, authUser.getAuthorities()
+			user, accessToken, user.getAuthorities()
 		);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}

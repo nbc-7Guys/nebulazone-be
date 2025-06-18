@@ -16,7 +16,6 @@ import nbc.chillguys.nebulazone.application.post.dto.response.DeletePostResponse
 import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.SearchPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostDeleteCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
@@ -26,23 +25,19 @@ import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
 import nbc.chillguys.nebulazone.domain.post.vo.PostDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
-	private final UserDomainService userDomainService;
 	private final PostDomainService postDomainService;
 	private final S3Service s3Service;
 
 	@Transactional
-	public CreatePostResponse createPost(AuthUser authUser, CreatePostRequest request,
+	public CreatePostResponse createPost(User user, CreatePostRequest request,
 		List<MultipartFile> multipartFiles) {
-
-		User findUser = userDomainService.findActiveUserById(authUser.getId());
-		PostCreateCommand postCreateDto = PostCreateCommand.of(findUser, request);
+		PostCreateCommand postCreateDto = PostCreateCommand.of(user, request);
 
 		List<String> postImageUrls = multipartFiles == null
 			? List.of()

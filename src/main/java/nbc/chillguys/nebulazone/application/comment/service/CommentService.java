@@ -20,7 +20,6 @@ import nbc.chillguys.nebulazone.domain.comment.service.CommentDomainService;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @RequiredArgsConstructor
 @Service
@@ -28,12 +27,10 @@ public class CommentService {
 
 	public static final int COMMENT_SIZE_PER_PAGE = 20;
 
-	private final UserDomainService userDomainService;
 	private final PostDomainService postDomainService;
 	private final CommentDomainService commentDomainService;
 
-	public CommentResponse createComment(Long userId, Long postId, CreateCommentRequest request) {
-		User user = userDomainService.findActiveUserById(userId);
+	public CommentResponse createComment(User user, Long postId, CreateCommentRequest request) {
 		Post post = postDomainService.findActivePost(postId);
 
 		CommentCreateCommand command = request.toCommand(user, post);
@@ -64,9 +61,8 @@ public class CommentService {
 		return CommonPageResponse.from(response);
 	}
 
-	public DeleteCommentResponse deleteComment(Long userId, Long postId, Long commentId) {
-		User user = userDomainService.findActiveUserById(userId);
-		Post post = postDomainService.findMyActivePost(postId, userId);
+	public DeleteCommentResponse deleteComment(User user, Long postId, Long commentId) {
+		Post post = postDomainService.findMyActivePost(postId, user.getId());
 
 		CommentDeleteCommand command = CommentDeleteCommand.of(user, post, commentId);
 		commentDomainService.deleteComment(command);
@@ -74,9 +70,8 @@ public class CommentService {
 		return DeleteCommentResponse.from(commentId);
 	}
 
-	public CommentResponse updateComment(Long userId, Long postId, Long commentId, UpdateCommentRequest request) {
-		User user = userDomainService.findActiveUserById(userId);
-		Post post = postDomainService.findMyActivePost(postId, userId);
+	public CommentResponse updateComment(User user, Long postId, Long commentId, UpdateCommentRequest request) {
+		Post post = postDomainService.findMyActivePost(postId, user.getId());
 
 		CommentUpdateCommand command = request.toCommand(user, post, commentId);
 		Comment comment = commentDomainService.updateComment(command);

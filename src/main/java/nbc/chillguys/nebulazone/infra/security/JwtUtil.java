@@ -1,9 +1,6 @@
 package nbc.chillguys.nebulazone.infra.security;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
@@ -17,8 +14,8 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
-import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 import nbc.chillguys.nebulazone.infra.security.constant.JwtConstants;
 import nbc.chillguys.nebulazone.infra.security.constant.TokenExpiredConstant;
 import nbc.chillguys.nebulazone.infra.security.exception.JwtTokenErrorCode;
@@ -30,32 +27,35 @@ import nbc.chillguys.nebulazone.infra.security.filter.exception.JwtFilterExcepti
 public class JwtUtil {
 	private final SecretKey secretKey;
 	private final TokenExpiredConstant tokenExpiredConstant;
+	private final UserCacheService userCacheService;
 
-	public JwtUtil(@Value("${jwt.secret.key}") String secretKey, TokenExpiredConstant tokenExpiredConstant) {
+	public JwtUtil(@Value("${jwt.secret.key}") String secretKey, TokenExpiredConstant tokenExpiredConstant,
+		UserCacheService userCacheService) {
 		this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes());
 		this.tokenExpiredConstant = tokenExpiredConstant;
+		this.userCacheService = userCacheService;
 	}
 
-	public String generateAccessToken(AuthUser authUser) {
+	public String generateAccessToken(User user) {
 		Date now = new Date();
 
 		return Jwts.builder()
-			.subject(authUser.getEmail())
-			.id(authUser.getId().toString())
-			.claim(JwtConstants.KEY_ROLES, authUser.getRoles())
+			.subject(user.getEmail())
+			.id(user.getId().toString())
+			.claim(JwtConstants.KEY_ROLES, user.getRoles())
 			.issuedAt(now)
 			.expiration(tokenExpiredConstant.getAccessTokenExpiredDate(now))
 			.signWith(secretKey, Jwts.SIG.HS256)
 			.compact();
 	}
 
-	public String generateRefreshToken(AuthUser authUser) {
+	public String generateRefreshToken(User user) {
 		Date now = new Date();
 
 		return Jwts.builder()
-			.subject(authUser.getEmail())
-			.id(authUser.getId().toString())
-			.claim(JwtConstants.KEY_ROLES, authUser.getRoles())
+			.subject(user.getEmail())
+			.id(user.getId().toString())
+			.claim(JwtConstants.KEY_ROLES, user.getRoles())
 			.issuedAt(now)
 			.expiration(tokenExpiredConstant.getRefreshTokenExpiredDate(now))
 			.signWith(secretKey, Jwts.SIG.HS256)
@@ -67,9 +67,9 @@ public class JwtUtil {
 			throw new JwtTokenException(JwtTokenErrorCode.REFRESH_TOKEN_EXPIRED);
 		}
 
-		AuthUser authUser = getAuthUserFromToken(refreshToken);
+		User user = getUserFromToken(refreshToken);
 
-		return generateAccessToken(authUser);
+		return generateAccessToken(user);
 	}
 
 	public boolean isTokenExpired(String token) {
@@ -77,20 +77,16 @@ public class JwtUtil {
 		return claims.getExpiration().before(new Date());
 	}
 
-	public AuthUser getAuthUserFromToken(String token) {
+	public User getUserFromToken(String token) {
 		Claims claims = parseToken(token);
 
-		List<?> objects = claims.get("roles", List.class);
-		Set<UserRole> roles = objects.stream()
-			.map(String::valueOf)
-			.map(UserRole::from)
-			.collect(Collectors.toSet());
+		Long userId = Long.valueOf(claims.getId());
 
-		return AuthUser.builder()
-			.id(Long.valueOf(claims.getId()))
-			.email(claims.getSubject())
-			.roles(roles)
-			.build();
+		Date expiration = claims.getExpiration();
+
+		long ttl = (expiration.getTime() - System.currentTimeMillis()) / 1000;
+
+		return userCacheService.getUserById(userId, ttl);
 	}
 
 	public Claims parseToken(String token) {

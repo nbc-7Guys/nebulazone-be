@@ -31,7 +31,6 @@ import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.ManualEndAuctionInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
@@ -47,9 +46,6 @@ import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainServ
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
-import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
-import nbc.chillguys.nebulazone.domain.user.exception.UserException;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @DisplayName("경매 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -60,9 +56,6 @@ class AuctionServiceUnitTest {
 
 	@Mock
 	BidDomainService bidDomainService;
-
-	@Mock
-	UserDomainService userDomainService;
 
 	@Mock
 	AuctionSchedulerService auctionSchedulerService;
@@ -89,7 +82,6 @@ class AuctionServiceUnitTest {
 	private User bidder;
 	private Catalog catalog;
 	private Product product;
-	private AuthUser authUser;
 
 	@BeforeEach
 	void setUp() {
@@ -97,7 +89,6 @@ class AuctionServiceUnitTest {
 		bidder = createUser(2L, BIDDER_EMAIL, BIDDER_NICKNAME);
 		catalog = createCatalog(1L, "테스트 카탈로그");
 		product = createProduct(1L, PRODUCT_NAME, seller, catalog);
-		authUser = createAuthUser(1L, SELLER_EMAIL);
 	}
 
 	@Nested
@@ -183,34 +174,16 @@ class AuctionServiceUnitTest {
 			// given
 			Long auctionId = 1L;
 
-			given(userDomainService.findActiveUserById(authUser.getId())).willReturn(seller);
 			given(auctionDomainService.deleteAuction(auctionId, seller)).willReturn(auctionId);
 			willDoNothing().given(auctionSchedulerService).cancelSchedule(auctionId);
 
 			// when
-			DeleteAuctionResponse result = auctionService.deleteAuction(auctionId, authUser);
+			DeleteAuctionResponse result = auctionService.deleteAuction(auctionId, seller);
 
 			// then
 			assertThat(result.auctionId()).isEqualTo(auctionId);
-			verify(userDomainService).findActiveUserById(authUser.getId());
 			verify(auctionDomainService).deleteAuction(auctionId, seller);
 			verify(auctionSchedulerService).cancelSchedule(auctionId);
-		}
-
-		@Test
-		@DisplayName("경매 삭제 실패 - 사용자를 찾을 수 없음")
-		void fail_deleteAuction_userNotFound() {
-			// given
-			Long auctionId = 1L;
-
-			given(userDomainService.findActiveUserById(authUser.getId()))
-				.willThrow(new UserException(UserErrorCode.USER_NOT_FOUND));
-
-			// when & then
-			assertThatThrownBy(() -> auctionService.deleteAuction(auctionId, authUser))
-				.isInstanceOf(UserException.class)
-				.extracting("errorCode")
-				.isEqualTo(UserErrorCode.USER_NOT_FOUND);
 		}
 	}
 
@@ -230,13 +203,12 @@ class AuctionServiceUnitTest {
 			Bid wonBid = createBid(bidId, bidder, CURRENT_PRICE);
 			ManualEndAuctionInfo auctionInfo = createManualEndAuctionInfo(auctionId, bidId);
 
-			given(userDomainService.findActiveUserById(authUser.getId())).willReturn(seller);
 			given(bidDomainService.findBid(bidId)).willReturn(wonBid);
 			given(productDomainService.findActiveProductById(productId)).willReturn(product);
 			given(auctionDomainService.manualEndAuction(seller, wonBid, auctionId)).willReturn(auctionInfo);
 
 			// when
-			ManualEndAuctionResponse result = auctionService.manualEndAuction(auctionId, authUser, request);
+			ManualEndAuctionResponse result = auctionService.manualEndAuction(auctionId, seller, request);
 
 			// then
 			assertThat(result.auctionId()).isEqualTo(auctionId);
@@ -255,11 +227,10 @@ class AuctionServiceUnitTest {
 			Long productId = 1L;
 			ManualEndAuctionRequest request = new ManualEndAuctionRequest(bidId, productId);
 
-			given(userDomainService.findActiveUserById(authUser.getId())).willReturn(seller);
 			given(bidDomainService.findBid(bidId)).willThrow(new BidException(BidErrorCode.BID_NOT_FOUND));
 
 			// when & then
-			assertThatThrownBy(() -> auctionService.manualEndAuction(auctionId, authUser, request))
+			assertThatThrownBy(() -> auctionService.manualEndAuction(auctionId, seller, request))
 				.isInstanceOf(BidException.class)
 				.extracting("errorCode")
 				.isEqualTo(BidErrorCode.BID_NOT_FOUND);
@@ -276,13 +247,12 @@ class AuctionServiceUnitTest {
 
 			Bid wonBid = createBid(bidId, bidder, CURRENT_PRICE);
 
-			given(userDomainService.findActiveUserById(authUser.getId())).willReturn(seller);
 			given(bidDomainService.findBid(bidId)).willReturn(wonBid);
 			given(productDomainService.findActiveProductById(productId))
 				.willThrow(new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 			// when & then
-			assertThatThrownBy(() -> auctionService.manualEndAuction(auctionId, authUser, request))
+			assertThatThrownBy(() -> auctionService.manualEndAuction(auctionId, seller, request))
 				.isInstanceOf(ProductException.class)
 				.extracting("errorCode")
 				.isEqualTo(ProductErrorCode.PRODUCT_NOT_FOUND);
@@ -350,14 +320,6 @@ class AuctionServiceUnitTest {
 			.build());
 		ReflectionTestUtils.setField(product, "id", id);
 		return product;
-	}
-
-	private AuthUser createAuthUser(Long id, String email) {
-		return AuthUser.builder()
-			.id(id)
-			.email(email)
-			.roles(Set.of(UserRole.ROLE_USER))
-			.build();
 	}
 
 	private Bid createBid(Long id, User user, Long price) {

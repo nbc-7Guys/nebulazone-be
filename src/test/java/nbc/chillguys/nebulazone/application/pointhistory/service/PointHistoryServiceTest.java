@@ -46,12 +46,10 @@ class PointHistoryServiceTest {
 		@DisplayName("CHARGE 타입 포인트 내역 생성 성공")
 		void success_createChargePointHistory() {
 			// given
-			Long userId = 1L;
 			User mockUser = mock(User.class);
 			PointRequest req = new PointRequest(1000, PointHistoryType.CHARGE, "123-456-789");
 			PointHistory mockPointHistory = mock(PointHistory.class);
 
-			given(userDomainService.findActiveUserById(userId)).willReturn(mockUser);
 			given(pointHistoryDomainService.createPointHistory(any(PointHistoryCommand.class))).willReturn(
 				mockPointHistory);
 			given(mockPointHistory.getId()).willReturn(1L);
@@ -61,7 +59,7 @@ class PointHistoryServiceTest {
 			given(mockPointHistory.getCreatedAt()).willReturn(LocalDateTime.now());
 
 			// when
-			PointResponse response = pointHistoryService.createPointHistory(req, userId);
+			PointResponse response = pointHistoryService.createPointHistory(req, mockUser);
 
 			// then
 			assertThat(response.price()).isEqualTo(1000);
@@ -72,17 +70,15 @@ class PointHistoryServiceTest {
 		@DisplayName("EXCHANGE 타입은 포인트 검증 호출")
 		void createExchangePointHistory_validatesPoint() {
 			// given
-			Long userId = 1L;
 			User mockUser = mock(User.class);
 			PointRequest req = new PointRequest(3000, PointHistoryType.EXCHANGE, "321-654-987");
 			PointHistory mockPointHistory = mock(PointHistory.class);
 
-			given(userDomainService.findActiveUserById(userId)).willReturn(mockUser);
 			given(pointHistoryDomainService.createPointHistory(any(PointHistoryCommand.class))).willReturn(
 				mockPointHistory);
 
 			// when
-			pointHistoryService.createPointHistory(req, userId);
+			pointHistoryService.createPointHistory(req, mockUser);
 
 			// then
 			verify(userDomainService).validEnoughPoint(mockUser, 3000);

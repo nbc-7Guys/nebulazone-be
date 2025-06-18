@@ -1,14 +1,15 @@
 package nbc.chillguys.nebulazone.domain.user.dto;
 
 import nbc.chillguys.nebulazone.application.user.dto.request.UpdateUserRequest;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 public record UserUpdateCommand(
-	Long userId,
+	User user,
 	String nickname,
 	String oldPassword,
 	String newPassword
 ) {
-	public static UserUpdateCommand of(UpdateUserRequest updateUserRequest, Long userId) {
+	public static UserUpdateCommand of(UpdateUserRequest updateUserRequest, User user) {
 		String oldPassword;
 		String newPassword;
 		if (updateUserRequest.passwordChangeForm() == null) {
@@ -20,7 +21,7 @@ public record UserUpdateCommand(
 		}
 
 		return new UserUpdateCommand(
-			userId,
+			user,
 			updateUserRequest.nickname(),
 			oldPassword,
 			newPassword
