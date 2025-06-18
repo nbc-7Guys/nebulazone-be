@@ -133,8 +133,7 @@ services:
       - "5044:5044"
     volumes:
       - ./logstash/config/pipelines-prod.yml:/usr/share/logstash/config/pipelines.yml
-      - ./logstash/pipeline/pipeline1-prod.conf:/usr/share/logstash/pipeline/pipeline1.conf
-      - ./logstash/pipeline/pipeline2-prod.conf:/usr/share/logstash/pipeline/pipeline2.conf
+      - ./logstash/pipeline/pipeline-prod.conf:/usr/share/logstash/pipeline/pipeline.conf
     environment:
       - XPACK_MONITORING_ENABLED=false
     networks:
