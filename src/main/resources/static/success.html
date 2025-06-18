@@ -12,15 +12,15 @@
     const params = new URLSearchParams(window.location.search);
     const paymentKey = params.get('paymentKey');
     const orderId = params.get('orderId');
-    const point = params.get('point');
+    const amount = params.get('amount');
     document.getElementById('params').innerText =
-        `paymentKey: ${paymentKey}\norderId: ${orderId}\npoint: ${point}`;
+        `paymentKey: ${paymentKey}\norderId: ${orderId}\namount: ${amount}`;
     // 백엔드 결제 승인(Confirm) 호출
     document.getElementById('confirmBtn').onclick = function () {
-        fetch('http://localhost:8080/payments/confirm', {
+        fetch('http://localhost:8080/payments/confirm/toss', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({paymentKey, orderId, point: Number(point)})
+            body: JSON.stringify({paymentKey, orderId, amount: Number(amount)})
         })
             .then(res => res.json())
             .then(data => alert('백엔드 응답: ' + JSON.stringify(data)))

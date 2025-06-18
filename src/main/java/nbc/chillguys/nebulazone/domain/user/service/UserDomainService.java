@@ -225,8 +225,14 @@ public class UserDomainService {
 		}
 	}
 
+	/**
+	 * 유저 포인트 충전
+	 * @param command 포인트충전DTO
+	 * @author 정석현
+	 */
 	public void chargeUserPoint(UserPointChargeCommand command) {
 		User user = findActiveUserById(command.userId());
 		user.addPoint(command.point());
 	}
+
 }

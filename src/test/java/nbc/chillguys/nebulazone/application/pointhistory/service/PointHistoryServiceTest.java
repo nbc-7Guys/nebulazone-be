@@ -52,8 +52,9 @@ class PointHistoryServiceTest {
 			PointHistory mockPointHistory = mock(PointHistory.class);
 
 			given(userDomainService.findActiveUserById(userId)).willReturn(mockUser);
-			given(pointHistoryDomainService.createPointHistory(any(PointHistoryCommand.class))).willReturn(
-				mockPointHistory);
+			given(pointHistoryDomainService.createPointHistory(any(PointHistoryCommand.class),
+				any(PointHistoryStatus.class)))
+				.willReturn(mockPointHistory);
 			given(mockPointHistory.getId()).willReturn(1L);
 			given(mockPointHistory.getPrice()).willReturn(1000L);
 			given(mockPointHistory.getPointHistoryType()).willReturn(PointHistoryType.CHARGE);
@@ -78,7 +79,8 @@ class PointHistoryServiceTest {
 			PointHistory mockPointHistory = mock(PointHistory.class);
 
 			given(userDomainService.findActiveUserById(userId)).willReturn(mockUser);
-			given(pointHistoryDomainService.createPointHistory(any(PointHistoryCommand.class))).willReturn(
+			given(pointHistoryDomainService.createPointHistory(any(PointHistoryCommand.class),
+				any(PointHistoryStatus.class))).willReturn(
 				mockPointHistory);
 
 			// when

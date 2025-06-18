@@ -5,9 +5,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.user.dto.request.TossPaymentConfirmRequest;
+import nbc.chillguys.nebulazone.application.user.dto.request.UserPointRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.PointChargeResponse;
 import nbc.chillguys.nebulazone.application.user.dto.response.TossPaymentConfirmResponse;
 import nbc.chillguys.nebulazone.domain.pointhistory.dto.PointHistoryCommand;
+import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 import nbc.chillguys.nebulazone.domain.pointhistory.service.PointHistoryDomainService;
 import nbc.chillguys.nebulazone.domain.user.dto.UserPointChargeCommand;
@@ -32,7 +34,17 @@ public class PaymentService {
 
 		PointHistoryCommand historyCommand = new PointHistoryCommand(user, request.point(), null,
 			PointHistoryType.CHARGE);
-		pointHistoryDomainService.createPointHistory(historyCommand);
+		pointHistoryDomainService.createPointHistory(historyCommand, PointHistoryStatus.ACCEPT);
 		return PointChargeResponse.from(user, tossResult);
+	}
+
+	@Transactional
+	public void requestPointCharge(Long userId, UserPointRequest request) {
+		User user = userDomainService.findActiveUserById(userId);
+
+		PointHistoryCommand historyCommand = new PointHistoryCommand(user, request.price(), null,
+			PointHistoryType.CHARGE);
+
+		pointHistoryDomainService.createPointHistory(historyCommand, PointHistoryStatus.PENDING);
 	}
 }

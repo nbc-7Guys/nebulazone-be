@@ -30,13 +30,13 @@ public class PointHistoryDomainService {
 	 * @author 정석현
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public PointHistory createPointHistory(PointHistoryCommand command) {
+	public PointHistory createPointHistory(PointHistoryCommand command, PointHistoryStatus status) {
 		PointHistory pointHistory = PointHistory.builder()
 			.user(command.user())
 			.price(command.price())
 			.account(command.account())
 			.pointHistoryType(command.type())
-			.pointHistoryStatus(PointHistoryStatus.PENDING)
+			.pointHistoryStatus(status)
 			.build();
 		return pointHistoryRepository.save(pointHistory);
 	}
