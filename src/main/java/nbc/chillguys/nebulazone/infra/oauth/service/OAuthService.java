@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.user.dto.UserSignUpCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.exception.UserException;
@@ -48,10 +47,9 @@ public class OAuthService extends DefaultOAuth2UserService {
 		};
 
 		User user = getOrCreateUser(oAuth2UserInfo);
-		AuthUser authUser = AuthUser.from(user);
 
-		String accessToken = jwtUtil.generateAccessToken(authUser);
-		String refreshToken = jwtUtil.generateRefreshToken(authUser);
+		String accessToken = jwtUtil.generateAccessToken(user);
+		String refreshToken = jwtUtil.generateRefreshToken(user);
 
 		return CustomOAuth2User.builder()
 			.userId(user.getId())

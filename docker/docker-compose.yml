@@ -11,6 +11,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    volumes:
+      - app-logs:/logs
     depends_on:
       db:
         condition: service_healthy
@@ -123,7 +125,37 @@ services:
     networks:
       - nebulazone-network
 
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.18.1
+    container_name: nebulazone-logstash
+    ports:
+      - "9600:9600"
+      - "5044:5044"
+    volumes:
+      - ./logstash/config/pipelines-prod.yml:/usr/share/logstash/config/pipelines.yml
+      - ./logstash/pipeline/pipeline-prod.conf:/usr/share/logstash/pipeline/pipeline.conf
+    environment:
+      - XPACK_MONITORING_ENABLED=false
+    networks:
+      - nebulazone-network
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.18.1
+    container_name: nebulazone-filebeat
+    user: root
+    volumes:
+      - ./filebeat/filebeat-prod.yml:/usr/share/filebeat/filebeat.yml
+      - app-logs:/var/log/app
+    depends_on:
+      - logstash
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    command: [ "--strict.perms=false" ]
+    networks:
+      - nebulazone-network
+
 volumes:
   es-data:
   redis-data:
   mysql-data:
+  app-logs:

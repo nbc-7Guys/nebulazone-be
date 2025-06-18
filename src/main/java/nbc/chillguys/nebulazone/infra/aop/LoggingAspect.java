@@ -12,7 +12,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Aspect
 @Slf4j
@@ -41,7 +41,7 @@ public class LoggingAspect {
 		// 유저 정보
 		String userInfo = getUserInfo();
 
-		log.warn("[API 요청] {} | Controller={}.{} | 유저={}",
+		log.info("[API 요청] {} | Controller={}.{} | 유저={}",
 			method, className, methodName, userInfo);
 	}
 
@@ -50,8 +50,8 @@ public class LoggingAspect {
 		if (authentication != null && authentication.isAuthenticated()
 			&& !"anonymousUser".equals(authentication.getPrincipal())) {
 			Object principal = authentication.getPrincipal();
-			if (principal instanceof AuthUser authUser) {
-				return String.format("id=%d, email=%s", authUser.getId(), authUser.getEmail());
+			if (principal instanceof User user) {
+				return String.format("id=%d, email=%s", user.getId(), user.getEmail());
 			} else if (principal instanceof org.springframework.security.core.userdetails.UserDetails userDetails) {
 				return userDetails.getUsername();
 			}

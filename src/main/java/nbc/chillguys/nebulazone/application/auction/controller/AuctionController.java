@@ -23,7 +23,7 @@ import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctio
 import nbc.chillguys.nebulazone.application.auction.service.AuctionService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @RestController
 @RequestMapping("/auctions")
@@ -65,10 +65,10 @@ public class AuctionController {
 	@PostMapping("/{auctionId}")
 	public ResponseEntity<ManualEndAuctionResponse> manualEndAuction(
 		@PathVariable("auctionId") Long auctionId,
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@Valid @RequestBody ManualEndAuctionRequest request) {
 
-		ManualEndAuctionResponse response = auctionService.manualEndAuction(auctionId, authUser, request);
+		ManualEndAuctionResponse response = auctionService.manualEndAuction(auctionId, user, request);
 
 		return ResponseEntity.ok(response);
 	}
@@ -76,9 +76,9 @@ public class AuctionController {
 	@DeleteMapping("/{auctionId}")
 	public ResponseEntity<DeleteAuctionResponse> deleteAuction(
 		@PathVariable("auctionId") Long auctionId,
-		@AuthenticationPrincipal AuthUser authUser) {
+		@AuthenticationPrincipal User user) {
 
-		DeleteAuctionResponse response = auctionService.deleteAuction(auctionId, authUser);
+		DeleteAuctionResponse response = auctionService.deleteAuction(auctionId, user);
 
 		return ResponseEntity.ok(response);
 	}
