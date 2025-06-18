@@ -43,7 +43,7 @@ public class PaymentClient {
 		Map<String, Object> body = Map.of(
 			"paymentKey", request.paymentKey(),
 			"orderId", request.orderId(),
-			"point", request.point()
+			"amount", request.point()
 		);
 
 		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
