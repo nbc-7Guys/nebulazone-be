@@ -17,7 +17,7 @@ import nbc.chillguys.nebulazone.application.user.dto.response.TossPaymentConfirm
 @RequiredArgsConstructor
 public class PaymentClient {
 
-	private final RestClient restClient = RestClient.builder().build();
+	private final RestClient restClient;
 
 	@Value("${toss.secret-key}")
 	private String secretKey;
