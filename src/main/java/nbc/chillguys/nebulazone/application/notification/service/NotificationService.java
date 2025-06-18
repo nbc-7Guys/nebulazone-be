@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.application.notification.dto.UnreadNotificationResponses;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.notification.dto.NotificationInfo;
 import nbc.chillguys.nebulazone.domain.notification.entity.NotificationType;
 import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
 import nbc.chillguys.nebulazone.domain.notification.service.NotificationDomainService;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
 
 @Slf4j
@@ -98,18 +98,18 @@ public class NotificationService {
 		}
 	}
 
-	public UnreadNotificationResponses findUnreadNotifications(AuthUser authUser) {
+	public UnreadNotificationResponses findUnreadNotifications(User user) {
 		List<NotificationInfo> unreadNotifications = notificationDomainService.findUnreadNotifications(
-			authUser.getId());
+			user.getId());
 		return UnreadNotificationResponses.of(unreadNotifications);
 	}
 
-	public void markNotificationAsRead(AuthUser authUser, Long notificationId) {
-		notificationDomainService.readNotification(authUser.getId(), notificationId);
+	public void markNotificationAsRead(User user, Long notificationId) {
+		notificationDomainService.readNotification(user.getId(), notificationId);
 	}
 
-	public void markAllNotificationAsRead(AuthUser authUser) {
-		notificationDomainService.readAllNotification(authUser.getId());
+	public void markAllNotificationAsRead(User user) {
+		notificationDomainService.readAllNotification(user.getId());
 	}
 
 }

@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.domain.notification.repository;
 import static nbc.chillguys.nebulazone.domain.notification.entity.QNotification.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
@@ -49,4 +50,16 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
 			)
 			.fetch();
 	}
+
+	@Override
+	public Optional<Notification> findQueryNotificationByUserAndId(Long userId, Long notificationId) {
+		return Optional.ofNullable(jpaQueryFactory
+				.selectFrom(notification)
+				.where(
+					notification.targetUserId.eq(userId),
+					notification.id.eq(notificationId)
+				)
+				.fetchOne());
+	}
+
 }

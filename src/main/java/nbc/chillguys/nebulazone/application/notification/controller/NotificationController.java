@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.notification.dto.UnreadNotificationResponses;
 import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
-import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.notification.entity.NotificationType;
 import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,26 +41,26 @@ public class NotificationController {
 
 	@GetMapping("/notifications")
 	public ResponseEntity<UnreadNotificationResponses> findUnreadNotifications(
-		@AuthenticationPrincipal AuthUser authUser
+		@AuthenticationPrincipal User user
 	) {
-		UnreadNotificationResponses unreadNotifications = notificationService.findUnreadNotifications(authUser);
+		UnreadNotificationResponses unreadNotifications = notificationService.findUnreadNotifications(user);
 		return ResponseEntity.ok(unreadNotifications);
 	}
 
 	@PatchMapping("/notification/{notificationId}/read")
 	public ResponseEntity<Void> markNotificationAsRead(
-		@AuthenticationPrincipal AuthUser authUser,
+		@AuthenticationPrincipal User user,
 		@PathVariable("notificationId") Long notificationId
 	) {
-		notificationService.markNotificationAsRead(authUser, notificationId);
+		notificationService.markNotificationAsRead(user, notificationId);
 		return ResponseEntity.ok().build();
 	}
 
 	@PatchMapping("/notification/read-all")
 	public ResponseEntity<Void> markAllNotificationAsRead(
-		@AuthenticationPrincipal AuthUser authUser
+		@AuthenticationPrincipal User user
 	) {
-		notificationService.markAllNotificationAsRead(authUser);
+		notificationService.markAllNotificationAsRead(user);
 		return ResponseEntity.ok().build();
 	}
 

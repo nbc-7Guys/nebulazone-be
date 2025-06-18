@@ -33,7 +33,7 @@ public class NotificationDomainService {
 
 	@Transactional
 	public void readNotification(Long userId, Long notificationId) {
-		Notification notification = notificationRepository.findById(notificationId)
+		Notification notification = notificationRepository.findQueryNotificationByUserAndId(userId, notificationId)
 			.orElseThrow(() -> new RuntimeException("해당 알림은 존재하지 않습니다."));
 
 		notification.markAsRead();
