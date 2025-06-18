@@ -1,14 +1,11 @@
 package nbc.chillguys.nebulazone.infra.websocket.interceptor;
 
-import java.security.Principal;
-
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +17,6 @@ import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomRepository;
 import nbc.chillguys.nebulazone.domain.chat.repository.ChatRoomUserRepository;
 import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
-import nbc.chillguys.nebulazone.infra.websocket.SessionUtil;
 import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
 
 @Slf4j
@@ -37,7 +33,7 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 	 * WebSocket STOMP 인바운드 메시지 인증 및 권한 검증 인터셉터 <br>
 	 * <p>
 	 * - CONNECT: JWT 토큰을 검증하고, Principal 및 세션-유저 매핑을 수행<br>
-	 * - SUBSCRIBE: 채팅방 존재 여부와 참여자 권한을 검증하고, 세션-채팅방 매핑을 수행
+	 * - SUBSCRIBE: 채팅방/알림 구독 권한을 검증하고, 세션 매핑을 수행
 	 * </p>
 	 *
 	 * @author 박형우
@@ -73,16 +69,21 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 
 		}
 
-		// SUBSCRIBE: 특정 채팅방 구독 시 권한 체크
+		// SUBSCRIBE: 구독 시 권한 체크
 		if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
 
 			String destination = accessor.getDestination();
+			SessionUser user = webSocketSessionRedisService.getUserIdBySessionId(accessor.getSessionId());
 
+			if (user == null) {
+				throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+			}
+
+			// 채팅방 구독 권한 체크
 			if (destination != null && destination.startsWith("/topic/chat/")) {
 				String roomIdStr = destination.substring("/topic/chat/".length());
 				try {
 					Long roomId = Long.valueOf(roomIdStr);
-					SessionUser user = webSocketSessionRedisService.getUserIdBySessionId(accessor.getSessionId());
 
 					// 채팅방 존재 확인
 					boolean existsChatRoomById = chatRoomRepository.existsChatRoomById(roomId);
@@ -102,7 +103,23 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 				} catch (NumberFormatException e) {
 					log.warn("방번호 추출 실패: {}", roomIdStr);
 				}
+			}
+			// 알림 구독 권한 체크
+			else if (destination != null && destination.startsWith("/topic/notification/")) {
+				String userIdStr = destination.substring("/topic/notification/".length());
+				try {
+					Long targetUserId = Long.valueOf(userIdStr);
 
+					// 자신의 알림만 구독 가능하도록 권한 체크
+					if (!user.id().equals(targetUserId)) {
+						log.warn("알림 구독 권한 없음 - sessionUserId: {}, targetUserId: {}", user.id(), targetUserId);
+						throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+					}
+
+				} catch (NumberFormatException e) {
+					log.warn("알림 구독 대상 사용자 ID 추출 실패: {}", userIdStr);
+					throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+				}
 			}
 		}
 

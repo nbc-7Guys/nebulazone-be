@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.application.chat.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -12,12 +13,15 @@ import nbc.chillguys.nebulazone.application.chat.dto.request.CreateChatRoomReque
 import nbc.chillguys.nebulazone.application.chat.dto.response.CreateChatRoomResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponses;
+import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
 import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
+import nbc.chillguys.nebulazone.domain.notification.constant.NotificationType;
+import nbc.chillguys.nebulazone.domain.notification.dto.NotificationMessage;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -32,6 +36,7 @@ public class ChatService {
 	private final SimpMessagingTemplate messagingTemplate;
 	private final ProductDomainService productDomainService;
 	private final UserDomainService userDomainService;
+	private final NotificationService notificationService;
 
 	/**
 	 * 채팅방 생성 또는 기존에 채팅방 조회.<br/>
@@ -74,8 +79,24 @@ public class ChatService {
 		User buyer = userDomainService.findActiveUserByEmail(authUser.getEmail());
 		User seller = product.getSeller();
 
+		NotificationMessage notificationMessage = NotificationMessage.of(
+			NotificationType.CHAT_ROOM_CREATED,
+			"'" + buyer.getNickname() + " 님이 거래 요청을 하였습니다.'",
+			"'" + product.getName() + " 제품에 대한 거래를 요청하였습니다.'",
+			"/chat/rooms",
+			seller.getId(),
+			LocalDateTime.now(),
+			false
+		);
+
 		// 채팅방 및 참가자 save
-		return chatDomainService.createChatRoom(product, buyer, seller);
+		ChatRoom chatRoom = chatDomainService.createChatRoom(product, buyer, seller);
+		notificationService.sendNotificationToUser(
+			seller.getId(),
+			notificationMessage
+		);
+
+		return chatRoom;
 	}
 
 	/**
