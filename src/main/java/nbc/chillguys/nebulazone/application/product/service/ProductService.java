@@ -73,13 +73,14 @@ public class ProductService {
 
 		Product createdProduct = productDomainService.createProduct(productCreateCommand, productImageUrls);
 
-		productDomainService.saveProductToEs(createdProduct);
-
 		if (createdProduct.getTxMethod() == ProductTxMethod.AUCTION) {
 			AuctionCreateCommand auctionCreateCommand = AuctionCreateCommand.of(createdProduct, productEndTime);
 			Auction savedAuction = auctionDomainService.createAuction(auctionCreateCommand);
 			auctionSchedulerService.autoAuctionEndSchedule(savedAuction, createdProduct.getId());
+			createdProduct.updateAuctionId(savedAuction.getId());
 		}
+
+		productDomainService.saveProductToEs(createdProduct);
 
 		return ProductResponse.from(createdProduct, productEndTime);
 	}

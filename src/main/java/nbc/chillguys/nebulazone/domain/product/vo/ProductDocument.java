@@ -38,6 +38,9 @@ public record ProductDocument(
 	@Field(type = FieldType.Keyword)
 	String sellerNickname,
 
+	@Field(type = FieldType.Long)
+	Long auctionId,
+
 	@Field(type = FieldType.Boolean)
 	boolean isSold,
 
@@ -56,6 +59,7 @@ public record ProductDocument(
 			product.getCatalogId(),
 			product.getSellerId(),
 			product.getSellerNickname(),
+			product.getAuctionId(),
 			product.isSold(),
 			product.getCreatedAt(),
 			product.getProductImages().stream()

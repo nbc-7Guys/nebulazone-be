@@ -54,6 +54,8 @@ public class Product extends BaseEntity {
 	@Column(nullable = false)
 	private ProductTxMethod txMethod;
 
+	private Long auctionId;
+
 	private boolean isSold;
 
 	private boolean isDeleted;
@@ -193,6 +195,10 @@ public class Product extends BaseEntity {
 
 	public String getSellerNickname() {
 		return seller.getNickname();
+	}
+
+	public void updateAuctionId(Long auctionId) {
+		this.auctionId = auctionId;
 	}
 
 }
