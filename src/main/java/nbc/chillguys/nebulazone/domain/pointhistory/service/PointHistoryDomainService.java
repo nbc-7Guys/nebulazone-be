@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class PointHistoryDomainService {
 	 * @return 생성된 PointHistory 엔티티
 	 * @author 정석현
 	 */
-	@Transactional
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public PointHistory createPointHistory(PointHistoryCommand command) {
 		PointHistory pointHistory = PointHistory.builder()
 			.user(command.user())
