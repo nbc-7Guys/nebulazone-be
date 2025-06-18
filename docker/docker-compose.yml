@@ -53,8 +53,11 @@ services:
     container_name: nebulazone-redis
     ports:
       - "6379:6379"
+    environment:
+      TZ: Asia/Seoul
     volumes:
       - redis-data:/data
+      - /etc/localtime:/etc/localtime:ro
     command: redis-server --appendonly yes
     networks:
       - nebulazone-network
