@@ -26,3 +26,6 @@ spring:
 jwt:
   secret:
     key: test-secret-key-test-secret-key-test-secret-key
+
+toss:
+  secret-key: toss-test-secret-key
