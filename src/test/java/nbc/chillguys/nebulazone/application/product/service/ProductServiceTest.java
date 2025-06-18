@@ -47,16 +47,11 @@ import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
-import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
-import nbc.chillguys.nebulazone.domain.user.exception.UserException;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
 
 @DisplayName("상품 애플리케이션 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
-	@Mock
-	private UserDomainService userDomainService;
 
 	@Mock
 	private ProductDomainService productDomainService;

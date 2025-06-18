@@ -36,9 +36,6 @@ import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
-import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
-import nbc.chillguys.nebulazone.domain.user.exception.UserException;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @DisplayName("거래내역 애플리케이션 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -46,9 +43,6 @@ class TransactionServiceUnitTest {
 
 	@Mock
 	private TransactionDomainService txDomainService;
-
-	@Mock
-	private UserDomainService userDomainService;
 
 	@InjectMocks
 	private TransactionService txService;

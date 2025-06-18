@@ -16,14 +16,12 @@ import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @Service
 @RequiredArgsConstructor
 public class BidService {
 
 	private final BidDomainService bidDomainService;
-	private final UserDomainService userDomainService;
 	private final AuctionDomainService auctionDomainService;
 
 	/**

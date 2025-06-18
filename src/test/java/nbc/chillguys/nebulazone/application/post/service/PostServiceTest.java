@@ -36,16 +36,11 @@ import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
-import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
-import nbc.chillguys.nebulazone.domain.user.exception.UserException;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
 
 @DisplayName("게시글 애플리케이션 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
-	@Mock
-	private UserDomainService userDomainService;
 
 	@Mock
 	private PostDomainService postDomainService;
@@ -58,7 +53,6 @@ class PostServiceTest {
 
 	private User user;
 	private Post post;
-	private User user2;
 
 	@BeforeEach
 	void init() {
@@ -94,13 +88,6 @@ class PostServiceTest {
 			.user(user)
 			.build();
 		ReflectionTestUtils.setField(post, "id", 1L);
-
-		user2 = User.builder()
-			.email("test@test.com")
-			.roles(Set.of(UserRole.ROLE_USER))
-			.build();
-
-		ReflectionTestUtils.setField(user2, "id", 1L);
 	}
 
 	@Nested
@@ -170,7 +157,7 @@ class PostServiceTest {
 				.willReturn(post);
 
 			// When
-			CreatePostResponse result = postService.createPost(user2, request, files);
+			CreatePostResponse result = postService.createPost(user, request, files);
 
 			// Then
 			assertThat(result.postId()).isEqualTo(1L);
@@ -202,7 +189,7 @@ class PostServiceTest {
 				.willReturn(post);
 
 			// When
-			CreatePostResponse result = postService.createPost(user2, request, files);
+			CreatePostResponse result = postService.createPost(user, request, files);
 
 			// Then
 			assertThat(result.postId()).isEqualTo(1L);

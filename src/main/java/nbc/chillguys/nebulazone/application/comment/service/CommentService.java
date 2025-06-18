@@ -20,7 +20,6 @@ import nbc.chillguys.nebulazone.domain.comment.service.CommentDomainService;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @RequiredArgsConstructor
 @Service
@@ -28,7 +27,6 @@ public class CommentService {
 
 	public static final int COMMENT_SIZE_PER_PAGE = 20;
 
-	private final UserDomainService userDomainService;
 	private final PostDomainService postDomainService;
 	private final CommentDomainService commentDomainService;
 

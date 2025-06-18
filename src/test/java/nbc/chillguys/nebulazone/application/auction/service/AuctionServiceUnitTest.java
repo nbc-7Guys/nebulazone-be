@@ -46,7 +46,6 @@ import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainServ
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @DisplayName("경매 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -57,9 +56,6 @@ class AuctionServiceUnitTest {
 
 	@Mock
 	BidDomainService bidDomainService;
-
-	@Mock
-	UserDomainService userDomainService;
 
 	@Mock
 	AuctionSchedulerService auctionSchedulerService;
