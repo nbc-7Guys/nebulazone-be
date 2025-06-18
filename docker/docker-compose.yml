@@ -132,8 +132,8 @@ services:
       - "9600:9600"
       - "5044:5044"
     volumes:
-      - ./logstash/config/pipelines-prod.yml:/usr/share/logstash/config/pipelines.yml
-      - ./logstash/pipeline/pipeline-prod.conf:/usr/share/logstash/pipeline/pipeline.conf
+      - ../logstash/config/pipelines-prod.yml:/usr/share/logstash/config/pipelines.yml
+      - ../logstash/pipeline/pipeline-prod.conf:/usr/share/logstash/pipeline/pipeline.conf
     environment:
       - XPACK_MONITORING_ENABLED=false
     networks:
@@ -144,7 +144,7 @@ services:
     container_name: nebulazone-filebeat
     user: root
     volumes:
-      - ./filebeat/filebeat-prod.yml:/usr/share/filebeat/filebeat.yml
+      - ../filebeat/filebeat-prod.yml:/usr/share/filebeat/filebeat.yml
       - app-logs:/var/log/app
     depends_on:
       - logstash
