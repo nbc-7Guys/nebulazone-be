@@ -5,12 +5,9 @@ import java.util.Base64;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.user.dto.request.TossPaymentConfirmRequest;
@@ -20,7 +17,7 @@ import nbc.chillguys.nebulazone.application.user.dto.response.TossPaymentConfirm
 @RequiredArgsConstructor
 public class PaymentClient {
 
-	private final RestTemplate restTemplate = new RestTemplate();
+	private final RestClient restClient = RestClient.builder().build();
 
 	@Value("${toss.secret-key}")
 	private String secretKey;
@@ -36,25 +33,20 @@ public class PaymentClient {
 		String encodedSecretKey = Base64.getEncoder()
 			.encodeToString((secretKey + ":").getBytes(StandardCharsets.UTF_8));
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Authorization", "Basic " + encodedSecretKey);
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
 		Map<String, Object> body = Map.of(
 			"paymentKey", request.paymentKey(),
 			"orderId", request.orderId(),
 			"amount", request.point()
 		);
 
-		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
-
-		ResponseEntity<TossPaymentConfirmResponse> response = restTemplate
-			.postForEntity(url, entity, TossPaymentConfirmResponse.class);
-
-		if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-			return response.getBody();
-		} else {
-			throw new IllegalStateException("토스 결제 승인 실패");
-		}
+		return restClient.post()
+			.uri(url)
+			.headers(headers -> {
+				headers.set("Authorization", "Basic " + encodedSecretKey);
+				headers.setContentType(MediaType.APPLICATION_JSON);
+			})
+			.body(body)
+			.retrieve()
+			.body(TossPaymentConfirmResponse.class);
 	}
 }
