@@ -40,6 +40,7 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 		Pageable pageable = PageRequest.of(page, size);
 
 		List<AuctionFindAllInfo> contents = jpaQueryFactory
+
 			.select(new QAuctionFindAllInfo(
 				auction.id,
 				auction.startPrice,
@@ -47,6 +48,7 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 				auction.isWon,
 				auction.endTime,
 				auction.createdAt,
+				product.id,
 				product.name,
 				productImage.url.min(),
 				bid.auction.id.count()
@@ -98,6 +100,7 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 				auction.isWon,
 				auction.endTime,
 				auction.createdAt,
+				product.id,
 				product.name,
 				productImage.url.min(),
 				bid.auction.id.count()
