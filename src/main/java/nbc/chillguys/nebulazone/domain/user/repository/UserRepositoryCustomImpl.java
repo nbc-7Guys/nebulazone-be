@@ -54,4 +54,17 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 			).fetchOne());
 	}
 
+	@Override
+	public Optional<User> findUserById(Long userId) {
+		QUser user = QUser.user;
+
+		return Optional.ofNullable(jpaQueryFactory.selectFrom(user)
+			.leftJoin(user.addresses).fetchJoin()
+			.leftJoin(user.roles).fetchJoin()
+			.where(
+				user.id.eq(userId),
+				user.status.eq(UserStatus.ACTIVE)
+			).fetchOne());
+	}
+
 }

@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.UpdateUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest;
@@ -16,13 +15,14 @@ import nbc.chillguys.nebulazone.domain.user.dto.UserUpdateCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 	private final UserDomainService userDomainService;
 	private final S3Service s3Service;
+	private final UserCacheService userCacheService;
 
 	public UserResponse signUp(SignUpUserRequest signUpUserRequest) {
 		userDomainService.validEmail(signUpUserRequest.email());
@@ -47,6 +47,8 @@ public class UserService {
 			UserUpdateCommand.of(updateUserRequest, loggedInUser)
 		);
 
+		userCacheService.deleteUserById(user.getId());
+
 		return UserResponse.from(user);
 	}
 
@@ -57,9 +59,10 @@ public class UserService {
 		}
 
 		String profileImageUrl = s3Service.generateUploadUrlAndUploadFile(profileImage);
-		log.info("profileImageUrl: {}", profileImageUrl);
 
 		userDomainService.updateUserProfileImage(profileImageUrl, user);
+
+		userCacheService.deleteUserById(user.getId());
 
 		return UserResponse.from(user);
 	}
@@ -68,6 +71,8 @@ public class UserService {
 		userDomainService.validPassword(withdrawUserRequest.password(), user.getPassword());
 
 		userDomainService.withdrawUser(user);
+
+		userCacheService.deleteUserById(user.getId());
 
 		return WithdrawUserResponse.from(user.getId());
 	}

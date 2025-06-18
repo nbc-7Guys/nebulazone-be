@@ -209,7 +209,7 @@ public class UserDomainService {
 			user.updatePassword(passwordEncoder.encode(userUpdateCommand.newPassword()));
 		}
 
-		return user;
+		return userRepository.save(user);
 	}
 
 	/**
@@ -219,6 +219,8 @@ public class UserDomainService {
 	 * @author 이승현
 	 */
 	public void validPhone(String phone) {
+		phone = phone.replaceAll("-", "");
+
 		if (userRepository.existsByPhone(phone)) {
 			throw new UserException(UserErrorCode.ALREADY_EXISTS_PHONE);
 		}
