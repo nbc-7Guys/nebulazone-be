@@ -8,8 +8,11 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nbc.chillguys.nebulazone.domain.notification.constant.NotificationType;
-import nbc.chillguys.nebulazone.domain.notification.dto.NotificationMessage;
+import nbc.chillguys.nebulazone.application.notification.dto.UnreadNotificationResponses;
+import nbc.chillguys.nebulazone.domain.auth.vo.AuthUser;
+import nbc.chillguys.nebulazone.domain.notification.dto.NotificationInfo;
+import nbc.chillguys.nebulazone.domain.notification.entity.NotificationType;
+import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
 import nbc.chillguys.nebulazone.domain.notification.service.NotificationDomainService;
 import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
 
@@ -32,6 +35,9 @@ public class NotificationService {
 			} else {
 				log.info("사용자 오프라인 - userId : {}", userId);
 			}
+
+			notificationDomainService.createNotification(userId, message);
+
 		} catch (Exception e) {
 			log.error("알림 전송 실패 - userId : {}, message : {}", userId, message, e);
 		}
@@ -90,6 +96,20 @@ public class NotificationService {
 		} catch (Exception e) {
 			log.error("상품 구매 알림 실패 - productId={}, error={}", productId, e.getMessage());
 		}
+	}
+
+	public UnreadNotificationResponses findUnreadNotifications(AuthUser authUser) {
+		List<NotificationInfo> unreadNotifications = notificationDomainService.findUnreadNotifications(
+			authUser.getId());
+		return UnreadNotificationResponses.of(unreadNotifications);
+	}
+
+	public void markNotificationAsRead(AuthUser authUser, Long notificationId) {
+		notificationDomainService.readNotification(authUser.getId(), notificationId);
+	}
+
+	public void markAllNotificationAsRead(AuthUser authUser) {
+		notificationDomainService.readAllNotification(authUser.getId());
 	}
 
 }

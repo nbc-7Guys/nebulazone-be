@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.domain.notification.constant;
+package nbc.chillguys.nebulazone.domain.notification.entity;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

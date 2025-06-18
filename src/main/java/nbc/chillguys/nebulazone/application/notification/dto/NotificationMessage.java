@@ -1,10 +1,10 @@
-package nbc.chillguys.nebulazone.domain.notification.dto;
+package nbc.chillguys.nebulazone.application.notification.dto;
 
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import nbc.chillguys.nebulazone.domain.notification.constant.NotificationType;
+import nbc.chillguys.nebulazone.domain.notification.entity.NotificationType;
 
 public record NotificationMessage(
 	NotificationType type,
