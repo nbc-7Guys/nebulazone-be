@@ -41,7 +41,7 @@ public class LoggingAspect {
 		// 유저 정보
 		String userInfo = getUserInfo();
 
-		log.warn("[API 요청] {} | Controller={}.{} | 유저={}",
+		log.info("[API 요청] {} | Controller={}.{} | 유저={}",
 			method, className, methodName, userInfo);
 	}
 
