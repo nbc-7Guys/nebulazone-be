@@ -73,6 +73,7 @@ class BidServiceUnitTest {
 	private Catalog catalog;
 	private Product product;
 	private Auction auction;
+	private User loggedInUser;
 	private CreateBidRequest createBidRequest;
 
 	@BeforeEach
@@ -82,6 +83,7 @@ class BidServiceUnitTest {
 		catalog = createCatalog(1L, "테스트 카탈로그");
 		product = createProduct(1L, PRODUCT_NAME, seller, catalog);
 		auction = createAuction(1L, product, START_PRICE);
+		loggedInUser = createUser(1L, BIDDER_EMAIL);
 		createBidRequest = new CreateBidRequest(BID_PRICE);
 	}
 
@@ -97,6 +99,7 @@ class BidServiceUnitTest {
 			Bid createdBid = createBid(100L, bidder, BID_PRICE);
 
 			given(auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId)).willReturn(auction);
+			given(userDomainService.findActiveUserById(loggedInUser.getId())).willReturn(bidder);
 			given(bidDomainService.createBid(auction, bidder, BID_PRICE)).willReturn(createdBid);
 
 			// when
@@ -107,6 +110,7 @@ class BidServiceUnitTest {
 			assertThat(result.bidPrice()).isEqualTo(BID_PRICE);
 
 			verify(auctionDomainService).findActiveAuctionWithProductAndSellerLock(auctionId);
+			verify(userDomainService).findActiveUserById(loggedInUser.getId());
 			verify(bidDomainService).createBid(auction, bidder, BID_PRICE);
 		}
 
@@ -157,6 +161,7 @@ class BidServiceUnitTest {
 			// given
 			Long auctionId = 1L;
 
+			given(userDomainService.findActiveUserById(loggedInUser.getId())).willReturn(bidder);
 			given(auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId)).willReturn(auction);
 			given(bidDomainService.createBid(auction, bidder, BID_PRICE))
 				.willThrow(new BidException(BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE));
@@ -168,6 +173,7 @@ class BidServiceUnitTest {
 				.isEqualTo(BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE);
 
 			verify(auctionDomainService).findActiveAuctionWithProductAndSellerLock(auctionId);
+			verify(userDomainService).findActiveUserById(loggedInUser.getId());
 			verify(bidDomainService).createBid(auction, bidder, BID_PRICE);
 		}
 	}

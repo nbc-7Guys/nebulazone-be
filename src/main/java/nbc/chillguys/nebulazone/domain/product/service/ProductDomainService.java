@@ -139,6 +139,8 @@ public class ProductDomainService {
 		Product product = findAvailableProductById(command.productId());
 
 		product.purchase();
+
+		product.getSeller().addPoint(product.getPrice());
 	}
 
 	/**

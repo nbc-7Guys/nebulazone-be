@@ -16,25 +16,29 @@ import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @Service
 @RequiredArgsConstructor
 public class BidService {
 
 	private final BidDomainService bidDomainService;
+	private final UserDomainService userDomainService;
 	private final AuctionDomainService auctionDomainService;
 
 	/**
 	 * 경매에 기존 입찰 내역이 없다면 입찰 생성, 있다면 입찰 수정
 	 * @param auctionId 대상 경매
-	 * @param user 인증 유저
+	 * @param loggedInUser 로그인 유저
 	 * @param request 입찰 정보
 	 * @return 입찰 후 반환값
 	 * @author 전나겸
 	 */
 	@Transactional
-	public CreateBidResponse upsertBid(Long auctionId, User user, CreateBidRequest request) {
+	public CreateBidResponse upsertBid(Long auctionId, User loggedInUser, CreateBidRequest request) {
 		Auction lockAuction = auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId);
+
+		User user = userDomainService.findActiveUserById(loggedInUser.getId());
 
 		Bid resultBid = bidDomainService.findBidByAuctionIdAndUserId(lockAuction.getId(), user.getId())
 			.map(findBid -> bidDomainService.updateBid(lockAuction, findBid, user, request.price()))

@@ -40,12 +40,14 @@ import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
+	private final UserDomainService userDomainService;
 	private final ProductDomainService productDomainService;
 	private final AuctionDomainService auctionDomainService;
 	private final TransactionDomainService transactionDomainService;
@@ -150,7 +152,8 @@ public class ProductService {
 	}
 
 	@Transactional
-	public PurchaseProductResponse purchaseProduct(User user, Long catalogId, Long productId) {
+	public PurchaseProductResponse purchaseProduct(User loggedInUser, Long catalogId, Long productId) {
+		User user = userDomainService.findActiveUserById(loggedInUser.getId());
 		Product product = productDomainService.findAvailableProductById(productId);
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
