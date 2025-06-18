@@ -13,6 +13,7 @@ public record FindAllAuctionResponse(
 	boolean isWon,
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime endTime,
+	Long productId,
 	String productName,
 	String productImageUrl,
 	Long bidCount) {
@@ -24,6 +25,7 @@ public record FindAllAuctionResponse(
 			findInfo.currentPrice(),
 			findInfo.isWon(),
 			findInfo.endTime(),
+			findInfo.productId(),
 			findInfo.productName(),
 			findInfo.productImageUrl() != null ? findInfo.productImageUrl() : "이미지 없음",
 			findInfo.bidCount()

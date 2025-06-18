@@ -544,7 +544,7 @@ class AuctionDomainServiceUnitTest {
 
 	private AuctionFindAllInfo createAuctionFindAllInfo(Long id, Long startPrice, Long currentPrice, Long bidCount) {
 		return new AuctionFindAllInfo(id, startPrice, currentPrice, false,
-			LocalDateTime.now().plusDays(1), LocalDateTime.now(), PRODUCT_NAME, "img", bidCount);
+			LocalDateTime.now().plusDays(1), LocalDateTime.now(), 1L, PRODUCT_NAME, "img", bidCount);
 	}
 
 	private AuctionFindDetailInfo createAuctionFindDetailInfo(Long auctionId) {

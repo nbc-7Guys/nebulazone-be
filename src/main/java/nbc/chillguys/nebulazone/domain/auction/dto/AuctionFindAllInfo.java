@@ -11,6 +11,7 @@ public record AuctionFindAllInfo(
 	boolean isWon,
 	LocalDateTime endTime,
 	LocalDateTime createdAt,
+	Long productId,
 	String productName,
 	String productImageUrl,
 	Long bidCount
