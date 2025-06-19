@@ -5,7 +5,7 @@ filebeat.inputs:
       - /var/log/app/mylog.log
     fields:
       log_type: app
-      service: myapp1
+      service: ${FILEBEAT_SERVICE}
     fields_under_root: true
 
   - type: log
@@ -18,4 +18,4 @@ filebeat.inputs:
     fields_under_root: true
 
 output.logstash:
-  hosts: ["nebulazone-logstash:5044"]
+  hosts: ["${LOGSTASH_HOSTS}"]
