@@ -29,6 +29,7 @@ jobs:
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> docker/.env
           echo "SPRING_DATA_REDIS_HOST=${{ secrets.REDIS_HOST }}" >> docker/.env
           echo "SPRING_DATA_REDIS_PORT=${{ secrets.REDIS_PORT }}" >> docker/.env
+          echo "SPRING_DATA_REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} " >> docker/.env
           echo "SPRING_CLOUD_AWS_CREDENTIALS_ACCESS-KEY=${{ secrets.AWS_ACCESS_KEY }}" >> docker/.env
           echo "SPRING_CLOUD_AWS_CREDENTIALS_SECRET-KEY=${{ secrets.AWS_SECRET_KEY }}" >> docker/.env
           echo "SPRING_CLOUD_AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}" >> docker/.env
@@ -36,10 +37,6 @@ jobs:
           echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT-ID=${{ secrets.NAVER_API_KEY }}" >> docker/.env
           echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT-SECRET=${{ secrets.NAVER_API_SECRET_KEY }}" >> docker/.env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> docker/.env
-          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> docker/.env
-          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> docker/.env
-          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> docker/.env
-          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> docker/.env
           echo "ES_URI=${{ secrets.ES_URI }}" >> docker/.env
           echo "TOSS_SECRET_KEY=${{ secrets.TOSS_SECRET_KEY }}" >> docker/.env
           echo "TOSS_CLIENT_KEY=${{ secrets.TOSS_CLIENT_KEY }}" >> docker/.env
@@ -57,7 +54,7 @@ jobs:
           host: ${{ secrets.GCP_VM_HOST_1 }}
           username: ubuntu
           key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
-          source: "docker/docker-compose.yml,docker/.env,prometheus/prometheus-prod.yml,filebeat/filebeat-prod.yml"
+          source: "docker/docker-compose.yml,docker/.env,filebeat/filebeat-prod.yml"
           target: "~/app"
           overwrite: true
 
