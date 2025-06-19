@@ -15,9 +15,6 @@ services:
       - .env
     volumes:
       - app-logs:/app/logs
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 30s
@@ -34,7 +31,7 @@ services:
       - ../filebeat/filebeat-prod.yml:/usr/share/filebeat/filebeat.yml
       - app-logs:/var/log/app
     environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_HOSTS=${ES_URI}
     command: [ "--strict.perms=false" ]
     networks:
       - nebulazone-network
