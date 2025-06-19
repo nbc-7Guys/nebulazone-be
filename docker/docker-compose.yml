@@ -33,8 +33,6 @@ services:
     volumes:
       - ../filebeat/filebeat-prod.yml:/usr/share/filebeat/filebeat.yml
       - app-logs:/var/log/app
-    depends_on:
-      - logstash
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     command: [ "--strict.perms=false" ]
