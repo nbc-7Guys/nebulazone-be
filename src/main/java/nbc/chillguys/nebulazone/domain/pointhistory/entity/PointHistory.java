@@ -34,7 +34,7 @@ public class PointHistory extends BaseEntity {
 	private User user;
 
 	@Column(nullable = false)
-	private int price;
+	private Long price;
 
 	private String account;
 
@@ -48,7 +48,7 @@ public class PointHistory extends BaseEntity {
 
 	@Builder
 	public PointHistory(
-		int price,
+		Long price,
 		String account,
 		User user,
 		PointHistoryType pointHistoryType,

@@ -10,7 +10,7 @@ import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 
 public record AdminPointHistoryResponse(
 	Long pointId,
-	Integer price,
+	Long price,
 	String account,
 	PointHistoryType type,
 	PointHistoryStatus status,
@@ -22,7 +22,7 @@ public record AdminPointHistoryResponse(
 ) {
 	@QueryProjection
 	public AdminPointHistoryResponse(
-		Long pointId, Integer price, String account,
+		Long pointId, Long price, String account,
 		PointHistoryType type, PointHistoryStatus status, LocalDateTime createdAt,
 		Long userId, String email, String nickname
 	) {

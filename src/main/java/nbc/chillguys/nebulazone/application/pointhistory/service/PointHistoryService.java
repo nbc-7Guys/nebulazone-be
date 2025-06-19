@@ -36,7 +36,7 @@ public class PointHistoryService {
 		}
 
 		PointHistoryCommand command = PointHistoryCommand.of(request, user);
-		PointHistory pointHistory = pointHistoryDomainService.createPointHistory(command);
+		PointHistory pointHistory = pointHistoryDomainService.createPointHistory(command, PointHistoryStatus.PENDING);
 
 		return PointResponse.from(pointHistory);
 	}

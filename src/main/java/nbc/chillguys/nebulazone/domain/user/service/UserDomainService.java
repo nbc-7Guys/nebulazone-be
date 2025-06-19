@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.domain.user.dto.UserPointChargeCommand;
 import nbc.chillguys.nebulazone.domain.user.dto.UserSignUpCommand;
 import nbc.chillguys.nebulazone.domain.user.dto.UserUpdateCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
@@ -174,7 +175,7 @@ public class UserDomainService {
 	 * @param price 요청 포인트
 	 * @author 정석현
 	 */
-	public void validEnoughPoint(User user, int price) {
+	public void validEnoughPoint(User user, Long price) {
 		if (user.hasNotEnoughPoint(price)) {
 			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
 		}
@@ -225,4 +226,15 @@ public class UserDomainService {
 			throw new UserException(UserErrorCode.ALREADY_EXISTS_PHONE);
 		}
 	}
+
+	/**
+	 * 유저 포인트 충전
+	 * @param command 포인트충전DTO
+	 * @author 정석현
+	 */
+	public void chargeUserPoint(UserPointChargeCommand command) {
+		User user = findActiveUserById(command.userId());
+		user.addPoint(command.point());
+	}
+
 }

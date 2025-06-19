@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
@@ -33,6 +34,7 @@ public class CatalogEsRepositoryCustomImpl implements CatalogEsRepositoryCustom 
 				.multiMatch(mm -> mm
 					.query(keyword)
 					.fields("name", "description")
+					.operator(Operator.And)
 					.type(TextQueryType.CrossFields)
 				)
 			);

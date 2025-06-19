@@ -82,11 +82,11 @@ class AuctionControllerTest {
 			// given
 			FindAllAuctionResponse auctionContent1 = new FindAllAuctionResponse(
 				AUCTION_ID, START_PRICE, CURRENT_PRICE, false,
-				endTime, PRODUCT_NAME, PRODUCT_IMAGE_URL, BID_COUNT
+				endTime, PRODUCT_ID, PRODUCT_NAME, PRODUCT_IMAGE_URL, BID_COUNT
 			);
 			FindAllAuctionResponse auctionContent2 = new FindAllAuctionResponse(
 				AUCTION_ID + 1, START_PRICE + 10000, CURRENT_PRICE + 20000, false,
-				endTime.plusDays(1), PRODUCT_NAME + "2", PRODUCT_IMAGE_URL, BID_COUNT + 2
+				endTime.plusDays(1), PRODUCT_ID, PRODUCT_NAME + "2", PRODUCT_IMAGE_URL, BID_COUNT + 2
 			);
 			List<FindAllAuctionResponse> contents = List.of(auctionContent1, auctionContent2);
 
@@ -147,7 +147,7 @@ class AuctionControllerTest {
 			// given
 			FindAllAuctionResponse auctionContent = new FindAllAuctionResponse(
 				AUCTION_ID, START_PRICE, CURRENT_PRICE, false,
-				endTime, PRODUCT_NAME, PRODUCT_IMAGE_URL, BID_COUNT
+				endTime, PRODUCT_ID, PRODUCT_NAME, PRODUCT_IMAGE_URL, BID_COUNT
 			);
 			List<FindAllAuctionResponse> contents = List.of(auctionContent);
 
@@ -200,11 +200,11 @@ class AuctionControllerTest {
 			// given
 			FindAllAuctionResponse auctionContent1 = new FindAllAuctionResponse(
 				AUCTION_ID, START_PRICE, CURRENT_PRICE, false,
-				endTime, PRODUCT_NAME, PRODUCT_IMAGE_URL, BID_COUNT
+				endTime, PRODUCT_ID, PRODUCT_NAME, PRODUCT_IMAGE_URL, BID_COUNT
 			);
 			FindAllAuctionResponse auctionContent2 = new FindAllAuctionResponse(
 				AUCTION_ID + 1, START_PRICE + 10000, CURRENT_PRICE + 20000, false,
-				endTime.plusDays(1), PRODUCT_NAME + "2", PRODUCT_IMAGE_URL, BID_COUNT + 3
+				endTime.plusDays(1), PRODUCT_ID, PRODUCT_NAME + "2", PRODUCT_IMAGE_URL, BID_COUNT + 3
 			);
 			List<FindAllAuctionResponse> expectedResponse = List.of(auctionContent1, auctionContent2);
 
@@ -237,7 +237,7 @@ class AuctionControllerTest {
 			// given
 			FindAllAuctionResponse auctionContent = new FindAllAuctionResponse(
 				AUCTION_ID, START_PRICE, CURRENT_PRICE, false,
-				endTime, PRODUCT_NAME, PRODUCT_IMAGE_URL, BID_COUNT
+				endTime, PRODUCT_ID, PRODUCT_NAME, PRODUCT_IMAGE_URL, BID_COUNT
 			);
 			List<FindAllAuctionResponse> expectedResponse = List.of(auctionContent);
 

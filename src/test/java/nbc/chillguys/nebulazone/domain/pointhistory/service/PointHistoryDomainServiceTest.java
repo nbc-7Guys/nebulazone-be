@@ -42,11 +42,11 @@ class PointHistoryDomainServiceTest {
 			// given
 			User user = mock(User.class);
 
-			PointRequest pointRequest = new PointRequest(1000, PointHistoryType.CHARGE, "123-456-789");
+			PointRequest pointRequest = new PointRequest(1000L, PointHistoryType.CHARGE, "123-456-789");
 			PointHistoryCommand command = PointHistoryCommand.of(pointRequest, user);
 
 			// when
-			pointHistoryDomainService.createPointHistory(command);
+			pointHistoryDomainService.createPointHistory(command, PointHistoryStatus.PENDING);
 
 			// then
 			verify(pointHistoryRepository).save(any(PointHistory.class));

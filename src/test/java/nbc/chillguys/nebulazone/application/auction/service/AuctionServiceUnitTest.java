@@ -339,6 +339,7 @@ class AuctionServiceUnitTest {
 			false,
 			LocalDateTime.now().plusDays(1),
 			LocalDateTime.now(),
+			1L,
 			PRODUCT_NAME,
 			"image.jpg",
 			10L);
@@ -350,6 +351,7 @@ class AuctionServiceUnitTest {
 			false,
 			LocalDateTime.now().plusDays(1),
 			LocalDateTime.now(),
+			1L,
 			PRODUCT_NAME,
 			"image.jpg",
 			5L);

@@ -7,7 +7,7 @@ import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 
 public record PointHistoryResponse(
-	Integer price,
+	Long price,
 	String account,
 	PointHistoryType type,
 	PointHistoryStatus status,
