@@ -41,22 +41,30 @@ jobs:
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> docker/.env
           echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> docker/.env
           echo "ES_URI=${{ secrets.ES_URI }}" >> docker/.env
+          echo "TOSS_SECRET_KEY=${{ secrets.TOSS_SECRET_KEY }} >> docker/.env
+          echo "TOSS_SECRET_KEY=${{ secrets.TOSS_CLIENT_KEY }} >> docker/.env
           chmod 644 docker/.env
+
+      - name: Fill filebeat config
+        run: envsubst < filebeat/filebeat-prod.yml.template > filebeat/filebeat-prod.yml
+        env:
+          LOGSTASH_HOSTS: ${{ secrets.LOGSTASH_HOSTS }}
+          FILEBEAT_SERVICE: ${{ secrets.FILEBEAT_SERVICE_1 }}
 
       - name: Copy files to GCP VM
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.GCP_VM_HOST }}
+          host: ${{ secrets.GCP_VM_HOST_1 }}
           username: ubuntu
           key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
-          source: "docker/docker-compose.yml,docker/.env,prometheus/prometheus-prod.yml,filebeat/filebeat-prod.yml,logstash/config/pipelines-prod.yml,logstash/pipeline/pipeline-prod.conf"
+          source: "docker/docker-compose.yml,docker/.env,prometheus/prometheus-prod.yml,filebeat/filebeat-prod.yml"
           target: "~/app"
           overwrite: true
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.GCP_VM_HOST }}
+          host: ${{ secrets.GCP_VM_HOST_1 }}
           username: ubuntu
           key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
           script: |
