@@ -57,7 +57,7 @@ jobs:
           host: ${{ secrets.GCP_VM_HOST_1 }}
           username: ubuntu
           key: ${{ secrets.GCP_SSH_PRIVATE_KEY }}
-          source: "docker/docker-compose.yml,docker/.env,prometheus/prometheus-prod.yml,filebeat/filebeat-prod.yml"
+          source: "docker/docker-compose.yml,docker/.env,filebeat/filebeat-prod.yml"
           target: "~/app"
           overwrite: true
 
