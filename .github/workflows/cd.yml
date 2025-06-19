@@ -41,8 +41,8 @@ jobs:
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> docker/.env
           echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> docker/.env
           echo "ES_URI=${{ secrets.ES_URI }}" >> docker/.env
-          echo "TOSS_SECRET_KEY=${{ secrets.TOSS_SECRET_KEY }} >> docker/.env
-          echo "TOSS_CLIENT_KEY=${{ secrets.TOSS_CLIENT_KEY }} >> docker/.env
+          echo "TOSS_SECRET_KEY=${{ secrets.TOSS_SECRET_KEY }}" >> docker/.env
+          echo "TOSS_CLIENT_KEY=${{ secrets.TOSS_CLIENT_KEY }}" >> docker/.env
           chmod 644 docker/.env
 
       - name: Fill filebeat config
