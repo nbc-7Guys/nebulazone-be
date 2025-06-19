@@ -26,7 +26,6 @@ spring:
     redis:
       host: localhost
       port: 6379
-      password:
 
   cloud:
     aws:
@@ -112,5 +111,5 @@ management:
         enabled: true
 
 toss:
-  secret-key: ${TOSS_SECRET_KEY}
-  client-key: ${TOSS_CLIENT_KEY}
+  secret-key: ${TOSS_SECRET_KEY:1}
+  client-key: ${TOSS_CLIENT_KEY:1}
