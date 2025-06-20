@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.ban.dto.BanInfo;
+import nbc.chillguys.nebulazone.domain.ban.exception.BanErrorCode;
+import nbc.chillguys.nebulazone.domain.ban.exception.BanException;
 import nbc.chillguys.nebulazone.domain.ban.repository.BanRepository;
 
 @Service
@@ -20,6 +22,7 @@ public class BanAdminDomainService {
 	 * @author 정석현
 	 */
 	public void unban(String ipAddress) {
+		findByIpAddress(ipAddress);
 		banRepository.deleteByIpAddress(ipAddress);
 	}
 
@@ -33,5 +36,17 @@ public class BanAdminDomainService {
 		return banRepository.findAll().stream()
 			.map(BanInfo::from)
 			.toList();
+	}
+
+	/**
+	 * 주어진 IP 주소에 해당하는 밴 정보를 조회하고, 없으면 예외를 발생
+	 *
+	 * @param ipAddress 조회할 IP 주소
+	 * @throws BanException 존재하지 않는 경우
+	 * @author 정석현
+	 */
+	public void findByIpAddress(String ipAddress) {
+		banRepository.findByIpAddress(ipAddress)
+			.orElseThrow(() -> new BanException(BanErrorCode.BAN_NOT_FOUND));
 	}
 }
