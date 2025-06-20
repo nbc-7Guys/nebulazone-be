@@ -29,3 +29,6 @@ jwt:
 
 toss:
   secret-key: toss-test-secret-key
+
+frontend:
+  url: test-front-end-url
