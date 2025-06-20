@@ -104,7 +104,8 @@ public class SecurityConfig {
 			"https://nebulazone-fe.vercel.app",
 			"https://nebulazone.store",
 			"https://www.nebulazone.store",
-			"https://api2.nebulazone.store"
+			"https://api2.nebulazone.store",
+			"http://api2.nebulazone.store"
 		));
 		configuration.setAllowedMethods(List.of(
 			"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
