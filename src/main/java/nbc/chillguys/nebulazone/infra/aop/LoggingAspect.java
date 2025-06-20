@@ -25,28 +25,44 @@ public class LoggingAspect {
 
 	@Before("restController()")
 	public void logRequestInfo(JoinPoint joinPoint) {
+		// 요청정보 가져오기
 		ServletRequestAttributes attr = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
 		if (attr == null) {
 			return;
 		}
 		HttpServletRequest request = attr.getRequest();
 
-		String method = request.getMethod();
+		// 1. 엔드포인트가 /admin 으로 시작하는지 체크
 		String uri = request.getRequestURI();
+		if (!uri.startsWith("/admin")) {
+			return;
+		}
 
-		// 컨트롤러/메서드 정보
+		// 2. 인증 정보 확인 (관리자만)
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (!isAdmin(authentication)) {
+			return; // 관리자가 아니면 로그 찍지 않음
+		}
+
+		String method = request.getMethod();
 		String className = joinPoint.getSignature().getDeclaringTypeName();
 		String methodName = joinPoint.getSignature().getName();
+		String userInfo = getUserInfo(authentication);
 
-		// 유저 정보
-		String userInfo = getUserInfo();
-
-		log.info("[API 요청] {} | Controller={}.{} | 유저={}",
-			method, className, methodName, userInfo);
+		log.info("[ADMIN API 요청] {} {} | Controller={}.{} | 유저={}",
+			method, uri, className, methodName, userInfo);
 	}
 
-	private String getUserInfo() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	private boolean isAdmin(Authentication authentication) {
+		if (authentication != null && authentication.isAuthenticated()
+			&& !"anonymousUser".equals(authentication.getPrincipal())) {
+			return authentication.getAuthorities().stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+		}
+		return false;
+	}
+
+	private String getUserInfo(Authentication authentication) {
 		if (authentication != null && authentication.isAuthenticated()
 			&& !"anonymousUser".equals(authentication.getPrincipal())) {
 			Object principal = authentication.getPrincipal();
