@@ -31,7 +31,7 @@ services:
       - ../filebeat/filebeat-prod.yml:/usr/share/filebeat/filebeat.yml
       - app-logs:/var/log/app
     environment:
-      - ELASTICSEARCH_HOSTS=${ES_URI}
+      - ELASTICSEARCH_HOSTS=${ELASTICSEARCH_HOSTS}
     command: [ "--strict.perms=false" ]
     networks:
       - nebulazone-network

@@ -38,6 +38,7 @@ jobs:
           echo "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_NAVER_CLIENT-SECRET=${{ secrets.NAVER_API_SECRET_KEY }}" >> docker/.env
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> docker/.env
           echo "ES_URI=${{ secrets.ES_URI }}" >> docker/.env
+          echo "ELASTICSEARCH_HOSTS=${{ secrets.ES_URI }}" >> docker/.env
           echo "TOSS_SECRET_KEY=${{ secrets.TOSS_SECRET_KEY }}" >> docker/.env
           echo "TOSS_CLIENT_KEY=${{ secrets.TOSS_CLIENT_KEY }}" >> docker/.env
           chmod 644 docker/.env
