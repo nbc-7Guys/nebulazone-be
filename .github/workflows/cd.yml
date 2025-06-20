@@ -20,16 +20,12 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: username/my-app
+          images: shlee054/nebulazone-app
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
+          file: docker/Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Build and Push Docker Image
-        run: |
-          docker build -t shlee054/nebulazone-app:latest -f docker/Dockerfile .
-          docker push shlee054/nebulazone-app:latest
