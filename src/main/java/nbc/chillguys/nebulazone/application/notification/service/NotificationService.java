@@ -108,8 +108,8 @@ public class NotificationService {
 		notificationDomainService.readNotification(user.getId(), notificationId);
 	}
 
-	public void markAllNotificationAsRead(User user) {
-		notificationDomainService.readAllNotification(user.getId());
+	public Long markAllNotificationAsRead(User user) {
+		return notificationDomainService.readAllNotification(user.getId());
 	}
 
 }
