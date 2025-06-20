@@ -40,7 +40,6 @@ public class Ban {
 	@Column(name = "expires_at")
 	private LocalDateTime expiresAt;
 
-	// 정적 팩토리 메소드
 	public static Ban create(BanCreateCommand command) {
 		Ban ban = new Ban();
 		ban.ipAddress = command.ipAddress();
@@ -57,17 +56,14 @@ public class Ban {
 		}
 	}
 
-	// 편의 메소드: 밴이 만료되었는지 확인
 	public boolean isExpired() {
 		return expiresAt != null && LocalDateTime.now().isAfter(expiresAt);
 	}
 
-	// 편의 메소드: 영구 밴인지 확인
 	public boolean isPermanent() {
 		return expiresAt == null;
 	}
 
-	// 편의 메소드: 밴이 활성상태인지 확인
 	public boolean isActive() {
 		return !isExpired();
 	}

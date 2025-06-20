@@ -25,23 +25,20 @@ public class LoggingAspect {
 
 	@Before("restController()")
 	public void logRequestInfo(JoinPoint joinPoint) {
-		// 요청정보 가져오기
 		ServletRequestAttributes attr = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
 		if (attr == null) {
 			return;
 		}
 		HttpServletRequest request = attr.getRequest();
 
-		// 1. 엔드포인트가 /admin 으로 시작하는지 체크
 		String uri = request.getRequestURI();
 		if (!uri.startsWith("/admin")) {
 			return;
 		}
 
-		// 2. 인증 정보 확인 (관리자만)
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		if (!isAdmin(authentication)) {
-			return; // 관리자가 아니면 로그 찍지 않음
+			return;
 		}
 
 		String method = request.getMethod();
