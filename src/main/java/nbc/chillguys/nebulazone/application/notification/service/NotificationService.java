@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.application.notification.dto.UnreadNotificationResponses;
@@ -24,6 +25,7 @@ public class NotificationService {
 	private final SimpMessagingTemplate messagingTemplate;
 	private final WebSocketSessionRedisService sessionRedisService;
 	private final NotificationDomainService notificationDomainService;
+	private final EntityManager em;
 
 	// 단일 유저 에게 메세지 전송
 	public void sendNotificationToUser(Long userId, NotificationMessage message) {
@@ -109,7 +111,14 @@ public class NotificationService {
 	}
 
 	public Long markAllNotificationAsRead(User user) {
-		return notificationDomainService.readAllNotification(user.getId());
+		Long readAllNotification = notificationDomainService.readAllNotification(user.getId());
+
+		if (readAllNotification > 0) {
+			em.flush();
+			em.clear();
+		}
+
+		return readAllNotification;
 	}
 
 }
