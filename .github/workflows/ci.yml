@@ -51,3 +51,5 @@ jobs:
 
       - name: Run tests
         run: ./gradlew clean test
+        env:
+          ELASTICSEARCH_HOST: http://localhost:9200
