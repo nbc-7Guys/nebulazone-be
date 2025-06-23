@@ -176,6 +176,8 @@ class UserServiceTest {
 			MultipartFile mockImage = new MockMultipartFile("image", "test.jpg", "image/jpeg",
 				"content".getBytes());
 
+			given(userDomainService.findActiveUserById(anyLong()))
+				.willReturn(user);
 			given(gcsClient.uploadFile(any()))
 				.willReturn("new_image_url");
 
@@ -183,6 +185,7 @@ class UserServiceTest {
 			UserResponse response = userService.updateUserProfileImage(mockImage, user);
 
 			// Then
+			verify(userDomainService, times(1)).findActiveUserById(user.getId());
 			verify(userCacheService).deleteUserById(user.getId());
 			verify(gcsClient).deleteFile("test_profile_image_url");
 			verify(gcsClient).uploadFile(mockImage);

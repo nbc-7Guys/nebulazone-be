@@ -18,8 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.infra.gcs.exception.GcsErrorCode;
 import nbc.chillguys.nebulazone.infra.gcs.exception.GcsException;
 
-@Configuration
 @Slf4j
+@Configuration
 @RequiredArgsConstructor
 public class GcsConfig {
 	private final ResourceLoader resourceLoader;
