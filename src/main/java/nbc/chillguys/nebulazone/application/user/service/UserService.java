@@ -14,14 +14,14 @@ import nbc.chillguys.nebulazone.domain.user.dto.UserSignUpCommand;
 import nbc.chillguys.nebulazone.domain.user.dto.UserUpdateCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 	private final UserDomainService userDomainService;
-	private final S3Service s3Service;
+	private final GcsClient gcsClient;
 	private final UserCacheService userCacheService;
 
 	public UserResponse signUp(SignUpUserRequest signUpUserRequest) {
@@ -53,12 +53,14 @@ public class UserService {
 	}
 
 	@Transactional
-	public UserResponse updateUserProfileImage(MultipartFile profileImage, User user) {
+	public UserResponse updateUserProfileImage(MultipartFile profileImage, User loggedInUser) {
+		User user = userDomainService.findActiveUserById(loggedInUser.getId());
+
 		if (user.getProfileImage() != null) {
-			s3Service.generateDeleteUrlAndDeleteFile(user.getProfileImage());
+			gcsClient.deleteFile(user.getProfileImage());
 		}
 
-		String profileImageUrl = s3Service.generateUploadUrlAndUploadFile(profileImage);
+		String profileImageUrl = gcsClient.uploadFile(profileImage);
 
 		userDomainService.updateUserProfileImage(profileImageUrl, user);
 

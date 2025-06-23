@@ -41,7 +41,7 @@ import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +53,7 @@ public class ProductService {
 	private final TransactionDomainService transactionDomainService;
 	private final AuctionSchedulerService auctionSchedulerService;
 	private final CatalogDomainService catalogDomainService;
-	private final S3Service s3Service;
+	private final GcsClient gcsClient;
 
 	@Transactional
 	public ProductResponse createProduct(User user, Long catalogId, CreateProductRequest request,
@@ -62,7 +62,7 @@ public class ProductService {
 		List<String> productImageUrls = multipartFiles == null
 			? List.of()
 			: multipartFiles.stream()
-			.map(s3Service::generateUploadUrlAndUploadFile)
+			.map(gcsClient::uploadFile)
 			.toList();
 
 		Catalog findCatalog = catalogDomainService.getCatalogById(catalogId);
@@ -99,13 +99,13 @@ public class ProductService {
 		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
 		if (hasImage) {
 			List<String> newImageUrls = imageFiles.stream()
-				.map(s3Service::generateUploadUrlAndUploadFile)
+				.map(gcsClient::uploadFile)
 				.toList();
 			imageUrls.addAll(newImageUrls);
 
 			product.getProductImages().stream()
 				.filter(productImage -> !imageUrls.contains(productImage.getUrl()))
-				.forEach((productImage) -> s3Service.generateDeleteUrlAndDeleteFile(productImage.getUrl()));
+				.forEach((productImage) -> gcsClient.deleteFile(productImage.getUrl()));
 		}
 
 		ProductUpdateCommand command = request.toCommand(user, catalog, productId, imageUrls);

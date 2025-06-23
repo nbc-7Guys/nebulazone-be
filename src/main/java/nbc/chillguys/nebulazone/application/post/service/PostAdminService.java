@@ -22,14 +22,14 @@ import nbc.chillguys.nebulazone.domain.post.dto.PostAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostAdminUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.service.PostAdminDomainService;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 
 @Service
 @RequiredArgsConstructor
 public class PostAdminService {
 
 	private final PostAdminDomainService postsAdminDomainService;
-	private final S3Service s3Service;
+	private final GcsClient gcsClient;
 
 	public CommonPageResponse<PostAdminResponse> findPosts(PostAdminSearchRequest request, Pageable pageable) {
 		PostAdminSearchQueryCommand command = new PostAdminSearchQueryCommand(
@@ -58,13 +58,13 @@ public class PostAdminService {
 		boolean hasImage = !imageFiles.isEmpty();
 		if (hasImage) {
 			List<String> newImageUrls = imageFiles.stream()
-				.map(s3Service::generateUploadUrlAndUploadFile)
+				.map(gcsClient::uploadFile)
 				.toList();
 			imageUrls.addAll(newImageUrls);
 
 			post.getPostImages().stream()
 				.filter(postImage -> !imageUrls.contains(postImage.getUrl()))
-				.forEach((postImage) -> s3Service.generateDeleteUrlAndDeleteFile(postImage.getUrl()));
+				.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
 		}
 
 		PostAdminUpdateCommand command = request.toAdminCommand(postId, imageUrls);

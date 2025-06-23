@@ -29,7 +29,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 
 @DisplayName("유저 어플리케이션 서비스 단위 테스트")
@@ -39,7 +39,7 @@ class UserServiceTest {
 	private UserDomainService userDomainService;
 
 	@Mock
-	private S3Service s3Service;
+	private GcsClient gcsClient;
 
 	@Mock
 	private UserCacheService userCacheService;
@@ -176,7 +176,7 @@ class UserServiceTest {
 			MultipartFile mockImage = new MockMultipartFile("image", "test.jpg", "image/jpeg",
 				"content".getBytes());
 
-			given(s3Service.generateUploadUrlAndUploadFile(any()))
+			given(gcsClient.uploadFile(any()))
 				.willReturn("new_image_url");
 
 			// When
@@ -184,8 +184,8 @@ class UserServiceTest {
 
 			// Then
 			verify(userCacheService).deleteUserById(user.getId());
-			verify(s3Service).generateDeleteUrlAndDeleteFile("test_profile_image_url");
-			verify(s3Service).generateUploadUrlAndUploadFile(mockImage);
+			verify(gcsClient).deleteFile("test_profile_image_url");
+			verify(gcsClient).uploadFile(mockImage);
 			verify(userDomainService).updateUserProfileImage("new_image_url", user);
 
 			assertThat(response)

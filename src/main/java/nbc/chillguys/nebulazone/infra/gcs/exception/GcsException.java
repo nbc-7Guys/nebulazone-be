@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.infra.oauth.exception;
+package nbc.chillguys.nebulazone.infra.gcs.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -6,6 +6,6 @@ import nbc.chillguys.nebulazone.common.exception.BaseException;
 
 @Getter
 @RequiredArgsConstructor
-public class OAuthException extends BaseException {
-	private final OAuthErrorCode errorCode;
+public class GcsException extends BaseException {
+	private final GcsErrorCode errorCode;
 }
