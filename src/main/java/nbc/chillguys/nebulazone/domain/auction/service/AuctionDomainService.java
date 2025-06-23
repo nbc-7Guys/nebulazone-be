@@ -123,8 +123,8 @@ public class AuctionDomainService {
 	 * @author 전나겸
 	 */
 	@Transactional
-	public Long deleteAuction(Long auctionId, User user) {
-		Auction findAuction = auctionRepository.findById(auctionId)
+	public Auction deleteAuction(Long auctionId, User user) {
+		Auction findAuction = auctionRepository.findByAuctionWithProduct(auctionId)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 
 		if (findAuction.isDeleted()) {
@@ -135,7 +135,9 @@ public class AuctionDomainService {
 			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
 		}
 
-		return findAuction.delete();
+		findAuction.delete();
+
+		return findAuction;
 	}
 
 	/**

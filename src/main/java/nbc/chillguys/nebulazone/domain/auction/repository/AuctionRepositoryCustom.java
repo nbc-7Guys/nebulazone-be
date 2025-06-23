@@ -17,6 +17,8 @@ public interface AuctionRepositoryCustom {
 
 	Optional<Auction> findAuctionWithProductAndSellerLock(Long auctionId);
 
+	Optional<Auction> findByAuctionWithProduct(Long auctionId);
+
 	List<Auction> findAuctionsByNotDeletedAndIsWonFalse();
 
 	Optional<AuctionFindDetailInfo> findAuctionDetail(Long auctionId);

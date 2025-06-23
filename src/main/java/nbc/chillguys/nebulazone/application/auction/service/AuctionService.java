@@ -16,6 +16,7 @@ import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.ManualEndAuctionInfo;
+import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
@@ -31,7 +32,6 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 public class AuctionService {
 
 	private final AuctionDomainService auctionDomainService;
-	private final AuctionSchedulerService auctionSchedulerService;
 	private final BidDomainService bidDomainService;
 	private final TransactionDomainService txDomainService;
 	private final ProductDomainService productDomainService;
@@ -44,13 +44,12 @@ public class AuctionService {
 		return CommonPageResponse.from(response);
 	}
 
-	@Transactional
-	public DeleteAuctionResponse deleteAuction(Long auctionId, User user) {
+	public FindDetailAuctionResponse findAuction(Long auctionId) {
 
-		Long deletedAuctionId = auctionDomainService.deleteAuction(auctionId, user);
-		auctionSchedulerService.cancelSchedule(deletedAuctionId);
+		Bid highestPriceBid = bidDomainService.findHighBidByAuction(auctionId);
+		AuctionFindDetailInfo auctionFindDetailInfo = auctionDomainService.findAuction(auctionId);
 
-		return DeleteAuctionResponse.from(deletedAuctionId);
+		return FindDetailAuctionResponse.from(auctionFindDetailInfo, highestPriceBid);
 	}
 
 	@Transactional
@@ -81,12 +80,16 @@ public class AuctionService {
 		return ManualEndAuctionResponse.from(auctionInfo);
 	}
 
-	public FindDetailAuctionResponse findAuction(Long auctionId) {
+	@Transactional
+	public DeleteAuctionResponse deleteAuction(Long auctionId, User user) {
 
-		Bid highestPriceBid = bidDomainService.findHighBidByAuction(auctionId);
-		AuctionFindDetailInfo auctionFindDetailInfo = auctionDomainService.findAuction(auctionId);
+		Auction deletedAuction = auctionDomainService.deleteAuction(auctionId, user);
 
-		return FindDetailAuctionResponse.from(auctionFindDetailInfo, highestPriceBid);
+		Product product = deletedAuction.getProduct();
+		product.delete();
+		productDomainService.deleteProductFromEs(product.getId());
+
+		return DeleteAuctionResponse.from(deletedAuction.getId(), product.getId());
 	}
 
 }

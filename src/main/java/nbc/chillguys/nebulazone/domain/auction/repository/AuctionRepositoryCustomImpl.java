@@ -138,6 +138,19 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 	}
 
 	@Override
+	public Optional<Auction> findByAuctionWithProduct(Long auctionId) {
+
+		return Optional.ofNullable(
+			jpaQueryFactory
+				.selectFrom(auction)
+				.join(auction.product, product).fetchJoin()
+				.where(auction.id.eq(auctionId))
+				.fetchOne()
+
+		);
+	}
+
+	@Override
 	public List<Auction> findAuctionsByNotDeletedAndIsWonFalse() {
 
 		return jpaQueryFactory

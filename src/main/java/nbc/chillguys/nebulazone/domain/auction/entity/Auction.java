@@ -65,10 +65,9 @@ public class Auction extends BaseEntity {
 		this.deletedAt = deletedAt;
 	}
 
-	public Long delete() {
+	public void delete() {
 		this.deleted = true;
 		this.deletedAt = LocalDateTime.now();
-		return id;
 	}
 
 	public void update(Long startPrice, Long currentPrice, LocalDateTime endTime, Boolean isWon) {
