@@ -40,7 +40,7 @@ public class NotificationController {
 		);
 	}
 
-	@GetMapping("/notifications")
+	@GetMapping("/notification")
 	public ResponseEntity<UnreadNotificationResponses> findUnreadNotifications(
 		@AuthenticationPrincipal User user
 	) {

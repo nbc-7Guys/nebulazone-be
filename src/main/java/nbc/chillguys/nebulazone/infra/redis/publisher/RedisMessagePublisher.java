@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.infra.redis.publisher;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class RedisMessagePublisher {
 	 * @param roomId 채팅방 ID
 	 * @param chatMessageInfo 발행할 채팅 메시지 정보
 	 */
+	@Async
 	public void publishChatMessage(Long roomId, ChatMessageInfo chatMessageInfo) {
 		try {
 			// ChatMessageInfo를 ChatPubSubMessage로 변환

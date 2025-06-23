@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +23,7 @@ public class ChatMessageRedisService {
 	/**
 	 * 채팅 메시지 Redis에 저장
 	 */
+	@Async
 	public void saveMessageToRedis(Long roomId, ChatMessageInfo messageInfo) {
 		try {
 			String key = CHAT_MESSAGE_KEY_PREFIX + roomId;
