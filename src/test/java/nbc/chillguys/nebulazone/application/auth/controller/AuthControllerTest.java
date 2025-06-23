@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -24,6 +26,7 @@ import nbc.chillguys.nebulazone.application.auth.dto.response.ReissueResponse;
 import nbc.chillguys.nebulazone.application.auth.dto.response.SignInResponse;
 import nbc.chillguys.nebulazone.application.auth.service.AuthService;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("auth 컨트롤러 단위 테스트")
@@ -92,7 +95,11 @@ class AuthControllerTest {
 	@DisplayName("access token 재발급 성공")
 	void success_reissueAccessToken() throws Exception {
 		// Given
-		ReissueResponse response = new ReissueResponse("regenerateAccessToken");
+		User user = mock(User.class);
+		Authentication authentication = new UsernamePasswordAuthenticationToken(
+			user, "regenerateAccessToken", user.getAuthorities()
+		);
+		ReissueResponse response = new ReissueResponse("regenerateAccessToken", authentication);
 
 		given(authService.reissueAccessToken(anyString()))
 			.willReturn(response);
