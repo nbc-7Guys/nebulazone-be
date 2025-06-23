@@ -4,6 +4,8 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -11,13 +13,13 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Aspect
-@Slf4j
 @Component
 public class LoggingAspect {
+
+	private static final Logger adminLogger = LoggerFactory.getLogger("ADMIN_LOGGER");
 
 	@Pointcut("within(@org.springframework.web.bind.annotation.RestController *)")
 	public void restController() {
@@ -46,7 +48,7 @@ public class LoggingAspect {
 		String methodName = joinPoint.getSignature().getName();
 		String userInfo = getUserInfo(authentication);
 
-		log.info("[ADMIN API 요청] {} {} | Controller={}.{} | 유저={}",
+		adminLogger.info("[ADMIN API 요청] {} {} | Controller={}.{} | 유저={}",
 			method, uri, className, methodName, userInfo);
 	}
 
