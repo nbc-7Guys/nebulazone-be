@@ -13,11 +13,6 @@ spring:
       hibernate:
         format_sql: true
 
-  cloud:
-    aws:
-      s3:
-        bucket: test-bucket
-
   data:
     redis:
       host: localhost
@@ -35,3 +30,7 @@ toss:
 
 frontend:
   url: test-front-end-url
+
+gcp:
+  credentials:
+    location: test-key.json

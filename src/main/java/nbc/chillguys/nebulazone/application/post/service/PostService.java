@@ -25,14 +25,14 @@ import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
 import nbc.chillguys.nebulazone.domain.post.vo.PostDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
 	private final PostDomainService postDomainService;
-	private final S3Service s3Service;
+	private final GcsClient gcsClient;
 
 	@Transactional
 	public CreatePostResponse createPost(User user, CreatePostRequest request,
@@ -42,7 +42,7 @@ public class PostService {
 		List<String> postImageUrls = multipartFiles == null
 			? List.of()
 			: multipartFiles.stream()
-			.map(s3Service::generateUploadUrlAndUploadFile)
+			.map(gcsClient::uploadFile)
 			.toList();
 
 		Post createdPost = postDomainService.createPost(postCreateDto, postImageUrls);
@@ -65,13 +65,13 @@ public class PostService {
 		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
 		if (hasImage) {
 			List<String> newImageUrls = imageFiles.stream()
-				.map(s3Service::generateUploadUrlAndUploadFile)
+				.map(gcsClient::uploadFile)
 				.toList();
 			imageUrls.addAll(newImageUrls);
 
 			post.getPostImages().stream()
 				.filter(postImage -> !imageUrls.contains(postImage.getUrl()))
-				.forEach((postImage) -> s3Service.generateDeleteUrlAndDeleteFile(postImage.getUrl()));
+				.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
 		}
 
 		PostUpdateCommand command = request.toCommand(userId, postId, imageUrls);
