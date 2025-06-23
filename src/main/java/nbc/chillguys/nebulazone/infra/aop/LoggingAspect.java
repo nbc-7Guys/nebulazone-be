@@ -4,6 +4,8 @@ import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -11,13 +13,13 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Aspect
-@Slf4j
 @Component
 public class LoggingAspect {
+
+	private static final Logger adminLogger = LoggerFactory.getLogger("ADMIN_LOGGER");
 
 	@Pointcut("within(@org.springframework.web.bind.annotation.RestController *)")
 	public void restController() {
@@ -31,22 +33,35 @@ public class LoggingAspect {
 		}
 		HttpServletRequest request = attr.getRequest();
 
-		String method = request.getMethod();
 		String uri = request.getRequestURI();
+		if (!uri.startsWith("/admin")) {
+			return;
+		}
 
-		// 컨트롤러/메서드 정보
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (!isAdmin(authentication)) {
+			return;
+		}
+
+		String method = request.getMethod();
 		String className = joinPoint.getSignature().getDeclaringTypeName();
 		String methodName = joinPoint.getSignature().getName();
+		String userInfo = getUserInfo(authentication);
 
-		// 유저 정보
-		String userInfo = getUserInfo();
-
-		log.info("[API 요청] {} | Controller={}.{} | 유저={}",
-			method, className, methodName, userInfo);
+		adminLogger.info("[ADMIN API 요청] {} {} | Controller={}.{} | 유저={}",
+			method, uri, className, methodName, userInfo);
 	}
 
-	private String getUserInfo() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+	private boolean isAdmin(Authentication authentication) {
+		if (authentication != null && authentication.isAuthenticated()
+			&& !"anonymousUser".equals(authentication.getPrincipal())) {
+			return authentication.getAuthorities().stream()
+				.anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+		}
+		return false;
+	}
+
+	private String getUserInfo(Authentication authentication) {
 		if (authentication != null && authentication.isAuthenticated()
 			&& !"anonymousUser".equals(authentication.getPrincipal())) {
 			Object principal = authentication.getPrincipal();
