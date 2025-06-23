@@ -39,7 +39,7 @@ public class AuthService {
 	public ReissueResponse reissueAccessToken(String refreshToken) {
 		String accessToken = jwtUtil.regenerateAccessToken(refreshToken);
 
-		User user = jwtUtil.getUserFromToken(accessToken);
+		User user = jwtUtil.getUserFromToken(refreshToken);
 
 		Authentication authentication = new UsernamePasswordAuthenticationToken(
 			user, accessToken, user.getAuthorities()
