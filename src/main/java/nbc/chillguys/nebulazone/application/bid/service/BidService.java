@@ -9,6 +9,7 @@ import nbc.chillguys.nebulazone.application.bid.dto.request.CreateBidRequest;
 import nbc.chillguys.nebulazone.application.bid.dto.response.CreateBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.DeleteBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.FindBidResponse;
+import nbc.chillguys.nebulazone.application.bid.metrics.BidMetrics;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
@@ -25,6 +26,7 @@ public class BidService {
 	private final BidDomainService bidDomainService;
 	private final UserDomainService userDomainService;
 	private final AuctionDomainService auctionDomainService;
+	private final BidMetrics bidMetrics;
 
 	/**
 	 * 경매에 기존 입찰 내역이 없다면 입찰 생성, 있다면 입찰 수정
@@ -36,16 +38,25 @@ public class BidService {
 	 */
 	@Transactional
 	public CreateBidResponse upsertBid(Long auctionId, User loggedInUser, CreateBidRequest request) {
-		Auction lockAuction = auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId);
+		long start = System.currentTimeMillis();
 
-		User user = userDomainService.findActiveUserById(loggedInUser.getId());
+		try {
+			Auction lockAuction = auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId);
+			User user = userDomainService.findActiveUserById(loggedInUser.getId());
 
-		Bid resultBid = bidDomainService.findBidByAuctionIdAndUserId(lockAuction.getId(), user.getId())
-			.map(findBid -> bidDomainService.updateBid(lockAuction, findBid, user, request.price()))
-			.orElseGet(() -> bidDomainService.createBid(lockAuction, user, request.price()));
+			Bid resultBid = bidDomainService.findBidByAuctionIdAndUserId(lockAuction.getId(), user.getId())
+				.map(findBid -> bidDomainService.updateBid(lockAuction, findBid, user, request.price()))
+				.orElseGet(() -> bidDomainService.createBid(lockAuction, user, request.price()));
 
-		return CreateBidResponse.from(resultBid);
+			bidMetrics.countBidSuccess();
+			bidMetrics.recordBidAmount(request.price());
 
+			return CreateBidResponse.from(resultBid);
+
+		} finally {
+			long elapsed = System.currentTimeMillis() - start;
+			bidMetrics.recordBidLatency(elapsed);
+		}
 	}
 
 	public CommonPageResponse<FindBidResponse> findBids(Long auctionId, int page, int size) {
