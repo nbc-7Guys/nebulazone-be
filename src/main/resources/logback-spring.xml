@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+
+    <!-- 공통 속성 정의 -->
     <property name="LOG_DIR" value="./logs"/>
     <property name="LOG_FILE_NAME" value="mylog"/>
 
+    <!-- 콘솔 로그 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) %magenta(%-4relative) --- [ %thread{10} ]
-                %cyan(%logger{20}) : %msg%n
-            </pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{20}) - %msg%n</pattern>
         </encoder>
     </appender>
 
+    <!-- 일반 로그 (info) -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/${LOG_FILE_NAME}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${LOG_DIR}/${LOG_FILE_NAME}-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
-            <!-- each archived file's size will be max 10MB -->
             <maxFileSize>10MB</maxFileSize>
-            <!-- 30 days to keep -->
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
@@ -25,28 +25,54 @@
         </encoder>
     </appender>
 
+    <!-- 에러 로그 -->
     <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/${LOG_FILE_NAME}.error.log</file>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/${LOG_FILE_NAME}-error-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
             <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread] %-5level %logger{35} - %msg%n</pattern>
             <charset>UTF-8</charset>
         </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_DIR}/${LOG_FILE_NAME}-error-%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>ERROR</level>
         </filter>
     </appender>
 
-    <logger name="org.springframework" level="warn"/>
-    <logger name="org.hibernate" level="warn"/>
-    <logger name="nbc.chillguys.nebulazone" level="info"/>
+    <!-- 관리자 전용 로그 -->
+    <appender name="ADMIN" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/${LOG_FILE_NAME}.admin.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/${LOG_FILE_NAME}.admin-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
-    <root level="warn">
-        <appender-ref ref="CONSOLE"/>
+    <!-- 관리자 로그 전용 Logger -->
+    <logger name="ADMIN_LOGGER" level="INFO">
+        <appender-ref ref="ADMIN"/>
+    </logger>
+
+    <!-- 전체 애플리케이션 로그 -->
+    <logger name="nbc.chillguys.nebulazone" level="INFO">
         <appender-ref ref="FILE"/>
+    </logger>
+
+    <!-- 프레임워크 로그 최소화 -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.hibernate" level="WARN"/>
+
+    <!-- 루트 로그 최소 출력 -->
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
         <appender-ref ref="ERROR"/>
     </root>
+
 </configuration>
