@@ -52,9 +52,7 @@ public class AuctionDomainService {
 	 * @author 전나겸
 	 */
 	public Page<AuctionFindAllInfo> findAuctions(int page, int size) {
-
 		return auctionRepository.findAuctionsWithProduct(page, size);
-
 	}
 
 	/**
@@ -64,9 +62,7 @@ public class AuctionDomainService {
 	 * @return 리스트 AuctionFindInfo
 	 */
 	public List<AuctionFindAllInfo> findAuctionsBySortType(AuctionSortType sortType) {
-
 		return auctionRepository.finAuctionsBySortType(sortType);
-
 	}
 
 	/**

@@ -1,7 +1,5 @@
 package nbc.chillguys.nebulazone.application.auction.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,7 +17,9 @@ import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuction
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindAllAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindDetailAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.FindSortTypeAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.service.AuctionCacheService;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
@@ -31,6 +31,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 public class AuctionController {
 
 	private final AuctionService auctionService;
+	private final AuctionCacheService auctionCacheService;
 
 	@GetMapping
 	public ResponseEntity<CommonPageResponse<FindAllAuctionResponse>> findAuctions(
@@ -44,10 +45,10 @@ public class AuctionController {
 	}
 
 	@GetMapping("/sorted")
-	public ResponseEntity<List<FindAllAuctionResponse>> findAuctionsSortType(
+	public ResponseEntity<FindSortTypeAuctionResponse> findAuctionsSortType(
 		@RequestParam("sort") String sortType) {
 
-		List<FindAllAuctionResponse> response = auctionService.findAuctionsBySortType(AuctionSortType.of(sortType));
+		FindSortTypeAuctionResponse response = auctionCacheService.findAuctionsBySortType(AuctionSortType.of(sortType));
 
 		return ResponseEntity.ok(response);
 

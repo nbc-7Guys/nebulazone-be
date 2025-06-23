@@ -16,7 +16,6 @@ import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.ManualEndAuctionInfo;
-import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
@@ -43,13 +42,6 @@ public class AuctionService {
 		Page<FindAllAuctionResponse> response = findAuctions.map(FindAllAuctionResponse::from);
 
 		return CommonPageResponse.from(response);
-	}
-
-	public List<FindAllAuctionResponse> findAuctionsBySortType(AuctionSortType sortType) {
-
-		List<AuctionFindAllInfo> findAuctionsBySortType = auctionDomainService.findAuctionsBySortType(sortType);
-
-		return findAuctionsBySortType.stream().map(FindAllAuctionResponse::from).toList();
 	}
 
 	@Transactional
