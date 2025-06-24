@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.application.ban.sevice;
+package nbc.chillguys.nebulazone.application.ban.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

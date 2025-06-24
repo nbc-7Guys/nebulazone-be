@@ -4,7 +4,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
-import nbc.chillguys.nebulazone.application.ban.sevice.BanService;
+import nbc.chillguys.nebulazone.application.ban.service.BanService;
 
 @TestConfiguration
 public class TestMockConfig {

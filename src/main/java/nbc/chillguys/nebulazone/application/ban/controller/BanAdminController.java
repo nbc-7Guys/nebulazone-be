@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.ban.dto.response.BanResponse;
-import nbc.chillguys.nebulazone.application.ban.sevice.BanAdminService;
+import nbc.chillguys.nebulazone.application.ban.service.BanAdminService;
 
 @RestController
 @RequestMapping("/admin/bans")

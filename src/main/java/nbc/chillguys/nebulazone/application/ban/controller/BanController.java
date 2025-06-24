@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.ban.dto.request.BanCreateRequest;
-import nbc.chillguys.nebulazone.application.ban.sevice.BanService;
+import nbc.chillguys.nebulazone.application.ban.service.BanService;
 
 @RestController
 @RequestMapping("/internal/bans")
