@@ -11,6 +11,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
 
+/**
+ * WebSocket 세션 정보를 Redis에서 관리하는 서비스
+ *
+ * <p>WebSocket 연결된 사용자들의 세션 정보, 온라인 상태, 채팅방 참여 정보를
+ * Redis에 저장하고 관리하여 다중 서버 환경에서의 세션 공유를 지원</p>
+ *
+ * @author 박형우
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -24,7 +32,15 @@ public class WebSocketSessionRedisService {
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ObjectMapper objectMapper;
 
-	// 세션ID : user 매핑
+	/**
+	 * 사용자의 WebSocket 세션을 Redis에 등록
+	 *
+	 * <p>세션 ID와 사용자 정보를 매핑하고, 온라인 사용자 목록에 추가</p>
+	 *
+	 * @param sessionId WebSocket 세션 ID
+	 * @param sessionUser 세션 사용자 정보
+	 * @author 박형우
+	 */
 	public void registerUser(String sessionId, SessionUser sessionUser) {
 		try {
 			String key = SESSION_USER_PREFIX + sessionId;
@@ -37,7 +53,15 @@ public class WebSocketSessionRedisService {
 		}
 	}
 
-	// 세션ID : roomId 매핑
+	/**
+	 * 세션 ID와 채팅방 ID를 매핑하여 등록
+	 *
+	 * <p>특정 세션이 어느 채팅방에 참여하고 있는지 추적하기 위해 사용</p>
+	 *
+	 * @param sessionId WebSocket 세션 ID
+	 * @param roomId 채팅방 ID
+	 * @author 박형우
+	 */
 	public void registerRoom(String sessionId, long roomId) {
 		try {
 			String key = SESSION_ROOM_PREFIX + sessionId;
@@ -47,7 +71,15 @@ public class WebSocketSessionRedisService {
 		}
 	}
 
-	// 세션ID로 SessionUser 찾기
+	/**
+	 * 세션 ID로 사용자 정보 조회
+	 *
+	 * <p>WebSocket 세션 ID를 통해 해당 세션에 연결된 사용자 정보를 조회</p>
+	 *
+	 * @param sessionId WebSocket 세션 ID
+	 * @return 세션에 연결된 사용자 정보, 없으면 null
+	 * @author 박형우
+	 */
 	public SessionUser getUserIdBySessionId(String sessionId) {
 		try {
 			String key = SESSION_USER_PREFIX + sessionId;
@@ -64,7 +96,15 @@ public class WebSocketSessionRedisService {
 		}
 	}
 
-	// 세션ID로 roomId찾기
+	/**
+	 * 세션 ID로 참여 중인 채팅방 ID 조회
+	 *
+	 * <p>특정 세션이 현재 참여하고 있는 채팅방의 ID를 반환</p>
+	 *
+	 * @param sessionId WebSocket 세션 ID
+	 * @return 참여 중인 채팅방 ID, 없으면 null
+	 * @author 박형우
+	 */
 	public Long getRoomIdBySessionId(String sessionId) {
 		try {
 			String key = SESSION_ROOM_PREFIX + sessionId;
@@ -79,7 +119,14 @@ public class WebSocketSessionRedisService {
 		}
 	}
 
-	// 세션 종료 시 삭제
+	/**
+	 * WebSocket 세션 종료 시 관련 정보 삭제
+	 *
+	 * <p>세션이 종료되면 해당 세션과 관련된 모든 Redis 데이터를 정리</p>
+	 *
+	 * @param sessionId 종료할 WebSocket 세션 ID
+	 * @author 박형우
+	 */
 	public void unregisterSession(String sessionId) {
 		try {
 			String userKey = SESSION_USER_PREFIX + sessionId;
@@ -98,6 +145,15 @@ public class WebSocketSessionRedisService {
 		}
 	}
 
+	/**
+	 * 사용자를 온라인 목록에 등록
+	 *
+	 * <p>사용자가 온라인 상태임을 표시하고, 사용자 ID와 세션 ID를 매핑</p>
+	 *
+	 * @param userId 사용자 ID
+	 * @param sessionId WebSocket 세션 ID
+	 * @author 박형우
+	 */
 	public void registerOnlineUser(Long userId, String sessionId) {
 		try {
 			redisTemplate.opsForSet().add(ONLINE_USERS_KEY, userId);
@@ -110,6 +166,14 @@ public class WebSocketSessionRedisService {
 		}
 	}
 
+	/**
+	 * 온라인 목록에서 사용자 제거
+	 *
+	 * <p>사용자가 오프라인 상태가 되면 온라인 목록에서 제거하고 관련 세션 정보를 삭제</p>
+	 *
+	 * @param userId 제거할 사용자 ID
+	 * @author 박형우
+	 */
 	public void unregisterOnlineUser(Long userId) {
 		try {
 			redisTemplate.opsForSet().remove(ONLINE_USERS_KEY, userId);
@@ -122,6 +186,15 @@ public class WebSocketSessionRedisService {
 		}
 	}
 
+	/**
+	 * 사용자의 온라인 상태 확인
+	 *
+	 * <p>특정 사용자가 현재 온라인 상태인지 확인</p>
+	 *
+	 * @param userId 확인할 사용자 ID
+	 * @return 온라인이면 true, 오프라인이면 false
+	 * @author 박형우
+	 */
 	public boolean isOnlineUser(Long userId) {
 		try {
 			Boolean isUserOnline = redisTemplate.opsForSet().isMember(ONLINE_USERS_KEY, userId);
@@ -132,6 +205,15 @@ public class WebSocketSessionRedisService {
 		}
 	}
 
+	/**
+	 * 사용자 ID로 현재 활성 세션 ID 조회
+	 *
+	 * <p>특정 사용자의 현재 활성화된 WebSocket 세션 ID를 반환</p>
+	 *
+	 * @param userId 조회할 사용자 ID
+	 * @return 활성 세션 ID, 없으면 null
+	 * @author 박형우
+	 */
 	public String getSessionIdByUserId(Long userId) {
 		try {
 			String userSessionKey = USER_SESSION_PREFIX + userId;
@@ -145,7 +227,5 @@ public class WebSocketSessionRedisService {
 			return null;
 		}
 	}
-
-
 
 }

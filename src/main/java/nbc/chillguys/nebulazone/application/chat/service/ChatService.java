@@ -26,6 +26,14 @@ import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
+/**
+ * 채팅방 관련 비즈니스 로직을 처리하는 애플리케이션 서비스
+ *
+ * <p>채팅방 생성, 조회, 나가기 등의 핵심 비즈니스 로직을 담당하며,
+ * 도메인 서비스와 외부 서비스들을 조합하여 완전한 채팅 기능을 제공.</p>
+ *
+ * @author 박형우
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -61,9 +69,12 @@ public class ChatService {
 	/**
 	 * 구매자와 판매자가 동일 유저인지 확인
 	 *
+	 * <p>자기 자신과는 채팅할 수 없도록 유효성을 검증</p>
+	 *
 	 * @param buyerId 구매자 ID
 	 * @param productId 판매 상품 ID
-	 * @throws ChatException CANNOT_CHAT_WITH_SELF
+	 * @throws ChatException 구매자와 판매자가 동일한 경우 (CANNOT_CHAT_WITH_SELF)
+	 * @author 박형우
 	 */
 	private void validateBuyerIsNotSeller(Long buyerId, Long productId) {
 		Product availableProductById = productDomainService.findAvailableProductById(productId);
@@ -72,6 +83,17 @@ public class ChatService {
 		}
 	}
 
+	/**
+	 * 새로운 채팅방을 생성하고 참여자를 등록
+	 *
+	 * <p>구매자와 판매자 간의 새로운 채팅방을 생성하고,
+	 * 판매자에게 채팅방 생성 알림을 발송</p>
+	 *
+	 * @param user 채팅방을 생성하는 사용자 (구매자)
+	 * @param request 채팅방 생성 요청 데이터
+	 * @return 생성된 채팅방 정보
+	 * @author 박형우
+	 */
 	public ChatRoom createChatRoom(User user, CreateChatRoomRequest request) {
 		// 기존에 참여중인 방이 없다면 거래상품 구매자, 판매자 생성
 		Product product = productDomainService.findAvailableProductById(request.productId());
@@ -129,8 +151,13 @@ public class ChatService {
 
 	/**
 	 * 채팅방 나가기
-	 * @param user the auth user
-	 * @param roomId the room id
+	 *
+	 * <p>사용자가 채팅방에서 나가며, 해당 채팅방의 다른 참여자들에게
+	 * 나감 알림 메시지를 WebSocket을 통해 브로드캐스트</p>
+	 *
+	 * @param user 채팅방을 나가는 사용자
+	 * @param roomId 나갈 채팅방 ID
+	 * @author 박형우
 	 */
 	@Transactional
 	public void exitChatRoom(User user, Long roomId) {
