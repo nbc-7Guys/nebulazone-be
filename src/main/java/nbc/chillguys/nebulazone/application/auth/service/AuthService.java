@@ -15,6 +15,7 @@ import nbc.chillguys.nebulazone.common.exception.BaseException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
+import nbc.chillguys.nebulazone.infra.security.dto.AuthTokens;
 
 @Service
 @RequiredArgsConstructor
@@ -32,10 +33,9 @@ public class AuthService {
 			userDomainService.validPassword(request.password(), user.getPassword());
 
 			authMetrics.countSuccess();
-			return SignInResponse.of(
-				jwtUtil.generateTokens(user).accessToken(),
-				jwtUtil.generateTokens(user).refreshToken()
-			);
+
+			AuthTokens tokens = jwtUtil.generateTokens(user);
+			return SignInResponse.of(tokens.accessToken(), tokens.refreshToken());
 
 		} catch (BaseException e) {
 			authMetrics.countFailure();
