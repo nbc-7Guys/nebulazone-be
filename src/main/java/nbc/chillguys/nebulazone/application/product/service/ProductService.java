@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.auction.service.AuctionSchedulerService;
 import nbc.chillguys.nebulazone.application.product.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.UpdateProductRequest;
@@ -51,7 +50,6 @@ public class ProductService {
 	private final ProductDomainService productDomainService;
 	private final AuctionDomainService auctionDomainService;
 	private final TransactionDomainService transactionDomainService;
-	private final AuctionSchedulerService auctionSchedulerService;
 	private final CatalogDomainService catalogDomainService;
 	private final GcsClient gcsClient;
 
@@ -76,7 +74,6 @@ public class ProductService {
 		if (createdProduct.getTxMethod() == ProductTxMethod.AUCTION) {
 			AuctionCreateCommand auctionCreateCommand = AuctionCreateCommand.of(createdProduct, productEndTime);
 			Auction savedAuction = auctionDomainService.createAuction(auctionCreateCommand);
-			auctionSchedulerService.autoAuctionEndSchedule(savedAuction, createdProduct.getId());
 			createdProduct.updateAuctionId(savedAuction.getId());
 		}
 

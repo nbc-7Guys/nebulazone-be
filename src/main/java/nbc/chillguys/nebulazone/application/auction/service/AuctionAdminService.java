@@ -20,7 +20,6 @@ import nbc.chillguys.nebulazone.domain.auction.service.AuctionAdminDomainService
 @RequiredArgsConstructor
 public class AuctionAdminService {
 	private final AuctionAdminDomainService auctionAdminDomainService;
-	private final AuctionSchedulerService auctionSchedulerService;
 
 	public CommonPageResponse<AuctionAdminResponse> findAuctions(AuctionAdminSearchRequest request, Pageable pageable) {
 		AuctionAdminSearchQueryCommand command = new AuctionAdminSearchQueryCommand(
@@ -40,13 +39,11 @@ public class AuctionAdminService {
 	@Transactional
 	public void deleteAuction(Long auctionId) {
 		auctionAdminDomainService.deleteAuction(auctionId);
-		auctionSchedulerService.cancelSchedule(auctionId);
 	}
 
 	public void restoreAuction(Long auctionId) {
 		auctionAdminDomainService.restoreAuction(auctionId);
 		Auction auction = auctionAdminDomainService.findByAuctionById(auctionId);
-		auctionSchedulerService.autoAuctionEndSchedule(auction, auction.getProduct().getId());
 	}
 
 }

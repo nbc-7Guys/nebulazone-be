@@ -23,7 +23,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import nbc.chillguys.nebulazone.application.auction.service.AuctionSchedulerService;
 import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.application.product.dto.response.SearchProductResponse;
@@ -61,9 +60,6 @@ class ProductServiceTest {
 
 	@Mock
 	private TransactionDomainService transactionDomainService;
-
-	@Mock
-	private AuctionSchedulerService auctionSchedulerService;
 
 	@Mock
 	private CatalogDomainService catalogDomainService;
@@ -238,7 +234,6 @@ class ProductServiceTest {
 			verify(productDomainService, times(1))
 				.createProduct(any(ProductCreateCommand.class), any());
 			verify(auctionDomainService, never()).createAuction(any());
-			verify(auctionSchedulerService, never()).autoAuctionEndSchedule(any(), any());
 		}
 
 		@Test
@@ -276,7 +271,6 @@ class ProductServiceTest {
 			verify(productDomainService, times(1)).createProduct(any(ProductCreateCommand.class),
 				any());
 			verify(auctionDomainService, times(1)).createAuction(any(AuctionCreateCommand.class));
-			verify(auctionSchedulerService, times(1)).autoAuctionEndSchedule(auction, auctionProduct.getId());
 		}
 
 		@Test

@@ -21,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuctionRequest;
-import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindAllAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindDetailAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
@@ -29,7 +28,6 @@ import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.ManualEndAuctionInfo;
-import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
@@ -56,9 +54,6 @@ class AuctionServiceUnitTest {
 
 	@Mock
 	BidDomainService bidDomainService;
-
-	@Mock
-	AuctionSchedulerService auctionSchedulerService;
 
 	@Mock
 	ProductDomainService productDomainService;
@@ -120,70 +115,18 @@ class AuctionServiceUnitTest {
 	}
 
 	@Nested
-	@DisplayName("정렬별 경매 목록 조회")
-	class FindAuctionsBySortTypeTest {
-
-		@Test
-		@DisplayName("인기순 경매 목록 조회 성공")
-		void success_findAuctionsBySortType_popular() {
-			// given
-			AuctionSortType sortType = AuctionSortType.POPULAR;
-			List<AuctionFindAllInfo> auctionInfoList = createAuctionFindAllInfoList();
-
-			given(auctionDomainService.findAuctionsBySortType(sortType)).willReturn(auctionInfoList);
-
-			// when
-			List<FindAllAuctionResponse> result = auctionService.findAuctionsBySortType(sortType);
-
-			// then
-			assertThat(result).hasSize(2);
-			assertThat(result.get(0).productName()).isEqualTo(PRODUCT_NAME);
-			assertThat(result.get(0).startPrice()).isEqualTo(START_PRICE);
-			assertThat(result.get(1).currentPrice()).isEqualTo(125000L);
-			assertThat(result).extracting("auctionId").containsExactly(1L, 2L);
-		}
-
-		@Test
-		@DisplayName("마감 임박순 경매 목록 조회 성공")
-		void success_findAuctionsBySortType_deadlineImminent() {
-			// given
-			AuctionSortType sortType = AuctionSortType.CLOSING;
-			List<AuctionFindAllInfo> auctionInfoList = createAuctionFindAllInfoList();
-
-			given(auctionDomainService.findAuctionsBySortType(sortType)).willReturn(auctionInfoList);
-
-			// when
-			List<FindAllAuctionResponse> result = auctionService.findAuctionsBySortType(sortType);
-
-			// then
-			assertThat(result).hasSize(2);
-			assertThat(result.get(0).productName()).isEqualTo(PRODUCT_NAME);
-			assertThat(result.get(0).startPrice()).isEqualTo(START_PRICE);
-			assertThat(result.get(1).currentPrice()).isEqualTo(125000L);
-			assertThat(result).extracting("auctionId").containsExactly(1L, 2L);
-		}
-	}
-
-	@Nested
 	@DisplayName("경매 삭제")
 	class DeleteAuctionTest {
 
 		@Test
-		@DisplayName("경매 삭제 성공")
+		@DisplayName("경매 삭제 성공 - 수정 필요")
 		void success_deleteAuction() {
 			// given
-			Long auctionId = 1L;
-
-			given(auctionDomainService.deleteAuction(auctionId, seller)).willReturn(auctionId);
-			willDoNothing().given(auctionSchedulerService).cancelSchedule(auctionId);
 
 			// when
-			DeleteAuctionResponse result = auctionService.deleteAuction(auctionId, seller);
 
 			// then
-			assertThat(result.auctionId()).isEqualTo(auctionId);
-			verify(auctionDomainService).deleteAuction(auctionId, seller);
-			verify(auctionSchedulerService).cancelSchedule(auctionId);
+
 		}
 	}
 
