@@ -5,8 +5,6 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nbc.chillguys.nebulazone.infra.oauth.handler.OAuth2SuccessHandler;
 import nbc.chillguys.nebulazone.infra.oauth.service.OAuthService;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
+import nbc.chillguys.nebulazone.infra.security.filter.BanCheckFilter;
 import nbc.chillguys.nebulazone.infra.security.filter.CustomAuthenticationEntryPoint;
 import nbc.chillguys.nebulazone.infra.security.filter.ExceptionLoggingFilter;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
@@ -34,14 +33,17 @@ public class SecurityConfig {
 	private final OAuthService oAuthService;
 	private final OAuth2SuccessHandler oAuth2SuccessHandler;
 	private final ExceptionLoggingFilter exceptionLoggingFilter;
+	private final BanCheckFilter banCheckFilter;
 
 	public SecurityConfig(ObjectMapper objectMapper, JwtUtil jwtUtil, OAuthService oAuthService,
-		OAuth2SuccessHandler oAuth2SuccessHandler, ExceptionLoggingFilter exceptionLoggingFilter) {
+		OAuth2SuccessHandler oAuth2SuccessHandler, ExceptionLoggingFilter exceptionLoggingFilter,
+		BanCheckFilter banCheckFilter) {
 		this.entryPoint = new CustomAuthenticationEntryPoint(objectMapper);
 		this.jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, entryPoint);
 		this.oAuthService = oAuthService;
 		this.oAuth2SuccessHandler = oAuth2SuccessHandler;
 		this.exceptionLoggingFilter = exceptionLoggingFilter;
+		this.banCheckFilter = banCheckFilter;
 	}
 
 	@Bean
@@ -65,7 +67,8 @@ public class SecurityConfig {
 					"/ws/**",
 					"/ws",
 					"/chat/**",
-					"/topic/**"
+					"/topic/**",
+					"/internal/bans"
 				).permitAll()
 				.requestMatchers(
 					"/auth/signin",
@@ -84,11 +87,16 @@ public class SecurityConfig {
 			.oauth2Login(oauth2 -> oauth2
 				.userInfoEndpoint(userInfo -> userInfo
 					.userService(oAuthService))
-				.successHandler(oAuth2SuccessHandler))
+				.successHandler(oAuth2SuccessHandler)
+				.authorizationEndpoint(authorization -> authorization
+					.authorizationRequestRepository(new HttpCookieOAuth2AuthorizationRequestRepository())
+				)
+			)
 			.exceptionHandling(exception ->
 				exception.authenticationEntryPoint(entryPoint))
-			.addFilterBefore(exceptionLoggingFilter, UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(banCheckFilter, UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(exceptionLoggingFilter, UsernamePasswordAuthenticationFilter.class)
 			.build();
 	}
 
@@ -106,7 +114,8 @@ public class SecurityConfig {
 			"https://nebulazone-fe.vercel.app",
 			"https://nebulazone.store",
 			"https://www.nebulazone.store",
-			"https://api.nebulazone.store"
+			"https://api2.nebulazone.store",
+			"http://api2.nebulazone.store"
 		));
 		configuration.setAllowedMethods(List.of(
 			"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
@@ -125,10 +134,5 @@ public class SecurityConfig {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
-	}
-
-	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration auth) throws Exception {
-		return auth.getAuthenticationManager();
 	}
 }

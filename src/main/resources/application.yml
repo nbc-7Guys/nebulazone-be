@@ -21,22 +21,12 @@ spring:
         show_sql: false
         format_sql: true
         use_sql_comments: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
 
   data:
     redis:
       host: localhost
       port: 6379
-
-  cloud:
-    aws:
-      credentials:
-        access-key: ${AWS_ACCESS_KEY}
-        secret-key: ${AWS_SECRET_KEY}
-      region:
-        static: ap-northeast-2
-
-      s3:
-        bucket: ${AWS_S3_BUCKET}
 
   security:
     oauth2:
@@ -79,7 +69,7 @@ spring:
             user-name-attribute: response
 
   elasticsearch:
-    uris: ${ES_URI:http://localhost:9200}
+    uris: ${ES_URI}
 
 jwt:
   secret:
@@ -112,4 +102,12 @@ management:
 
 toss:
   secret-key: ${TOSS_SECRET_KEY}
-  client-key: ${TOSS_CLIENT_KEY}
+
+frontend:
+  url: ${FRONT_END_URL}
+
+gcp:
+  credentials:
+    location: ${GCP_KEY}
+  storage:
+    bucket: nbc-nebulazone

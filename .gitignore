@@ -38,3 +38,6 @@ out/
 
 ### log ###
 /logs
+
+### gcp key ###
+gcp-key.json

@@ -16,7 +16,7 @@ import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
 import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
 import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
@@ -27,7 +27,7 @@ import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
 public class ChatMessageService {
 
 	private final ChatMessageRedisService chatMessageRedisService;
-	private final S3Service s3Service;
+	private final GcsClient gcsClient;
 	private final RedisMessagePublisher redisMessagePublisher;
 	private final ChatDomainService chatDomainService;
 	private final WebSocketSessionRedisService webSocketSessionRedisService;
@@ -71,7 +71,7 @@ public class ChatMessageService {
 		SessionUser sessionUser = SessionUser.from(user);
 
 		chatDomainService.validateUserAccessToChatRoom(user, roomId);
-		String imageUrl = s3Service.generateUploadUrlAndUploadFile(multipartFile);
+		String imageUrl = gcsClient.uploadFile(multipartFile);
 		MessageType messageType = MessageType.valueOf(type);
 		sendAndSaveMessage(roomId, imageUrl, messageType, sessionUser);
 	}

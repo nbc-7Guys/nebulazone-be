@@ -13,15 +13,13 @@ spring:
       hibernate:
         format_sql: true
 
-  cloud:
-    aws:
-      s3:
-        bucket: test-bucket
-
   data:
     redis:
       host: localhost
       port: 6379
+
+  elasticsearch:
+    uris: http://localhost:9200
 
 jwt:
   secret:
@@ -29,3 +27,10 @@ jwt:
 
 toss:
   secret-key: toss-test-secret-key
+
+frontend:
+  url: test-front-end-url
+
+gcp:
+  credentials:
+    location: test-key.json

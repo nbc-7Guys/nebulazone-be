@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.application.auth.service;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +13,7 @@ import nbc.chillguys.nebulazone.application.auth.dto.response.SignInResponse;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
+import nbc.chillguys.nebulazone.infra.security.dto.AuthTokens;
 
 @Service
 @RequiredArgsConstructor
@@ -24,10 +27,9 @@ public class AuthService {
 
 		userDomainService.validPassword(signInRequest.password(), user.getPassword());
 
-		String accessToken = jwtUtil.generateAccessToken(user);
-		String refreshToken = jwtUtil.generateRefreshToken(user);
+		AuthTokens authTokens = jwtUtil.generateTokens(user);
 
-		return SignInResponse.of(accessToken, refreshToken);
+		return SignInResponse.of(authTokens.accessToken(), authTokens.refreshToken());
 	}
 
 	public void signOut() {
@@ -37,6 +39,12 @@ public class AuthService {
 	public ReissueResponse reissueAccessToken(String refreshToken) {
 		String accessToken = jwtUtil.regenerateAccessToken(refreshToken);
 
-		return ReissueResponse.from(accessToken);
+		User user = jwtUtil.getUserFromToken(refreshToken);
+
+		Authentication authentication = new UsernamePasswordAuthenticationToken(
+			user, accessToken, user.getAuthorities()
+		);
+
+		return ReissueResponse.of(accessToken, authentication);
 	}
 }

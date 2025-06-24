@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.application.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,9 +13,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auth.dto.request.SignInRequest;
+import nbc.chillguys.nebulazone.application.auth.dto.response.RegenerateAccessTokenResponse;
 import nbc.chillguys.nebulazone.application.auth.dto.response.ReissueResponse;
 import nbc.chillguys.nebulazone.application.auth.dto.response.SignInResponse;
 import nbc.chillguys.nebulazone.application.auth.service.AuthService;
+import nbc.chillguys.nebulazone.common.util.CookieUtils;
 
 @RestController
 @RequestMapping("/auth")
@@ -29,13 +32,8 @@ public class AuthController {
 	) {
 		SignInResponse response = authService.signIn(signInRequestDto);
 
-		Cookie cookie = new Cookie("Refresh_Token", response.refreshToken());
-		cookie.setHttpOnly(true);
-		// https 통신이 아니기 때문에 임시 주석
-		// cookie.setSecure(true);
-		cookie.setPath("/");
-		cookie.setMaxAge(2 * 24 * 60 * 60);
-
+		int maxAge = 2 * 24 * 60 * 60;
+		Cookie cookie = CookieUtils.createCookie("Refresh_Token", response.refreshToken(), maxAge);
 		httpServletResponse.addCookie(cookie);
 
 		return ResponseEntity.ok(response);
@@ -45,24 +43,19 @@ public class AuthController {
 	public ResponseEntity<String> signOut(HttpServletResponse httpServletResponse) {
 		authService.signOut();
 
-		Cookie cookie = new Cookie("Refresh_Token", null);
-		cookie.setHttpOnly(true);
-		// https 통신이 아니기 때문에 임시 주석
-		// cookie.setSecure(true);
-		cookie.setPath("/");
-		cookie.setMaxAge(0);
-
-		httpServletResponse.addCookie(cookie);
+		CookieUtils.deleteCookie(httpServletResponse, "Refresh_Token");
 
 		return ResponseEntity.ok("로그아웃 성공");
 	}
 
 	@PostMapping("/reissue")
-	public ResponseEntity<ReissueResponse> reissueAccessToken(
+	public ResponseEntity<RegenerateAccessTokenResponse> reissueAccessToken(
 		@CookieValue("Refresh_Token") String refreshToken
 	) {
 		ReissueResponse response = authService.reissueAccessToken(refreshToken);
 
-		return ResponseEntity.ok(response);
+		SecurityContextHolder.getContext().setAuthentication(response.authentication());
+
+		return ResponseEntity.ok(RegenerateAccessTokenResponse.from(response.accessToken()));
 	}
 }

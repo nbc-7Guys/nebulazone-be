@@ -36,7 +36,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 
 @DisplayName("게시글 애플리케이션 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +46,7 @@ class PostServiceTest {
 	private PostDomainService postDomainService;
 
 	@Mock
-	private S3Service s3Service;
+	private GcsClient gcsClient;
 
 	@InjectMocks
 	private PostService postService;
@@ -183,7 +183,7 @@ class PostServiceTest {
 			List<MultipartFile> files = List.of(mockFile);
 			String mockImageUrl = "https://test-image.jpg";
 
-			given(s3Service.generateUploadUrlAndUploadFile(mockFile))
+			given(gcsClient.uploadFile(mockFile))
 				.willReturn(mockImageUrl);
 			given(postDomainService.createPost(any(PostCreateCommand.class), any(List.class)))
 				.willReturn(post);
@@ -197,7 +197,7 @@ class PostServiceTest {
 			assertThat(result.content()).isEqualTo("테스트 본문1");
 			assertThat(result.type()).isEqualTo(PostType.FREE);
 
-			verify(s3Service, times(1)).generateUploadUrlAndUploadFile(mockFile);
+			verify(gcsClient, times(1)).uploadFile(mockFile);
 			verify(postDomainService, times(1)).createPost(any(PostCreateCommand.class), any(List.class));
 		}
 	}

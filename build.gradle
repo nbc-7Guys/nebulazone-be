@@ -55,10 +55,6 @@ dependencies {
     // tika
     implementation 'org.apache.tika:tika-core:3.1.0'
 
-    // s3
-    implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.3.0')
-    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
-
     // LocalDateTime 직렬화
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
@@ -67,6 +63,10 @@ dependencies {
 
     // AOP
     implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // GCS
+    implementation platform('com.google.cloud:libraries-bom:26.61.0')
+    implementation 'com.google.cloud:google-cloud-storage'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
