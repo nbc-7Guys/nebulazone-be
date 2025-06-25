@@ -17,6 +17,7 @@ import nbc.chillguys.nebulazone.application.bid.dto.request.CreateBidRequest;
 import nbc.chillguys.nebulazone.application.bid.dto.response.CreateBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.DeleteBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.FindBidResponse;
+import nbc.chillguys.nebulazone.application.bid.service.BidRedisService;
 import nbc.chillguys.nebulazone.application.bid.service.BidService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -26,15 +27,26 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 public class BidController {
 
 	private final BidService bidService;
+	private final BidRedisService bidRedisService;
+
+	// @PostMapping("/auctions/{auctionId}/bids")
+	// public ResponseEntity<CreateBidResponse> upsertBid(
+	// 	@PathVariable("auctionId") Long auctionId,
+	// 	@AuthenticationPrincipal User user,
+	// 	@Valid @RequestBody CreateBidRequest request) {
+	//
+	// 	CreateBidResponse response = bidService.upsertBid(auctionId, user, request);
+	//
+	// 	return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	// }
 
 	@PostMapping("/auctions/{auctionId}/bids")
-	public ResponseEntity<CreateBidResponse> upsertBid(
+	public ResponseEntity<CreateBidResponse> createBid(
 		@PathVariable("auctionId") Long auctionId,
 		@AuthenticationPrincipal User user,
 		@Valid @RequestBody CreateBidRequest request) {
 
-		CreateBidResponse response = bidService.upsertBid(auctionId, user, request);
-
+		CreateBidResponse response = bidRedisService.createBid(auctionId, user, request.price());
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
