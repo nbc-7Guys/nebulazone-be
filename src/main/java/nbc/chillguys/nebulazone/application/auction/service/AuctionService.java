@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.application.auction.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -78,13 +79,14 @@ public class AuctionService {
 
 		product.getSeller().addPoint(wonBid.getPrice());
 
+		LocalDateTime purchasedAt = LocalDateTime.now();
 		TransactionCreateCommand buyerTxCreateCommand = TransactionCreateCommand.of(wonBid.getUser(), UserType.BUYER,
-			product, product.getTxMethod().name(), auctionInfo.wonProductPrice());
+			product, product.getTxMethod().name(), auctionInfo.wonProductPrice(), purchasedAt);
 
 		txDomainService.createTransaction(buyerTxCreateCommand);
 
 		TransactionCreateCommand sellerTxCreateCommand = TransactionCreateCommand.of(product.getSeller(),
-			UserType.SELLER, product, product.getTxMethod().name(), auctionInfo.wonProductPrice());
+			UserType.SELLER, product, product.getTxMethod().name(), auctionInfo.wonProductPrice(), purchasedAt);
 
 		txDomainService.createTransaction(sellerTxCreateCommand);
 

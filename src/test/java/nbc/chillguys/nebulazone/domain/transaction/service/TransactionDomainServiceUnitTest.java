@@ -86,7 +86,7 @@ class TransactionDomainServiceUnitTest {
 		void success_createTransaction_direct() {
 			// given
 			TransactionCreateCommand command = TransactionCreateCommand.of(
-				buyer, UserType.BUYER, product, DIRECT_METHOD, TRANSACTION_PRICE);
+				buyer, UserType.BUYER, product, DIRECT_METHOD, TRANSACTION_PRICE, LocalDateTime.now());
 			Transaction expectedTransaction = createTransaction(1L, buyer, product,
 				TransactionMethod.DIRECT, TRANSACTION_PRICE);
 
@@ -107,7 +107,7 @@ class TransactionDomainServiceUnitTest {
 		void success_createTransaction_auction() {
 			// given
 			TransactionCreateCommand command = TransactionCreateCommand.of(
-				buyer, UserType.BUYER, product, AUCTION_METHOD, TRANSACTION_PRICE);
+				buyer, UserType.BUYER, product, AUCTION_METHOD, TRANSACTION_PRICE, LocalDateTime.now());
 			Transaction expectedTransaction = createTransaction(2L, buyer, product,
 				TransactionMethod.AUCTION, TRANSACTION_PRICE);
 
@@ -128,7 +128,7 @@ class TransactionDomainServiceUnitTest {
 		void fail_createTransaction_invalidMethod() {
 			// given
 			TransactionCreateCommand command = TransactionCreateCommand.of(
-				buyer, UserType.BUYER, product, INVALID_METHOD, TRANSACTION_PRICE);
+				buyer, UserType.BUYER, product, INVALID_METHOD, TRANSACTION_PRICE, LocalDateTime.now());
 
 			// when & then
 			assertTransactionException(() -> transactionDomainService.createTransaction(command),
