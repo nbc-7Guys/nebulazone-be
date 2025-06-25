@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.application.ban.service.BanService;
+import nbc.chillguys.nebulazone.domain.ban.exception.BanErrorCode;
+import nbc.chillguys.nebulazone.domain.ban.exception.BanException;
 
 @Slf4j
 @Component
@@ -29,12 +31,19 @@ public class BanCheckFilter extends OncePerRequestFilter {
 			ip = request.getRemoteAddr();
 		}
 
-		if (banService.isBanned(ip)) {
+		try {
+			banService.validateBanned(ip);
+		} catch (BanException e) {
+			if (e.getErrorCode() == BanErrorCode.BAN_NOT_FOUND) {
+				filterChain.doFilter(request, response); // 밴이 아니면 정상 통과
+				return;
+			}
 			log.warn("[BAN] 차단된 IP: {}", ip);
 			response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden IP");
 			return;
 		}
 
-		filterChain.doFilter(request, response);
+		log.warn("[BAN] 차단된 IP: {}", ip);
+		response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden IP");
 	}
 }

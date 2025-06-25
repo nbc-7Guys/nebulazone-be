@@ -111,3 +111,6 @@ gcp:
     location: ${GCP_KEY}
   storage:
     bucket: nbc-nebulazone
+
+security:
+  logstash-key: ${LOGSTASH_KEY}
