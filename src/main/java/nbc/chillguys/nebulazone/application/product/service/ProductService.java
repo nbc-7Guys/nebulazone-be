@@ -39,14 +39,13 @@ import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
+import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
-	private final UserDomainService userDomainService;
 	private final ProductDomainService productDomainService;
 	private final AuctionDomainService auctionDomainService;
 	private final AuctionSchedulerService auctionSchedulerService;
@@ -151,6 +150,7 @@ public class ProductService {
 		return DeleteProductResponse.from(productId);
 	}
 
+	@DistributedLock(key = "'lock:purchase:product:' + #productId")
 	@Transactional
 	public PurchaseProductResponse purchaseProduct(User user, Long catalogId, Long productId) {
 		Product product = productDomainService.findAvailableProductByIdForUpdate(productId);
