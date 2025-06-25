@@ -2,10 +2,8 @@ package nbc.chillguys.nebulazone.application.bid.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.bid.dto.response.DeleteBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.FindBidResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
@@ -37,12 +35,4 @@ public class BidService {
 		return CommonPageResponse.from(response);
 	}
 
-	@Transactional
-	public DeleteBidResponse statusBid(User user, Long auctionId, Long bidId) {
-		Auction auction = auctionDomainService.findActiveAuctionWithProductAndSellerLock(auctionId);
-
-		Long deletedBidId = bidDomainService.statusBid(auction, user, bidId);
-		return DeleteBidResponse.from(deletedBidId);
-
-	}
 }

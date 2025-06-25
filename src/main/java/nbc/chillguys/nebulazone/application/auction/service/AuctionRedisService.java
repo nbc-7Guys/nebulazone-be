@@ -74,11 +74,12 @@ public class AuctionRedisService {
 	/**
 	 * 특정 경매의 입찰 최고가 갱신
 	 * @param auctionId 대상 경매 id
-	 * @param bidPrice 갱신할 입찰가
+	 * @param bidPrice 갱신할 입찰가 (null 가능 - 입찰이 모두 취소된 경우)
 	 * @author 전나겸
 	 */
 	public void updateAuctionCurrentPrice(Long auctionId, Long bidPrice) {
 		String auctionKey = "auction:" + auctionId;
+
 		redisTemplate.opsForHash().put(auctionKey, "currentPrice", bidPrice);
 
 	}

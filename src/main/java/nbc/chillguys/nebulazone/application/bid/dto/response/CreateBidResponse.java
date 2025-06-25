@@ -15,8 +15,8 @@ public record CreateBidResponse(
 
 	public static CreateBidResponse from(BidVo bidVo) {
 		return new CreateBidResponse(
-			bidVo.auctionId(),
-			bidVo.bidPrice(),
-			bidVo.bidCreatedAt());
+			bidVo.getAuctionId(),
+			bidVo.getBidPrice(),
+			bidVo.getBidCreatedAt());
 	}
 }

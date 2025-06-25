@@ -29,17 +29,6 @@ public class BidController {
 	private final BidService bidService;
 	private final BidRedisService bidRedisService;
 
-	// @PostMapping("/auctions/{auctionId}/bids")
-	// public ResponseEntity<CreateBidResponse> upsertBid(
-	// 	@PathVariable("auctionId") Long auctionId,
-	// 	@AuthenticationPrincipal User user,
-	// 	@Valid @RequestBody CreateBidRequest request) {
-	//
-	// 	CreateBidResponse response = bidService.upsertBid(auctionId, user, request);
-	//
-	// 	return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	// }
-
 	@PostMapping("/auctions/{auctionId}/bids")
 	public ResponseEntity<CreateBidResponse> createBid(
 		@PathVariable("auctionId") Long auctionId,
@@ -72,14 +61,15 @@ public class BidController {
 		return ResponseEntity.ok(response);
 	}
 
-	@DeleteMapping("/auctions/{auctionId}/bids/{bidId}")
+	@DeleteMapping("/auctions/{auctionId}/bids/{bidPrice}")
 	public ResponseEntity<DeleteBidResponse> statusBid(
 		@AuthenticationPrincipal User user,
 		@PathVariable("auctionId") Long auctionId,
-		@PathVariable("bidId") Long bidId
+		@PathVariable("bidPrice") Long bidPrice
 	) {
 
-		DeleteBidResponse response = bidService.statusBid(user, auctionId, bidId);
+		DeleteBidResponse response = bidRedisService.statusBid(user, auctionId, bidPrice);
+		// DeleteBidResponse response = bidService.statusBid(user, auctionId, bidId);
 
 		return ResponseEntity.ok(response);
 	}

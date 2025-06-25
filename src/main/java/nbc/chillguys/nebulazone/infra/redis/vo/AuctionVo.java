@@ -4,6 +4,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
@@ -12,20 +14,21 @@ import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
-public record AuctionVo(
-	Long auctionId,
-	Long startPrice,
-	Long currentPrice,
-	LocalDateTime endTime,
-	boolean isWon,
-	LocalDateTime createAt,
-	Long productId,
-	String productName,
-	boolean isSold,
-	Long sellerId,
-	String sellerNickname,
-	String sellerEmail
-) {
+@Getter
+@AllArgsConstructor
+public class AuctionVo {
+	private Long auctionId;
+	private Long startPrice;
+	private Long currentPrice;
+	private LocalDateTime endTime;
+	private boolean isWon;
+	private LocalDateTime createAt;
+	private Long productId;
+	private String productName;
+	private boolean isSold;
+	private Long sellerId;
+	private String sellerNickname;
+	private String sellerEmail;
 
 	public static AuctionVo of(Product product, Auction auction, User user) {
 		return new AuctionVo(
@@ -45,7 +48,7 @@ public record AuctionVo(
 	}
 
 	public void validateAuctionNotClosed() {
-		if (Duration.between(LocalDateTime.now(), this.endTime()).isNegative()) {
+		if (Duration.between(LocalDateTime.now(), this.endTime).isNegative()) {
 			throw new AuctionException(AuctionErrorCode.ALREADY_CLOSED_AUCTION);
 		}
 	}
@@ -63,7 +66,7 @@ public record AuctionVo(
 	}
 
 	public void validateMinimumBidPrice(Long bidPrice) {
-		if (this.currentPrice == null) {
+		if (this.currentPrice == 0L) {
 			if (this.startPrice > bidPrice) {
 				throw new BidException(BidErrorCode.BID_PRICE_TOO_LOW_START_PRICE);
 			}
@@ -71,6 +74,12 @@ public record AuctionVo(
 			if (this.currentPrice >= bidPrice) {
 				throw new BidException(BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE);
 			}
+		}
+	}
+
+	public void validateBidCancelBefore30Minutes() {
+		if (this.endTime.minusMinutes(30).isBefore(LocalDateTime.now())) {
+			throw new BidException(BidErrorCode.BID_CANCEL_TIME_LIMIT_EXCEEDED);
 		}
 	}
 

@@ -38,6 +38,7 @@ public class AuctionDomainService {
 		Auction auction = Auction.builder()
 			.product(command.product())
 			.startPrice(command.product().getPrice())
+			.currentPrice(0L)
 			.endTime(command.endTime())
 			.build();
 
