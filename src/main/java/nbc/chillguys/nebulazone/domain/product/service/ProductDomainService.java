@@ -191,4 +191,14 @@ public class ProductDomainService {
 
 		return product;
 	}
+
+	/**
+	 * 상품이 팔렸다고 ES에 기록
+	 *
+	 * @param productId 상품 id
+	 * @author 윤정환
+	 */
+	public void markProductAsPurchased(Long productId) {
+		productEsRepository.markProductAsPurchased(productId);
+	}
 }

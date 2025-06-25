@@ -36,7 +36,9 @@ public class TransactionDomainService {
 			.user(command.user())
 			.method(TransactionMethod.of(command.txMethod()))
 			.price(command.price())
+			.createdAt(command.createdAt())
 			.build();
+
 		return transactionRepository.save(tx);
 	}
 
