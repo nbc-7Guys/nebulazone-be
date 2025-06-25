@@ -104,6 +104,8 @@ public class BidRedisService {
 				.orElse(Set.of())
 				.stream()
 				.map(o -> objectMapper.convertValue(o, BidVo.class))
+				.filter(bidVo -> BidStatus.BID.name().equals(bidVo.getBidStatus()))
+				.filter(bidVo -> bidVo.getBidUserId().equals(user.getId()))
 				.findFirst()
 				.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
 
