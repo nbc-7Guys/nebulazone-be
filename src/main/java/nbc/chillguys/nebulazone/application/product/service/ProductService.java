@@ -38,7 +38,6 @@ import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
-import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
@@ -154,7 +153,7 @@ public class ProductService {
 
 	@Transactional
 	public PurchaseProductResponse purchaseProduct(User user, Long catalogId, Long productId) {
-		Product product = productDomainService.findAvailableProductById(productId);
+		Product product = productDomainService.findAvailableProductByIdForUpdate(productId);
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		product.validPurchasable(user.getId());
