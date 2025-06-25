@@ -73,50 +73,6 @@ public class BidDomainService {
 	}
 
 	/**
-	 * 특정 경매의 입찰 수정 - 기존 입찰이 존재할 때
-	 * @param lockAuction 경매
-	 * @param findBid 기존 입찰 내역
-	 * @param user 로그인 유저
-	 * @param price 입찰가
-	 * @return bid
-	 * @author 전나겸
-	 */
-	@Transactional
-	public Bid updateBid(Auction lockAuction, Bid findBid, User user, Long price) {
-
-		if (Duration.between(LocalDateTime.now(), lockAuction.getEndTime()).isNegative()) {
-			throw new AuctionException(AuctionErrorCode.ALREADY_CLOSED_AUCTION);
-		}
-
-		if (findBid.isNotBidOwner(user)) {
-			throw new BidException(BidErrorCode.BID_NOT_OWNER);
-		}
-
-		if (findBid.isDifferentAuction(lockAuction)) {
-			throw new BidException(BidErrorCode.BID_AUCTION_MISMATCH);
-		}
-
-		if (lockAuction.isAuctionOwner(user)) {
-			throw new BidException(BidErrorCode.CANNOT_BID_OWN_AUCTION);
-		}
-
-		if (lockAuction.isWon()) {
-			throw new AuctionException(AuctionErrorCode.ALREADY_WON_AUCTION);
-		}
-
-		Optional<Long> highestPrice = bidRepository.findActiveBidHighestPriceByAuction(lockAuction);
-
-		if (highestPrice.isPresent() && highestPrice.get() >= price) {
-			throw new BidException(BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE);
-		}
-
-		lockAuction.updateBidPrice(price);
-		user.updatePoint(findBid.getPrice(), price);
-		findBid.updateBidPrice(price);
-		return findBid;
-	}
-
-	/**
 	 * 특정 경매의 입찰 내역 조회
 	 * @param auction 조회할 삭제되지 않은 경매
 	 * @param page 페이지

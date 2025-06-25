@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
 import nbc.chillguys.nebulazone.application.bid.dto.response.CreateBidResponse;
@@ -18,6 +19,7 @@ import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
@@ -33,6 +35,7 @@ public class BidRedisService {
 	private final ObjectMapper objectMapper;
 	private final RedissonClient redissonClient;
 	private final AuctionRedisService auctionRedisService;
+	private final UserDomainService userDomainService;
 
 	/**
 	 * redis 경매 입찰<br>
@@ -43,9 +46,11 @@ public class BidRedisService {
 	 * @return CreateBidResponse
 	 * @author 전나겸
 	 */
+	@Transactional
 	public CreateBidResponse createBid(Long auctionId, User user, Long bidPrice) {
 
 		RLock bidLock = redissonClient.getLock(BID_LOCK_PREFIX + auctionId + ":" + user.getId());
+		User loginUser = userDomainService.findActiveUserById(user.getId());
 
 		acquireLockOrThrow(bidLock);
 
@@ -63,6 +68,7 @@ public class BidRedisService {
 			redisTemplate.opsForZSet().add(bidKey, bidVo, bidPrice);
 
 			auctionRedisService.updateAuctionCurrentPrice(auctionId, bidPrice);
+			loginUser.usePoint(bidPrice);
 
 			return CreateBidResponse.from(bidVo);
 
@@ -85,8 +91,10 @@ public class BidRedisService {
 	 * @return DeleteBidResponse
 	 * @author 전나겸
 	 */
+	@Transactional
 	public DeleteBidResponse statusBid(User user, Long auctionId, Long bidPrice) {
 		RLock bidLock = redissonClient.getLock(BID_DELETE_LOCK_PREFIX + auctionId);
+		User loginUser = userDomainService.findActiveUserById(user.getId());
 
 		acquireLockOrThrow(bidLock);
 
@@ -130,6 +138,7 @@ public class BidRedisService {
 				.orElse(0L);
 
 			auctionRedisService.updateAuctionCurrentPrice(auctionId, newCurrentPrice);
+			loginUser.addPoint(bidPrice);
 
 			return DeleteBidResponse.from(findBidVo);
 
