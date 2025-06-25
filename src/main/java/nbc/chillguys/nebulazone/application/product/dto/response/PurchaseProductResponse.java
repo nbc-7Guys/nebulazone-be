@@ -4,18 +4,17 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
+import nbc.chillguys.nebulazone.domain.product.entity.Product;
 
 public record PurchaseProductResponse(
-	Long buyerTxId,
-
-	Long sellerTxId,
+	Long productId,
+	Long price,
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	LocalDateTime createdAt
+	LocalDateTime purchasedAt
 ) {
 
-	public static PurchaseProductResponse from(Transaction buyerTx, Transaction sellerTx) {
-		return new PurchaseProductResponse(buyerTx.getId(), sellerTx.getId(), buyerTx.getCreatedAt());
+	public static PurchaseProductResponse from(Product product, LocalDateTime purchasedAt) {
+		return new PurchaseProductResponse(product.getId(), product.getPrice(), purchasedAt);
 	}
 }
