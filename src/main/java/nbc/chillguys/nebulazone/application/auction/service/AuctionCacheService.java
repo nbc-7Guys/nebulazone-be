@@ -17,6 +17,7 @@ import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 
+// 생각해보니 redis에서 모든 실시간 데이터가 관리되는데 rdb 캐싱이 의미 없어짐 -> 고쳐야함
 @Service
 @RequiredArgsConstructor
 public class AuctionCacheService {
@@ -35,8 +36,6 @@ public class AuctionCacheService {
 		Object cached = redisTemplate.opsForValue().get(cacheKey);
 
 		if (cached != null) {
-			System.out.println("cached = " + cached);
-			System.out.println("cached.getClass() = " + cached.getClass());
 			return objectMapper.convertValue(cached, FindSortTypeAuctionResponse.class);
 		}
 

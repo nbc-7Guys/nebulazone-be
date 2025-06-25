@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
 import nbc.chillguys.nebulazone.application.product.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.UpdateProductRequest;
@@ -41,6 +42,7 @@ import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainServ
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
+import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +53,7 @@ public class ProductService {
 	private final AuctionDomainService auctionDomainService;
 	private final TransactionDomainService transactionDomainService;
 	private final CatalogDomainService catalogDomainService;
+	private final AuctionRedisService auctionRedisService;
 	private final GcsClient gcsClient;
 
 	@Transactional
@@ -73,8 +76,12 @@ public class ProductService {
 
 		if (createdProduct.getTxMethod() == ProductTxMethod.AUCTION) {
 			AuctionCreateCommand auctionCreateCommand = AuctionCreateCommand.of(createdProduct, productEndTime);
-			Auction savedAuction = auctionDomainService.createAuction(auctionCreateCommand);
-			createdProduct.updateAuctionId(savedAuction.getId());
+			Auction createdAuction = auctionDomainService.createAuction(auctionCreateCommand);
+
+			CreateRedisAuctionDto createRedisAuctionDto = CreateRedisAuctionDto.of(createdProduct, createdAuction, user,
+				productEndTime);
+			auctionRedisService.createAuction(createRedisAuctionDto);
+			createdProduct.updateAuctionId(createdAuction.getId());
 		}
 
 		productDomainService.saveProductToEs(createdProduct);
