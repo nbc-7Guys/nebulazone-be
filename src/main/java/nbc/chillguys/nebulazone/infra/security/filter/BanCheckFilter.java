@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nbc.chillguys.nebulazone.application.ban.sevice.BanService;
+import nbc.chillguys.nebulazone.application.ban.service.BanService;
 
 @Slf4j
 @Component
