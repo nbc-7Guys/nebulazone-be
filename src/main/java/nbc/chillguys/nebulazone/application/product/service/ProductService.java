@@ -153,8 +153,7 @@ public class ProductService {
 	}
 
 	@Transactional
-	public PurchaseProductResponse purchaseProduct(User loggedInUser, Long catalogId, Long productId) {
-		User user = userDomainService.findActiveUserById(loggedInUser.getId());
+	public PurchaseProductResponse purchaseProduct(User user, Long catalogId, Long productId) {
 		Product product = productDomainService.findAvailableProductById(productId);
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
