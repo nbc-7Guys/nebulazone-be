@@ -1,23 +1,27 @@
-package nbc.chillguys.nebulazone.application.ban.sevice;
+package nbc.chillguys.nebulazone.application.ban.service;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.ban.dto.request.BanCreateRequest;
 import nbc.chillguys.nebulazone.application.ban.dto.response.BanResponse;
+import nbc.chillguys.nebulazone.domain.ban.dto.BanCreateCommand;
 import nbc.chillguys.nebulazone.domain.ban.service.BanAdminDomainService;
-import nbc.chillguys.nebulazone.infra.redis.service.RedisBanService;
 
 @Service
 @RequiredArgsConstructor
 public class BanAdminService {
 
 	private final BanAdminDomainService banAdminDomainService;
-	private final RedisBanService redisBanService;
+
+	public void createBan(BanCreateRequest request) {
+		BanCreateCommand command = BanCreateCommand.from(request);
+		banAdminDomainService.createBan(command);
+	}
 
 	public void unban(String ipAddress) {
-		redisBanService.unban(ipAddress);
 		banAdminDomainService.unban(ipAddress);
 	}
 
@@ -27,7 +31,4 @@ public class BanAdminService {
 			.toList();
 	}
 
-	public boolean isBanned(String ipAddress) {
-		return redisBanService.isBanned(ipAddress);
-	}
 }

@@ -24,6 +24,7 @@ import nbc.chillguys.nebulazone.application.bid.dto.request.CreateBidRequest;
 import nbc.chillguys.nebulazone.application.bid.dto.response.CreateBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.DeleteBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.FindBidResponse;
+import nbc.chillguys.nebulazone.application.bid.metrics.BidMetrics;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
@@ -58,6 +59,9 @@ class BidServiceUnitTest {
 
 	@Mock
 	AuctionDomainService auctionDomainService;
+
+	@Mock
+	BidMetrics bidMetrics;
 
 	@InjectMocks
 	BidService bidService;

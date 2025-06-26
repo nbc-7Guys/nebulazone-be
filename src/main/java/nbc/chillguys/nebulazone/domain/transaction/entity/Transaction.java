@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.domain.transaction.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -49,12 +51,23 @@ public class Transaction extends BaseEntity {
 	@JoinColumn(name = "product_id", nullable = false)
 	private Product product;
 
+	@Column(updatable = false, nullable = false)
+	private LocalDateTime createdAt;
+
 	@Builder
-	public Transaction(Long price, TransactionMethod method, User user, UserType userType, Product product) {
+	public Transaction(
+		Long price,
+		TransactionMethod method,
+		User user,
+		UserType userType,
+		Product product,
+		LocalDateTime createdAt
+	) {
 		this.price = price;
 		this.method = method;
 		this.user = user;
 		this.userType = userType;
 		this.product = product;
+		this.createdAt = createdAt;
 	}
 }

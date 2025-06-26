@@ -1,9 +1,11 @@
 package nbc.chillguys.nebulazone.application.product.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,28 +36,24 @@ import nbc.chillguys.nebulazone.domain.product.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
-import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
-import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
-import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
-import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
+import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
-	private final UserDomainService userDomainService;
 	private final ProductDomainService productDomainService;
 	private final AuctionDomainService auctionDomainService;
-	private final TransactionDomainService transactionDomainService;
 	private final AuctionSchedulerService auctionSchedulerService;
 	private final CatalogDomainService catalogDomainService;
 	private final NotificationService notificationService;
 	private final GcsClient gcsClient;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
 	public ProductResponse createProduct(User user, Long catalogId, CreateProductRequest request,
@@ -154,10 +152,10 @@ public class ProductService {
 		return DeleteProductResponse.from(productId);
 	}
 
+	@DistributedLock(key = "'lock:purchase:product:' + #productId")
 	@Transactional
-	public PurchaseProductResponse purchaseProduct(User loggedInUser, Long catalogId, Long productId) {
-		User user = userDomainService.findActiveUserById(loggedInUser.getId());
-		Product product = productDomainService.findAvailableProductById(productId);
+	public PurchaseProductResponse purchaseProduct(User user, Long catalogId, Long productId) {
+		Product product = productDomainService.findAvailableProductByIdForUpdate(productId);
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		product.validPurchasable(user.getId());
@@ -166,21 +164,13 @@ public class ProductService {
 		ProductPurchaseCommand command = ProductPurchaseCommand.of(user, catalog, productId);
 		productDomainService.purchaseProduct(command);
 
-		productDomainService.saveProductToEs(product);
-
-		TransactionCreateCommand buyerTxCreateCommand
-			= TransactionCreateCommand.of(user, UserType.BUYER, product, product.getTxMethod().name(),
-			product.getPrice());
-		Transaction buyerTx = transactionDomainService.createTransaction(buyerTxCreateCommand);
-		TransactionCreateCommand sellerTxCreateCommand
-			= TransactionCreateCommand.of(product.getSeller(), UserType.SELLER, product, product.getTxMethod().name(),
-			product.getPrice());
-		Transaction sellerTx = transactionDomainService.createTransaction(sellerTxCreateCommand);
+		LocalDateTime purchasedAt = LocalDateTime.now();
+		eventPublisher.publishEvent(new PurchaseProductEvent(user, product, purchasedAt));
 
 		notificationService.sendProductPurchaseNotification(product.getId(), product.getSellerId(), user.getId(),
 			product.getName(), user.getNickname());
 
-		return PurchaseProductResponse.from(buyerTx, sellerTx);
+		return PurchaseProductResponse.from(product, purchasedAt);
 	}
 
 	public Page<SearchProductResponse> searchProduct(String productName, String sellerNickname,

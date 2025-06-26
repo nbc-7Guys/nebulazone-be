@@ -8,6 +8,9 @@ import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.document.Document;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.data.elasticsearch.core.query.UpdateQuery;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -16,6 +19,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.json.JsonData;
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.domain.common.constants.EsIndexNames;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
 
 @Repository
@@ -70,5 +74,17 @@ public class ProductEsRepositoryCustomImpl implements ProductEsRepositoryCustom 
 			pageable,
 			hits.getTotalHits()
 		);
+	}
+
+	@Override
+	public void markProductAsPurchased(Long productId) {
+		Document document = Document.create();
+		document.put("isSold", true);
+
+		UpdateQuery updateQuery = UpdateQuery.builder(productId.toString())
+			.withDocument(document)
+			.build();
+
+		elasticsearchOperations.update(updateQuery, IndexCoordinates.of(EsIndexNames.PRODUCT));
 	}
 }

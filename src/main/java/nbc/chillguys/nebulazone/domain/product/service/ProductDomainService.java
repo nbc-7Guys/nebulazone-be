@@ -67,6 +67,17 @@ public class ProductDomainService {
 	}
 
 	/**
+	 * 삭제되지 않은 판매 상품 조회 (비관적 락 적용)
+	 * @param productId 상품 id
+	 * @return product
+	 * @author 윤정환
+	 */
+	public Product findActiveProductByIdForUpdate(Long productId) {
+		return productRepository.findActiveProductByIdForUpdate(productId)
+			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+	}
+
+	/**
 	 * 판매되지 않은 일반 판매 상품 조회
 	 * @param productId 상품 id
 	 * @return product
@@ -80,6 +91,23 @@ public class ProductDomainService {
 
 		return product;
 	}
+
+	/**
+	 * 판매되지 않은 일반 판매 상품 조회 (비관적 락 적용)
+	 * @param productId 상품 id
+	 * @return product
+	 * @author 윤정환
+	 */
+	public Product findAvailableProductByIdForUpdate(Long productId) {
+		Product product = findActiveProductByIdForUpdate(productId);
+
+		product.validNotSold();
+		product.validPurchasable();
+
+		return product;
+	}
+
+
 
 	/**
 	 * 판매 상품 수정
@@ -190,5 +218,15 @@ public class ProductDomainService {
 		product.validBelongsToCatalog(query.catalogId());
 
 		return product;
+	}
+
+	/**
+	 * 상품이 팔렸다고 ES에 기록
+	 *
+	 * @param productId 상품 id
+	 * @author 윤정환
+	 */
+	public void markProductAsPurchased(Long productId) {
+		productEsRepository.markProductAsPurchased(productId);
 	}
 }

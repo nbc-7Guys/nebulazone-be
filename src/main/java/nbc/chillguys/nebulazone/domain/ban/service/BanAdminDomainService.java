@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.domain.ban.dto.BanCreateCommand;
 import nbc.chillguys.nebulazone.domain.ban.dto.BanInfo;
+import nbc.chillguys.nebulazone.domain.ban.entity.Ban;
 import nbc.chillguys.nebulazone.domain.ban.exception.BanErrorCode;
 import nbc.chillguys.nebulazone.domain.ban.exception.BanException;
 import nbc.chillguys.nebulazone.domain.ban.repository.BanRepository;
@@ -14,6 +16,18 @@ import nbc.chillguys.nebulazone.domain.ban.repository.BanRepository;
 @RequiredArgsConstructor
 public class BanAdminDomainService {
 	private final BanRepository banRepository;
+
+	/**
+	 * 밴 생성 로직
+	 *
+	 * @param command 밴 생성
+	 * @author 정석현
+	 */
+	public void createBan(BanCreateCommand command) {
+		validateNotAlreadyBanned(command.ipAddress());
+		Ban ban = Ban.create(command);
+		banRepository.save(ban);
+	}
 
 	/**
 	 * 주어진 IP 주소에 해당하는 밴 정보를 삭제
@@ -48,5 +62,18 @@ public class BanAdminDomainService {
 	public void findByIpAddress(String ipAddress) {
 		banRepository.findByIpAddress(ipAddress)
 			.orElseThrow(() -> new BanException(BanErrorCode.BAN_NOT_FOUND));
+	}
+
+	/**
+	 * 이미 밴이 되었는지 확인
+	 *
+	 * @param ipAddress 아이피 주소
+	 * @author 정석현
+	 */
+	public void validateNotAlreadyBanned(String ipAddress) {
+		banRepository.findActiveBanByIp(ipAddress)
+			.ifPresent(ban -> {
+				throw new BanException(BanErrorCode.ALREADY_BANNED);
+			});
 	}
 }
