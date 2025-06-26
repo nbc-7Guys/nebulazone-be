@@ -107,4 +107,9 @@ public class Auction extends BaseEntity {
 	public Long getProductId() {
 		return this.product.getId();
 	}
+
+	public boolean isNotWonAndNotDeleted() {
+		return !isWon && !isDeleted();
+	}
+
 }

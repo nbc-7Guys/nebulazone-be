@@ -19,7 +19,6 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
@@ -124,8 +123,7 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 	}
 
 	@Override
-	public Optional<Auction> findAuctionWithProductAndSellerLock(Long auctionId) {
-
+	public Optional<Auction> findAuctionWithProductAndSeller(Long auctionId) {
 		return Optional.ofNullable(jpaQueryFactory
 			.selectFrom(auction)
 			.join(auction.product, product).fetchJoin()
@@ -133,7 +131,6 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 			.where(auction.id.eq(auctionId),
 				auction.deleted.eq(false),
 				product.isDeleted.eq(false))
-			.setLockMode(LockModeType.PESSIMISTIC_WRITE)
 			.fetchOne());
 	}
 

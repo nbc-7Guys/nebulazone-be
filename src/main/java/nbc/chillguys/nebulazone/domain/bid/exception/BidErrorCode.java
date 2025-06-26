@@ -18,7 +18,8 @@ public enum BidErrorCode implements ErrorCode {
 	BID_NOT_OWNER(HttpStatus.FORBIDDEN, "내 입찰 내역이 아닙니다."),
 	BID_CANCEL_TIME_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "경매 종료 30분 전부터는 입찰을 취소할 수 없습니다."),
 	BID_AUCTION_MISMATCH(HttpStatus.FORBIDDEN, "해당 경매의 입찰이 아닙니다."),
-	BID_PROCESSING_BUSY(HttpStatus.CONFLICT, "먼저 처리되고 있는 입찰이 있습니다. 다시 시도해주세요.");
+	BID_PROCESSING_BUSY(HttpStatus.CONFLICT, "먼저 처리되고 있는 입찰이 있습니다. 다시 시도해주세요."),
+	INVALID_BID_STATUS(HttpStatus.BAD_REQUEST, "유효하지 입찰 상태값 입니다.");
 
 	private final HttpStatus status;
 	private final String message;

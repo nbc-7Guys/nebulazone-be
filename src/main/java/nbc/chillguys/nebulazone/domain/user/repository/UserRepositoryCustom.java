@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.domain.user.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
@@ -15,4 +16,6 @@ public interface UserRepositoryCustom {
 	Optional<User> findUserById(Long userId);
 
 	boolean existsByEmailAndOAuthType(String email, OAuthType oAuthType);
+
+	List<User> findActiveUserByIds(List<Long> userIds);
 }

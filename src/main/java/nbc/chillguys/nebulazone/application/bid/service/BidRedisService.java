@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.application.bid.service;
 
+import static nbc.chillguys.nebulazone.application.bid.consts.BidConst.*;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -26,10 +28,6 @@ import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 @Service
 @RequiredArgsConstructor
 public class BidRedisService {
-
-	private static final String BID_PREFIX = "bid:auction:";
-	private static final String BID_LOCK_PREFIX = "bid:lock:auction:";
-	private static final String BID_DELETE_LOCK_PREFIX = "bid:deleteLock:";
 
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ObjectMapper objectMapper;

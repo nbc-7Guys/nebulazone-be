@@ -1,9 +1,7 @@
 package nbc.chillguys.nebulazone.domain.bid.service;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -11,65 +9,42 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
-import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
-import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
+import nbc.chillguys.nebulazone.domain.bid.repository.BidJdbcRepository;
 import nbc.chillguys.nebulazone.domain.bid.repository.BidRepository;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class BidDomainService {
 
+	private final BidJdbcRepository bidJdbcRepository;
 	private final BidRepository bidRepository;
 
-	/**
-	 * 특정 경매의 입찰 생성 - 최초 입찰
-	 * @param lockAuction 삭제되지 않은 비관적 락이 적용된 Auction(상품, 셀러 정보 포함)
-	 * @param user 입찰자
-	 * @param price 입찰 가격
-	 * @return Bid
-	 * @author 전나겸
-	 */
 	@Transactional
-	public Bid createBid(Auction lockAuction, User user, Long price) {
+	public void createAllBid(Auction auction, List<BidVo> bidVoList, Map<Long, User> userMap) {
 
-		if (Duration.between(LocalDateTime.now(), lockAuction.getEndTime()).isNegative()) {
-			throw new AuctionException(AuctionErrorCode.ALREADY_CLOSED_AUCTION);
-		}
+		List<Bid> bidList = bidVoList.stream()
+			.filter(bidVo -> userMap.containsKey(bidVo.getBidUserId()))
+			.map(bidVo -> {
+				User bidUser = userMap.get(bidVo.getBidUserId());
 
-		if (lockAuction.isAuctionOwner(user)) {
-			throw new BidException(BidErrorCode.CANNOT_BID_OWN_AUCTION);
-		}
+				return Bid.builder()
+					.auction(auction)
+					.user(bidUser)
+					.price(bidVo.getBidPrice())
+					.status(bidVo.getBidStatus())
+					.build();
+			})
+			.toList();
 
-		if (lockAuction.getStartPrice() > price) {
-			throw new BidException(BidErrorCode.BID_PRICE_TOO_LOW_START_PRICE);
-		}
+		bidJdbcRepository.saveBidsBatch(bidList);
 
-		if (lockAuction.isWon()) {
-			throw new AuctionException(AuctionErrorCode.ALREADY_WON_AUCTION);
-		}
-
-		Optional<Long> highestPrice = bidRepository.findActiveBidHighestPriceByAuction(lockAuction);
-
-		if (highestPrice.isPresent() && highestPrice.get() >= price) {
-			throw new BidException(BidErrorCode.BID_PRICE_TOO_LOW_CURRENT_PRICE);
-		}
-
-		lockAuction.updateBidPrice(price);
-		user.usePoint(price);
-
-		Bid bid = Bid.builder()
-			.auction(lockAuction)
-			.user(user)
-			.price(price)
-			.build();
-
-		return bidRepository.save(bid);
 	}
 
 	/**

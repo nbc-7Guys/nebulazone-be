@@ -15,7 +15,7 @@ public interface AuctionRepositoryCustom {
 
 	List<AuctionFindAllInfo> finAuctionsBySortType(AuctionSortType sortType);
 
-	Optional<Auction> findAuctionWithProductAndSellerLock(Long auctionId);
+	Optional<Auction> findAuctionWithProductAndSeller(Long auctionId);
 
 	Optional<Auction> findByAuctionWithProduct(Long auctionId);
 

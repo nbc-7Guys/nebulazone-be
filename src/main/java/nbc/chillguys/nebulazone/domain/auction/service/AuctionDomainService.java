@@ -163,25 +163,4 @@ public class AuctionDomainService {
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 	}
 
-	/**
-	 * 삭제되지 않은 비관적 락이 적용된 경매 조회(상품, 판매자 정보 한번에 조회)
-	 * @param auctionId 조회할 AuctionId
-	 * @return 비관적 락이 적용된 auction
-	 * @author 전나겸
-	 */
-	@Transactional
-	public Auction findActiveAuctionWithProductAndSellerLock(Long auctionId) {
-		return auctionRepository.findAuctionWithProductAndSellerLock(auctionId)
-			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
-	}
-
-	/**
-	 * 삭제 되지 않은 경매 리스트 조회
-	 * @return 삭제 되지 않은 경매 리스트
-	 * @author 전나겸
-	 */
-	public List<Auction> findActiveAuctionsWithProductAndSeller() {
-		return auctionRepository.findAuctionsByNotDeletedAndIsWonFalse();
-	}
-
 }

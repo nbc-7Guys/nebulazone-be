@@ -12,7 +12,8 @@ public record TransactionCreateCommand(
 	Long price
 ) {
 
-	public static TransactionCreateCommand of(User user, UserType userType, Product product, String name, Long price) {
-		return new TransactionCreateCommand(user, userType, product, name, price);
+	public static TransactionCreateCommand of(User user, UserType userType, Product product, String txMethod,
+		Long price) {
+		return new TransactionCreateCommand(user, userType, product, txMethod, price);
 	}
 }

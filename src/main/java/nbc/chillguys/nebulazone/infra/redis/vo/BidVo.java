@@ -90,4 +90,8 @@ public class BidVo {
 		}
 	}
 
+	public void wonBid() {
+		this.bidStatus = BidStatus.WON.name();
+	}
+
 }

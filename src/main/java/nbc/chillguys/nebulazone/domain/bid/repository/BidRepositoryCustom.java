@@ -16,13 +16,9 @@ public interface BidRepositoryCustom {
 
 	Page<FindBidInfo> findMyBids(User user, int page, int size);
 
-	Optional<Long> findActiveBidHighestPriceByAuction(Auction auction);
-
 	Bid findHighestPriceBidByAuctionWithUser(Long auctionId);
 
 	Optional<Bid> findBidWithWonUser(Long bidId);
-
-	Optional<Bid> findBidByAuctionIdAndUserId(Long auctionId, Long userId);
 
 	List<Bid> findBidsByAuctionIdAndStatusBid(Long auctionId);
 }

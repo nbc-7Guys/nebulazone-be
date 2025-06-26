@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.application.auction.service;
 
+import static nbc.chillguys.nebulazone.application.auction.consts.AuctionConst.*;
+
 import java.util.Map;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,9 +23,6 @@ import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 @Service
 @RequiredArgsConstructor
 public class AuctionRedisService {
-
-	private static final String AUCTION_PREFIX = "auction:";
-	private static final String AUCTION_ENDING_KEY = "auction:ending";
 
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ObjectMapper objectMapper;
@@ -49,7 +48,7 @@ public class AuctionRedisService {
 		redisTemplate.opsForHash().putAll(auctionKey, auctionVoMap);
 
 		long endTimestamp = System.currentTimeMillis() / 1000 + productEndTime.getSeconds();
-		redisTemplate.opsForZSet().add(AUCTION_ENDING_KEY, auction.getId(), endTimestamp);
+		redisTemplate.opsForZSet().add(AUCTION_ENDING_PREFIX, auction.getId(), endTimestamp);
 
 	}
 
@@ -84,13 +83,13 @@ public class AuctionRedisService {
 
 	}
 
+	// todo : 수동 낙찰
+
+	// todo : 자동 낙찰 -> 자동낙찰은 스케줄러로 구현하고 따로 처리
+
 	// todo : 내 경매 내역 조회
 
 	// todo : 경매 상세 조회
-
-	// todo : 수동 낙찰
-
-	// todo : 자동 낙찰 -> 자동낙찰은 스케줄러로 구현하고 따로 처
 
 	// todo : 내 경매 삭제
 
