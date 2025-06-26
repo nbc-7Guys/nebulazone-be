@@ -60,9 +60,27 @@ public class BidRedisService {
 			auctionVo.validateNotAuctionOwner(user.getId());
 			auctionVo.validateMinimumBidPrice(bidPrice);
 
+			String bidKey = BID_PREFIX + auctionId;
+
+			Set<Object> allBid = redisTemplate.opsForZSet().range(bidKey, 0, -1);
+			BidVo findBidVo = Optional.ofNullable(allBid)
+				.orElse(Set.of())
+				.stream()
+				.map(o -> objectMapper.convertValue(o, BidVo.class))
+				.filter(bidVo -> bidVo.getBidUserId().equals(user.getId()))
+				.filter(bidVo -> bidVo.getBidStatus().equals(BidStatus.BID.name()))
+				.findFirst()
+				.orElse(null);
+
+			if (findBidVo != null) {
+				loginUser.addPoint(findBidVo.getBidPrice());
+				redisTemplate.opsForZSet().remove(bidKey, findBidVo);
+				findBidVo.cancelBid();
+				redisTemplate.opsForZSet().add(bidKey, findBidVo, findBidVo.getBidPrice());
+			}
+
 			BidVo bidVo = BidVo.of(auctionId, user, bidPrice);
 
-			String bidKey = BID_PREFIX + auctionId;
 			redisTemplate.opsForZSet().add(bidKey, bidVo, bidPrice);
 
 			auctionRedisService.updateAuctionCurrentPrice(auctionId, bidPrice);
@@ -122,7 +140,7 @@ public class BidRedisService {
 
 			redisTemplate.opsForZSet().remove(bidKey, findBidVo);
 			findBidVo.cancelBid();
-			redisTemplate.opsForZSet().add(bidKey, findBidVo, bidPrice);
+			redisTemplate.opsForZSet().add(bidKey, findBidVo, findBidVo.getBidPrice());
 
 			Set<Object> allBids = redisTemplate.opsForZSet().reverseRange(bidKey, 0, -1);
 
