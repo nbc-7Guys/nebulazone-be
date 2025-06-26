@@ -25,10 +25,10 @@ public class PointHistoryAdminDomainService {
 	}
 
 	@Transactional
-	public void approvePointHistory(Long pointHistoryId) {
+	public PointHistory approvePointHistory(Long pointHistoryId) {
 		PointHistory pointHistory = findActivePointHistory(pointHistoryId);
 		pointHistory.approve();
-
+		return pointHistory;
 	}
 
 	@Transactional

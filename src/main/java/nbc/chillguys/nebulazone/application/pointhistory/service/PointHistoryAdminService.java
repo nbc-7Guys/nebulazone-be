@@ -8,12 +8,17 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.pointhistory.dto.request.PointHistoryAdminRequest;
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.AdminPointHistoryResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
+import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistory;
+import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 import nbc.chillguys.nebulazone.domain.pointhistory.service.PointHistoryAdminDomainService;
+import nbc.chillguys.nebulazone.domain.user.dto.UserPointChargeCommand;
+import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @Service
 @RequiredArgsConstructor
 public class PointHistoryAdminService {
 	private final PointHistoryAdminDomainService pointHistoryAdminDomainService;
+	private final UserDomainService userDomainService;
 
 	/**
 	 * 포인트 히스토리 목록을 검색/조회합니다.<br>
@@ -35,12 +40,22 @@ public class PointHistoryAdminService {
 
 	/**
 	 * 포인트 히스토리 요청을 승인 처리합니다.
+	 * 포인트 충전 요청인 경우 유저의 포인트를 충전합니다.
 	 *
 	 * @param pointHistoryId 포인트 히스토리 ID
 	 * @author 정석현
 	 */
+	@Transactional
 	public void approvePointHistory(Long pointHistoryId) {
-		pointHistoryAdminDomainService.approvePointHistory(pointHistoryId);
+		PointHistory pointHistory = pointHistoryAdminDomainService.approvePointHistory(pointHistoryId);
+
+		if (pointHistory.getPointHistoryType() == PointHistoryType.CHARGE) {
+			UserPointChargeCommand command = new UserPointChargeCommand(
+				pointHistory.getUser().getId(),
+				pointHistory.getPrice()
+			);
+			userDomainService.chargeUserPoint(command);
+		}
 	}
 
 	/**
