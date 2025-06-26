@@ -29,6 +29,23 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 	private final ChatRoomUserRepository chatRoomUserRepository;
 	private final WebSocketSessionRedisService webSocketSessionRedisService;
 
+	private void handleNotificationSubscription(String destination, SessionUser user) {
+		String userIdStr = destination.substring("/topic/notification/".length());
+		try {
+			Long targetUserId = Long.valueOf(userIdStr);
+
+			// 자신의 알림만 구독 가능하도록 권한 체크
+			if (!user.id().equals(targetUserId)) {
+				log.warn("알림 구독 권한 없음 - sessionUserId: {}, targetUserId: {}", user.id(), targetUserId);
+				throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+			}
+
+		} catch (NumberFormatException e) {
+			log.warn("알림 구독 대상 사용자 ID 추출 실패: {}", userIdStr);
+			throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+		}
+	}
+
 	/**
 	 * WebSocket STOMP 인바운드 메시지 인증 및 권한 검증 인터셉터 <br>
 	 * <p>
@@ -44,85 +61,79 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 
 		// CONNECT: 최초 연결 시 JWT 인증 처리
 		if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-
-			String token = accessor.getFirstNativeHeader("Authorization");
-
-			if (token == null) {
-				throw new IllegalArgumentException("No token provided");
-			}
-
-			if (token.startsWith("Bearer ")) {
-				token = token.substring("Bearer ".length());
-			}
-
-			try {
-				User userFromToken = jwtUtil.getUserFromToken(token);
-				SessionUser user = SessionUser.from(userFromToken);
-
-				// 세션과 유저 매핑 (메모리 or Redis 등)
-				webSocketSessionRedisService.registerUser(accessor.getSessionId(), user);
-
-			} catch (Exception e) {
-				log.warn("JWT 파싱 또는 Principal 세팅 예외: {}", e);
-				throw e;
-			}
-
+			handleConnect(accessor);
 		}
-
 		// SUBSCRIBE: 구독 시 권한 체크
 		if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
-
-			String destination = accessor.getDestination();
-			SessionUser user = webSocketSessionRedisService.getUserIdBySessionId(accessor.getSessionId());
-
-			if (user == null) {
-				throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
-			}
-
-			// 채팅방 구독 권한 체크
-			if (destination != null && destination.startsWith("/topic/chat/")) {
-				String roomIdStr = destination.substring("/topic/chat/".length());
-				try {
-					Long roomId = Long.valueOf(roomIdStr);
-
-					// 채팅방 존재 확인
-					boolean existsChatRoomById = chatRoomRepository.existsChatRoomById(roomId);
-					if (!existsChatRoomById) {
-						throw new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND);
-					}
-
-					// 채팅방 참가자 여부 확인
-					boolean isParticipant = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId,
-						user.id());
-					if (!isParticipant) {
-						throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
-					}
-
-					// 세션과 채팅방 매핑
-					webSocketSessionRedisService.registerRoom(accessor.getSessionId(), roomId);
-				} catch (NumberFormatException e) {
-					log.warn("방번호 추출 실패: {}", roomIdStr);
-				}
-			}
-			// 알림 구독 권한 체크
-			else if (destination != null && destination.startsWith("/topic/notification/")) {
-				String userIdStr = destination.substring("/topic/notification/".length());
-				try {
-					Long targetUserId = Long.valueOf(userIdStr);
-
-					// 자신의 알림만 구독 가능하도록 권한 체크
-					if (!user.id().equals(targetUserId)) {
-						log.warn("알림 구독 권한 없음 - sessionUserId: {}, targetUserId: {}", user.id(), targetUserId);
-						throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
-					}
-
-				} catch (NumberFormatException e) {
-					log.warn("알림 구독 대상 사용자 ID 추출 실패: {}", userIdStr);
-					throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
-				}
-			}
+			handleSubscribe(accessor);
 		}
 
 		return MessageBuilder.createMessage(message.getPayload(), accessor.getMessageHeaders());
+	}
+
+	private void handleSubscribe(StompHeaderAccessor accessor) {
+		String destination = accessor.getDestination();
+		SessionUser user = webSocketSessionRedisService.getUserIdBySessionId(accessor.getSessionId());
+
+		if (user == null) {
+			throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+		}
+
+		// 채팅방 구독 권한 체크
+		if (destination != null && destination.startsWith("/topic/chat/")) {
+			handleChatSubscription(accessor, destination, user);
+		} else if (destination != null && destination.startsWith("/topic/notification/")) {
+			// 알림 구독 권한 체크
+			handleNotificationSubscription(destination, user);
+		}
+	}
+
+	private void handleChatSubscription(StompHeaderAccessor accessor, String destination, SessionUser user) {
+		String roomIdStr = destination.substring("/topic/chat/".length());
+		try {
+			Long roomId = Long.valueOf(roomIdStr);
+
+			// 채팅방 존재 확인
+			boolean existsChatRoomById = chatRoomRepository.existsChatRoomById(roomId);
+			if (!existsChatRoomById) {
+				throw new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND);
+			}
+
+			// 채팅방 참가자 여부 확인
+			boolean isParticipant = chatRoomUserRepository.existsByIdChatRoomIdAndIdUserId(roomId,
+				user.id());
+			if (!isParticipant) {
+				throw new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+			}
+
+			// 세션과 채팅방 매핑
+			webSocketSessionRedisService.registerRoom(accessor.getSessionId(), roomId);
+		} catch (NumberFormatException e) {
+			log.warn("방번호 추출 실패: {}", roomIdStr);
+		}
+	}
+
+	private void handleConnect(StompHeaderAccessor accessor) {
+		String token = accessor.getFirstNativeHeader("Authorization");
+
+		if (token == null) {
+			throw new IllegalArgumentException("No token provided");
+		}
+
+		if (token.startsWith("Bearer ")) {
+			token = token.substring("Bearer ".length());
+		}
+
+		try {
+			User userFromToken = jwtUtil.getUserFromToken(token);
+			SessionUser user = SessionUser.from(userFromToken);
+
+			// 세션과 유저 매핑 (메모리 or Redis 등)
+			webSocketSessionRedisService.registerUser(accessor.getSessionId(), user);
+
+		} catch (Exception e) {
+			log.warn("JWT 파싱 또는 Principal 세팅 예외: {}", e);
+			throw e;
+		}
 	}
 }
