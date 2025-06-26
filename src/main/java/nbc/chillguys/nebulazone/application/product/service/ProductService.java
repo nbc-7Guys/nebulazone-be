@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionSchedulerService;
+import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
 import nbc.chillguys.nebulazone.application.product.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.UpdateProductRequest;
@@ -53,6 +54,7 @@ public class ProductService {
 	private final TransactionDomainService transactionDomainService;
 	private final AuctionSchedulerService auctionSchedulerService;
 	private final CatalogDomainService catalogDomainService;
+	private final NotificationService notificationService;
 	private final GcsClient gcsClient;
 
 	@Transactional
@@ -174,6 +176,9 @@ public class ProductService {
 			= TransactionCreateCommand.of(product.getSeller(), UserType.SELLER, product, product.getTxMethod().name(),
 			product.getPrice());
 		Transaction sellerTx = transactionDomainService.createTransaction(sellerTxCreateCommand);
+
+		notificationService.sendProductPurchaseNotification(product.getId(), product.getSellerId(), user.getId(),
+			product.getName(), user.getNickname());
 
 		return PurchaseProductResponse.from(buyerTx, sellerTx);
 	}

@@ -6,7 +6,7 @@ services:
       - "3306:3306"
     environment:
       MYSQL_USERNAME: root
-      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: nebulazone
       TZ: Asia/Seoul
 
