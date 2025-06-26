@@ -19,11 +19,24 @@ public class PointHistoryAdminDomainService {
 
 	private final PointHistoryRepository pointHistoryRepository;
 
+	/**
+	 * 포인트 히스토리 검색
+	 *
+	 * @param request 검색 조건
+	 * @param pageable 페이징
+	 * @return 검색 결과
+	 */
 	public Page<AdminPointHistoryResponse> searchAdminPointHistories(
 		PointHistoryAdminRequest request, Pageable pageable) {
 		return pointHistoryRepository.searchAdminPointHistories(request, pageable);
 	}
 
+	/**
+	 * 포인트 요청 승인
+	 *
+	 * @param pointHistoryId 포인트 아이디
+	 * @return 승인된 포인트 요청
+	 */
 	@Transactional
 	public PointHistory approvePointHistory(Long pointHistoryId) {
 		PointHistory pointHistory = findActivePointHistory(pointHistoryId);
@@ -31,6 +44,11 @@ public class PointHistoryAdminDomainService {
 		return pointHistory;
 	}
 
+	/**
+	 * 포인트 요청 거절
+	 *
+	 * @param pointHistoryId 포인트 아이디
+	 */
 	@Transactional
 	public void rejectPointHistory(Long pointHistoryId) {
 		PointHistory pointHistory = findActivePointHistory(pointHistoryId);
