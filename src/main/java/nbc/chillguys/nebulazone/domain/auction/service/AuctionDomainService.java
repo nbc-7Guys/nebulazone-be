@@ -38,17 +38,6 @@ public class AuctionDomainService {
 		return auctionRepository.save(auction);
 	}
 
-	// /**
-	//  * 경매 전체 조회(페이징)
-	//  * @param page 페이지 정보
-	//  * @param size 출력 개수
-	//  * @return 페이징 AuctionFindInfo
-	//  * @author 전나겸
-	//  */
-	// public Page<AuctionFindAllInfo> findAuctions(int page, int size) {
-	// 	return auctionRepository.findAuctionsWithProduct(page, size);
-	// }
-
 	/**
 	 * 경매 상세 조회
 	 * @param auctionId 조회할 경매

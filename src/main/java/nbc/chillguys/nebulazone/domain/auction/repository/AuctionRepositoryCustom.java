@@ -7,8 +7,6 @@ import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 
 public interface AuctionRepositoryCustom {
-	// Page<AuctionFindAllInfo> findAuctionsWithProduct(int page, int size);
-
 	Optional<Auction> findAuctionWithProductAndSeller(Long auctionId);
 
 	Optional<Auction> findByAuctionWithProduct(Long auctionId);

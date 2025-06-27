@@ -24,6 +24,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuctionRequest;
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.FindDetailAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindSortTypeAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
@@ -281,6 +282,13 @@ public class AuctionRedisService {
 
 	}
 
+	/**
+	 * 정렬기반 경매 조회<br>
+	 * CLOSING: 마감임박순, POPULAR: 인기순(입찰 건수)
+	 * @param sortType 정렬 타입
+	 * @return 조회된 응답값
+	 * @author 전나겸
+	 */
 	public FindSortTypeAuctionResponse findAuctionsBySortType(AuctionSortType sortType) {
 
 		String findAuctionsBySortTypeKey = AUCTION_FIND_SORT_TYPE_PREFIX + sortType.name();
@@ -347,9 +355,10 @@ public class AuctionRedisService {
 			.size();
 	}
 
-	// todo : 내 경매 내역 조회
-
 	// todo : 경매 상세 조회
+	public FindDetailAuctionResponse findAuction(Long auctionId) {
+		return null;
+	}
 
 	private void acquireLockOrThrow(RLock auctionLock) {
 		if (!auctionLock.tryLock()) {

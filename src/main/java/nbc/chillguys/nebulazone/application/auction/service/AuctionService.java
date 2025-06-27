@@ -16,14 +16,6 @@ public class AuctionService {
 	private final AuctionDomainService auctionDomainService;
 	private final BidDomainService bidDomainService;
 
-	// public CommonPageResponse<FindAllAuctionResponse> findAuctions(int page, int size) {
-	//
-	// 	Page<AuctionFindAllInfo> findAuctions = auctionDomainService.findAuctions(page, size);
-	// 	Page<FindAllAuctionResponse> response = findAuctions.map(FindAllAuctionResponse::from);
-	//
-	// 	return CommonPageResponse.from(response);
-	// }
-
 	public FindDetailAuctionResponse findAuction(Long auctionId) {
 
 		Bid highestPriceBid = bidDomainService.findHighBidByAuction(auctionId);

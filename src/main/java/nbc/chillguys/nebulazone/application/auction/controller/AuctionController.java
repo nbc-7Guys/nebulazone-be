@@ -31,17 +31,6 @@ public class AuctionController {
 	private final AuctionService auctionService;
 	private final AuctionRedisService auctionRedisService;
 
-	// @GetMapping
-	// public ResponseEntity<CommonPageResponse<FindAllAuctionResponse>> findAuctions(
-	// 	@RequestParam(defaultValue = "1", value = "page") int page,
-	// 	@RequestParam(defaultValue = "20", value = "size") int size) {
-	//
-	// 	CommonPageResponse<FindAllAuctionResponse> response = auctionService.findAuctions(Math.max(page - 1, 0), size);
-	//
-	// 	return ResponseEntity.ok(response);
-	//
-	// }
-
 	@GetMapping("/sorted")
 	public ResponseEntity<FindSortTypeAuctionResponse> findAuctionsSortType(
 		@RequestParam("sort") String sortType) {
@@ -56,7 +45,7 @@ public class AuctionController {
 	@GetMapping("/{auctionId}")
 	public ResponseEntity<FindDetailAuctionResponse> findAuction(@PathVariable("auctionId") Long auctionId) {
 
-		FindDetailAuctionResponse response = auctionService.findAuction(auctionId);
+		FindDetailAuctionResponse response = auctionRedisService.findAuction(auctionId);
 
 		return ResponseEntity.ok(response);
 

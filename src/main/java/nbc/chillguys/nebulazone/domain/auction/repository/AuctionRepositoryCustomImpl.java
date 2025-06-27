@@ -25,56 +25,6 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 
 	private final JPAQueryFactory jpaQueryFactory;
 
-	// @Override
-	// public Page<AuctionFindAllInfo> findAuctionsWithProduct(int page, int size) {
-	// 	Pageable pageable = PageRequest.of(page, size);
-	//
-	// 	List<AuctionFindAllInfo> contents = jpaQueryFactory
-	//
-	// 		.select(new QAuctionFindAllInfo(
-	// 			auction.id,
-	// 			auction.startPrice,
-	// 			auction.currentPrice,
-	// 			auction.isWon,
-	// 			auction.endTime,
-	// 			auction.createdAt,
-	// 			product.id,
-	// 			product.name,
-	// 			productImage.url.min(),
-	// 			bid.auction.id.count()
-	// 		))
-	// 		.from(auction)
-	// 		.join(auction.product, product)
-	// 		.leftJoin(auction.product.productImages, productImage)
-	// 		.leftJoin(bid)
-	// 		.on(bid.auction.eq(auction),
-	// 			bid.status.notIn(BidStatus.CANCEL))
-	// 		.where(
-	// 			auction.deleted.eq(false),
-	// 			auction.deletedAt.isNull(),
-	// 			product.isDeleted.eq(false),
-	// 			product.deletedAt.isNull())
-	// 		.groupBy(auction.id, product.id)
-	// 		.offset(pageable.getOffset())
-	// 		.limit(pageable.getPageSize())
-	// 		.orderBy(auction.createdAt.desc())
-	// 		.fetch();
-	//
-	// 	JPAQuery<Long> countQuery = jpaQueryFactory
-	// 		.select(auction.countDistinct())
-	// 		.from(auction)
-	// 		.join(auction.product, product)
-	// 		.where(
-	// 			auction.deleted.eq(false),
-	// 			auction.deletedAt.isNull(),
-	// 			product.isDeleted.eq(false),
-	// 			product.deletedAt.isNull()
-	// 		);
-	//
-	// 	return PageableExecutionUtils.getPage(contents, pageable, countQuery::fetchOne);
-	// }
-	//
-
 	@Override
 	public Optional<Auction> findAuctionWithProductAndSeller(Long auctionId) {
 		return Optional.ofNullable(jpaQueryFactory
