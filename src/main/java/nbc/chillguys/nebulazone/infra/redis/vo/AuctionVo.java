@@ -53,7 +53,7 @@ public class AuctionVo {
 		}
 	}
 
-	public void validNotAuctionOwner(Long bidUserId) {
+	public void validAuctionOwnerNotBid(Long bidUserId) {
 		if (Objects.equals(this.sellerId, bidUserId)) {
 			throw new BidException(BidErrorCode.CANNOT_BID_OWN_AUCTION);
 		}
@@ -83,4 +83,15 @@ public class AuctionVo {
 		}
 	}
 
+	public void validMismatchBidPrice(Long bidPrice) {
+		if (!Objects.equals(currentPrice, bidPrice)) {
+			throw new AuctionException(AuctionErrorCode.MISMATCH_BID_PRICE);
+		}
+	}
+
+	public void validNotAuctionOwner(User loginUser) {
+		if (!Objects.equals(this.sellerId, loginUser.getId())) {
+			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
+		}
+	}
 }

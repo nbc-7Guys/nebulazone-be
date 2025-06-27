@@ -40,6 +40,8 @@ public class AutoAuctionDomainService {
 			log.info("낙찰 - 경매 id: {}", auctionId);
 			auction.wonAuction();
 			auction.updateBidPrice(bidPrice);
+			auction.updateEndTime();
+
 		}
 		return auction;
 	}

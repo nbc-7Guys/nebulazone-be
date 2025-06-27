@@ -1,7 +1,6 @@
 package nbc.chillguys.nebulazone.domain.auction.service;
 
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -11,13 +10,11 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
-import nbc.chillguys.nebulazone.domain.auction.dto.ManualEndAuctionInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.auction.repository.AuctionRepository;
-import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Service
@@ -79,41 +76,19 @@ public class AuctionDomainService {
 
 	}
 
-	/**
-	 * 수동 낙찰
-	 * @param loginUser 로그인 유저
-	 * @param wonBid 낙찰 대상인 입찰
-	 * @param auctionId 종료할 경매 id
-	 * @return manualEndAuctionInfo
-	 * @author 전나겸
-	 */
 	@Transactional
-	public ManualEndAuctionInfo manualEndAuction(User loginUser, Bid wonBid, Long auctionId) {
+	public Auction manualEndAuction(Long auctionId, Long bidPrice) {
 
-		Auction findAuction = auctionRepository.findById(auctionId)
+		Auction auction = auctionRepository.findAuctionWithProductAndSeller(auctionId)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 
-		if (findAuction.isDeleted()) {
-			throw new AuctionException(AuctionErrorCode.ALREADY_DELETED_AUCTION);
-		}
+		auction.validDeleted();
 
-		if (findAuction.isWon()) {
-			throw new AuctionException(AuctionErrorCode.ALREADY_WON_AUCTION);
-		}
+		auction.wonAuction();
+		auction.updateBidPrice(bidPrice);
+		auction.updateEndTime();
 
-		if (!findAuction.isAuctionOwner(loginUser)) {
-			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
-		}
-
-		if (!Objects.equals(findAuction.getCurrentPrice(), wonBid.getPrice())) {
-			throw new AuctionException(AuctionErrorCode.MISMATCH_BID_PRICE);
-		}
-
-		wonBid.wonBid();
-		findAuction.wonAuction();
-		findAuction.updateEndTime();
-
-		return ManualEndAuctionInfo.from(findAuction, wonBid);
+		return auction;
 	}
 
 	/**

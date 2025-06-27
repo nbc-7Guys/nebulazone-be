@@ -57,18 +57,18 @@ public class AutoAuctionRedisService {
 	 */
 	@Transactional
 	public void processAuctionEnding(Long auctionId) {
-		RLock autoAuctionLock = redissonClient.getLock(AUCTION_LOCK_ENDING_PREFIX + auctionId);
+		RLock auctionEndingLock = redissonClient.getLock(AUCTION_LOCK_ENDING_PREFIX + auctionId);
 
 		try {
-			if (!autoAuctionLock.tryLock()) {
+			if (!auctionEndingLock.tryLock()) {
 				return;
 			}
 
 			Map<Object, Object> auctionMap = redisTemplate.opsForHash().entries(AUCTION_PREFIX + auctionId);
 			AuctionVo auctionVo = objectMapper.convertValue(auctionMap, AuctionVo.class);
+			Auction auction = autoAuctionDomainService.autoEndAuction(auctionId, auctionVo.getCurrentPrice());
 
 			Set<Object> objects = redisTemplate.opsForZSet().range(BID_PREFIX + auctionId, 0, -1);
-			Auction auction = autoAuctionDomainService.autoEndAuction(auctionId, auctionVo.getCurrentPrice());
 
 			if (auction == null) {
 				log.warn("자동 낙찰 대상이 없으므로 자동 낙찰 프로세스 자동 종료. 자동 종료 시도한 경매 id: {}", auctionId);
@@ -88,31 +88,39 @@ public class AutoAuctionRedisService {
 					.stream()
 					.map(bid -> objectMapper.convertValue(bid, BidVo.class))
 					.peek(bidVo -> {
-						if (bidVo.getBidPrice().equals(auction.getCurrentPrice())) {
+						if (bidVo.getBidPrice().equals(auction.getCurrentPrice())
+							&& bidVo.getBidStatus().equals(BidStatus.BID.name())) {
 							bidVo.wonBid();
 						}
 					})
 					.toList();
 
-				List<Long> bidUserIds = bidVoList.stream().map(BidVo::getBidUserId).distinct().toList();
+				List<Long> bidUserIds = bidVoList.stream()
+					.map(BidVo::getBidUserId)
+					.distinct()
+					.toList();
 
 				List<User> bidUsers = userDomainService.findActiveUserByIds(bidUserIds);
 
-				Map<Long, User> userMap = bidUsers.stream().collect(Collectors.toMap(User::getId, user -> user));
+				Map<Long, User> userMap = bidUsers.stream()
+					.collect(Collectors.toMap(User::getId, user -> user));
 
-				bidVoList.stream().filter(bidVo -> userMap.containsKey(bidVo.getBidUserId())).forEach(bidVo -> {
-					User bidUser = userMap.get(bidVo.getBidUserId());
+				bidVoList.stream()
+					.filter(bidVo -> userMap.containsKey(bidVo.getBidUserId()))
+					.forEach(bidVo -> {
 
-					if (BidStatus.WON.name().equals(bidVo.getBidStatus())) {
-						TransactionCreateCommand buyerTxCreateCommand = TransactionCreateCommand.of(bidUser,
-							UserType.BUYER, wonAuctionProduct, wonAuctionProduct.getTxMethod().name(),
-							auction.getCurrentPrice());
-						transactionDomainService.createTransaction(buyerTxCreateCommand);
+						User bidUser = userMap.get(bidVo.getBidUserId());
 
-					} else if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
-						bidUser.addPoint(bidVo.getBidPrice());
-					}
-				});
+						if (BidStatus.WON.name().equals(bidVo.getBidStatus())) {
+							TransactionCreateCommand buyerTxCreateCommand = TransactionCreateCommand.of(bidUser,
+								UserType.BUYER, wonAuctionProduct, wonAuctionProduct.getTxMethod().name(),
+								auction.getCurrentPrice());
+							transactionDomainService.createTransaction(buyerTxCreateCommand);
+
+						} else if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
+							bidUser.addPoint(bidVo.getBidPrice());
+						}
+					});
 
 				bidDomainService.createAllBid(auction, bidVoList, userMap);
 
@@ -126,13 +134,13 @@ public class AutoAuctionRedisService {
 			cleanUpRedisAuctionAndBid(auctionId);
 
 		} finally {
-			autoAuctionLock.unlock();
+			auctionEndingLock.unlock();
 		}
 
 	}
 
 	private void cleanUpRedisAuctionAndBid(Long auctionId) {
-		redisTemplate.delete(AUCTION_ENDING_PREFIX);
+		redisTemplate.opsForZSet().remove(AUCTION_ENDING_PREFIX, auctionId);
 		redisTemplate.delete(AUCTION_PREFIX + auctionId);
 		redisTemplate.delete(BID_PREFIX + auctionId);
 	}

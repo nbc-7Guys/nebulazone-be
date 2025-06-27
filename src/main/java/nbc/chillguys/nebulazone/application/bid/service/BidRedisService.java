@@ -55,10 +55,10 @@ public class BidRedisService {
 		try {
 			AuctionVo auctionVo = auctionRedisService.getAuctionVo(auctionId);
 
-			auctionVo.validateAuctionNotClosed();
-			auctionVo.validateWonAuction();
-			auctionVo.validateNotAuctionOwner(user.getId());
-			auctionVo.validateMinimumBidPrice(bidPrice);
+			auctionVo.validAuctionNotClosed();
+			auctionVo.validWonAuction();
+			auctionVo.validAuctionOwnerNotBid(user.getId());
+			auctionVo.validMinimumBidPrice(bidPrice);
 
 			String bidKey = BID_PREFIX + auctionId;
 

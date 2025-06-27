@@ -20,6 +20,7 @@ import nbc.chillguys.nebulazone.application.auction.dto.response.FindDetailAucti
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindSortTypeAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionCacheService;
+import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
@@ -32,6 +33,7 @@ public class AuctionController {
 
 	private final AuctionService auctionService;
 	private final AuctionCacheService auctionCacheService;
+	private final AuctionRedisService auctionRedisService;
 
 	@GetMapping
 	public ResponseEntity<CommonPageResponse<FindAllAuctionResponse>> findAuctions(
@@ -69,7 +71,7 @@ public class AuctionController {
 		@AuthenticationPrincipal User user,
 		@Valid @RequestBody ManualEndAuctionRequest request) {
 
-		ManualEndAuctionResponse response = auctionService.manualEndAuction(auctionId, user, request);
+		ManualEndAuctionResponse response = auctionRedisService.manualEndAuction(auctionId, user, request);
 
 		return ResponseEntity.ok(response);
 	}
