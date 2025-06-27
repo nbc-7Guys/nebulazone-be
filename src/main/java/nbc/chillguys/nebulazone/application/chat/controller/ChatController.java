@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
@@ -83,9 +84,11 @@ public class ChatController {
 	@GetMapping("/rooms/history/{roomId}")
 	public ResponseEntity<List<FindChatHistoryResponse>> findChatHistories(
 		@AuthenticationPrincipal User user,
-		@PathVariable("roomId") Long roomId
+		@PathVariable("roomId") Long roomId,
+		@RequestParam(required = false) Long lastId,
+		@RequestParam(defaultValue = "30") int size
 	) {
-		List<FindChatHistoryResponse> chatHistories = chatService.findChatHistories(user, roomId);
+		List<FindChatHistoryResponse> chatHistories = chatService.findChatHistories(user, roomId, lastId, size);
 		return ResponseEntity.ok(chatHistories);
 	}
 

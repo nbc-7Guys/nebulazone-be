@@ -15,6 +15,7 @@ import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryRes
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponses;
 import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
+import nbc.chillguys.nebulazone.domain.chat.entity.ChatHistory;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
@@ -25,6 +26,7 @@ import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
+import nonapi.io.github.classgraph.fileslice.Slice;
 
 /**
  * 채팅방 관련 비즈니스 로직을 처리하는 애플리케이션 서비스
@@ -140,11 +142,11 @@ public class ChatService {
 	 * @return the find chat room response
 	 */
 	@Transactional(readOnly = true)
-	public List<FindChatHistoryResponse> findChatHistories(User user, Long roomId) {
+	public List<FindChatHistoryResponse> findChatHistories(User user, Long roomId, Long lastId, int size) {
 
 		chatDomainService.validateUserAccessToChatRoom(user, roomId);
 
-		List<FindChatHistoryResponse> responses = chatDomainService.findChatHistoryResponses(roomId);
+		List<FindChatHistoryResponse> responses = chatDomainService.findChatHistoryResponses(roomId, lastId, size);
 
 		return responses;
 	}
