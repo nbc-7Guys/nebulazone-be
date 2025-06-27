@@ -287,7 +287,7 @@ public class UserDomainService {
 		Address oldAddress = user.getAddresses().stream()
 			.filter(a -> a.getAddressNickname().equals(command.oldAddressNickname()))
 			.findFirst()
-			.orElseThrow();
+			.orElseThrow(() -> new UserException(UserErrorCode.ADDRESS_NOT_EXISTS));
 
 		user.removeAddress(oldAddress);
 
