@@ -15,7 +15,6 @@ import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.auction.repository.AuctionRepository;
-import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
@@ -92,28 +91,21 @@ public class AuctionDomainService {
 	}
 
 	/**
-	 * 경매 삭제(취소)
+	 * 경매 삭제 == 경매 취소(수동 유찰)
 	 * @param auctionId 삭제할 경매 id
-	 * @param user 로그인 유저
 	 * @return 삭제된 경매 id
 	 * @author 전나겸
 	 */
 	@Transactional
-	public Auction deleteAuction(Long auctionId, User user) {
-		Auction findAuction = auctionRepository.findByAuctionWithProduct(auctionId)
+	public Auction deleteAuction(Long auctionId) {
+		Auction auction = auctionRepository.findByAuctionWithProduct(auctionId)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
 
-		if (findAuction.isDeleted()) {
-			throw new AuctionException(AuctionErrorCode.ALREADY_DELETED_AUCTION);
-		}
+		auction.validDeleted();
 
-		// if (!findAuction.isAuctionOwner(user)) {
-		// 	throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
-		// }
+		auction.delete();
 
-		findAuction.delete();
-
-		return findAuction;
+		return auction;
 	}
 
 	/**

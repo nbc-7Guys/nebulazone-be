@@ -2,22 +2,17 @@ package nbc.chillguys.nebulazone.application.auction.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindAllAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindDetailAuctionResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
-import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
-import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
-import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Service
 @RequiredArgsConstructor
@@ -43,16 +38,16 @@ public class AuctionService {
 		return FindDetailAuctionResponse.from(auctionFindDetailInfo, highestPriceBid);
 	}
 
-	@Transactional
-	public DeleteAuctionResponse deleteAuction(Long auctionId, User user) {
-
-		Auction deletedAuction = auctionDomainService.deleteAuction(auctionId, user);
-
-		Product product = deletedAuction.getProduct();
-		product.delete();
-		productDomainService.deleteProductFromEs(product.getId());
-
-		return DeleteAuctionResponse.from(deletedAuction.getId(), product.getId());
-	}
+	// @Transactional
+	// public DeleteAuctionResponse deleteAuction(Long auctionId, User user) {
+	//
+	// 	Auction deletedAuction = auctionDomainService.deleteAuction(auctionId, user);
+	//
+	// 	Product product = deletedAuction.getProduct();
+	// 	product.delete();
+	// 	productDomainService.deleteProductFromEs(product.getId());
+	//
+	// 	return DeleteAuctionResponse.from(deletedAuction.getId(), product.getId());
+	// }
 
 }

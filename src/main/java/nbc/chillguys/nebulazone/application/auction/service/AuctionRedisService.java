@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuctionRequest;
+import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
@@ -31,6 +32,7 @@ import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
+import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
@@ -51,6 +53,7 @@ public class AuctionRedisService {
 	private final UserDomainService userDomainService;
 	private final BidDomainService bidDomainService;
 	private final TransactionDomainService transactionDomainService;
+	private final ProductDomainService productDomainService;
 
 	/**
 	 * redis 경매 생성<br>
@@ -121,9 +124,7 @@ public class AuctionRedisService {
 		RLock auctionEndingLock = redissonClient.getLock(AUCTION_LOCK_ENDING_PREFIX + auctionId);
 
 		try {
-			if (!auctionEndingLock.tryLock()) {
-				throw new AuctionException(AuctionErrorCode.AUCTION_PROCESSING_BUSY);
-			}
+			acquireLockOrThrow(auctionEndingLock);
 
 			Map<Object, Object> auctionMap = redisTemplate.opsForHash().entries(AUCTION_PREFIX + auctionId);
 			AuctionVo auctionVo = objectMapper.convertValue(auctionMap, AuctionVo.class);
@@ -161,15 +162,16 @@ public class AuctionRedisService {
 
 			wonBidVo.validNotBidOwner(request.bidUserId());
 
-			List<Long> bidUserIds = bidVoList
-				.stream()
+			List<Long> bidUserIds = bidVoList.stream()
 				.map(BidVo::getBidUserId)
 				.distinct()
 				.toList();
 
 			List<User> bidUsers = userDomainService.findActiveUserByIds(bidUserIds);
 
-			Map<Long, User> userMap = bidUsers.stream().collect(Collectors.toMap(User::getId, user -> user));
+			Map<Long, User> userMap = bidUsers.stream()
+				.collect(Collectors.toMap(User::getId, user -> user));
+
 			bidVoList.stream()
 				.filter(bidVo -> userMap.containsKey(bidVo.getBidUserId()))
 				.forEach(bidVo -> {
@@ -205,6 +207,66 @@ public class AuctionRedisService {
 		}
 	}
 
+	@Transactional
+	public DeleteAuctionResponse deleteAuction(Long auctionId, User loginUser) {
+		RLock auctionDelete = redissonClient.getLock(AUCTION_LOCK_ENDING_PREFIX + auctionId);
+
+		try {
+			acquireLockOrThrow(auctionDelete);
+
+			Map<Object, Object> entries = redisTemplate.opsForHash().entries(AUCTION_PREFIX + auctionId);
+			AuctionVo auctionVo = objectMapper.convertValue(entries, AuctionVo.class);
+
+			auctionVo.validNotAuctionOwner(loginUser);
+			Auction deletedAuction = auctionDomainService.deleteAuction(auctionId);
+
+			if (auctionVo.getCurrentPrice() >= auctionVo.getStartPrice()) {
+				Set<Object> objects = redisTemplate.opsForZSet().range(BID_PREFIX + auctionId, 0, -1);
+
+				List<BidVo> bidVoList = Optional.ofNullable(objects)
+					.orElse(Set.of())
+					.stream()
+					.map(bid -> objectMapper.convertValue(bid, BidVo.class))
+					.toList();
+
+				List<Long> bidUserIds = bidVoList.stream()
+					.map(BidVo::getBidUserId)
+					.distinct()
+					.toList();
+
+				List<User> bidUsers = userDomainService.findActiveUserByIds(bidUserIds);
+
+				Map<Long, User> userMap = bidUsers.stream()
+					.collect(Collectors.toMap(User::getId, user -> user));
+
+				bidVoList.stream()
+					.filter(bidVo -> userMap.containsKey(bidVo.getBidUserId()))
+					.forEach(bidVo -> {
+						if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
+							User bidUser = userMap.get(bidVo.getBidUserId());
+							bidUser.addPoint(bidVo.getBidPrice());
+						}
+					});
+
+				bidDomainService.createAllBid(deletedAuction, bidVoList, userMap);
+			}
+
+			Product product = deletedAuction.getProduct();
+			product.delete();
+
+			productDomainService.deleteProductFromEs(product.getId());
+
+			redisTemplate.opsForZSet().remove(AUCTION_ENDING_PREFIX, auctionId);
+			redisTemplate.delete(AUCTION_PREFIX + auctionId);
+			redisTemplate.delete(BID_PREFIX + auctionId);
+
+			return DeleteAuctionResponse.of(deletedAuction.getId(), product.getId());
+		} finally {
+			auctionDelete.unlock();
+		}
+
+	}
+
 	// todo : 내 경매 삭제
 
 	// todo : 정렬 기반 경매 조회
@@ -212,5 +274,11 @@ public class AuctionRedisService {
 	// todo : 내 경매 내역 조회
 
 	// todo : 경매 상세 조회
+
+	private void acquireLockOrThrow(RLock auctionLock) {
+		if (!auctionLock.tryLock()) {
+			throw new AuctionException(AuctionErrorCode.AUCTION_PROCESSING_BUSY);
+		}
+	}
 
 }

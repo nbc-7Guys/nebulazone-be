@@ -81,7 +81,7 @@ public class AuctionController {
 		@PathVariable("auctionId") Long auctionId,
 		@AuthenticationPrincipal User user) {
 
-		DeleteAuctionResponse response = auctionService.deleteAuction(auctionId, user);
+		DeleteAuctionResponse response = auctionRedisService.deleteAuction(auctionId, user);
 
 		return ResponseEntity.ok(response);
 	}

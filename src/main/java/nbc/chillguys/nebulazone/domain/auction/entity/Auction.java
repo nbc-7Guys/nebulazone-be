@@ -101,10 +101,6 @@ public class Auction extends BaseEntity {
 		this.endTime = LocalDateTime.now();
 	}
 
-	public Long getProductId() {
-		return this.product.getId();
-	}
-
 	public boolean isNotWonAndNotDeleted() {
 		return !isWon && !isDeleted();
 	}

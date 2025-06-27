@@ -5,7 +5,7 @@ public record DeleteAuctionResponse(
 	Long productId
 ) {
 
-	public static DeleteAuctionResponse from(Long auctionId, Long productId) {
+	public static DeleteAuctionResponse of(Long auctionId, Long productId) {
 		return new DeleteAuctionResponse(auctionId, productId);
 	}
 }
