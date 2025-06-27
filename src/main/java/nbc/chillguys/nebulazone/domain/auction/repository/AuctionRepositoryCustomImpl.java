@@ -9,23 +9,14 @@ import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
-import nbc.chillguys.nebulazone.domain.auction.dto.QAuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.QAuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
-import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 
 @Repository
@@ -34,93 +25,55 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 
 	private final JPAQueryFactory jpaQueryFactory;
 
-	@Override
-	public Page<AuctionFindAllInfo> findAuctionsWithProduct(int page, int size) {
-		Pageable pageable = PageRequest.of(page, size);
-
-		List<AuctionFindAllInfo> contents = jpaQueryFactory
-
-			.select(new QAuctionFindAllInfo(
-				auction.id,
-				auction.startPrice,
-				auction.currentPrice,
-				auction.isWon,
-				auction.endTime,
-				auction.createdAt,
-				product.id,
-				product.name,
-				productImage.url.min(),
-				bid.auction.id.count()
-			))
-			.from(auction)
-			.join(auction.product, product)
-			.leftJoin(auction.product.productImages, productImage)
-			.leftJoin(bid)
-			.on(bid.auction.eq(auction),
-				bid.status.notIn(BidStatus.CANCEL))
-			.where(
-				auction.deleted.eq(false),
-				auction.deletedAt.isNull(),
-				product.isDeleted.eq(false),
-				product.deletedAt.isNull())
-			.groupBy(auction.id, product.id)
-			.offset(pageable.getOffset())
-			.limit(pageable.getPageSize())
-			.orderBy(auction.createdAt.desc())
-			.fetch();
-
-		JPAQuery<Long> countQuery = jpaQueryFactory
-			.select(auction.countDistinct())
-			.from(auction)
-			.join(auction.product, product)
-			.where(
-				auction.deleted.eq(false),
-				auction.deletedAt.isNull(),
-				product.isDeleted.eq(false),
-				product.deletedAt.isNull()
-			);
-
-		return PageableExecutionUtils.getPage(contents, pageable, countQuery::fetchOne);
-	}
-
-	@Override
-	public List<AuctionFindAllInfo> finAuctionsBySortType(AuctionSortType sortType) {
-
-		OrderSpecifier<?> orderType = switch (sortType) {
-			case POPULAR -> bid.id.count().desc();
-			case CLOSING -> auction.endTime.desc();
-		};
-
-		return jpaQueryFactory
-			.select(new QAuctionFindAllInfo(
-				auction.id,
-				auction.startPrice,
-				auction.currentPrice,
-				auction.isWon,
-				auction.endTime,
-				auction.createdAt,
-				product.id,
-				product.name,
-				productImage.url.min(),
-				bid.auction.id.count()
-			))
-			.from(auction)
-			.join(auction.product, product)
-			.leftJoin(auction.product.productImages, productImage)
-			.leftJoin(bid)
-			.on(bid.auction.eq(auction),
-				bid.status.notIn(BidStatus.CANCEL))
-			.where(
-				auction.isWon.eq(false),
-				auction.deleted.eq(false),
-				auction.deletedAt.isNull(),
-				product.isDeleted.eq(false),
-				product.deletedAt.isNull())
-			.groupBy(auction.id, product.id)
-			.limit(5)
-			.orderBy(orderType)
-			.fetch();
-	}
+	// @Override
+	// public Page<AuctionFindAllInfo> findAuctionsWithProduct(int page, int size) {
+	// 	Pageable pageable = PageRequest.of(page, size);
+	//
+	// 	List<AuctionFindAllInfo> contents = jpaQueryFactory
+	//
+	// 		.select(new QAuctionFindAllInfo(
+	// 			auction.id,
+	// 			auction.startPrice,
+	// 			auction.currentPrice,
+	// 			auction.isWon,
+	// 			auction.endTime,
+	// 			auction.createdAt,
+	// 			product.id,
+	// 			product.name,
+	// 			productImage.url.min(),
+	// 			bid.auction.id.count()
+	// 		))
+	// 		.from(auction)
+	// 		.join(auction.product, product)
+	// 		.leftJoin(auction.product.productImages, productImage)
+	// 		.leftJoin(bid)
+	// 		.on(bid.auction.eq(auction),
+	// 			bid.status.notIn(BidStatus.CANCEL))
+	// 		.where(
+	// 			auction.deleted.eq(false),
+	// 			auction.deletedAt.isNull(),
+	// 			product.isDeleted.eq(false),
+	// 			product.deletedAt.isNull())
+	// 		.groupBy(auction.id, product.id)
+	// 		.offset(pageable.getOffset())
+	// 		.limit(pageable.getPageSize())
+	// 		.orderBy(auction.createdAt.desc())
+	// 		.fetch();
+	//
+	// 	JPAQuery<Long> countQuery = jpaQueryFactory
+	// 		.select(auction.countDistinct())
+	// 		.from(auction)
+	// 		.join(auction.product, product)
+	// 		.where(
+	// 			auction.deleted.eq(false),
+	// 			auction.deletedAt.isNull(),
+	// 			product.isDeleted.eq(false),
+	// 			product.deletedAt.isNull()
+	// 		);
+	//
+	// 	return PageableExecutionUtils.getPage(contents, pageable, countQuery::fetchOne);
+	// }
+	//
 
 	@Override
 	public Optional<Auction> findAuctionWithProductAndSeller(Long auctionId) {

@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
+import nbc.chillguys.nebulazone.infra.redis.dto.FindAllAuctionsDto;
 
 public record FindSortTypeAuctionResponse(
 	List<AuctionSortTypeInfo> auctions,
@@ -25,23 +25,23 @@ public record FindSortTypeAuctionResponse(
 		String productImageUrl,
 		Long bidCount
 	) {
-		private static AuctionSortTypeInfo from(AuctionFindAllInfo findInfo) {
+		private static AuctionSortTypeInfo from(FindAllAuctionsDto findAllAuctionsDto) {
 			return new AuctionSortTypeInfo(
-				findInfo.auctionId(),
-				findInfo.startPrice(),
-				findInfo.currentPrice(),
-				findInfo.isWon(),
-				findInfo.endTime(),
-				findInfo.productId(),
-				findInfo.productName(),
-				findInfo.productImageUrl() != null ? findInfo.productImageUrl() : "이미지 없음",
-				findInfo.bidCount()
+				findAllAuctionsDto.auctionId(),
+				findAllAuctionsDto.startPrice(),
+				findAllAuctionsDto.currentPrice(),
+				findAllAuctionsDto.isWon(),
+				findAllAuctionsDto.endTime(),
+				findAllAuctionsDto.productId(),
+				findAllAuctionsDto.productName(),
+				findAllAuctionsDto.productImageUrl(),
+				findAllAuctionsDto.bidCount()
 			);
 		}
 	}
 
-	public static FindSortTypeAuctionResponse from(List<AuctionFindAllInfo> findAllInfos) {
-		List<AuctionSortTypeInfo> auctionsBySortType = findAllInfos.stream()
+	public static FindSortTypeAuctionResponse from(List<FindAllAuctionsDto> findAllAuctionsDtoList) {
+		List<AuctionSortTypeInfo> auctionsBySortType = findAllAuctionsDtoList.stream()
 			.map(AuctionSortTypeInfo::from)
 			.toList();
 

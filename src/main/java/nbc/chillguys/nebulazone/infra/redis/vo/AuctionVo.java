@@ -2,6 +2,7 @@ package nbc.chillguys.nebulazone.infra.redis.vo;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 import lombok.AllArgsConstructor;
@@ -29,8 +30,9 @@ public class AuctionVo {
 	private Long sellerId;
 	private String sellerNickname;
 	private String sellerEmail;
+	private List<String> productImageUrls;
 
-	public static AuctionVo of(Product product, Auction auction, User user) {
+	public static AuctionVo of(Product product, Auction auction, User user, List<String> productImageUrls) {
 		return new AuctionVo(
 			auction.getId(),
 			auction.getStartPrice(),
@@ -43,7 +45,8 @@ public class AuctionVo {
 			product.isSold(),
 			user.getId(),
 			user.getNickname(),
-			user.getNickname()
+			user.getNickname(),
+			productImageUrls
 		);
 	}
 

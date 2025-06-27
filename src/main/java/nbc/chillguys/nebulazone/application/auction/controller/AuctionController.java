@@ -15,14 +15,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuctionRequest;
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
-import nbc.chillguys.nebulazone.application.auction.dto.response.FindAllAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindDetailAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindSortTypeAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
-import nbc.chillguys.nebulazone.application.auction.service.AuctionCacheService;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionService;
-import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
@@ -32,25 +29,25 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 public class AuctionController {
 
 	private final AuctionService auctionService;
-	private final AuctionCacheService auctionCacheService;
 	private final AuctionRedisService auctionRedisService;
 
-	@GetMapping
-	public ResponseEntity<CommonPageResponse<FindAllAuctionResponse>> findAuctions(
-		@RequestParam(defaultValue = "1", value = "page") int page,
-		@RequestParam(defaultValue = "20", value = "size") int size) {
-
-		CommonPageResponse<FindAllAuctionResponse> response = auctionService.findAuctions(Math.max(page - 1, 0), size);
-
-		return ResponseEntity.ok(response);
-
-	}
+	// @GetMapping
+	// public ResponseEntity<CommonPageResponse<FindAllAuctionResponse>> findAuctions(
+	// 	@RequestParam(defaultValue = "1", value = "page") int page,
+	// 	@RequestParam(defaultValue = "20", value = "size") int size) {
+	//
+	// 	CommonPageResponse<FindAllAuctionResponse> response = auctionService.findAuctions(Math.max(page - 1, 0), size);
+	//
+	// 	return ResponseEntity.ok(response);
+	//
+	// }
 
 	@GetMapping("/sorted")
 	public ResponseEntity<FindSortTypeAuctionResponse> findAuctionsSortType(
 		@RequestParam("sort") String sortType) {
 
-		FindSortTypeAuctionResponse response = auctionCacheService.findAuctionsBySortType(AuctionSortType.of(sortType));
+		AuctionSortType auctionSortType = AuctionSortType.of(sortType);
+		FindSortTypeAuctionResponse response = auctionRedisService.findAuctionsBySortType(auctionSortType);
 
 		return ResponseEntity.ok(response);
 

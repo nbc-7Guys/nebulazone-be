@@ -79,7 +79,7 @@ public class ProductService {
 			Auction createdAuction = auctionDomainService.createAuction(auctionCreateCommand);
 
 			CreateRedisAuctionDto createRedisAuctionDto = CreateRedisAuctionDto.of(createdProduct, createdAuction, user,
-				productEndTime);
+				productEndTime, productImageUrls);
 			auctionRedisService.createAuction(createRedisAuctionDto);
 			createdProduct.updateAuctionId(createdAuction.getId());
 		}

@@ -2,16 +2,13 @@ package nbc.chillguys.nebulazone.domain.auction.service;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
-import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindAllInfo;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
-import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.auction.repository.AuctionRepository;
@@ -41,26 +38,16 @@ public class AuctionDomainService {
 		return auctionRepository.save(auction);
 	}
 
-	/**
-	 * 경매 전체 조회(페이징)
-	 * @param page 페이지 정보
-	 * @param size 출력 개수
-	 * @return 페이징 AuctionFindInfo
-	 * @author 전나겸
-	 */
-	public Page<AuctionFindAllInfo> findAuctions(int page, int size) {
-		return auctionRepository.findAuctionsWithProduct(page, size);
-	}
-
-	/**
-	 * 경매 정렬 조건으로 조회<br>
-	 * 마감 임박순 5개 조회, 경매 입찰 건수 많은 순 5개 조회
-	 * @param sortType 정렬 조건(closing, popular)
-	 * @return 리스트 AuctionFindInfo
-	 */
-	public List<AuctionFindAllInfo> findAuctionsBySortType(AuctionSortType sortType) {
-		return auctionRepository.finAuctionsBySortType(sortType);
-	}
+	// /**
+	//  * 경매 전체 조회(페이징)
+	//  * @param page 페이지 정보
+	//  * @param size 출력 개수
+	//  * @return 페이징 AuctionFindInfo
+	//  * @author 전나겸
+	//  */
+	// public Page<AuctionFindAllInfo> findAuctions(int page, int size) {
+	// 	return auctionRepository.findAuctionsWithProduct(page, size);
+	// }
 
 	/**
 	 * 경매 상세 조회
@@ -128,6 +115,15 @@ public class AuctionDomainService {
 	public Auction findActiveAuctionById(Long auctionId) {
 		return auctionRepository.findByIdAndDeletedFalse(auctionId)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
+	}
+
+	/**
+	 * 진행 중인 모든 경매 조회 (Redis 동기화용)
+	 * @return 삭제되지 않고 낙찰되지 않은 경매 목록
+	 * @author 전나겸
+	 */
+	public List<Auction> findActiveAuctions() {
+		return auctionRepository.findAuctionsByNotDeletedAndIsWonFalse();
 	}
 
 }

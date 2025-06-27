@@ -2,7 +2,9 @@ package nbc.chillguys.nebulazone.application.auction.service;
 
 import static nbc.chillguys.nebulazone.application.auction.consts.AuctionConst.*;
 import static nbc.chillguys.nebulazone.application.bid.consts.BidConst.*;
+import static nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -21,8 +24,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuctionRequest;
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.FindSortTypeAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
+import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
@@ -39,6 +44,7 @@ import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainServ
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
+import nbc.chillguys.nebulazone.infra.redis.dto.FindAllAuctionsDto;
 import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
@@ -66,10 +72,11 @@ public class AuctionRedisService {
 		Product product = redisAuctionDto.product();
 		Auction auction = redisAuctionDto.auction();
 		User user = redisAuctionDto.user();
-		ProductEndTime productEndTime = redisAuctionDto.ProductEndTime();
+		ProductEndTime productEndTime = redisAuctionDto.productEndTime();
+		List<String> productImageUrls = redisAuctionDto.productImageUrls();
 
 		String auctionKey = AUCTION_PREFIX + auction.getId();
-		AuctionVo auctionVo = AuctionVo.of(product, auction, user);
+		AuctionVo auctionVo = AuctionVo.of(product, auction, user, productImageUrls);
 
 		Map<String, Object> auctionVoMap = objectMapper.convertValue(auctionVo, new TypeReference<>() {
 		});
@@ -207,9 +214,16 @@ public class AuctionRedisService {
 		}
 	}
 
+	/**
+	 * 내 경매 삭제
+	 * @param auctionId 삭제할 경매 id
+	 * @param loginUser 로그인 유저
+	 * @return 경매 삭제 응답 값
+	 * @author 전나겸
+	 */
 	@Transactional
 	public DeleteAuctionResponse deleteAuction(Long auctionId, User loginUser) {
-		RLock auctionDelete = redissonClient.getLock(AUCTION_LOCK_ENDING_PREFIX + auctionId);
+		RLock auctionDelete = redissonClient.getLock(AUCTION_LOCK_DELETE_PREFIX + auctionId);
 
 		try {
 			acquireLockOrThrow(auctionDelete);
@@ -267,9 +281,71 @@ public class AuctionRedisService {
 
 	}
 
-	// todo : 내 경매 삭제
+	public FindSortTypeAuctionResponse findAuctionsBySortType(AuctionSortType sortType) {
 
-	// todo : 정렬 기반 경매 조회
+		String findAuctionsBySortTypeKey = AUCTION_FIND_SORT_TYPE_PREFIX + sortType.name();
+
+		Object object = redisTemplate.opsForValue().get(findAuctionsBySortTypeKey);
+
+		if (object != null) {
+			FindSortTypeAuctionResponse cacheData = objectMapper
+				.convertValue(object, FindSortTypeAuctionResponse.class);
+
+			if (!cacheData.auctions().isEmpty()) {
+				return cacheData;
+			}
+		}
+
+		FindSortTypeAuctionResponse response = switch (sortType) {
+			case CLOSING -> {
+				Set<Object> objects = redisTemplate.opsForZSet().range(AUCTION_ENDING_PREFIX, 0, 4);
+
+				List<FindAllAuctionsDto> findAuctionsByClosing = Optional.ofNullable(objects)
+					.orElse(Set.of())
+					.stream()
+					.map(obj -> {
+						long auctionId = ((Number)obj).longValue();
+						AuctionVo auctionVo = getAuctionVo(auctionId);
+						Long bidCount = calculateAuctionBidCount(auctionId);
+						return FindAllAuctionsDto.of(auctionVo, bidCount);
+					})
+					.toList();
+
+				yield FindSortTypeAuctionResponse.from(findAuctionsByClosing);
+			}
+
+			case POPULAR -> {
+				Set<Object> objects = redisTemplate.opsForZSet().range(AUCTION_ENDING_PREFIX, 0, -1);
+
+				List<FindAllAuctionsDto> findAuctionsByPopular = Optional.ofNullable(objects)
+					.orElse(Set.of())
+					.stream()
+					.map(obj -> {
+						long auctionId = ((Number)obj).longValue();
+						AuctionVo auctionVo = getAuctionVo(auctionId);
+						Long bidCount = calculateAuctionBidCount(auctionId);
+						return FindAllAuctionsDto.of(auctionVo, bidCount);
+					})
+					.sorted(Comparator.comparing(FindAllAuctionsDto::bidCount).reversed())
+					.limit(5)
+					.toList();
+
+				yield FindSortTypeAuctionResponse.from(findAuctionsByPopular);
+			}
+		};
+
+		redisTemplate.opsForValue().set(findAuctionsBySortTypeKey, response, AUCTION_FIND_SORT_TYPE_TTL);
+		return response;
+	}
+
+	private Long calculateAuctionBidCount(Long auctionId) {
+		Set<Object> objects = redisTemplate.opsForZSet()
+			.range(BID_PREFIX + auctionId, 0, -1);
+
+		return (long)Optional.ofNullable(objects)
+			.orElse(Set.of())
+			.size();
+	}
 
 	// todo : 내 경매 내역 조회
 
@@ -278,6 +354,13 @@ public class AuctionRedisService {
 	private void acquireLockOrThrow(RLock auctionLock) {
 		if (!auctionLock.tryLock()) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_PROCESSING_BUSY);
+		}
+	}
+
+	@Scheduled(cron = "0 0 */6 * * *")
+	void refreshCache() {
+		for (AuctionSortType sortType : values()) {
+			findAuctionsBySortType(sortType);
 		}
 	}
 
