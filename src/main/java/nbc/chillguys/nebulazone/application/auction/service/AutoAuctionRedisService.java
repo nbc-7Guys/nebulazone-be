@@ -48,6 +48,13 @@ public class AutoAuctionRedisService {
 	private final UserDomainService userDomainService;
 	private final TransactionDomainService transactionDomainService;
 
+	/**
+	 * 자동 경매 종료<br>
+	 * 유찰 - 입찰 내역이 없음, logging만 수행<br>
+	 * 입찰 - 판매자 포인트 증가, 낙찰안된 입찰자 포인트 반환, 상품 및 경매 상태 변경, 거래내역 생성
+	 * @param auctionId 종료할 경매 id
+	 * @author 전나겸
+	 */
 	@Transactional
 	public void processAuctionEnding(Long auctionId) {
 		RLock autoAuctionLock = redissonClient.getLock(AUCTION_LOCK_ENDING_PREFIX + auctionId);
