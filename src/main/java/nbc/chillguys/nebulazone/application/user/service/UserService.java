@@ -69,7 +69,10 @@ public class UserService {
 		return UserResponse.from(user);
 	}
 
-	public WithdrawUserResponse withdrawUser(WithdrawUserRequest withdrawUserRequest, User user) {
+	@Transactional
+	public WithdrawUserResponse withdrawUser(WithdrawUserRequest withdrawUserRequest, User loggedInUser) {
+		User user = userDomainService.findActiveUserById(loggedInUser.getId());
+
 		userDomainService.validPassword(withdrawUserRequest.password(), user.getPassword());
 
 		userDomainService.withdrawUser(user);

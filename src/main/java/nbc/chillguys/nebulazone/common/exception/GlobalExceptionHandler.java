@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
 		BindingResult result = ex.getBindingResult();
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-			.body(CommonResponse.of(ex.getStatusCode().value(), ex.getMessage(), result));
+			.body(CommonResponse.of(ex.getStatusCode().value(), "입력값이 올바르지 않습니다.", result));
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
