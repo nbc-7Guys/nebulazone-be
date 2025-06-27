@@ -17,7 +17,6 @@ import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
-import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Service
@@ -26,7 +25,6 @@ public class AuctionService {
 
 	private final AuctionDomainService auctionDomainService;
 	private final BidDomainService bidDomainService;
-	private final TransactionDomainService txDomainService;
 	private final ProductDomainService productDomainService;
 
 	public CommonPageResponse<FindAllAuctionResponse> findAuctions(int page, int size) {
@@ -44,36 +42,6 @@ public class AuctionService {
 
 		return FindDetailAuctionResponse.from(auctionFindDetailInfo, highestPriceBid);
 	}
-
-	// @Transactional
-	// public ManualEndAuctionResponse manualEndAuction(Long auctionId, User user,
-	// 	ManualEndAuctionRequest request) {
-	//
-	// 	Bid wonBid = bidDomainService.findBid(request.bidId());
-	// 	Product product = productDomainService.findActiveProductById(request.productId());
-	// 	product.purchase();
-	//
-	// 	productDomainService.saveProductToEs(product);
-	//
-	// 	ManualEndAuctionInfo auctionInfo = auctionDomainService.manualEndAuction(user, wonBid, auctionId);
-	//
-	// 	List<Bid> bidList = bidDomainService.findBidsByAuctionIdAndStatusBid(auctionId);
-	// 	bidList.forEach(bid -> bid.getUser().addPoint(bid.getPrice()));
-	//
-	// 	product.getSeller().addPoint(wonBid.getPrice());
-	//
-	// 	TransactionCreateCommand buyerTxCreateCommand = TransactionCreateCommand.of(wonBid.getUser(), UserType.BUYER,
-	// 		product, product.getTxMethod().name(), auctionInfo.wonProductPrice());
-	//
-	// 	txDomainService.createTransaction(buyerTxCreateCommand);
-	//
-	// 	TransactionCreateCommand sellerTxCreateCommand = TransactionCreateCommand.of(product.getSeller(),
-	// 		UserType.SELLER, product, product.getTxMethod().name(), auctionInfo.wonProductPrice());
-	//
-	// 	txDomainService.createTransaction(sellerTxCreateCommand);
-	//
-	// 	return ManualEndAuctionResponse.from(auctionInfo);
-	// }
 
 	@Transactional
 	public DeleteAuctionResponse deleteAuction(Long auctionId, User user) {

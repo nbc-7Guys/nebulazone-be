@@ -108,6 +108,14 @@ public class AuctionRedisService {
 
 	}
 
+	/**
+	 * 수동 낙찰<br>
+	 * @param auctionId 종료할 경매 id
+	 * @param loginUser 로그인 유저
+	 * @param request 낙찰 요청 reqeust
+	 * @return 수동 낙찰 응답값
+	 * @author 전나겸
+	 */
 	@Transactional
 	public ManualEndAuctionResponse manualEndAuction(Long auctionId, User loginUser, ManualEndAuctionRequest request) {
 		RLock auctionEndingLock = redissonClient.getLock(AUCTION_LOCK_ENDING_PREFIX + auctionId);
