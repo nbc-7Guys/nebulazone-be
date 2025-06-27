@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
@@ -74,7 +75,7 @@ class UserControllerTest {
 		// Given
 		SignUpUserRequest request = new SignUpUserRequest("test@test.com", "testPassword1!",
 			"01012345678", "test",
-			Set.of(new SignUpUserRequest.SignUpUserAddressRequest("test_road_address", "test_detail_address",
+			List.of(new SignUpUserRequest.SignUpUserAddressRequest("test_road_address", "test_detail_address",
 				"address_nickname")));
 
 		given(userService.signUp(any()))

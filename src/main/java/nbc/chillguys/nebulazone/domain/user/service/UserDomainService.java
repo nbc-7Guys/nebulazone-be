@@ -8,9 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.domain.user.dto.UserAddressCommand;
 import nbc.chillguys.nebulazone.domain.user.dto.UserPointChargeCommand;
 import nbc.chillguys.nebulazone.domain.user.dto.UserSignUpCommand;
 import nbc.chillguys.nebulazone.domain.user.dto.UserUpdateCommand;
+import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
@@ -130,8 +132,10 @@ public class UserDomainService {
 	 * @author 이승현
 	 */
 	@Transactional
-	public void updateUserProfileImage(String profileImageUrl, User user) {
+	public User updateUserProfileImage(String profileImageUrl, User user) {
 		user.updateProfileImage(profileImageUrl);
+
+		return userRepository.save(user);
 	}
 
 	/**
@@ -152,8 +156,10 @@ public class UserDomainService {
 	 * @author 이승현
 	 */
 	@Transactional
-	public void withdrawUser(User user) {
+	public User withdrawUser(User user) {
 		user.withdraw();
+
+		return userRepository.save(user);
 	}
 
 	/**
@@ -246,6 +252,67 @@ public class UserDomainService {
 	 */
 	public boolean validEmailWithOAuthType(String email, OAuthType oAuthType) {
 		return userRepository.existsByEmailAndOAuthType(email, oAuthType);
+	}
+
+	/**
+	 * 주소 추가
+	 * @param user 로그인한 유저
+	 * @param command 주소 정보(주소 별칭, 도로명 주소, 상세 주소)
+	 * @return user
+	 * @author 이승현
+	 */
+	@Transactional
+	public User addAddress(User user, UserAddressCommand command) {
+		boolean exists = user.getAddresses().stream()
+			.anyMatch(a -> a.getAddressNickname().equals(command.addressNickname()));
+
+		if (exists) {
+			throw new UserException(UserErrorCode.ALREADY_EXISTS_ADDRESS);
+		}
+
+		user.addAddress(command);
+
+		return userRepository.save(user);
+	}
+
+	/**
+	 * 주소 수정
+	 * @param user 로그인한 유저
+	 * @param command 주소 정보(수정할 주소 별칭, 주소 별칭, 도로명 주소, 상세 주소)
+	 * @return user
+	 * @author 이승현
+	 */
+	@Transactional
+	public User updateAddress(User user, UserAddressCommand command) {
+		Address oldAddress = user.getAddresses().stream()
+			.filter(a -> a.getAddressNickname().equals(command.oldAddressNickname()))
+			.findFirst()
+			.orElseThrow();
+
+		user.removeAddress(oldAddress);
+
+		user.addAddress(command);
+
+		return userRepository.save(user);
+	}
+
+	/**
+	 * 주소 삭제
+	 * @param user 로그인한 유저
+	 * @param command 주소 정보(주소 별칭, 도로명 주소, 상세 주소)
+	 * @return user
+	 * @author 이승현
+	 */
+	@Transactional
+	public User removeAddress(User user, UserAddressCommand command) {
+		Address oldAddress = user.getAddresses().stream()
+			.filter(a -> a.getAddressNickname().equals(command.addressNickname()))
+			.findFirst()
+			.orElseThrow(() -> new UserException(UserErrorCode.ADDRESS_NOT_EXISTS));
+
+		user.removeAddress(oldAddress);
+
+		return userRepository.save(user);
 	}
 
 }

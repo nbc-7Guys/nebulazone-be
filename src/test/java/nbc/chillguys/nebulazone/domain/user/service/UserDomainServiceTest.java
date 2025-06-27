@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -57,7 +58,7 @@ class UserDomainServiceTest {
 			.point(0)
 			.oAuthType(OAuthType.KAKAO)
 			.roles(Set.of(UserRole.ROLE_USER))
-			.addresses(Set.of(Address.builder()
+			.addresses(List.of(Address.builder()
 				.addressNickname("test_address_nickname")
 				.roadAddress("test_road_address")
 				.detailAddress("test_detail_address")
@@ -80,7 +81,7 @@ class UserDomainServiceTest {
 				"01012345678",
 				"test",
 				"test.jpg",
-				Set.of(Address.builder()
+				List.of(Address.builder()
 					.addressNickname("test_address_nickname")
 					.roadAddress("test_road_address")
 					.detailAddress("test_detail_address")

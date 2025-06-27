@@ -1,6 +1,6 @@
 package nbc.chillguys.nebulazone.application.user.dto.request;
 
-import java.util.Set;
+import java.util.List;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -35,7 +35,7 @@ public record SignUpUserRequest(
 
 	@Valid
 	@NotNull(message = "주소는 필수 입력값이니다.")
-	Set<SignUpUserAddressRequest> addresses
+	List<SignUpUserAddressRequest> addresses
 ) {
 	public record SignUpUserAddressRequest(
 		@NotBlank(message = "도로명 주소는 필수 입력값입니다.")

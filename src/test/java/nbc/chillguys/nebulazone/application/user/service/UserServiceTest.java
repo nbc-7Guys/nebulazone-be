@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +62,7 @@ class UserServiceTest {
 			.point(0)
 			.oAuthType(OAuthType.DOMAIN)
 			.roles(Set.of(UserRole.ROLE_USER))
-			.addresses(Set.of(Address.builder()
+			.addresses(List.of(Address.builder()
 				.addressNickname("test_address_nickname")
 				.roadAddress("test_road_address")
 				.detailAddress("test_detail_address")
@@ -80,7 +81,7 @@ class UserServiceTest {
 			// Given
 			SignUpUserRequest signUpUserRequest = new SignUpUserRequest("test@test.com", "testPassword1!",
 				"01012345678", "test",
-				Set.of(new SignUpUserRequest.SignUpUserAddressRequest("test_road_address", "test_detail_address",
+				List.of(new SignUpUserRequest.SignUpUserAddressRequest("test_road_address", "test_detail_address",
 					"test_address_nickname")));
 
 			given(userDomainService.createUser(any()))
