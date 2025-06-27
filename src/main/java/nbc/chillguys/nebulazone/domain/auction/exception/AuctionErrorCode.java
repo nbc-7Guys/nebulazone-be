@@ -17,7 +17,7 @@ public enum AuctionErrorCode implements ErrorCode {
 	AUCTION_NOT_OWNER(HttpStatus.FORBIDDEN, "본인이 등록한 경매가 아닙니다."),
 	AUCTION_NOT_CLOSED(HttpStatus.CONFLICT, "경매가 종료되어야 삭제할 수 있습니다."),
 	AUCTION_END_TIME_INVALID(HttpStatus.BAD_REQUEST, "경매 종료 시간이 현재 시간보다 늦어야 합니다."),
-	MISMATCH_BID_PRICE(HttpStatus.BAD_REQUEST, "입찰 가격이 일치하지 않습니다. 최고가만 낙찰할 수 있습니다."),
+	MISMATCH_BID_PRICE(HttpStatus.BAD_REQUEST, "입찰 가격이 일치하지 않습니다. 입찰 데이터 중 최고가만 낙찰이 가능합니다."),
 	AUCTION_PROCESSING_BUSY(HttpStatus.BAD_REQUEST, "낙찰이 진행 중 입니다.");
 
 	private final HttpStatus status;

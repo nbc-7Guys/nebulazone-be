@@ -3,7 +3,6 @@ package nbc.chillguys.nebulazone.application.auction.service;
 import static nbc.chillguys.nebulazone.application.auction.consts.AuctionConst.*;
 import static nbc.chillguys.nebulazone.application.bid.consts.BidConst.*;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -148,8 +147,8 @@ public class AuctionRedisService {
 				.toList();
 
 			BidVo wonBidVo = bidVoList.stream()
-				.filter(bidVo -> BidStatus.BID.name().equals(bidVo.getBidStatus()))
-				.max(Comparator.comparing(BidVo::getBidPrice))
+				.filter(bidVo -> BidStatus.WON.name().equals(bidVo.getBidStatus()))
+				.findFirst()
 				.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
 
 			wonBidVo.validNotBidOwner(request.bidUserId());

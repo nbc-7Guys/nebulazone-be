@@ -107,9 +107,9 @@ public class AuctionDomainService {
 			throw new AuctionException(AuctionErrorCode.ALREADY_DELETED_AUCTION);
 		}
 
-		if (!findAuction.isAuctionOwner(user)) {
-			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
-		}
+		// if (!findAuction.isAuctionOwner(user)) {
+		// 	throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
+		// }
 
 		findAuction.delete();
 
