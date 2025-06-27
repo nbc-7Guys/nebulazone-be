@@ -47,25 +47,25 @@ public class AuctionVo {
 		);
 	}
 
-	public void validateAuctionNotClosed() {
+	public void validAuctionNotClosed() {
 		if (Duration.between(LocalDateTime.now(), this.endTime).isNegative()) {
 			throw new AuctionException(AuctionErrorCode.ALREADY_CLOSED_AUCTION);
 		}
 	}
 
-	public void validateNotAuctionOwner(Long bidUserId) {
+	public void validNotAuctionOwner(Long bidUserId) {
 		if (Objects.equals(this.sellerId, bidUserId)) {
 			throw new BidException(BidErrorCode.CANNOT_BID_OWN_AUCTION);
 		}
 	}
 
-	public void validateWonAuction() {
+	public void validWonAuction() {
 		if (isWon) {
 			throw new AuctionException(AuctionErrorCode.ALREADY_WON_AUCTION);
 		}
 	}
 
-	public void validateMinimumBidPrice(Long bidPrice) {
+	public void validMinimumBidPrice(Long bidPrice) {
 		if (this.currentPrice == 0L) {
 			if (this.startPrice > bidPrice) {
 				throw new BidException(BidErrorCode.BID_PRICE_TOO_LOW_START_PRICE);
@@ -77,7 +77,7 @@ public class AuctionVo {
 		}
 	}
 
-	public void validateBidCancelBefore30Minutes() {
+	public void validBidCancelBefore30Minutes() {
 		if (this.endTime.minusMinutes(30).isBefore(LocalDateTime.now())) {
 			throw new BidException(BidErrorCode.BID_CANCEL_TIME_LIMIT_EXCEEDED);
 		}

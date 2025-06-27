@@ -117,9 +117,9 @@ public class BidRedisService {
 		try {
 			AuctionVo auctionVo = auctionRedisService.getAuctionVo(auctionId);
 
-			auctionVo.validateAuctionNotClosed();
-			auctionVo.validateWonAuction();
-			auctionVo.validateBidCancelBefore30Minutes();
+			auctionVo.validAuctionNotClosed();
+			auctionVo.validWonAuction();
+			auctionVo.validBidCancelBefore30Minutes();
 
 			String bidKey = BID_PREFIX + auctionId;
 			Set<Object> objectBidVo = redisTemplate.opsForZSet().rangeByScore(bidKey, bidPrice, bidPrice);
@@ -133,10 +133,10 @@ public class BidRedisService {
 				.findFirst()
 				.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
 
-			findBidVo.validateNotBidOwner(user.getId());
-			findBidVo.validateBidStatusIsCancel();
-			findBidVo.validateBidStatusIsWon();
-			findBidVo.validateAuctionMismatch(auctionId);
+			findBidVo.validNotBidOwner(user.getId());
+			findBidVo.validBidStatusIsCancel();
+			findBidVo.validBidStatusIsWon();
+			findBidVo.validAuctionMismatch(auctionId);
 
 			redisTemplate.opsForZSet().remove(bidKey, findBidVo);
 			findBidVo.cancelBid();

@@ -65,25 +65,25 @@ public class BidVo {
 		this.bidCreatedAt = LocalDateTime.now();
 	}
 
-	public void validateBidStatusIsWon() {
+	public void validBidStatusIsWon() {
 		if (bidStatus.equalsIgnoreCase(BidStatus.WON.name())) {
 			throw new BidException(BidErrorCode.CANNOT_CANCEL_WON_BID);
 		}
 	}
 
-	public void validateBidStatusIsCancel() {
+	public void validBidStatusIsCancel() {
 		if (bidStatus.equalsIgnoreCase(BidStatus.CANCEL.name())) {
 			throw new BidException(BidErrorCode.ALREADY_BID_CANCELLED);
 		}
 	}
 
-	public void validateNotBidOwner(Long bidUserId) {
+	public void validNotBidOwner(Long bidUserId) {
 		if (!this.bidUserId.equals(bidUserId)) {
 			throw new BidException(BidErrorCode.BID_NOT_OWNER);
 		}
 	}
 
-	public void validateAuctionMismatch(Long auctionId) {
+	public void validAuctionMismatch(Long auctionId) {
 		if (!Objects.equals(this.auctionId, auctionId)) {
 			throw new BidException(BidErrorCode.BID_AUCTION_MISMATCH);
 
