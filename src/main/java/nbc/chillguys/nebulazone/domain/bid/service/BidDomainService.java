@@ -9,10 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
-import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
+import nbc.chillguys.nebulazone.domain.bid.dto.FindBidsByAuctionInfo;
+import nbc.chillguys.nebulazone.domain.bid.dto.FindMyBidsInfo;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
-import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
-import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
 import nbc.chillguys.nebulazone.domain.bid.repository.BidJdbcRepository;
 import nbc.chillguys.nebulazone.domain.bid.repository.BidRepository;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -48,19 +47,6 @@ public class BidDomainService {
 	}
 
 	/**
-	 * 특정 경매의 입찰 내역 조회
-	 * @param auction 조회할 삭제되지 않은 경매
-	 * @param page 페이지
-	 * @param size 출력 개수
-	 * @return FindBidInfo 페이징
-	 * @author 전나겸
-	 */
-	public Page<FindBidInfo> findBids(Auction auction, int page, int size) {
-
-		return bidRepository.findBidsWithUserByAuction(auction, page, size);
-	}
-
-	/**
 	 * 내 입찰 내역 조회
 	 * @param user 로그인 유저
 	 * @param page 페이지
@@ -68,7 +54,7 @@ public class BidDomainService {
 	 * @return FindBidInfo 페이징
 	 * @author 전나겸
 	 */
-	public Page<FindBidInfo> findMyBids(User user, int page, int size) {
+	public Page<FindMyBidsInfo> findMyBids(User user, int page, int size) {
 
 		return bidRepository.findMyBids(user, page, size);
 	}
@@ -85,17 +71,6 @@ public class BidDomainService {
 	}
 
 	/**
-	 * 특정 입찰 조회(유저도 함께 조회)
-	 * @param bidId 조회할 입찰 Id
-	 * @return 조회된 Bid
-	 * @author 전나겸
-	 */
-	public Bid findBid(Long bidId) {
-		return bidRepository.findBidWithWonUser(bidId)
-			.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
-	}
-
-	/**
 	 * 해당 경매의 입찰 전체조회
 	 * @param auctionId 조회할 경매
 	 * @return 조회된 BidList
@@ -103,6 +78,18 @@ public class BidDomainService {
 	 */
 	public List<Bid> findBidsByAuctionIdAndStatusBid(Long auctionId) {
 		return bidRepository.findBidsByAuctionIdAndStatusBid(auctionId);
+	}
+
+	/**
+	 * 특정 경매의 입찰 내역 조회
+	 * @param auctionId 대상 경매 id
+	 * @param page 페이지
+	 * @param size 출력 개수
+	 * @return FindBidInfo 페이징
+	 * @author 전나겸
+	 */
+	public Page<FindBidsByAuctionInfo> findBidsByAuctionId(Long auctionId, int page, int size) {
+		return bidRepository.findBidsWithUserByAuctionId(auctionId, page, size);
 	}
 }
 

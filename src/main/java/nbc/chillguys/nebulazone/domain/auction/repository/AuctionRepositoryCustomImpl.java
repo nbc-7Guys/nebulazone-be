@@ -51,18 +51,6 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 	}
 
 	@Override
-	public List<Auction> findAuctionsByNotDeletedAndIsWonFalse() {
-
-		return jpaQueryFactory
-			.selectFrom(auction)
-			.join(auction.product, product).fetchJoin()
-			.join(product.seller, user).fetchJoin()
-			.where(auction.deleted.eq(false),
-				auction.isWon.eq(false))
-			.fetch();
-	}
-
-	@Override
 	public Optional<AuctionFindDetailInfo> findAuctionDetail(Long auctionId) {
 		List<Tuple> tuple = jpaQueryFactory.select(
 				auction.id,
@@ -121,6 +109,18 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 		);
 
 		return Optional.of(info);
+	}
+
+	@Override
+	public List<Auction> findAuctionsByNotDeletedAndIsWonFalse() {
+
+		return jpaQueryFactory
+			.selectFrom(auction)
+			.join(auction.product, product).fetchJoin()
+			.join(product.seller, user).fetchJoin()
+			.where(auction.deleted.eq(false),
+				auction.isWon.eq(false))
+			.fetch();
 	}
 
 }

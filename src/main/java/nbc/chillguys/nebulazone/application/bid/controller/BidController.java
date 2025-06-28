@@ -40,12 +40,13 @@ public class BidController {
 	}
 
 	@GetMapping("/auctions/{auctionId}/bids")
-	public ResponseEntity<CommonPageResponse<FindBidResponse>> findBids(
+	public ResponseEntity<CommonPageResponse<FindBidResponse>> findBidsByAuctionId(
 		@PathVariable("auctionId") Long auctionId,
 		@RequestParam(defaultValue = "1", value = "page") int page,
 		@RequestParam(defaultValue = "20", value = "size") int size) {
 
-		CommonPageResponse<FindBidResponse> response = bidService.findBids(auctionId, toZeroBasedPage(page), size);
+		CommonPageResponse<FindBidResponse> response = bidService.findBidsByAuctionId(auctionId, toZeroBasedPage(page),
+			size);
 
 		return ResponseEntity.ok(response);
 	}
@@ -69,7 +70,6 @@ public class BidController {
 	) {
 
 		DeleteBidResponse response = bidRedisService.statusBid(user, auctionId, bidPrice);
-		// DeleteBidResponse response = bidService.statusBid(user, auctionId, bidId);
 
 		return ResponseEntity.ok(response);
 	}

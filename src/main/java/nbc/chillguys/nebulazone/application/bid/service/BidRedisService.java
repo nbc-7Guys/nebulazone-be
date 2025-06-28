@@ -2,11 +2,16 @@ package nbc.chillguys.nebulazone.application.bid.service;
 
 import static nbc.chillguys.nebulazone.application.bid.consts.BidConst.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
 import nbc.chillguys.nebulazone.application.bid.dto.response.CreateBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.DeleteBidResponse;
+import nbc.chillguys.nebulazone.application.bid.dto.response.FindBidResponse;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
@@ -97,8 +103,6 @@ public class BidRedisService {
 
 	// todo - 내 입찰 전체 조회 redis, rdb 각각 조회해서 한방에 응답해주자 그냥
 
-	// todo - 특정 경매의 입찰 전체 조회, redis, rdb 각각 조회해서 한방에 응답
-
 	/**
 	 * redis 경매 입찰 취소<br>
 	 * Redisson RLock을 사용하여 동시성 제어
@@ -164,6 +168,35 @@ public class BidRedisService {
 		}
 	}
 
+	public Page<FindBidResponse> findBidsByAuctionId(Long auctionId, int page, int size) {
+
+		String bidKey = BID_PREFIX + auctionId;
+		Long totalElements = redisTemplate.opsForZSet().zCard(bidKey);
+
+		if (totalElements == null) {
+			return new PageImpl<>(List.of());
+		}
+
+		Set<Object> objects = redisTemplate.opsForZSet().reverseRange(bidKey, 0, -1);
+		List<BidVo> bidVoList = Optional.ofNullable(objects)
+			.orElse(Set.of())
+			.stream()
+			.map(o -> objectMapper.convertValue(o, BidVo.class))
+			.sorted((o1, o2) -> o2.getBidCreatedAt().compareTo(o1.getBidCreatedAt()))
+			.sorted((o1, o2) -> o2.getBidPrice().compareTo(o1.getBidPrice()))
+			.skip((long)page * size)
+			.limit(size)
+			.toList();
+
+		Pageable pageable = PageRequest.of(page, size);
+
+		List<FindBidResponse> findBidResponse = bidVoList.stream()
+			.map(FindBidResponse::from)
+			.toList();
+
+		return new PageImpl<>(findBidResponse, pageable, totalElements);
+	}
+
 	/**
 	 * redis에 저장된 특정 경매의 낙찰 예정인 입찰 정보 조회
 	 * @param auctionId 경매 id
@@ -171,7 +204,7 @@ public class BidRedisService {
 	 * @return 조회된 BidVo
 	 * @author 전나겸
 	 */
-	public BidVo getBidVo(Long auctionId, Long bidPrice) {
+	public BidVo findWonBidVo(Long auctionId, Long bidPrice) {
 		Set<Object> objects = redisTemplate.opsForZSet().rangeByScore(BID_PREFIX + auctionId, bidPrice, bidPrice);
 
 		return Optional.ofNullable(objects)

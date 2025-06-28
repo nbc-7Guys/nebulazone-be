@@ -96,14 +96,14 @@ public class AuctionDomainService {
 	}
 
 	/**
-	 * 삭제되지 않은 경매 조회
-	 * @param auctionId 조회할 AuctionId
-	 * @return 조회된 경매
+	 * 경매가 RDB에 없으면 NotFound 에러 발생
+	 * @param auctionId 확인할 경매 id
 	 * @author 전나겸
 	 */
-	public Auction findActiveAuctionById(Long auctionId) {
-		return auctionRepository.findByIdAndDeletedFalse(auctionId)
-			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
+	public void existsAuctionByIdElseThrow(Long auctionId) {
+		if (!auctionRepository.existsById(auctionId)) {
+			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND);
+		}
 	}
 
 	/**

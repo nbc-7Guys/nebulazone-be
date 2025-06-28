@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.domain.bid.repository;
 
+import static nbc.chillguys.nebulazone.domain.auction.entity.QAuction.*;
 import static nbc.chillguys.nebulazone.domain.bid.entity.QBid.*;
 import static nbc.chillguys.nebulazone.domain.product.entity.QProduct.*;
 import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
@@ -17,9 +18,10 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
-import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
-import nbc.chillguys.nebulazone.domain.bid.dto.QFindBidInfo;
+import nbc.chillguys.nebulazone.domain.bid.dto.FindBidsByAuctionInfo;
+import nbc.chillguys.nebulazone.domain.bid.dto.FindMyBidsInfo;
+import nbc.chillguys.nebulazone.domain.bid.dto.QFindBidsByAuctionInfo;
+import nbc.chillguys.nebulazone.domain.bid.dto.QFindMyBidsInfo;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -31,34 +33,47 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Page<FindBidInfo> findBidsWithUserByAuction(Auction auction, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size);
+	public Page<FindBidsByAuctionInfo> findBidsWithUserByAuctionId(Long auctionId, int page, int size) {
 
-		List<FindBidInfo> contents = jpaQueryFactory.select(
-				new QFindBidInfo(bid.id, bid.price, bid.createdAt, bid.status, user.nickname, product.name))
+		Pageable pageable = PageRequest.of(page, size);
+		List<FindBidsByAuctionInfo> contents = jpaQueryFactory.select(
+				new QFindBidsByAuctionInfo(
+					bid.price,
+					bid.createdAt,
+					bid.status,
+					user.nickname,
+					auction.id))
 			.from(bid)
 			.join(bid.user, user)
-			.join(bid.auction.product, product)
-			.where(bid.auction.eq(auction))
-			.orderBy(bid.createdAt.desc())
+			.join(bid.auction, auction)
+			.where(bid.auction.id.eq(auctionId))
+			.orderBy(
+				bid.createdAt.desc(),
+				bid.price.desc())
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
 			.fetch();
 
 		JPAQuery<Long> countQuery = jpaQueryFactory.select(bid.countDistinct())
 			.from(bid)
-			.where(bid.auction.eq(auction));
+			.where(bid.auction.id.eq(auctionId));
 
 		return PageableExecutionUtils.getPage(contents, pageable, countQuery::fetchOne);
 	}
 
 	@Override
-	public Page<FindBidInfo> findMyBids(User loginUser, int page, int size) {
+	public Page<FindMyBidsInfo> findMyBids(User loginUser, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		List<FindBidInfo> contents = jpaQueryFactory
+		List<FindMyBidsInfo> contents = jpaQueryFactory
 			.select(
-				new QFindBidInfo(bid.id, bid.price, bid.createdAt, bid.status, user.nickname, product.name))
+				new QFindMyBidsInfo(
+					bid.price,
+					bid.createdAt,
+					bid.status,
+					user.nickname,
+					product.name)
+			)
 			.from(bid)
 			.join(bid.user, user)
 			.join(bid.auction.product, product)
@@ -68,7 +83,10 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 			.limit(pageable.getPageSize())
 			.fetch();
 
-		JPAQuery<Long> countQuery = jpaQueryFactory.select(bid.countDistinct()).from(bid).where(bid.user.eq(loginUser));
+		JPAQuery<Long> countQuery = jpaQueryFactory
+			.select(bid.countDistinct())
+			.from(bid)
+			.where(bid.user.eq(loginUser));
 
 		return PageableExecutionUtils.getPage(contents, pageable, countQuery::fetchOne);
 	}
@@ -80,7 +98,9 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 			.selectFrom(bid)
 			.join(bid.user, user)
 			.fetchJoin()
-			.where(bid.auction.id.eq(auctionId), bid.status.eq(BidStatus.BID))
+			.where(
+				bid.auction.id.eq(auctionId),
+				bid.status.eq(BidStatus.BID))
 			.orderBy(bid.price.desc())
 			.limit(1)
 			.fetchOne();
@@ -105,7 +125,9 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 			.select(bid)
 			.from(bid)
 			.join(bid.user, user).fetchJoin()
-			.where(bid.auction.id.eq(auctionId), bid.status.eq(BidStatus.BID))
+			.where(
+				bid.auction.id.eq(auctionId),
+				bid.status.eq(BidStatus.BID))
 			.fetch();
 	}
 }

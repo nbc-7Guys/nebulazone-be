@@ -34,7 +34,7 @@ public class AuctionService {
 
 		if (auctionVo != null) {
 			Long bidCount = auctionRedisService.calculateAuctionBidCount(auctionId);
-			BidVo bidVo = bidRedisService.getBidVo(auctionId, auctionVo.getCurrentPrice());
+			BidVo bidVo = bidRedisService.findWonBidVo(auctionId, auctionVo.getCurrentPrice());
 			return FindDetailAuctionResponse.of(auctionVo, bidVo, bidCount);
 		}
 

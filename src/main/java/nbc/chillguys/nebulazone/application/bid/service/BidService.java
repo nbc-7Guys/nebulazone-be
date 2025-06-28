@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.bid.dto.response.FindBidResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
-import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
-import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
+import nbc.chillguys.nebulazone.domain.bid.dto.FindBidsByAuctionInfo;
+import nbc.chillguys.nebulazone.domain.bid.dto.FindMyBidsInfo;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
@@ -19,20 +19,29 @@ public class BidService {
 	private final BidDomainService bidDomainService;
 	private final AuctionDomainService auctionDomainService;
 
-	public CommonPageResponse<FindBidResponse> findBids(Long auctionId, int page, int size) {
-		Auction auction = auctionDomainService.findActiveAuctionById(auctionId);
+	private final BidRedisService bidRedisService;
 
-		Page<FindBidInfo> findBids = bidDomainService.findBids(auction, page, size);
+	public CommonPageResponse<FindBidResponse> findBidsByAuctionId(Long auctionId, int page, int size) {
+
+		Page<FindBidResponse> findBidResponse = bidRedisService.findBidsByAuctionId(auctionId, page, size);
+
+		if (!findBidResponse.isEmpty()) {
+			return CommonPageResponse.from(findBidResponse);
+		}
+
+		auctionDomainService.existsAuctionByIdElseThrow(auctionId);
+
+		Page<FindBidsByAuctionInfo> findBids = bidDomainService.findBidsByAuctionId(auctionId, page, size);
+
 		Page<FindBidResponse> response = findBids.map(FindBidResponse::from);
-
 		return CommonPageResponse.from(response);
 	}
 
 	public CommonPageResponse<FindBidResponse> findMyBids(User user, int page, int size) {
-		Page<FindBidInfo> findBids = bidDomainService.findMyBids(user, page, size);
-		Page<FindBidResponse> response = findBids.map(FindBidResponse::from);
+		Page<FindMyBidsInfo> findBids = bidDomainService.findMyBids(user, page, size);
+		// Page<FindBidResponse> response = findBids.map(FindBidResponse::from);
 
-		return CommonPageResponse.from(response);
+		// return CommonPageResponse.from(response);
+		return null;
 	}
-
 }

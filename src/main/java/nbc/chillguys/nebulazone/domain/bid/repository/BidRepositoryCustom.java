@@ -5,20 +5,20 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 
-import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
-import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
+import nbc.chillguys.nebulazone.domain.bid.dto.FindBidsByAuctionInfo;
+import nbc.chillguys.nebulazone.domain.bid.dto.FindMyBidsInfo;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 public interface BidRepositoryCustom {
 
-	Page<FindBidInfo> findBidsWithUserByAuction(Auction auction, int page, int size);
-
-	Page<FindBidInfo> findMyBids(User user, int page, int size);
+	Page<FindMyBidsInfo> findMyBids(User user, int page, int size);
 
 	Bid findHighestPriceBidByAuctionWithUser(Long auctionId);
 
 	Optional<Bid> findBidWithWonUser(Long bidId);
 
 	List<Bid> findBidsByAuctionIdAndStatusBid(Long auctionId);
+
+	Page<FindBidsByAuctionInfo> findBidsWithUserByAuctionId(Long auctionId, int page, int size);
 }
