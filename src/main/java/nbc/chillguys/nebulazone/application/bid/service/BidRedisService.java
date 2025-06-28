@@ -32,8 +32,9 @@ public class BidRedisService {
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ObjectMapper objectMapper;
 	private final RedissonClient redissonClient;
-	private final AuctionRedisService auctionRedisService;
 	private final UserDomainService userDomainService;
+
+	private final AuctionRedisService auctionRedisService;
 
 	/**
 	 * redis 경매 입찰<br>
@@ -53,7 +54,7 @@ public class BidRedisService {
 		acquireLockOrThrow(bidLock);
 
 		try {
-			AuctionVo auctionVo = auctionRedisService.getAuctionVo(auctionId);
+			AuctionVo auctionVo = auctionRedisService.getAuctionVoElseThrow(auctionId);
 
 			auctionVo.validAuctionNotClosed();
 			auctionVo.validWonAuction();
@@ -115,7 +116,7 @@ public class BidRedisService {
 		acquireLockOrThrow(bidLock);
 
 		try {
-			AuctionVo auctionVo = auctionRedisService.getAuctionVo(auctionId);
+			AuctionVo auctionVo = auctionRedisService.getAuctionVoElseThrow(auctionId);
 
 			auctionVo.validAuctionNotClosed();
 			auctionVo.validWonAuction();
@@ -161,6 +162,18 @@ public class BidRedisService {
 		} finally {
 			bidLock.unlock();
 		}
+	}
+
+	public BidVo getBidVo(Long auctionId, Long bidPrice) {
+		Set<Object> objects = redisTemplate.opsForZSet().rangeByScore(BID_PREFIX + auctionId, bidPrice, bidPrice);
+
+		return Optional.ofNullable(objects)
+			.orElse(Set.of())
+			.stream()
+			.map(o -> objectMapper.convertValue(o, BidVo.class))
+			.findFirst()
+			.orElse(null);
+
 	}
 
 	private void acquireLockOrThrow(RLock bidLock) {

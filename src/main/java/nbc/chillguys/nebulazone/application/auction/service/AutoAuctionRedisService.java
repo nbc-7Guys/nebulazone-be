@@ -24,7 +24,6 @@ import nbc.chillguys.nebulazone.domain.auction.service.AutoAuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
-import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
@@ -43,7 +42,6 @@ public class AutoAuctionRedisService {
 	private final RedissonClient redissonClient;
 
 	private final AutoAuctionDomainService autoAuctionDomainService;
-	private final ProductDomainService productDomainService;
 	private final BidDomainService bidDomainService;
 	private final UserDomainService userDomainService;
 	private final TransactionDomainService transactionDomainService;
@@ -65,6 +63,12 @@ public class AutoAuctionRedisService {
 			}
 
 			Map<Object, Object> auctionMap = redisTemplate.opsForHash().entries(AUCTION_PREFIX + auctionId);
+
+			if (auctionMap.isEmpty()) {
+				log.warn("redis에 없는 데이터가 자동종료 되었음. 자동 종료 시도한 경매 id: {}", auctionId);
+				return;
+			}
+
 			AuctionVo auctionVo = objectMapper.convertValue(auctionMap, AuctionVo.class);
 			Auction auction = autoAuctionDomainService.autoEndAuction(auctionId, auctionVo.getCurrentPrice());
 

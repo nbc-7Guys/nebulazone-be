@@ -2,7 +2,6 @@ package nbc.chillguys.nebulazone.application.auction.service;
 
 import static nbc.chillguys.nebulazone.application.auction.consts.AuctionConst.*;
 import static nbc.chillguys.nebulazone.application.bid.consts.BidConst.*;
-import static nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -24,7 +22,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuctionRequest;
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
-import nbc.chillguys.nebulazone.application.auction.dto.response.FindDetailAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindSortTypeAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
@@ -56,6 +53,7 @@ public class AuctionRedisService {
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ObjectMapper objectMapper;
 	private final RedissonClient redissonClient;
+
 	private final AuctionDomainService auctionDomainService;
 	private final UserDomainService userDomainService;
 	private final BidDomainService bidDomainService;
@@ -95,7 +93,7 @@ public class AuctionRedisService {
 	 * @return AuctionVo
 	 * @author 전나겸
 	 */
-	public AuctionVo getAuctionVo(Long auctionId) {
+	public AuctionVo getAuctionVoElseThrow(Long auctionId) {
 		Map<Object, Object> auctionMap = redisTemplate.opsForHash()
 			.entries(AUCTION_PREFIX + auctionId);
 
@@ -104,19 +102,6 @@ public class AuctionRedisService {
 		}
 
 		return objectMapper.convertValue(auctionMap, AuctionVo.class);
-	}
-
-	/**
-	 * 특정 경매의 입찰 최고가 갱신
-	 * @param auctionId 대상 경매 id
-	 * @param bidPrice 갱신할 입찰가 (null 가능 - 입찰이 모두 취소된 경우)
-	 * @author 전나겸
-	 */
-	public void updateAuctionCurrentPrice(Long auctionId, Long bidPrice) {
-		String auctionKey = "auction:" + auctionId;
-
-		redisTemplate.opsForHash().put(auctionKey, "currentPrice", bidPrice);
-
 	}
 
 	/**
@@ -313,7 +298,7 @@ public class AuctionRedisService {
 					.stream()
 					.map(obj -> {
 						long auctionId = ((Number)obj).longValue();
-						AuctionVo auctionVo = getAuctionVo(auctionId);
+						AuctionVo auctionVo = getAuctionVoElseThrow(auctionId);
 						Long bidCount = calculateAuctionBidCount(auctionId);
 						return FindAllAuctionsDto.of(auctionVo, bidCount);
 					})
@@ -330,7 +315,7 @@ public class AuctionRedisService {
 					.stream()
 					.map(obj -> {
 						long auctionId = ((Number)obj).longValue();
-						AuctionVo auctionVo = getAuctionVo(auctionId);
+						AuctionVo auctionVo = getAuctionVoElseThrow(auctionId);
 						Long bidCount = calculateAuctionBidCount(auctionId);
 						return FindAllAuctionsDto.of(auctionVo, bidCount);
 					})
@@ -346,7 +331,37 @@ public class AuctionRedisService {
 		return response;
 	}
 
-	private Long calculateAuctionBidCount(Long auctionId) {
+	public AuctionVo findRedisAuctionVo(Long auctionId) {
+		Map<Object, Object> auctionMap = redisTemplate.opsForHash()
+			.entries(AUCTION_PREFIX + auctionId);
+
+		if (auctionMap.isEmpty()) {
+			return null;
+		}
+
+		return objectMapper.convertValue(auctionMap, AuctionVo.class);
+	}
+
+	/**
+	 * 특정 경매의 입찰 최고가 갱신
+	 * @param auctionId 대상 경매 id
+	 * @param bidPrice 갱신할 입찰가 (null 가능 - 입찰이 모두 취소된 경우)
+	 * @author 전나겸
+	 */
+	public void updateAuctionCurrentPrice(Long auctionId, Long bidPrice) {
+		String auctionKey = AUCTION_PREFIX + auctionId;
+
+		redisTemplate.opsForHash().put(auctionKey, "currentPrice", bidPrice);
+
+	}
+
+	/**
+	 * 특정 경매의 입찰 건수를 계산
+	 * @param auctionId 대상 경매 id
+	 * @return 해당 경매의 입찰 건수
+	 * @author 전나겸
+	 */
+	public Long calculateAuctionBidCount(Long auctionId) {
 		Set<Object> objects = redisTemplate.opsForZSet()
 			.range(BID_PREFIX + auctionId, 0, -1);
 
@@ -355,21 +370,9 @@ public class AuctionRedisService {
 			.size();
 	}
 
-	// todo : 경매 상세 조회
-	public FindDetailAuctionResponse findAuction(Long auctionId) {
-		return null;
-	}
-
 	private void acquireLockOrThrow(RLock auctionLock) {
 		if (!auctionLock.tryLock()) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_PROCESSING_BUSY);
-		}
-	}
-
-	@Scheduled(cron = "0 0 */6 * * *")
-	void refreshCache() {
-		for (AuctionSortType sortType : values()) {
-			findAuctionsBySortType(sortType);
 		}
 	}
 

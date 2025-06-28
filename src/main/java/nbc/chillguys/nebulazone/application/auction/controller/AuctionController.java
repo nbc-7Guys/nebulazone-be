@@ -45,7 +45,7 @@ public class AuctionController {
 	@GetMapping("/{auctionId}")
 	public ResponseEntity<FindDetailAuctionResponse> findAuction(@PathVariable("auctionId") Long auctionId) {
 
-		FindDetailAuctionResponse response = auctionRedisService.findAuction(auctionId);
+		FindDetailAuctionResponse response = auctionService.findAuction(auctionId);
 
 		return ResponseEntity.ok(response);
 

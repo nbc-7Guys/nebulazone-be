@@ -7,17 +7,17 @@ import static nbc.chillguys.nebulazone.domain.product.entity.QProductImage.*;
 import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.auction.dto.AuctionFindDetailInfo;
-import nbc.chillguys.nebulazone.domain.auction.dto.QAuctionFindDetailInfo;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
-import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 
 @Repository
 @RequiredArgsConstructor
@@ -64,33 +64,63 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 
 	@Override
 	public Optional<AuctionFindDetailInfo> findAuctionDetail(Long auctionId) {
-		return Optional.ofNullable(jpaQueryFactory.select(
-				new QAuctionFindDetailInfo(
-					auction.id,
-					user.id,
-					user.nickname,
-					user.email,
-					auction.startPrice,
-					auction.currentPrice,
-					auction.isWon,
-					auction.endTime,
-					product.id,
-					product.name,
-					productImage.url.min(),
-					product.createdAt,
-					bid.auction.id.count()
-				))
+		List<Tuple> tuple = jpaQueryFactory.select(
+				auction.id,
+				user.id,
+				user.nickname,
+				user.email,
+				auction.startPrice,
+				auction.currentPrice,
+				auction.isWon,
+				auction.endTime,
+				product.id,
+				product.name,
+				productImage.url,
+				product.createdAt
+			)
 			.from(auction)
 			.join(auction.product, product)
 			.join(product.seller, user)
 			.leftJoin(auction.product.productImages, productImage)
-			.leftJoin(bid)
-			.on(bid.auction.eq(auction),
-				bid.status.notIn(BidStatus.CANCEL))
 			.where(auction.id.eq(auctionId),
 				auction.deleted.eq(false),
 				product.isDeleted.eq(false))
-			.fetchOne());
+			.fetch();
+
+		Long bidCount = jpaQueryFactory
+			.select(bid.count())
+			.from(bid)
+			.where(bid.auction.id.eq(auctionId))
+			.fetchOne();
+
+		if (tuple.isEmpty()) {
+			return Optional.empty();
+		}
+
+		List<String> imageUrlList = tuple.stream()
+			.map(t -> t.get(productImage.url))
+			.filter(Objects::nonNull)
+			.toList();
+
+		Tuple firstTuple = tuple.getFirst();
+
+		AuctionFindDetailInfo info = new AuctionFindDetailInfo(
+			firstTuple.get(auction.id),
+			firstTuple.get(user.id),
+			firstTuple.get(user.nickname),
+			firstTuple.get(user.email),
+			firstTuple.get(auction.startPrice),
+			firstTuple.get(auction.currentPrice),
+			Boolean.TRUE.equals(firstTuple.get(auction.isWon)),
+			firstTuple.get(auction.endTime),
+			firstTuple.get(product.id),
+			firstTuple.get(product.name),
+			imageUrlList,
+			firstTuple.get(product.createdAt),
+			bidCount != null ? bidCount : 0L
+		);
+
+		return Optional.of(info);
 	}
 
 }
