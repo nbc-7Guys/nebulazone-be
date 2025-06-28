@@ -87,24 +87,6 @@ public class AuctionRedisService {
 	}
 
 	/**
-	 * 특정 경매 조회<br>
-	 * AuctionVo 반환
-	 * @param auctionId 조회할 경매 id
-	 * @return AuctionVo
-	 * @author 전나겸
-	 */
-	public AuctionVo getAuctionVoElseThrow(Long auctionId) {
-		Map<Object, Object> auctionMap = redisTemplate.opsForHash()
-			.entries(AUCTION_PREFIX + auctionId);
-
-		if (auctionMap.isEmpty()) {
-			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND);
-		}
-
-		return objectMapper.convertValue(auctionMap, AuctionVo.class);
-	}
-
-	/**
 	 * 수동 낙찰<br>
 	 * @param auctionId 종료할 경매 id
 	 * @param loginUser 로그인 유저
@@ -332,6 +314,24 @@ public class AuctionRedisService {
 	}
 
 	/**
+	 * redis에 저장된 특정 경매를 조회<br>
+	 * AuctionVo를 못찾으면 에러를 반환
+	 * @param auctionId 조회할 경매 id
+	 * @return AuctionVo
+	 * @author 전나겸
+	 */
+	public AuctionVo getAuctionVoElseThrow(Long auctionId) {
+		Map<Object, Object> auctionMap = redisTemplate.opsForHash()
+			.entries(AUCTION_PREFIX + auctionId);
+
+		if (auctionMap.isEmpty()) {
+			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND);
+		}
+
+		return objectMapper.convertValue(auctionMap, AuctionVo.class);
+	}
+
+	/**
 	 * redis에 저장된 특정 경매를 조회
 	 * @param auctionId 조회할 경매 id
 	 * @return 조회된 AuctionVo
@@ -361,6 +361,17 @@ public class AuctionRedisService {
 
 	}
 
+	public List<Long> findAllAuctionVoIds() {
+		Set<Object> objects = redisTemplate.opsForZSet().range(AUCTION_ENDING_PREFIX, 0, -1);
+
+		return Optional.ofNullable(objects)
+			.orElse(Set.of())
+			.stream()
+			.map(obj -> ((Number)obj).longValue())
+			.toList();
+
+	}
+
 	/**
 	 * 특정 경매의 입찰 건수를 계산
 	 * @param auctionId 대상 경매 id
@@ -381,5 +392,4 @@ public class AuctionRedisService {
 			throw new AuctionException(AuctionErrorCode.AUCTION_PROCESSING_BUSY);
 		}
 	}
-
 }

@@ -2,6 +2,8 @@ package nbc.chillguys.nebulazone.application.bid.service;
 
 import static nbc.chillguys.nebulazone.application.bid.consts.BidConst.*;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -190,8 +192,9 @@ public class BidRedisService {
 			.orElse(Set.of())
 			.stream()
 			.map(o -> objectMapper.convertValue(o, BidVo.class))
-			.sorted((o1, o2) -> o2.getBidCreatedAt().compareTo(o1.getBidCreatedAt()))
-			.sorted((o1, o2) -> o2.getBidPrice().compareTo(o1.getBidPrice()))
+			.sorted(Comparator
+				.comparing(BidVo::getBidCreatedAt).reversed()
+				.thenComparing(BidVo::getBidPrice).reversed())
 			.skip((long)page * size)
 			.limit(size)
 			.toList();
@@ -203,6 +206,30 @@ public class BidRedisService {
 			.toList();
 
 		return new PageImpl<>(findBidResponse, pageable, totalElements);
+	}
+
+	public List<BidVo> findMyBidVoList(Long userId, List<Long> auctionIds) {
+
+		List<BidVo> myBidVoList = new ArrayList<>();
+
+		for (Long auctionId : auctionIds) {
+			String bidKey = BID_PREFIX + auctionId;
+			Set<Object> objects = redisTemplate.opsForZSet().range(bidKey, 0, -1);
+
+			List<BidVo> myBidsByAuctionId = Optional.ofNullable(objects)
+				.orElse(Set.of())
+				.stream()
+				.map(o -> objectMapper.convertValue(o, BidVo.class))
+				.filter(bidVo -> bidVo.getBidUserId().equals(userId))
+				.toList();
+
+			myBidVoList.addAll(myBidsByAuctionId);
+		}
+
+		return myBidVoList.stream()
+			.sorted(Comparator.comparing(BidVo::getBidCreatedAt).reversed())
+			.toList();
+
 	}
 
 	/**
@@ -229,4 +256,5 @@ public class BidRedisService {
 			throw new BidException(BidErrorCode.BID_PROCESSING_BUSY);
 		}
 	}
+
 }

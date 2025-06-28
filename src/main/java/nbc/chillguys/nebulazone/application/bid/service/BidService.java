@@ -1,16 +1,27 @@
 package nbc.chillguys.nebulazone.application.bid.service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
 import nbc.chillguys.nebulazone.application.bid.dto.response.FindBidResponse;
+import nbc.chillguys.nebulazone.application.bid.dto.response.FindMyBidsResponse;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.dto.FindBidsByAuctionInfo;
 import nbc.chillguys.nebulazone.domain.bid.dto.FindMyBidsInfo;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
+import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +30,7 @@ public class BidService {
 	private final BidDomainService bidDomainService;
 	private final AuctionDomainService auctionDomainService;
 
+	private final AuctionRedisService auctionRedisService;
 	private final BidRedisService bidRedisService;
 
 	public CommonPageResponse<FindBidResponse> findBidsByAuctionId(Long auctionId, int page, int size) {
@@ -37,11 +49,42 @@ public class BidService {
 		return CommonPageResponse.from(response);
 	}
 
-	public CommonPageResponse<FindBidResponse> findMyBids(User user, int page, int size) {
-		Page<FindMyBidsInfo> findBids = bidDomainService.findMyBids(user, page, size);
-		// Page<FindBidResponse> response = findBids.map(FindBidResponse::from);
+	public CommonPageResponse<FindMyBidsResponse> findMyBids(User user, int page, int size) {
 
-		// return CommonPageResponse.from(response);
-		return null;
+		List<FindMyBidsInfo> findBids = bidDomainService.findMyBids(user.getId());
+
+		List<FindMyBidsResponse> allMyBids = new ArrayList<>(
+			findBids.stream()
+				.map(FindMyBidsResponse::from)
+				.toList()
+		);
+
+		List<Long> auctionIds = auctionRedisService.findAllAuctionVoIds();
+		System.out.println("Active auction IDs: " + auctionIds); // [10]이 있는지?
+
+		List<BidVo> myBidVoList = bidRedisService.findMyBidVoList(user.getId(), auctionIds);
+		System.out.println("My bids count: " + myBidVoList.size());
+
+		for (BidVo bidVo : myBidVoList) {
+			AuctionVo auctionVo = auctionRedisService.findRedisAuctionVo(bidVo.getAuctionId());
+			System.out.println("Checking auction: " + bidVo.getAuctionId());
+
+			if (auctionVo != null) {
+				System.out.println("Adding to response");
+				System.out.println("AuctionVo is null for auction: " + bidVo.getAuctionId());
+				allMyBids.add(FindMyBidsResponse.of(bidVo, auctionVo));
+			}
+		}
+
+		List<FindMyBidsResponse> pageContent = allMyBids.stream()
+			.sorted(Comparator.comparing(FindMyBidsResponse::bidTime).reversed())
+			.skip((long)page * size)
+			.limit(size)
+			.toList();
+
+		Pageable pageable = PageRequest.of(page, size);
+
+		Page<FindMyBidsResponse> findMyBidsResponses = new PageImpl<>(pageContent, pageable, allMyBids.size());
+		return CommonPageResponse.from(findMyBidsResponses);
 	}
 }

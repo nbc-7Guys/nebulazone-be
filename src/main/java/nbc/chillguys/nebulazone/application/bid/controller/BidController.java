@@ -17,6 +17,7 @@ import nbc.chillguys.nebulazone.application.bid.dto.request.CreateBidRequest;
 import nbc.chillguys.nebulazone.application.bid.dto.response.CreateBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.DeleteBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.FindBidResponse;
+import nbc.chillguys.nebulazone.application.bid.dto.response.FindMyBidsResponse;
 import nbc.chillguys.nebulazone.application.bid.service.BidRedisService;
 import nbc.chillguys.nebulazone.application.bid.service.BidService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
@@ -52,12 +53,12 @@ public class BidController {
 	}
 
 	@GetMapping("/bids/me")
-	public ResponseEntity<CommonPageResponse<FindBidResponse>> findMyBids(
+	public ResponseEntity<CommonPageResponse<FindMyBidsResponse>> findMyBids(
 		@AuthenticationPrincipal User user,
 		@RequestParam(defaultValue = "1", value = "page") int page,
 		@RequestParam(defaultValue = "20", value = "size") int size) {
 
-		CommonPageResponse<FindBidResponse> response = bidService.findMyBids(user, toZeroBasedPage(page), size);
+		CommonPageResponse<FindMyBidsResponse> response = bidService.findMyBids(user, toZeroBasedPage(page), size);
 
 		return ResponseEntity.ok(response);
 	}

@@ -46,17 +46,9 @@ public class BidDomainService {
 
 	}
 
-	/**
-	 * 내 입찰 내역 조회
-	 * @param user 로그인 유저
-	 * @param page 페이지
-	 * @param size 출력 개수
-	 * @return FindBidInfo 페이징
-	 * @author 전나겸
-	 */
-	public Page<FindMyBidsInfo> findMyBids(User user, int page, int size) {
+	public List<FindMyBidsInfo> findMyBids(Long userId) {
 
-		return bidRepository.findMyBids(user, page, size);
+		return bidRepository.findMyBids(userId);
 	}
 
 	/**

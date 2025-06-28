@@ -6,7 +6,6 @@ import static nbc.chillguys.nebulazone.domain.product.entity.QProduct.*;
 import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,7 +23,6 @@ import nbc.chillguys.nebulazone.domain.bid.dto.QFindBidsByAuctionInfo;
 import nbc.chillguys.nebulazone.domain.bid.dto.QFindMyBidsInfo;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
-import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Repository
 @RequiredArgsConstructor
@@ -62,33 +60,28 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 	}
 
 	@Override
-	public Page<FindMyBidsInfo> findMyBids(User loginUser, int page, int size) {
-		Pageable pageable = PageRequest.of(page, size);
+	public List<FindMyBidsInfo> findMyBids(Long userId) {
 
-		List<FindMyBidsInfo> contents = jpaQueryFactory
+		return jpaQueryFactory
 			.select(
 				new QFindMyBidsInfo(
+					user.id,
+					user.nickname,
+					bid.status,
 					bid.price,
 					bid.createdAt,
-					bid.status,
-					user.nickname,
+					auction.id,
+					product.id,
 					product.name)
 			)
 			.from(bid)
 			.join(bid.user, user)
+			.join(bid.auction, auction)
 			.join(bid.auction.product, product)
-			.where(bid.user.eq(loginUser))
+			.where(bid.user.id.eq(userId))
 			.orderBy(bid.createdAt.desc())
-			.offset(pageable.getOffset())
-			.limit(pageable.getPageSize())
 			.fetch();
 
-		JPAQuery<Long> countQuery = jpaQueryFactory
-			.select(bid.countDistinct())
-			.from(bid)
-			.where(bid.user.eq(loginUser));
-
-		return PageableExecutionUtils.getPage(contents, pageable, countQuery::fetchOne);
 	}
 
 	@Override
@@ -104,18 +97,6 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 			.orderBy(bid.price.desc())
 			.limit(1)
 			.fetchOne();
-	}
-
-	@Override
-	public Optional<Bid> findBidWithWonUser(Long bidId) {
-
-		return Optional.ofNullable(
-			jpaQueryFactory
-				.selectFrom(bid)
-				.join(bid.user, user).fetchJoin()
-				.where(bid.id.eq(bidId))
-				.fetchOne());
-
 	}
 
 	@Override
