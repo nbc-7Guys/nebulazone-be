@@ -61,8 +61,4 @@ public class Bid extends BaseEntity {
 		this.status = BidStatus.CANCEL;
 	}
 
-	public void wonBid() {
-		this.status = BidStatus.WON;
-	}
-
 }
