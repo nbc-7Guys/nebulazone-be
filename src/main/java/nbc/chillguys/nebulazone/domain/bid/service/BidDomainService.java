@@ -28,21 +28,18 @@ public class BidDomainService {
 	@Transactional
 	public void createAllBid(Auction auction, List<BidVo> bidVoList, Map<Long, User> userMap) {
 
-		List<Bid> bidList = bidVoList.stream()
+		List<Object[]> batchArgs = bidVoList.stream()
 			.filter(bidVo -> userMap.containsKey(bidVo.getBidUserId()))
-			.map(bidVo -> {
-				User bidUser = userMap.get(bidVo.getBidUserId());
-
-				return Bid.builder()
-					.auction(auction)
-					.user(bidUser)
-					.price(bidVo.getBidPrice())
-					.status(bidVo.getBidStatus())
-					.build();
+			.map(bidVo -> new Object[] {
+				auction.getId(),
+				bidVo.getBidUserId(),
+				bidVo.getBidPrice(),
+				bidVo.getBidStatus(),
+				bidVo.getBidCreatedAt()
 			})
 			.toList();
 
-		bidJdbcRepository.saveBidsBatch(bidList);
+		bidJdbcRepository.saveBidsBatch(batchArgs);
 
 	}
 
