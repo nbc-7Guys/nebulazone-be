@@ -164,6 +164,13 @@ public class BidRedisService {
 		}
 	}
 
+	/**
+	 * redis에 저장된 특정 경매의 낙찰 예정인 입찰 정보 조회
+	 * @param auctionId 경매 id
+	 * @param bidPrice 낙찰 예정인 입찰 가격
+	 * @return 조회된 BidVo
+	 * @author 전나겸
+	 */
 	public BidVo getBidVo(Long auctionId, Long bidPrice) {
 		Set<Object> objects = redisTemplate.opsForZSet().rangeByScore(BID_PREFIX + auctionId, bidPrice, bidPrice);
 

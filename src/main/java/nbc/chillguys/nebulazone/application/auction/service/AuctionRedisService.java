@@ -331,6 +331,12 @@ public class AuctionRedisService {
 		return response;
 	}
 
+	/**
+	 * redis에 저장된 특정 경매를 조회
+	 * @param auctionId 조회할 경매 id
+	 * @return 조회된 AuctionVo
+	 * @author 전나겸
+	 */
 	public AuctionVo findRedisAuctionVo(Long auctionId) {
 		Map<Object, Object> auctionMap = redisTemplate.opsForHash()
 			.entries(AUCTION_PREFIX + auctionId);
