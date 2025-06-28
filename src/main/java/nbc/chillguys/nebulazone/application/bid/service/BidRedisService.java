@@ -168,6 +168,14 @@ public class BidRedisService {
 		}
 	}
 
+	/**
+	 * redis의 특정 경매의 입찰 내역 조회 후 페이징 반환
+	 * @param auctionId 조회할 대상 경매 id
+	 * @param page 페이지
+	 * @param size 출력 개수
+	 * @return 페이징 응답값
+	 * @author 전나겸
+	 */
 	public Page<FindBidResponse> findBidsByAuctionId(Long auctionId, int page, int size) {
 
 		String bidKey = BID_PREFIX + auctionId;
