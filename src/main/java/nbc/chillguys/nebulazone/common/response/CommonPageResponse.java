@@ -14,8 +14,8 @@ public record CommonPageResponse<T>(
 	int size,
 	int totalPages,
 	boolean hasNext,
-	boolean isLast,
 	boolean hasPrevious,
+	boolean isLast,
 	boolean isFirst
 ) {
 
@@ -27,8 +27,8 @@ public record CommonPageResponse<T>(
 			.size(page.getSize())
 			.totalPages(page.getTotalPages())
 			.hasNext(page.hasNext())
-			.isLast(page.isLast())
 			.hasPrevious(page.hasPrevious())
+			.isLast(page.isLast())
 			.isFirst(page.isFirst())
 			.build();
 	}
