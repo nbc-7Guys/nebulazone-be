@@ -83,6 +83,12 @@ public class BidVo {
 		}
 	}
 
+	public void validMismatchBidOwner(Long bidUserId) {
+		if (!this.bidUserId.equals(bidUserId)) {
+			throw new BidException(BidErrorCode.BID_USER_MISMATCH);
+		}
+	}
+
 	public void validAuctionMismatch(Long auctionId) {
 		if (!Objects.equals(this.auctionId, auctionId)) {
 			throw new BidException(BidErrorCode.BID_AUCTION_MISMATCH);

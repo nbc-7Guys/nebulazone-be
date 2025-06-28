@@ -103,8 +103,6 @@ public class BidRedisService {
 
 	}
 
-	// todo - 내 입찰 전체 조회 redis, rdb 각각 조회해서 한방에 응답해주자 그냥
-
 	/**
 	 * redis 경매 입찰 취소<br>
 	 * Redisson RLock을 사용하여 동시성 제어

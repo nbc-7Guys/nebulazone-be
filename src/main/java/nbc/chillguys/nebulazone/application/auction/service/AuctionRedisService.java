@@ -135,7 +135,7 @@ public class AuctionRedisService {
 				.findFirst()
 				.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
 
-			wonBidVo.validNotBidOwner(request.bidUserId());
+			wonBidVo.validMismatchBidOwner(request.bidUserId());
 
 			List<Long> bidUserIds = bidVoList.stream()
 				.map(BidVo::getBidUserId)

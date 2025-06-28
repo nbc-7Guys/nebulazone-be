@@ -60,18 +60,12 @@ public class BidService {
 		);
 
 		List<Long> auctionIds = auctionRedisService.findAllAuctionVoIds();
-		System.out.println("Active auction IDs: " + auctionIds); // [10]이 있는지?
-
 		List<BidVo> myBidVoList = bidRedisService.findMyBidVoList(user.getId(), auctionIds);
-		System.out.println("My bids count: " + myBidVoList.size());
 
 		for (BidVo bidVo : myBidVoList) {
 			AuctionVo auctionVo = auctionRedisService.findRedisAuctionVo(bidVo.getAuctionId());
-			System.out.println("Checking auction: " + bidVo.getAuctionId());
 
 			if (auctionVo != null) {
-				System.out.println("Adding to response");
-				System.out.println("AuctionVo is null for auction: " + bidVo.getAuctionId());
 				allMyBids.add(FindMyBidsResponse.of(bidVo, auctionVo));
 			}
 		}
