@@ -20,7 +20,7 @@ public record FindAllAuctionsDto(
 ) {
 
 	public static FindAllAuctionsDto of(AuctionVo auctionVo, Long bidCount) {
-		
+
 		String productImageUrl = Optional.ofNullable(auctionVo.getProductImageUrls())
 			.filter(images -> !images.isEmpty())
 			.map(List::getFirst)
