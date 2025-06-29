@@ -1,11 +1,12 @@
 package nbc.chillguys.nebulazone.domain.ban.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.ban.dto.BanCreateCommand;
 import nbc.chillguys.nebulazone.domain.ban.entity.Ban;
+import nbc.chillguys.nebulazone.domain.ban.exception.BanErrorCode;
+import nbc.chillguys.nebulazone.domain.ban.exception.BanException;
 import nbc.chillguys.nebulazone.domain.ban.repository.BanRepository;
 
 @Service
@@ -19,23 +20,34 @@ public class BanDomainService {
 	 * @param command 밴 생성
 	 * @author 정석현
 	 */
-	@Transactional
 	public void createBan(BanCreateCommand command) {
-		if (isBanned(command.ipAddress())) {
-			return;
-		}
+		validateNotAlreadyBanned(command.ipAddress());
 		Ban ban = Ban.create(command);
 		banRepository.save(ban);
 	}
 
 	/**
 	 * 밴 유무
+	 *
 	 * @param ipAddress 아이피 주소
 	 * @return 밴 여부
 	 * @author 정석현
 	 */
-	public boolean isBanned(String ipAddress) {
-		return banRepository.findActiveBanByIp(ipAddress).isPresent();
+	public void validateBanned(String ipAddress) {
+		banRepository.findActiveBanByIp(ipAddress)
+			.orElseThrow(() -> new BanException(BanErrorCode.BAN_NOT_FOUND));
 	}
 
+	/**
+	 * 이미 밴이 되었는지 확인
+	 *
+	 * @param ipAddress 아이피 주소
+	 * @author 정석현
+	 */
+	public void validateNotAlreadyBanned(String ipAddress) {
+		banRepository.findActiveBanByIp(ipAddress)
+			.ifPresent(ban -> {
+				throw new BanException(BanErrorCode.ALREADY_BANNED);
+			});
+	}
 }

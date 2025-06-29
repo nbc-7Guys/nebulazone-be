@@ -13,4 +13,6 @@ public interface NotificationRepositoryCustom {
 
 	Optional<Notification> findQueryNotificationByUserAndId(Long userId, Long notificationId);
 
+	Long markAllAsRead(Long userId);
+
 }

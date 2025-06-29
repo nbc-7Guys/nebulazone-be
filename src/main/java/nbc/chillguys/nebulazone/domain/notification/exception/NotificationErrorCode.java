@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.domain.ban.exception;
+package nbc.chillguys.nebulazone.domain.notification.exception;
 
 import org.springframework.http.HttpStatus;
 
@@ -8,9 +8,8 @@ import nbc.chillguys.nebulazone.common.exception.ErrorCode;
 
 @Getter
 @RequiredArgsConstructor
-public enum BanErrorCode implements ErrorCode {
-	BAN_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 밴입니다."),
-	ALREADY_BANNED(HttpStatus.BAD_REQUEST, "이미 존재하는 밴입니다");
+public enum NotificationErrorCode implements ErrorCode {
+	NOTIFICATION_NOT_FOUND(HttpStatus.BAD_REQUEST, "알림이 존재하지 않습니다.");
 
 	private final HttpStatus status;
 	private final String message;

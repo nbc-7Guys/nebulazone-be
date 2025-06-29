@@ -226,10 +226,14 @@ class UserServiceTest {
 			// Given
 			WithdrawUserRequest withdrawUserRequest = new WithdrawUserRequest("encodedPassword");
 
+			given(userDomainService.findActiveUserById(anyLong()))
+				.willReturn(user);
+
 			// When
 			WithdrawUserResponse response = userService.withdrawUser(withdrawUserRequest, user);
 
 			// Then
+			verify(userDomainService, times(1)).findActiveUserById(user.getId());
 			verify(userCacheService).deleteUserById(user.getId());
 			verify(userDomainService).validPassword("encodedPassword", "encodedPassword");
 			verify(userDomainService).withdrawUser(user);

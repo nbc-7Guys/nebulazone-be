@@ -18,7 +18,7 @@ public class BanCleanerScheduler {
 
 	private final BanRepository banRepository;
 
-	@Scheduled(fixedDelay = 600_000)
+	@Scheduled(cron = "0 0 0 * * *")
 	@Transactional
 	public void removeExpiredBans() {
 		LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);

@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.infra.websocket.eventlistener;
+package nbc.chillguys.nebulazone.infra.websocket.eventListener;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;

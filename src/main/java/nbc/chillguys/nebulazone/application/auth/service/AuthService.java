@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auth.dto.request.SignInRequest;
 import nbc.chillguys.nebulazone.application.auth.dto.response.ReissueResponse;
 import nbc.chillguys.nebulazone.application.auth.dto.response.SignInResponse;
+import nbc.chillguys.nebulazone.application.auth.metrics.AuthMetrics;
+import nbc.chillguys.nebulazone.common.exception.BaseException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.security.JwtUtil;
@@ -21,15 +23,27 @@ import nbc.chillguys.nebulazone.infra.security.dto.AuthTokens;
 public class AuthService {
 	private final UserDomainService userDomainService;
 	private final JwtUtil jwtUtil;
+	private final AuthMetrics authMetrics;
 
-	public SignInResponse signIn(SignInRequest signInRequest) {
-		User user = userDomainService.findActiveUserByEmail(signInRequest.email());
+	public SignInResponse signIn(SignInRequest request) {
+		long start = System.currentTimeMillis();
 
-		userDomainService.validPassword(signInRequest.password(), user.getPassword());
+		try {
+			User user = userDomainService.findActiveUserByEmail(request.email());
+			userDomainService.validPassword(request.password(), user.getPassword());
 
-		AuthTokens authTokens = jwtUtil.generateTokens(user);
+			authMetrics.countSuccess();
 
-		return SignInResponse.of(authTokens.accessToken(), authTokens.refreshToken());
+			AuthTokens tokens = jwtUtil.generateTokens(user);
+			return SignInResponse.of(tokens.accessToken(), tokens.refreshToken());
+
+		} catch (BaseException e) {
+			authMetrics.countFailure();
+			throw e;
+
+		} finally {
+			authMetrics.recordLatency(System.currentTimeMillis() - start);
+		}
 	}
 
 	public void signOut() {

@@ -43,6 +43,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
+import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +56,7 @@ public class ProductService {
 	private final CatalogDomainService catalogDomainService;
 	private final AuctionRedisService auctionRedisService;
 	private final GcsClient gcsClient;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
 	public ProductResponse createProduct(User user, Long catalogId, CreateProductRequest request,
@@ -156,10 +158,10 @@ public class ProductService {
 		return DeleteProductResponse.from(productId);
 	}
 
+	@DistributedLock(key = "'lock:purchase:product:' + #productId")
 	@Transactional
-	public PurchaseProductResponse purchaseProduct(User loggedInUser, Long catalogId, Long productId) {
-		User user = userDomainService.findActiveUserById(loggedInUser.getId());
-		Product product = productDomainService.findAvailableProductById(productId);
+	public PurchaseProductResponse purchaseProduct(User user, Long catalogId, Long productId) {
+		Product product = productDomainService.findAvailableProductByIdForUpdate(productId);
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		product.validPurchasable(user.getId());
@@ -168,18 +170,9 @@ public class ProductService {
 		ProductPurchaseCommand command = ProductPurchaseCommand.of(user, catalog, productId);
 		productDomainService.purchaseProduct(command);
 
-		productDomainService.saveProductToEs(product);
-
-		TransactionCreateCommand buyerTxCreateCommand
-			= TransactionCreateCommand.of(user, UserType.BUYER, product, product.getTxMethod().name(),
-			product.getPrice());
-		Transaction buyerTx = transactionDomainService.createTransaction(buyerTxCreateCommand);
-		TransactionCreateCommand sellerTxCreateCommand
-			= TransactionCreateCommand.of(product.getSeller(), UserType.SELLER, product, product.getTxMethod().name(),
-			product.getPrice());
-		Transaction sellerTx = transactionDomainService.createTransaction(sellerTxCreateCommand);
-
-		return PurchaseProductResponse.from(buyerTx, sellerTx);
+		LocalDateTime purchasedAt = LocalDateTime.now();
+		eventPublisher.publishEvent(new PurchaseProductEvent(user, product, purchasedAt));
+		return PurchaseProductResponse.from(product, purchasedAt);
 	}
 
 	public Page<SearchProductResponse> searchProduct(String productName, String sellerNickname,
