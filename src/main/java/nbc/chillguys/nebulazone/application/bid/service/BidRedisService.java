@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
 import nbc.chillguys.nebulazone.application.bid.dto.response.CreateBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.DeleteBidResponse;
@@ -30,9 +31,11 @@ import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
+import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
 import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BidRedisService {
@@ -43,6 +46,7 @@ public class BidRedisService {
 	private final UserDomainService userDomainService;
 
 	private final AuctionRedisService auctionRedisService;
+	private final WebSocketSessionRedisService webSocketSessionRedisService;
 
 	/**
 	 * redis 경매 입찰<br>
@@ -95,7 +99,15 @@ public class BidRedisService {
 			auctionRedisService.updateAuctionCurrentPrice(auctionId, bidPrice);
 			loginUser.usePoint(bidPrice);
 
-			return CreateBidResponse.from(bidVo);
+			CreateBidResponse response = CreateBidResponse.from(bidVo);
+
+			try {
+				webSocketSessionRedisService.sendBidUpdate(auctionId, response);
+			} catch (Exception e) {
+				log.error("입찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
+			}
+
+			return response;
 
 		} finally {
 			bidLock.unlock();
@@ -161,7 +173,15 @@ public class BidRedisService {
 			auctionRedisService.updateAuctionCurrentPrice(auctionId, newCurrentPrice);
 			loginUser.addPoint(bidPrice);
 
-			return DeleteBidResponse.from(findBidVo);
+			DeleteBidResponse response = DeleteBidResponse.from(findBidVo);
+
+			try {
+				webSocketSessionRedisService.sendBidUpdate(auctionId, response);
+			} catch (Exception e) {
+				log.error("입찰 취소 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
+			}
+
+			return response;
 
 		} finally {
 			bidLock.unlock();
