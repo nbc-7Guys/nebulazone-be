@@ -36,12 +36,9 @@ import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
-import nbc.chillguys.nebulazone.domain.product.repository.ProductRepositoryCustomImpl;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
-import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
 import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
@@ -50,15 +47,12 @@ import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 @RequiredArgsConstructor
 public class ProductService {
 
-	private final UserDomainService userDomainService;
 	private final ProductDomainService productDomainService;
 	private final AuctionDomainService auctionDomainService;
-	private final TransactionDomainService transactionDomainService;
 	private final CatalogDomainService catalogDomainService;
 	private final AuctionRedisService auctionRedisService;
 	private final GcsClient gcsClient;
 	private final ApplicationEventPublisher eventPublisher;
-	private final ProductRepositoryCustomImpl productRepositoryCustomImpl;
 
 	@Transactional
 	public ProductResponse createProduct(User user, Long catalogId, CreateProductRequest request,
