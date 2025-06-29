@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.application.auction.service;
 import static nbc.chillguys.nebulazone.application.auction.consts.AuctionConst.*;
 import static nbc.chillguys.nebulazone.application.bid.consts.BidConst.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -118,7 +119,8 @@ public class AutoAuctionRedisService {
 						if (BidStatus.WON.name().equals(bidVo.getBidStatus())) {
 							TransactionCreateCommand buyerTxCreateCommand = TransactionCreateCommand.of(bidUser,
 								UserType.BUYER, wonAuctionProduct, wonAuctionProduct.getTxMethod().name(),
-								auction.getCurrentPrice());
+								auction.getCurrentPrice(), LocalDateTime.now());
+
 							transactionDomainService.createTransaction(buyerTxCreateCommand);
 
 						} else if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
@@ -129,7 +131,8 @@ public class AutoAuctionRedisService {
 				bidDomainService.createAllBid(auction, bidVoList, userMap);
 
 				TransactionCreateCommand sellerTxCreateCommand = TransactionCreateCommand.of(seller, UserType.SELLER,
-					wonAuctionProduct, wonAuctionProduct.getTxMethod().name(), auction.getCurrentPrice());
+					wonAuctionProduct, wonAuctionProduct.getTxMethod().name(),
+					auction.getCurrentPrice(), LocalDateTime.now());
 
 				transactionDomainService.createTransaction(sellerTxCreateCommand);
 

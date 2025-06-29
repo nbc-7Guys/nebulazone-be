@@ -1,9 +1,11 @@
 package nbc.chillguys.nebulazone.application.product.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,11 +35,9 @@ import nbc.chillguys.nebulazone.domain.product.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
-import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
-import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
-import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
