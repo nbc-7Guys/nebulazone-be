@@ -21,10 +21,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuctionRequest;
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.EndAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindSortTypeAuctionResponse;
-import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
@@ -44,9 +45,11 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
 import nbc.chillguys.nebulazone.infra.redis.dto.FindAllAuctionsDto;
+import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
 import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuctionRedisService {
@@ -60,6 +63,8 @@ public class AuctionRedisService {
 	private final BidDomainService bidDomainService;
 	private final TransactionDomainService transactionDomainService;
 	private final ProductDomainService productDomainService;
+
+	private final WebSocketSessionRedisService webSocketSessionRedisService;
 
 	/**
 	 * redis 경매 생성<br>
@@ -96,7 +101,7 @@ public class AuctionRedisService {
 	 * @author 전나겸
 	 */
 	@Transactional
-	public ManualEndAuctionResponse manualEndAuction(Long auctionId, User loginUser, ManualEndAuctionRequest request) {
+	public EndAuctionResponse manualEndAuction(Long auctionId, User loginUser, ManualEndAuctionRequest request) {
 		RLock auctionEndingLock = redissonClient.getLock(AUCTION_LOCK_ENDING_PREFIX + auctionId);
 
 		try {
@@ -158,6 +163,7 @@ public class AuctionRedisService {
 						TransactionCreateCommand buyerTxCreateCommand = TransactionCreateCommand.of(bidUser,
 							UserType.BUYER, wonAuctionProduct, wonAuctionProduct.getTxMethod().name(),
 							auction.getCurrentPrice(), LocalDateTime.now());
+
 						transactionDomainService.createTransaction(buyerTxCreateCommand);
 
 					} else if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
@@ -177,7 +183,15 @@ public class AuctionRedisService {
 			redisTemplate.delete(AUCTION_PREFIX + auctionId);
 			redisTemplate.delete(BID_PREFIX + auctionId);
 
-			return ManualEndAuctionResponse.of(auction, wonBidVo, wonAuctionProduct);
+			EndAuctionResponse response = EndAuctionResponse.of(auction, wonBidVo, wonAuctionProduct);
+
+			try {
+				webSocketSessionRedisService.sendAuctionEndUpdate(auctionId, response);
+			} catch (Exception e) {
+				log.error("수동 낙찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
+			}
+
+			return response;
 
 		} finally {
 			auctionEndingLock.unlock();

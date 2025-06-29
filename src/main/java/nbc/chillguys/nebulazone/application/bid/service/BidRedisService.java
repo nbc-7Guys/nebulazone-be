@@ -43,6 +43,7 @@ public class BidRedisService {
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ObjectMapper objectMapper;
 	private final RedissonClient redissonClient;
+
 	private final UserDomainService userDomainService;
 
 	private final AuctionRedisService auctionRedisService;
