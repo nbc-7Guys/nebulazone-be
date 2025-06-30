@@ -66,7 +66,7 @@ public class ChatMessageController {
 	@PostMapping(value = "/send/image/{roomId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public void sendImage(
 		@AuthenticationPrincipal User user,
-		@PathVariable @NotBlank(message = "roomId를 입력해주세요") Long roomId,
+		@PathVariable Long roomId,
 		@RequestPart("image") MultipartFile multipartFile,
 		@RequestPart("meta") String type
 	) {

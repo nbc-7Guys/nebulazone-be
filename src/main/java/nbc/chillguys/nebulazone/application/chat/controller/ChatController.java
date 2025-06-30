@@ -43,7 +43,7 @@ public class ChatController {
 	@PostMapping("/rooms")
 	public ResponseEntity<CreateChatRoomResponse> createChatRoom(
 		@AuthenticationPrincipal User user,
-		@RequestBody @Valid CreateChatRoomRequest request
+		@RequestBody CreateChatRoomRequest request
 	) {
 		CreateChatRoomResponse chatRoom = chatService.getOrCreate(user, request);
 		return ResponseEntity.ok(chatRoom);
@@ -79,7 +79,7 @@ public class ChatController {
 	@GetMapping("/rooms/history/{roomId}")
 	public ResponseEntity<List<FindChatHistoryResponse>> findChatHistories(
 		@AuthenticationPrincipal User user,
-		@PathVariable("roomId") @NotBlank(message = "roomId를 입력해주세요") Long roomId,
+		@PathVariable("roomId") Long roomId,
 		@RequestParam(required = false) Long lastId,
 		@RequestParam(defaultValue = "30") int size
 	) {
@@ -100,7 +100,7 @@ public class ChatController {
 	@DeleteMapping("/rooms/{roomId}")
 	public ResponseEntity<String> leaveChatRoom(
 		@AuthenticationPrincipal User user,
-		@PathVariable("roomId") @NotBlank(message = "roomId를 입력해주세요") Long roomId
+		@PathVariable("roomId") Long roomId
 	) {
 		chatService.exitChatRoom(user, roomId);
 		return ResponseEntity.ok("성공적으로 채팅방을 나갔습니다.");
