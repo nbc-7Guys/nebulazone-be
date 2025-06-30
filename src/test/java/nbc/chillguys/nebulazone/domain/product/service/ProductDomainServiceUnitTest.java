@@ -165,7 +165,7 @@ class ProductDomainServiceUnitTest {
 		@DisplayName("판매 상품 수정 성공")
 		void success_updateProduct() {
 			ProductUpdateCommand command
-				= new ProductUpdateCommand(user, catalog, product.getId(), "수정된 이름", "수정된 본문");
+				= new ProductUpdateCommand(product.getId(), user.getId(), catalog.getId(), "수정된 이름", "수정된 본문");
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -179,7 +179,7 @@ class ProductDomainServiceUnitTest {
 		@DisplayName("판매 상품 수정 실패 - 판매 상품을 찾을 수 없음")
 		void fail_updateProduct_productNotFound() {
 			ProductUpdateCommand command
-				= new ProductUpdateCommand(user, catalog, product.getId(), "수정된 이름", "수정된 본문");
+				= new ProductUpdateCommand(product.getId(), user.getId(), catalog.getId(), "수정된 이름", "수정된 본문");
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
@@ -195,7 +195,7 @@ class ProductDomainServiceUnitTest {
 			ReflectionTestUtils.setField(catalog, "id", 2L);
 
 			ProductUpdateCommand command
-				= new ProductUpdateCommand(user, catalog, product.getId(), "수정된 이름", "수정된 본문");
+				= new ProductUpdateCommand(product.getId(), user.getId(), catalog.getId(), "수정된 이름", "수정된 본문");
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -211,7 +211,7 @@ class ProductDomainServiceUnitTest {
 			ReflectionTestUtils.setField(user, "id", 2L);
 
 			ProductUpdateCommand command
-				= new ProductUpdateCommand(user, catalog, product.getId(), "수정된 이름", "수정된 본문");
+				= new ProductUpdateCommand(product.getId(), user.getId(), catalog.getId(), "수정된 이름", "수정된 본문");
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
