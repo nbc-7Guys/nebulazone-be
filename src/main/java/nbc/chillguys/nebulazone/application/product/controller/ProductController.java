@@ -45,7 +45,7 @@ public class ProductController {
 	public ResponseEntity<ProductResponse> createProduct(
 		@AuthenticationPrincipal User user,
 		@PathVariable("catalogId") Long catalogId,
-		@Valid @RequestPart("product") CreateProductRequest request) {
+		@Valid @RequestBody CreateProductRequest request) {
 
 		ProductResponse productResponse = productService.createProduct(user, catalogId, request);
 
