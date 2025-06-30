@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nbc.chillguys.nebulazone.application.auction.dto.response.EndAuctionResponse;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AutoAuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
@@ -30,6 +31,7 @@ import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
+import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
 import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
@@ -46,6 +48,8 @@ public class AutoAuctionRedisService {
 	private final BidDomainService bidDomainService;
 	private final UserDomainService userDomainService;
 	private final TransactionDomainService transactionDomainService;
+
+	private final RedisMessagePublisher redisMessagePublisher;
 
 	/**
 	 * 자동 경매 종료<br>
@@ -135,6 +139,22 @@ public class AutoAuctionRedisService {
 					auction.getCurrentPrice(), LocalDateTime.now());
 
 				transactionDomainService.createTransaction(sellerTxCreateCommand);
+
+				try {
+
+					BidVo wonBidVo = bidVoList.stream()
+						.filter(bidVo -> BidStatus.WON.name().equals(bidVo.getBidStatus()))
+						.findFirst()
+						.orElse(null);
+
+					if (wonBidVo != null) {
+						EndAuctionResponse response = EndAuctionResponse.of(auction, wonBidVo, wonAuctionProduct);
+						redisMessagePublisher.publishAuctionUpdate(auctionId, "won", response);
+					}
+
+				} catch (Exception e) {
+					log.error("자동 낙찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
+				}
 
 			}
 

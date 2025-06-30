@@ -15,9 +15,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuctionRequest;
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
+import nbc.chillguys.nebulazone.application.auction.dto.response.EndAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindDetailAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindSortTypeAuctionResponse;
-import nbc.chillguys.nebulazone.application.auction.dto.response.ManualEndAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionService;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
@@ -52,12 +52,12 @@ public class AuctionController {
 	}
 
 	@PostMapping("/{auctionId}")
-	public ResponseEntity<ManualEndAuctionResponse> manualEndAuction(
+	public ResponseEntity<EndAuctionResponse> manualEndAuction(
 		@PathVariable("auctionId") Long auctionId,
 		@AuthenticationPrincipal User user,
 		@Valid @RequestBody ManualEndAuctionRequest request) {
 
-		ManualEndAuctionResponse response = auctionRedisService.manualEndAuction(auctionId, user, request);
+		EndAuctionResponse response = auctionRedisService.manualEndAuction(auctionId, user, request);
 
 		return ResponseEntity.ok(response);
 	}

@@ -8,7 +8,7 @@ import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
-public record ManualEndAuctionResponse(
+public record EndAuctionResponse(
 	Long auctionId,
 	Long winnerId,
 	String winnerNickname,
@@ -19,8 +19,8 @@ public record ManualEndAuctionResponse(
 	LocalDateTime wonDate
 ) {
 
-	public static ManualEndAuctionResponse of(Auction auction, BidVo wonBidVo, Product product) {
-		return new ManualEndAuctionResponse(
+	public static EndAuctionResponse of(Auction auction, BidVo wonBidVo, Product product) {
+		return new EndAuctionResponse(
 			auction.getId(),
 			wonBidVo.getBidUserId(),
 			wonBidVo.getBidUserNickname(),
