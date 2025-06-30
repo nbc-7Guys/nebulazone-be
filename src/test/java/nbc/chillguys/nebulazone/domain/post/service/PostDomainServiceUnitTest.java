@@ -129,8 +129,8 @@ class PostDomainServiceUnitTest {
 
 			given(postRepository.findActivePostByIdWithUser(post.getId())).willReturn(Optional.empty());
 
-			PostException exception
-				= assertThrows(PostException.class,
+			PostException exception = assertThrows(
+				PostException.class,
 				() -> postDomainService.updatePost(post.getId(), user.getId(), command));
 
 			assertEquals(PostErrorCode.POST_NOT_FOUND, exception.getErrorCode());
@@ -139,9 +139,8 @@ class PostDomainServiceUnitTest {
 		@Test
 		@DisplayName("게시글 수정 실패 - 게시글 주인이 아님")
 		void fail_updatePost_notPostOwner() {
-			List<String> imageUrls = List.of("image1.jpg, image2.jpg");
-			PostUpdateCommand command
-				= new PostUpdateCommand("수정된 제목", "수정된 본문");
+
+			PostUpdateCommand command = new PostUpdateCommand("수정된 제목", "수정된 본문");
 
 			given(postRepository.findActivePostByIdWithUser(post.getId())).willReturn(Optional.ofNullable(post));
 

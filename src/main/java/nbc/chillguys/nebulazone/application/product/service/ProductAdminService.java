@@ -88,6 +88,7 @@ public class ProductAdminService {
 		productDomainService.saveProductToEs(updatedProduct);
 
 		return ProductResponse.from(updatedProduct);
-		
+
 	}
+
 }
