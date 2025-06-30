@@ -81,10 +81,8 @@ public class ProductService {
 		return ProductResponse.from(createdProduct, productEndTime);
 	}
 
-	public ProductResponse updateProduct(User user, Long catalogId, Long productId, UpdateProductRequest request) {
-		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
-
-		ProductUpdateCommand command = request.toCommand(user, catalog, productId);
+	public ProductResponse updateProduct(Long productId, Long userId, Long catalogId, UpdateProductRequest request) {
+		ProductUpdateCommand command = request.toCommand(productId, userId, catalogId);
 		Product updatedProduct = productDomainService.updateProduct(command);
 
 		productDomainService.saveProductToEs(updatedProduct);

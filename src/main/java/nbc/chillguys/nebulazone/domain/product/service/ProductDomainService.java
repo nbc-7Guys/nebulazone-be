@@ -120,8 +120,8 @@ public class ProductDomainService {
 	public Product updateProduct(ProductUpdateCommand command) {
 		Product product = findActiveProductById(command.productId());
 
-		product.validBelongsToCatalog(command.catalog().getId());
-		product.validNotProductOwner(command.user().getId());
+		product.validBelongsToCatalog(command.catalogId());
+		product.validNotProductOwner(command.userId());
 
 		product.update(command.name(), command.description());
 

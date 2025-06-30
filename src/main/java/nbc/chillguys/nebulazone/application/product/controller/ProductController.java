@@ -59,7 +59,7 @@ public class ProductController {
 		@PathVariable("productId") Long productId,
 		@Valid @RequestBody UpdateProductRequest request) {
 		ProductResponse response
-			= productService.updateProduct(user, catalogId, productId, request);
+			= productService.updateProduct(productId, user.getId(), catalogId, request);
 
 		return ResponseEntity.ok(response);
 	}
