@@ -80,7 +80,6 @@ public class UserService {
 	}
 
 	public UserResponse addAddress(AddAddressUserRequest addAddressUserRequest, User loggedInUser) {
-
 		User user = userDomainService.addAddress(loggedInUser,
 			UserAddressCommand.from(addAddressUserRequest));
 
