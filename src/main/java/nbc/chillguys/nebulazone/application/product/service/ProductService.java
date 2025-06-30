@@ -12,8 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
+import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
 import nbc.chillguys.nebulazone.application.product.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.UpdateProductRequest;
@@ -83,6 +83,7 @@ public class ProductService {
 		return ProductResponse.from(createdProduct, productEndTime);
 	}
 
+	@Transactional
 	public ProductResponse updateProduct(User user, Long catalogId, Long productId, UpdateProductRequest request) {
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
@@ -167,6 +168,7 @@ public class ProductService {
 		return ProductResponse.from(product);
 	}
 
+	@Transactional
 	public ProductResponse updateProductImages(Long productId, List<MultipartFile> imageFiles, User user,
 		List<String> remainImageUrls) {
 

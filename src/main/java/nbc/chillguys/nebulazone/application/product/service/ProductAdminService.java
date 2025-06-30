@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
 import nbc.chillguys.nebulazone.application.product.dto.request.ProductAdminSearchRequest;
@@ -59,6 +60,7 @@ public class ProductAdminService {
 		productAdminDomainService.restoreProduct(productId);
 	}
 
+	@Transactional
 	public ProductResponse updateProductImages(Long productId, List<MultipartFile> imageFiles,
 		List<String> remainImageUrls) {
 

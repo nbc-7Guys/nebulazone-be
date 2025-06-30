@@ -83,6 +83,7 @@ public class PostService {
 		return GetPostResponse.from(post);
 	}
 
+	@Transactional
 	public GetPostResponse updatePostImages(Long postId, List<MultipartFile> imageFiles, User user,
 		List<String> remainImageUrls) {
 
