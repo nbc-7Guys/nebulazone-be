@@ -71,7 +71,7 @@ public class CommentService {
 	}
 
 	public DeleteCommentResponse deleteComment(User user, Long postId, Long commentId) {
-		Post post = postDomainService.findMyActivePost(postId, user.getId());
+		Post post = postDomainService.findActivePost(postId);
 
 		CommentDeleteCommand command = CommentDeleteCommand.of(user, post, commentId);
 		commentDomainService.deleteComment(command);
