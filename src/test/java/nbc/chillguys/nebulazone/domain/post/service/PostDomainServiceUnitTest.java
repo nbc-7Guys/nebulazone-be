@@ -27,7 +27,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
 import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
-import nbc.chillguys.nebulazone.domain.post.dto.PostDeleteCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
@@ -146,11 +145,11 @@ class PostDomainServiceUnitTest {
 		void success_updatePost() {
 			List<String> imageUrls = List.of("image1.jpg, image2.jpg");
 			PostUpdateCommand command
-				= new PostUpdateCommand(user.getId(), post.getId(), "수정된 제목", "수정된 본문", imageUrls);
+				= new PostUpdateCommand("수정된 제목", "수정된 본문", imageUrls);
 
 			given(postRepository.findActivePostByIdWithUser(post.getId())).willReturn(Optional.ofNullable(post));
 
-			Post result = postDomainService.updatePost(command);
+			Post result = postDomainService.updatePost(post.getId(), user.getId(), command);
 
 			assertEquals(command.title(), result.getTitle());
 			assertEquals(command.content(), result.getContent());
@@ -162,12 +161,12 @@ class PostDomainServiceUnitTest {
 		void fail_updatePost_postNotFound() {
 			List<String> imageUrls = List.of("image1.jpg, image2.jpg");
 			PostUpdateCommand command
-				= new PostUpdateCommand(user.getId(), post.getId(), "수정된 제목", "수정된 본문", imageUrls);
+				= new PostUpdateCommand("수정된 제목", "수정된 본문", imageUrls);
 
 			given(postRepository.findActivePostByIdWithUser(post.getId())).willReturn(Optional.empty());
 
 			PostException exception
-				= assertThrows(PostException.class, () -> postDomainService.updatePost(command));
+				= assertThrows(PostException.class, () -> postDomainService.updatePost(post.getId(), user.getId(), command));
 
 			assertEquals(PostErrorCode.POST_NOT_FOUND, exception.getErrorCode());
 		}
@@ -177,12 +176,12 @@ class PostDomainServiceUnitTest {
 		void fail_updatePost_notPostOwner() {
 			List<String> imageUrls = List.of("image1.jpg, image2.jpg");
 			PostUpdateCommand command
-				= new PostUpdateCommand(2L, post.getId(), "수정된 제목", "수정된 본문", imageUrls);
+				= new PostUpdateCommand("수정된 제목", "수정된 본문", imageUrls);
 
 			given(postRepository.findActivePostByIdWithUser(post.getId())).willReturn(Optional.ofNullable(post));
 
 			PostException exception
-				= assertThrows(PostException.class, () -> postDomainService.updatePost(command));
+				= assertThrows(PostException.class, () -> postDomainService.updatePost(post.getId(), 2L, command));
 
 			assertEquals(PostErrorCode.NOT_POST_OWNER, exception.getErrorCode());
 		}
@@ -195,11 +194,9 @@ class PostDomainServiceUnitTest {
 		@Test
 		@DisplayName("게시글 삭제 성공")
 		void success_deletePost() {
-			PostDeleteCommand command = new PostDeleteCommand(user.getId(), post.getId());
-
 			given(postRepository.findActivePostByIdWithUser(post.getId())).willReturn(Optional.ofNullable(post));
 
-			postDomainService.deletePost(command);
+			postDomainService.deletePost(post.getId(), user.getId());
 
 			assertTrue(post.isDeleted());
 			assertNotNull(post.getDeletedAt());
@@ -208,12 +205,10 @@ class PostDomainServiceUnitTest {
 		@Test
 		@DisplayName("게시글 삭제 실패 - 게시글을 찾을 수 없음")
 		void fail_deletePost_postNotFound() {
-			PostDeleteCommand command = new PostDeleteCommand(user.getId(), post.getId());
-
 			given(postRepository.findActivePostByIdWithUser(post.getId())).willReturn(Optional.empty());
 
 			PostException exception
-				= assertThrows(PostException.class, () -> postDomainService.deletePost(command));
+				= assertThrows(PostException.class, () -> postDomainService.deletePost(post.getId(), user.getId()));
 
 			assertEquals(PostErrorCode.POST_NOT_FOUND, exception.getErrorCode());
 		}
@@ -221,12 +216,10 @@ class PostDomainServiceUnitTest {
 		@Test
 		@DisplayName("게시글 삭제 실패 - 게시글 주인이 아님")
 		void fail_deletePost_notPostOwner() {
-			PostDeleteCommand command = new PostDeleteCommand(2L, post.getId());
-
 			given(postRepository.findActivePostByIdWithUser(post.getId())).willReturn(Optional.ofNullable(post));
 
 			PostException exception
-				= assertThrows(PostException.class, () -> postDomainService.deletePost(command));
+				= assertThrows(PostException.class, () -> postDomainService.deletePost(post.getId(), 2L));
 
 			assertEquals(PostErrorCode.NOT_POST_OWNER, exception.getErrorCode());
 		}

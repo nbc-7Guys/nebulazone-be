@@ -18,8 +18,8 @@ public record UpdatePostRequest(
 	List<String> remainImageUrls
 ) {
 
-	public PostUpdateCommand toCommand(Long userId, Long postId, List<String> imageUrls) {
-		return new PostUpdateCommand(userId, postId, title, content, imageUrls);
+	public PostUpdateCommand toCommand(List<String> imageUrls) {
+		return new PostUpdateCommand(title, content, imageUrls);
 	}
 
 	public PostAdminUpdateCommand toAdminCommand(Long postId, List<String> imageUrls) {
