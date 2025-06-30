@@ -70,10 +70,10 @@ public class CommentService {
 		return CommentResponse.from(comment);
 	}
 
-	public DeleteCommentResponse deleteComment(User user, Long postId, Long commentId) {
-		Post post = postDomainService.findActivePost(postId);
+	public DeleteCommentResponse deleteComment(Long commentId, Long userId, Long postId) {
+		postDomainService.findActivePost(postId);
 
-		CommentDeleteCommand command = CommentDeleteCommand.of(user, post, commentId);
+		CommentDeleteCommand command = CommentDeleteCommand.of(commentId, userId, postId);
 		commentDomainService.deleteComment(command);
 
 		return DeleteCommentResponse.from(commentId);
