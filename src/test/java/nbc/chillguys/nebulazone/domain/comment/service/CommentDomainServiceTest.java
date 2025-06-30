@@ -3,7 +3,7 @@ package nbc.chillguys.nebulazone.domain.comment.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -56,7 +56,7 @@ class CommentDomainServiceTest {
 
 	@BeforeEach
 	void init() {
-		Set<Address> addresses = new HashSet<>();
+		List<Address> addresses = new ArrayList<>();
 		IntStream.range(1, 4)
 			.forEach(i -> addresses.add(
 				Address.builder()

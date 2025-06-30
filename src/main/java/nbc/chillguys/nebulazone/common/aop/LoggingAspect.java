@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.infra.aop;
+package nbc.chillguys.nebulazone.common.aop;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;

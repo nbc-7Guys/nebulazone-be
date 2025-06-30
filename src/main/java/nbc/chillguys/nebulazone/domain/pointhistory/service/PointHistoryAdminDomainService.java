@@ -25,6 +25,7 @@ public class PointHistoryAdminDomainService {
 	 * @param request 검색 조건
 	 * @param pageable 페이징
 	 * @return 검색 결과
+	 * @author 정석현
 	 */
 	public Page<AdminPointHistoryResponse> searchAdminPointHistories(
 		PointHistoryAdminRequest request, Pageable pageable) {
@@ -36,6 +37,7 @@ public class PointHistoryAdminDomainService {
 	 *
 	 * @param pointHistoryId 포인트 아이디
 	 * @return 승인된 포인트 요청
+	 * @author 정석현
 	 */
 	@Transactional
 	public PointHistory approvePointHistory(Long pointHistoryId) {
@@ -48,6 +50,7 @@ public class PointHistoryAdminDomainService {
 	 * 포인트 요청 거절
 	 *
 	 * @param pointHistoryId 포인트 아이디
+	 * @author 정석현
 	 */
 	@Transactional
 	public void rejectPointHistory(Long pointHistoryId) {
