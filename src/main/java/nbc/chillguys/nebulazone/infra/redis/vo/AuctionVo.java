@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionAdminUpdateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
@@ -97,4 +98,33 @@ public class AuctionVo {
 			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
 		}
 	}
+
+	public void validateUpdatableByAdmin(AuctionAdminUpdateCommand command) {
+		validAuctionNotClosed();
+
+		validWonAuction();
+
+		if (command.startPrice() != null && command.startPrice() <= 0) {
+			throw new AuctionException(AuctionErrorCode.INVALID_START_PRICE);
+		}
+		if (command.currentPrice() != null && command.currentPrice() < 0) {
+			throw new AuctionException(AuctionErrorCode.INVALID_CURRENT_PRICE);
+		}
+		if (command.endTime() != null && command.endTime().isBefore(LocalDateTime.now())) {
+			throw new AuctionException(AuctionErrorCode.AUCTION_END_TIME_INVALID);
+		}
+	}
+
+	public void updateByAdmin(Long startPrice, Long currentPrice, LocalDateTime endTime) {
+		if (startPrice != null) {
+			this.startPrice = startPrice;
+		}
+		if (currentPrice != null) {
+			this.currentPrice = currentPrice;
+		}
+		if (endTime != null) {
+			this.endTime = endTime;
+		}
+	}
+
 }

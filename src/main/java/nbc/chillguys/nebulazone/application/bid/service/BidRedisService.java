@@ -26,6 +26,7 @@ import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
 import nbc.chillguys.nebulazone.application.bid.dto.response.CreateBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.DeleteBidResponse;
 import nbc.chillguys.nebulazone.application.bid.dto.response.FindBidResponse;
+import nbc.chillguys.nebulazone.application.bid.metrics.BidMetrics;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
@@ -48,6 +49,7 @@ public class BidRedisService {
 
 	private final AuctionRedisService auctionRedisService;
 	private final RedisMessagePublisher redisMessagePublisher;
+	private final BidMetrics bidMetrics;
 
 	/**
 	 * redis 경매 입찰<br>
@@ -60,6 +62,7 @@ public class BidRedisService {
 	 */
 	@Transactional
 	public CreateBidResponse createBid(Long auctionId, User user, Long bidPrice) {
+		long start = System.currentTimeMillis();
 
 		RLock bidLock = redissonClient.getLock(BID_LOCK_PREFIX + auctionId + ":" + user.getId());
 		User loginUser = userDomainService.findActiveUserById(user.getId());
@@ -108,9 +111,14 @@ public class BidRedisService {
 				log.error("입찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
 			}
 
+			bidMetrics.countBidSuccess();
+			bidMetrics.recordBidAmount(bidPrice);
+
 			return response;
 
 		} finally {
+			long elapsed = System.currentTimeMillis() - start;
+			bidMetrics.recordBidLatency(elapsed);
 			bidLock.unlock();
 		}
 
@@ -182,6 +190,7 @@ public class BidRedisService {
 				log.error("입찰 취소 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
 			}
 
+			bidMetrics.countBidCancel();
 			return response;
 
 		} finally {
