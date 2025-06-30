@@ -36,7 +36,10 @@ import nbc.chillguys.nebulazone.domain.product.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.event.ChangeToAuctionTypeEvent;
+import nbc.chillguys.nebulazone.domain.product.event.DeleteProductEvent;
 import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
+import nbc.chillguys.nebulazone.domain.product.event.UpdateProductEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -51,7 +54,6 @@ public class ProductService {
 	private final ProductDomainService productDomainService;
 	private final AuctionDomainService auctionDomainService;
 	private final CatalogDomainService catalogDomainService;
-	private final NotificationService notificationService;
 	private final AuctionRedisService auctionRedisService;
 	private final GcsClient gcsClient;
 	private final ApplicationEventPublisher eventPublisher;
@@ -84,45 +86,43 @@ public class ProductService {
 	}
 
 	@Transactional
-	public ProductResponse updateProduct(User user, Long catalogId, Long productId, UpdateProductRequest request) {
-		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
-
-		ProductUpdateCommand command = request.toCommand(user, catalog, productId);
+	public ProductResponse updateProduct(Long productId, Long userId, Long catalogId, UpdateProductRequest request) {
+		ProductUpdateCommand command = request.toCommand(productId, userId, catalogId);
 		Product updatedProduct = productDomainService.updateProduct(command);
 
-		productDomainService.saveProductToEs(updatedProduct);
+		eventPublisher.publishEvent(new UpdateProductEvent(updatedProduct));
 
 		return ProductResponse.from(updatedProduct);
 	}
 
 	@Transactional
-	public ProductResponse changeToAuctionType(User user, Long catalogId, Long productId,
-		ChangeToAuctionTypeRequest request) {
-		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
-
-		ChangeToAuctionTypeCommand command = request.toCommand(user, catalog, productId);
+	public ProductResponse changeToAuctionType(
+		Long productId,
+		Long userId,
+		Long catalogId,
+		ChangeToAuctionTypeRequest request
+	) {
+		ChangeToAuctionTypeCommand command = request.toCommand(productId, userId, catalogId);
 		Product product = productDomainService.changeToAuctionType(command);
 
-		productDomainService.saveProductToEs(product);
-
 		auctionDomainService.createAuction(AuctionCreateCommand.of(product, request.getProductEndTime()));
+
+		eventPublisher.publishEvent(new ChangeToAuctionTypeEvent(product));
 
 		return ProductResponse.from(product, request.getProductEndTime());
 	}
 
 	@Transactional
-	public DeleteProductResponse deleteProduct(User user, Long catalogId, Long productId) {
-		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
-
-		ProductDeleteCommand command = ProductDeleteCommand.of(user, catalog, productId);
+	public DeleteProductResponse deleteProduct(Long productId, Long userId, Long catalogId) {
+		ProductDeleteCommand command = ProductDeleteCommand.of(productId, userId, catalogId);
 		Product product = productDomainService.deleteProduct(command);
-
-		productDomainService.deleteProductFromEs(productId);
 
 		if (Objects.equals(product.getTxMethod(), ProductTxMethod.AUCTION)) {
 			Auction auction = auctionDomainService.findAuctionByProductId(productId);
 			auction.delete();
 		}
+
+		eventPublisher.publishEvent(new DeleteProductEvent(productId));
 
 		return DeleteProductResponse.from(productId);
 	}
@@ -131,19 +131,19 @@ public class ProductService {
 	@Transactional
 	public PurchaseProductResponse purchaseProduct(User user, Long catalogId, Long productId) {
 		Product product = productDomainService.findAvailableProductByIdForUpdate(productId);
-		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
-		product.validPurchasable(user.getId());
+		product.validNotOwner(user.getId());
+		product.validBelongsToCatalog(catalogId);
+
 		user.usePoint(product.getPrice());
 
-		ProductPurchaseCommand command = ProductPurchaseCommand.of(user, catalog, productId);
+		ProductPurchaseCommand command = ProductPurchaseCommand.of(productId, user.getId(), catalogId);
 		productDomainService.purchaseProduct(command);
+
+		product.getSeller().addPoint(product.getPrice());
 
 		LocalDateTime purchasedAt = LocalDateTime.now();
 		eventPublisher.publishEvent(new PurchaseProductEvent(user, product, purchasedAt));
-
-		notificationService.sendProductPurchaseNotification(product.getId(), product.getSellerId(), user.getId(),
-			product.getName(), user.getNickname());
 
 		return PurchaseProductResponse.from(product, purchasedAt);
 	}

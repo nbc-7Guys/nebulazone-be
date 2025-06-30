@@ -12,6 +12,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +30,7 @@ public class SwaggerConfig {
 	@Bean
 	public OpenAPI openApi() {
 		return new OpenAPI()
+			.addServersItem(new Server().url("https://api2.nebulazone.store"))
 			.addSecurityItem(new SecurityRequirement().addList("bearer-key").addList("Refresh-Token"))
 			.components(new Components()
 				.addSecuritySchemes("bearer-key",
