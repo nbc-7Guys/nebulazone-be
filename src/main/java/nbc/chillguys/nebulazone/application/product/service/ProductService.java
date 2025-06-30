@@ -36,6 +36,7 @@ import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
+import nbc.chillguys.nebulazone.domain.product.event.UpdateProductEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -85,7 +86,7 @@ public class ProductService {
 		ProductUpdateCommand command = request.toCommand(productId, userId, catalogId);
 		Product updatedProduct = productDomainService.updateProduct(command);
 
-		productDomainService.saveProductToEs(updatedProduct);
+		eventPublisher.publishEvent(new UpdateProductEvent(updatedProduct));
 
 		return ProductResponse.from(updatedProduct);
 	}
