@@ -82,6 +82,7 @@ public class ProductService {
 		return ProductResponse.from(createdProduct, productEndTime);
 	}
 
+	@Transactional
 	public ProductResponse updateProduct(Long productId, Long userId, Long catalogId, UpdateProductRequest request) {
 		ProductUpdateCommand command = request.toCommand(productId, userId, catalogId);
 		Product updatedProduct = productDomainService.updateProduct(command);
