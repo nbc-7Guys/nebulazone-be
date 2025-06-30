@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
-import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
 import nbc.chillguys.nebulazone.application.product.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.UpdateProductRequest;
@@ -172,7 +171,12 @@ public class ProductService {
 	public ProductResponse updateProductImages(Long productId, List<MultipartFile> imageFiles, User user,
 		List<String> remainImageUrls) {
 
-		List<String> productImageUrs = new ArrayList<>(remainImageUrls);
+		List<String> productImageUrs = new ArrayList<>();
+
+		if (remainImageUrls != null) {
+			productImageUrs.addAll(remainImageUrls);
+		}
+
 		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
 		if (hasImage) {
 			List<String> newImageUrls = imageFiles.stream()
