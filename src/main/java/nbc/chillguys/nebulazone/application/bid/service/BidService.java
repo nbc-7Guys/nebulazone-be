@@ -33,6 +33,14 @@ public class BidService {
 	private final AuctionRedisService auctionRedisService;
 	private final BidRedisService bidRedisService;
 
+	/**
+	 * 특정 경매의 입찰 내역 조회
+	 * @param auctionId 경매 id
+	 * @param page 페이징
+	 * @param size 사이즈
+	 * @return 조회된 입찰 내역 응답값
+	 * @author 전나겸
+	 */
 	public CommonPageResponse<FindBidResponse> findBidsByAuctionId(Long auctionId, int page, int size) {
 
 		Page<FindBidResponse> findBidResponse = bidRedisService.findBidsByAuctionId(auctionId, page, size);
@@ -49,6 +57,14 @@ public class BidService {
 		return CommonPageResponse.from(response);
 	}
 
+	/**
+	 * 내 입찰 내역 조회
+	 * @param user 로그인 유저
+	 * @param page 페이징
+	 * @param size 사이즈
+	 * @return 조회된 내 입찰 내역 응답값
+	 * @author 전나겸
+	 */
 	public CommonPageResponse<FindMyBidsResponse> findMyBids(User user, int page, int size) {
 
 		List<FindMyBidsInfo> findBids = bidDomainService.findMyBids(user.getId());
