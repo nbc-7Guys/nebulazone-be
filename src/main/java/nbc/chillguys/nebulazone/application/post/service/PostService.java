@@ -53,6 +53,7 @@ public class PostService {
 
 	}
 
+	@Transactional
 	public UpdatePostResponse updatePost(
 		Long userId,
 		Long postId,
