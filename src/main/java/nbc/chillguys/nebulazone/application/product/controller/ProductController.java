@@ -82,7 +82,7 @@ public class ProductController {
 		@PathVariable("catalogId") Long catalogId,
 		@PathVariable("productId") Long productId
 	) {
-		DeleteProductResponse response = productService.deleteProduct(user, catalogId, productId);
+		DeleteProductResponse response = productService.deleteProduct(productId, user.getId(), catalogId);
 
 		return ResponseEntity.ok(response);
 	}

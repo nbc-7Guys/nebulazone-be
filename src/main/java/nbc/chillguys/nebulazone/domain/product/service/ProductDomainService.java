@@ -156,8 +156,8 @@ public class ProductDomainService {
 	public Product deleteProduct(ProductDeleteCommand command) {
 		Product product = findActiveProductById(command.productId());
 
-		product.validBelongsToCatalog(command.catalog().getId());
-		product.validNotProductOwner(command.user().getId());
+		product.validBelongsToCatalog(command.catalogId());
+		product.validNotProductOwner(command.userId());
 
 		product.delete();
 

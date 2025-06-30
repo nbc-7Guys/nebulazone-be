@@ -110,10 +110,8 @@ public class ProductService {
 	}
 
 	@Transactional
-	public DeleteProductResponse deleteProduct(User user, Long catalogId, Long productId) {
-		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
-
-		ProductDeleteCommand command = ProductDeleteCommand.of(user, catalog, productId);
+	public DeleteProductResponse deleteProduct(Long productId, Long userId, Long catalogId) {
+		ProductDeleteCommand command = ProductDeleteCommand.of(productId, userId, catalogId);
 		Product product = productDomainService.deleteProduct(command);
 
 		productDomainService.deleteProductFromEs(productId);
