@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.chat.dto.request.CreateChatRoomRequest;
 import nbc.chillguys.nebulazone.application.chat.dto.response.CreateChatRoomResponse;
@@ -21,13 +24,6 @@ import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomRespon
 import nbc.chillguys.nebulazone.application.chat.service.ChatService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
-/**
- * 채팅방 관리 REST API 컨트롤러
- *
- * <p>채팅방 생성, 조회, 채팅 기록 조회, 채팅방 나가기 등의 HTTP 엔드포인트를 제공합니다.</p>
- *
- * @author 박형우
- */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/chat")
@@ -48,7 +44,7 @@ public class ChatController {
 	@PostMapping("/rooms")
 	public ResponseEntity<CreateChatRoomResponse> createChatRoom(
 		@AuthenticationPrincipal User user,
-		@RequestBody CreateChatRoomRequest request
+		@RequestBody @Valid CreateChatRoomRequest request
 	) {
 		CreateChatRoomResponse chatRoom = chatService.getOrCreate(user, request);
 		return ResponseEntity.ok(chatRoom);
@@ -84,7 +80,7 @@ public class ChatController {
 	@GetMapping("/rooms/history/{roomId}")
 	public ResponseEntity<List<FindChatHistoryResponse>> findChatHistories(
 		@AuthenticationPrincipal User user,
-		@PathVariable("roomId") Long roomId,
+		@PathVariable("roomId") @NotBlank(message = "roomId를 입력해주세요") Long roomId,
 		@RequestParam(required = false) Long lastId,
 		@RequestParam(defaultValue = "30") int size
 	) {
@@ -105,7 +101,7 @@ public class ChatController {
 	@DeleteMapping("/rooms/{roomId}")
 	public ResponseEntity<String> leaveChatRoom(
 		@AuthenticationPrincipal User user,
-		@PathVariable("roomId") Long roomId
+		@PathVariable("roomId") @NotBlank(message = "roomId를 입력해주세요") Long roomId
 	) {
 		chatService.exitChatRoom(user, roomId);
 		return ResponseEntity.ok("성공적으로 채팅방을 나갔습니다.");

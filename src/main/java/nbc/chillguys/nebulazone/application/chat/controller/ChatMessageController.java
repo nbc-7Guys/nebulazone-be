@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.chat.service.ChatMessageService;
 import nbc.chillguys.nebulazone.domain.chat.dto.request.ChatSendTextMessageCommand;
@@ -43,7 +45,7 @@ public class ChatMessageController {
 	@MessageMapping("/send/{roomId}")
 	public void sendMessage(
 		@DestinationVariable Long roomId,
-		@Payload ChatSendTextMessageCommand command,
+		@Payload @Valid ChatSendTextMessageCommand command,
 		StompHeaderAccessor accessor
 	) {
 		String sessionId = accessor.getSessionId();
@@ -64,7 +66,7 @@ public class ChatMessageController {
 	@PostMapping(value = "/send/image/{roomId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public void sendImage(
 		@AuthenticationPrincipal User User,
-		@PathVariable Long roomId,
+		@PathVariable @NotBlank(message = "roomId를 입력해주세요") Long roomId,
 		@RequestPart("image") MultipartFile multipartFile,
 		@RequestPart("meta") String type
 	) {
