@@ -28,14 +28,6 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nonapi.io.github.classgraph.fileslice.Slice;
 
-/**
- * 채팅방 관련 비즈니스 로직을 처리하는 애플리케이션 서비스
- *
- * <p>채팅방 생성, 조회, 나가기 등의 핵심 비즈니스 로직을 담당하며,
- * 도메인 서비스와 외부 서비스들을 조합하여 완전한 채팅 기능을 제공.</p>
- *
- * @author 박형우
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor

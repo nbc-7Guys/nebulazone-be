@@ -28,9 +28,6 @@ import nbc.chillguys.nebulazone.domain.product.exception.ProductErrorCode;
 import nbc.chillguys.nebulazone.domain.product.exception.ProductException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
-/**
- * The type Chat service.
- */
 @Service
 @RequiredArgsConstructor
 public class ChatDomainService {

@@ -12,13 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 
-/**
- * 채팅 메시지의 Redis 캐시 관리를 담당하는 서비스
- *
- * <p>채팅 메시지를 Redis에 임시 저장, 조회, 삭제하는 기능을 제공</p>
- *
- * @author 박형우
- */
 @Service
 @RequiredArgsConstructor
 public class ChatMessageRedisService {
