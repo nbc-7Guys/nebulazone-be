@@ -161,15 +161,12 @@ public class PostDomainService {
 	/**
 	 * 게시글 이미지 수정
 	 *
-	 * @param postId 대상 게시글 id
+	 * @param post 대상 게시글
 	 * @param postImageUrls 이미지 url 리스트
 	 * @param userId 게시글 작성자
 	 * @author 전나겸
 	 */
-	public Post updatePostImages(Long postId, List<String> postImageUrls, Long userId) {
-		Post post = postRepository.findActivePostById(postId)
-			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
-
+	public Post updatePostImages(Post post, List<String> postImageUrls, Long userId) {
 		post.validatePostOwner(userId);
 		post.updatePostImages(postImageUrls);
 

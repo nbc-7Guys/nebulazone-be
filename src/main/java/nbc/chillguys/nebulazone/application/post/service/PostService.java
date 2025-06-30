@@ -95,15 +95,16 @@ public class PostService {
 			postImageUrls.addAll(newImageUrls);
 
 		}
-
-		Post post = postDomainService.updatePostImages(postId, postImageUrls, user.getId());
+		Post post = postDomainService.findActivePost(postId);
 
 		post.getPostImages().stream()
 			.filter(postImage -> !postImageUrls.contains(postImage.getUrl()))
 			.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
 
-		postDomainService.savePostToEs(post);
+		Post updatedPost = postDomainService.updatePostImages(post, postImageUrls, user.getId());
 
-		return GetPostResponse.from(post);
+		postDomainService.savePostToEs(updatedPost);
+
+		return GetPostResponse.from(updatedPost);
 	}
 }

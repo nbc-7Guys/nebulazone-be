@@ -177,11 +177,16 @@ public class PostAdminDomainService {
 		postEsRepository.deleteById(postId);
 	}
 
-	public Post updatePostImages(Long postId, List<String> postImageUrls, Long userId) {
-		Post post = postRepository.findActivePostById(postId)
-			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+	/**
+	 * 게시글의 이미지 업데이트
+	 *
+	 * @param post 업데이트할 이미지
+	 * @param postImageUrls 이미지 url 리스트
+	 * @return 업데이트된 Post
+	 * @author 전나겸
+	 */
+	public Post updatePostImages(Post post, List<String> postImageUrls) {
 
-		post.validatePostOwner(userId);
 		post.updatePostImages(postImageUrls);
 
 		return post;

@@ -22,7 +22,6 @@ import nbc.chillguys.nebulazone.domain.post.dto.PostAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostAdminUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.service.PostAdminDomainService;
-import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 
 @Service
@@ -76,7 +75,7 @@ public class PostAdminService {
 		postsAdminDomainService.restorePost(postId);
 	}
 
-	public GetPostResponse updatePostImages(Long postId, List<MultipartFile> imageFiles, User user,
+	public GetPostResponse updatePostImages(Long postId, List<MultipartFile> imageFiles,
 		List<String> remainImageUrls) {
 
 		List<String> postImageUrls = new ArrayList<>(remainImageUrls);
@@ -89,14 +88,16 @@ public class PostAdminService {
 			postImageUrls.addAll(newImageUrls);
 		}
 
-		Post post = postsAdminDomainService.updatePostImages(postId, postImageUrls, user.getId());
+		Post post = postsAdminDomainService.findActivePost(postId);
 
 		post.getPostImages().stream()
 			.filter(postImage -> !postImageUrls.contains(postImage.getUrl()))
 			.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
 
-		postsAdminDomainService.savePostToEs(post);
+		Post updatedPost = postsAdminDomainService.updatePostImages(post, postImageUrls);
 
-		return GetPostResponse.from(post);
+		postsAdminDomainService.savePostToEs(updatedPost);
+
+		return GetPostResponse.from(updatedPost);
 	}
 }

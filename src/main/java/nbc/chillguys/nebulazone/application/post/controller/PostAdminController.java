@@ -6,7 +6,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,7 +33,6 @@ import nbc.chillguys.nebulazone.application.post.service.PostAdminService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.common.validator.image.ImageFile;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
-import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @RestController
 @RequestMapping("/admin/posts")
@@ -100,11 +98,10 @@ public class PostAdminController {
 	public ResponseEntity<GetPostResponse> updatePostImages(
 		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
 		@PathVariable("postId") Long postId,
-		@AuthenticationPrincipal User user,
 		@Valid @RequestPart("post") UpdateImagesPostRequest request
 	) {
 
-		GetPostResponse response = postAdminService.updatePostImages(postId, imageFiles, user,
+		GetPostResponse response = postAdminService.updatePostImages(postId, imageFiles,
 			request.remainImageUrls());
 
 		return ResponseEntity.ok(response);
