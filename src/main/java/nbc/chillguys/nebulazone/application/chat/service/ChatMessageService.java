@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nbc.chillguys.nebulazone.application.chat.dto.request.ImageMessageRequest;
 import nbc.chillguys.nebulazone.domain.chat.dto.request.ChatSendTextMessageCommand;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.MessageType;
@@ -67,12 +68,12 @@ public class ChatMessageService {
 	 * @param roomId 메시지를 보낼 방ID
 	 * @param type 타입
 	 */
-	public void sendImageMessage(User user, MultipartFile multipartFile, Long roomId, String type) {
+	public void sendImageMessage(User user, Long roomId, ImageMessageRequest request) {
 		SessionUser sessionUser = SessionUser.from(user);
 
 		chatDomainService.validateUserAccessToChatRoom(user, roomId);
-		String imageUrl = gcsClient.uploadFile(multipartFile);
-		MessageType messageType = MessageType.valueOf(type);
+		String imageUrl = gcsClient.uploadFile(request.image());
+		MessageType messageType = MessageType.valueOf(request.type());
 		sendAndSaveMessage(roomId, imageUrl, messageType, sessionUser);
 	}
 

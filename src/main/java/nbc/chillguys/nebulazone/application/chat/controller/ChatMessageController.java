@@ -6,6 +6,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.chat.dto.request.ImageMessageRequest;
 import nbc.chillguys.nebulazone.application.chat.service.ChatMessageService;
 import nbc.chillguys.nebulazone.domain.chat.dto.request.ChatSendTextMessageCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -45,7 +47,7 @@ public class ChatMessageController {
 	@MessageMapping("/send/{roomId}")
 	public void sendMessage(
 		@DestinationVariable Long roomId,
-		@Payload @Valid ChatSendTextMessageCommand command,
+		@Valid @Payload ChatSendTextMessageCommand command,
 		StompHeaderAccessor accessor
 	) {
 		String sessionId = accessor.getSessionId();
@@ -67,10 +69,9 @@ public class ChatMessageController {
 	public void sendImage(
 		@AuthenticationPrincipal User user,
 		@PathVariable Long roomId,
-		@RequestPart("image") MultipartFile multipartFile,
-		@RequestPart("meta") String type
+		@Valid @ModelAttribute ImageMessageRequest request
 	) {
-		chatMessageService.sendImageMessage(user, multipartFile, roomId, type);
+		chatMessageService.sendImageMessage(user, roomId, request);
 	}
 
 }
