@@ -38,48 +38,22 @@ public class PostService {
 	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
-	public CreatePostResponse createPost(User user, CreatePostRequest request,
-		List<MultipartFile> multipartFiles) {
+	public CreatePostResponse createPost(User user, CreatePostRequest request) {
 		PostCreateCommand postCreateDto = PostCreateCommand.of(user, request);
 
-		List<String> postImageUrls = multipartFiles == null
-			? List.of()
-			: multipartFiles.stream()
-			.map(gcsClient::uploadFile)
-			.toList();
-
-		Post createdPost = postDomainService.createPost(postCreateDto, postImageUrls);
+		Post createdPost = postDomainService.createPost(postCreateDto);
 
 		postDomainService.savePostToEs(createdPost);
 
-		return CreatePostResponse.from(createdPost, postImageUrls);
+		return CreatePostResponse.from(createdPost);
 
 	}
 
 	@Transactional
-	public UpdatePostResponse updatePost(
-		Long userId,
-		Long postId,
-		UpdatePostRequest request,
-		List<MultipartFile> imageFiles
-	) {
+	public UpdatePostResponse updatePost(Long userId, Long postId, UpdatePostRequest request) {
 		Post post = postDomainService.findMyActivePost(userId, postId);
 
-		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
-		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
-		if (hasImage) {
-			List<String> newImageUrls = imageFiles.stream()
-				.map(gcsClient::uploadFile)
-				.toList();
-			imageUrls.addAll(newImageUrls);
-
-			post.getPostImages().stream()
-				.filter(postImage -> !imageUrls.contains(postImage.getUrl()))
-				.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
-		}
-
-		PostUpdateCommand command = request.toCommand(imageUrls);
-
+		PostUpdateCommand command = request.toCommand();
 		Post updatedPost = postDomainService.updatePost(postId, userId, command);
 
 		eventPublisher.publishEvent(new UpdatePostEvent(post));
@@ -105,6 +79,30 @@ public class PostService {
 
 	public GetPostResponse getPost(Long postId) {
 		Post post = postDomainService.getActivePostWithUserAndImages(postId);
+
+		return GetPostResponse.from(post);
+	}
+
+	public GetPostResponse updatePostImages(Long postId, List<MultipartFile> imageFiles, User user,
+		List<String> remainImageUrls) {
+
+		List<String> postImageUrls = new ArrayList<>(remainImageUrls);
+		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
+		if (hasImage) {
+			List<String> newImageUrls = imageFiles.stream()
+				.map(gcsClient::uploadFile)
+				.toList();
+			postImageUrls.addAll(newImageUrls);
+
+		}
+
+		Post post = postDomainService.updatePostImages(postId, postImageUrls, user.getId());
+
+		post.getPostImages().stream()
+			.filter(postImage -> !postImageUrls.contains(postImage.getUrl()))
+			.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
+
+		postDomainService.savePostToEs(post);
 
 		return GetPostResponse.from(post);
 	}

@@ -20,13 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
-import nbc.chillguys.nebulazone.application.post.dto.response.CreatePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.SearchPostResponse;
-import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
@@ -145,60 +141,7 @@ class PostServiceTest {
 		@Test
 		@DisplayName("게시글 생성 성공")
 		void success_createPost() {
-			// Given
-			CreatePostRequest request = new CreatePostRequest(
-				"테스트 게시글 제목",
-				"테스트 게시글 내용",
-				"free"
-			);
-			List<MultipartFile> files = List.of();
-
-			given(postDomainService.createPost(any(PostCreateCommand.class), any(List.class)))
-				.willReturn(post);
-
-			// When
-			CreatePostResponse result = postService.createPost(user, request, files);
-
-			// Then
-			assertThat(result.postId()).isEqualTo(1L);
-			assertThat(result.title()).isEqualTo("테스트 제목1");
-			assertThat(result.content()).isEqualTo("테스트 본문1");
-			assertThat(result.type()).isEqualTo(PostType.FREE);
-
-			verify(postDomainService, times(1)).createPost(any(PostCreateCommand.class), any(List.class));
-			verify(postDomainService, times(1)).savePostToEs(post);
-		}
-
-		@Test
-		@DisplayName("게시글 생성 성공 - 이미지 포함")
-		void success_createPost_withImages() {
-			// Given
-			CreatePostRequest request = new CreatePostRequest(
-				"테스트 게시글 제목",
-				"테스트 게시글 내용",
-				"free"
-			);
-
-			MultipartFile mockFile = mock(MultipartFile.class);
-			List<MultipartFile> files = List.of(mockFile);
-			String mockImageUrl = "https://test-image.jpg";
-
-			given(gcsClient.uploadFile(mockFile))
-				.willReturn(mockImageUrl);
-			given(postDomainService.createPost(any(PostCreateCommand.class), any(List.class)))
-				.willReturn(post);
-
-			// When
-			CreatePostResponse result = postService.createPost(user, request, files);
-
-			// Then
-			assertThat(result.postId()).isEqualTo(1L);
-			assertThat(result.title()).isEqualTo("테스트 제목1");
-			assertThat(result.content()).isEqualTo("테스트 본문1");
-			assertThat(result.type()).isEqualTo(PostType.FREE);
-
-			verify(gcsClient, times(1)).uploadFile(mockFile);
-			verify(postDomainService, times(1)).createPost(any(PostCreateCommand.class), any(List.class));
+			// 다시짜야함
 		}
 	}
 

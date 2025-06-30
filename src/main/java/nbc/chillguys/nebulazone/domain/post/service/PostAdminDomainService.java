@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.domain.post.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -51,7 +53,7 @@ public class PostAdminDomainService {
 	public Post updatePost(PostAdminUpdateCommand command) {
 		Post post = findActivePost(command.postId());
 
-		post.update(command.title(), command.content(), command.imageUrls());
+		post.update(command.title(), command.content());
 		savePostToEs(post);
 
 		return post;
@@ -175,4 +177,13 @@ public class PostAdminDomainService {
 		postEsRepository.deleteById(postId);
 	}
 
+	public Post updatePostImages(Long postId, List<String> postImageUrls, Long userId) {
+		Post post = postRepository.findActivePostById(postId)
+			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+
+		post.validatePostOwner(userId);
+		post.updatePostImages(postImageUrls);
+
+		return post;
+	}
 }

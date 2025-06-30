@@ -22,6 +22,7 @@ import nbc.chillguys.nebulazone.domain.post.dto.PostAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostAdminUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.service.PostAdminDomainService;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 
 @Service
@@ -47,27 +48,10 @@ public class PostAdminService {
 		return GetPostResponse.from(post);
 	}
 
-	public UpdatePostResponse updateAdminPost(
-		Long postId,
-		UpdatePostRequest request,
-		List<MultipartFile> imageFiles
-	) {
+	public UpdatePostResponse updateAdminPost(Long postId, UpdatePostRequest request) {
 		Post post = postsAdminDomainService.findMyActivePost(postId);
 
-		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
-		boolean hasImage = !imageFiles.isEmpty();
-		if (hasImage) {
-			List<String> newImageUrls = imageFiles.stream()
-				.map(gcsClient::uploadFile)
-				.toList();
-			imageUrls.addAll(newImageUrls);
-
-			post.getPostImages().stream()
-				.filter(postImage -> !imageUrls.contains(postImage.getUrl()))
-				.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
-		}
-
-		PostAdminUpdateCommand command = request.toAdminCommand(postId, imageUrls);
+		PostAdminUpdateCommand command = request.toAdminCommand(postId);
 
 		Post updatedPost = postsAdminDomainService.updatePost(command);
 
@@ -92,4 +76,27 @@ public class PostAdminService {
 		postsAdminDomainService.restorePost(postId);
 	}
 
+	public GetPostResponse updatePostImages(Long postId, List<MultipartFile> imageFiles, User user,
+		List<String> remainImageUrls) {
+
+		List<String> postImageUrls = new ArrayList<>(remainImageUrls);
+
+		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
+		if (hasImage) {
+			List<String> newImageUrls = imageFiles.stream()
+				.map(gcsClient::uploadFile)
+				.toList();
+			postImageUrls.addAll(newImageUrls);
+		}
+
+		Post post = postsAdminDomainService.updatePostImages(postId, postImageUrls, user.getId());
+
+		post.getPostImages().stream()
+			.filter(postImage -> !postImageUrls.contains(postImage.getUrl()))
+			.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
+
+		postsAdminDomainService.savePostToEs(post);
+
+		return GetPostResponse.from(post);
+	}
 }

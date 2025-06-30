@@ -36,7 +36,7 @@ public record PostDocument(
 	String author,
 
 	@Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second)
-	LocalDateTime createdAt,
+	LocalDateTime modifiedAt,
 
 	@Field(type = FieldType.Keyword)
 	List<String> imageUrls
@@ -49,7 +49,7 @@ public record PostDocument(
 			post.getType().name(),
 			post.getUserId(),
 			post.getUserNickname(),
-			post.getCreatedAt(),
+			post.getModifiedAt(),
 			post.getPostImages().stream()
 				.map(PostImage::getUrl)
 				.toList()

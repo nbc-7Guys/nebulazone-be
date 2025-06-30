@@ -18,12 +18,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Encoding;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
+import nbc.chillguys.nebulazone.application.post.dto.request.UpdateImagesPostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.request.UpdatePostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.response.CreatePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.DeletePostResponse;
@@ -43,31 +41,22 @@ public class PostController {
 
 	private final PostService postService;
 
-	@RequestBody(
-		content = @Content(encoding = @Encoding(name = "post", contentType = MediaType.APPLICATION_JSON_VALUE))
-	)
-	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping
 	public ResponseEntity<CreatePostResponse> createPost(
 		@AuthenticationPrincipal User user,
-		@Valid @RequestPart("post") CreatePostRequest request,
-		@RequestPart(value = "images", required = false) List<MultipartFile> multipartFiles) {
+		@Valid @RequestPart("post") CreatePostRequest request) {
 
-		CreatePostResponse postResponse = postService.createPost(user, request, multipartFiles);
+		CreatePostResponse postResponse = postService.createPost(user, request);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(postResponse);
 	}
 
-	@RequestBody(
-		content = @Content(encoding = @Encoding(name = "post", contentType = MediaType.APPLICATION_JSON_VALUE))
-	)
-	@PutMapping(path = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PutMapping(path = "/{postId}")
 	public ResponseEntity<UpdatePostResponse> updatePost(
 		@AuthenticationPrincipal User user,
 		@PathVariable("postId") Long postId,
-		@Valid @RequestPart("post") UpdatePostRequest request,
-		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles
-	) {
-		UpdatePostResponse res = postService.updatePost(user.getId(), postId, request, imageFiles);
+		@Valid @RequestPart("post") UpdatePostRequest request) {
+		UpdatePostResponse res = postService.updatePost(user.getId(), postId, request);
 
 		return ResponseEntity.ok(res);
 	}
@@ -101,4 +90,16 @@ public class PostController {
 		return ResponseEntity.ok(response);
 	}
 
+	@PutMapping(value = "/{postId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<GetPostResponse> updatePostImages(
+		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
+		@PathVariable("postId") Long postId,
+		@AuthenticationPrincipal User user,
+		@Valid @RequestPart("post") UpdateImagesPostRequest request
+	) {
+
+		GetPostResponse response = postService.updatePostImages(postId, imageFiles, user, request.remainImageUrls());
+
+		return ResponseEntity.ok(response);
+	}
 }
