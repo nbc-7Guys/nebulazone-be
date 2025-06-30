@@ -10,4 +10,6 @@ public interface PostRepositoryCustom {
 	Optional<Post> findActivePostByIdWithUser(Long postId);
 
 	Optional<Post> findActivePostByIdWithUserAndImages(Long postId);
+
+	boolean existActivePost(Long postId);
 }

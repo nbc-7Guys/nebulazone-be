@@ -62,7 +62,7 @@ public class CommentService {
 	}
 
 	public CommentResponse updateComment(Long commentId, Long userId, Long postId, UpdateCommentRequest request) {
-		postDomainService.findActivePost(postId);
+		postDomainService.validActivePost(postId);
 
 		CommentUpdateCommand command = request.toCommand(commentId, userId, postId);
 		Comment comment = commentDomainService.updateComment(command);
@@ -71,7 +71,7 @@ public class CommentService {
 	}
 
 	public DeleteCommentResponse deleteComment(Long commentId, Long userId, Long postId) {
-		postDomainService.findActivePost(postId);
+		postDomainService.validActivePost(postId);
 
 		CommentDeleteCommand command = CommentDeleteCommand.of(commentId, userId, postId);
 		commentDomainService.deleteComment(command);
