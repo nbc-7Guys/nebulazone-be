@@ -22,6 +22,7 @@ public class ImageFileValidator implements ConstraintValidator<ImageFile, Object
 		"image/bmp",
 		"image/x-windows-bmp"
 	);
+	private static final long MAX_SIZE = 2 * 1024 * 1024;
 
 	@Override
 	public boolean isValid(Object value, ConstraintValidatorContext context) {
@@ -51,6 +52,10 @@ public class ImageFileValidator implements ConstraintValidator<ImageFile, Object
 	}
 
 	private boolean isImage(MultipartFile file) {
+		if (file.getSize() > MAX_SIZE) {
+			return false;
+		}
+
 		try (InputStream inputStream = file.getInputStream()) {
 			String mimeType = tika.detect(inputStream);
 
