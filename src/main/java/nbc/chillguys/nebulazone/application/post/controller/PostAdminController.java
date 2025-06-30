@@ -64,7 +64,7 @@ public class PostAdminController {
 	@PutMapping("/{postId}")
 	public ResponseEntity<UpdatePostResponse> updateAdminPost(
 		@PathVariable("postId") Long postId,
-		@Valid @RequestPart("post") UpdatePostRequest request) {
+		@Valid @RequestBody UpdatePostRequest request) {
 		UpdatePostResponse response = postAdminService.updateAdminPost(postId, request);
 
 		return ResponseEntity.ok(response);
