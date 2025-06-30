@@ -35,6 +35,7 @@ import nbc.chillguys.nebulazone.domain.product.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.event.DeleteProductEvent;
 import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
 import nbc.chillguys.nebulazone.domain.product.event.UpdateProductEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
@@ -114,12 +115,12 @@ public class ProductService {
 		ProductDeleteCommand command = ProductDeleteCommand.of(productId, userId, catalogId);
 		Product product = productDomainService.deleteProduct(command);
 
-		productDomainService.deleteProductFromEs(productId);
-
 		if (Objects.equals(product.getTxMethod(), ProductTxMethod.AUCTION)) {
 			Auction auction = auctionDomainService.findAuctionByProductId(productId);
 			auction.delete();
 		}
+
+		eventPublisher.publishEvent(new DeleteProductEvent(productId));
 
 		return DeleteProductResponse.from(productId);
 	}
