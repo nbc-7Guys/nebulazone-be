@@ -130,12 +130,13 @@ public class ProductService {
 	@Transactional
 	public PurchaseProductResponse purchaseProduct(User user, Long catalogId, Long productId) {
 		Product product = productDomainService.findAvailableProductByIdForUpdate(productId);
-		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
-		product.validPurchasable(user.getId());
+		product.validNotOwner(user.getId());
+		product.validBelongsToCatalog(catalogId);
+
 		user.usePoint(product.getPrice());
 
-		ProductPurchaseCommand command = ProductPurchaseCommand.of(user, catalog, productId);
+		ProductPurchaseCommand command = ProductPurchaseCommand.of(productId, user.getId(), catalogId);
 		productDomainService.purchaseProduct(command);
 
 		product.getSeller().addPoint(product.getPrice());
@@ -143,8 +144,9 @@ public class ProductService {
 		LocalDateTime purchasedAt = LocalDateTime.now();
 		eventPublisher.publishEvent(new PurchaseProductEvent(user, product, purchasedAt));
 
-		notificationService.sendProductPurchaseNotification(product.getId(), product.getSellerId(), user.getId(),
-			product.getName(), user.getNickname());
+		notificationService.sendProductPurchaseNotification(
+			product.getId(), product.getSellerId(), user.getId(), product.getName(), user.getNickname()
+		);
 
 		return PurchaseProductResponse.from(product, purchasedAt);
 	}

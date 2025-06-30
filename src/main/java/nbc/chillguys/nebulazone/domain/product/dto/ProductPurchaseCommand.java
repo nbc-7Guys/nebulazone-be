@@ -1,15 +1,12 @@
 package nbc.chillguys.nebulazone.domain.product.dto;
 
-import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
-import nbc.chillguys.nebulazone.domain.user.entity.User;
-
 public record ProductPurchaseCommand(
-	User user,
-	Catalog catalog,
-	Long productId
+	Long productId,
+	Long userId,
+	Long catalogId
 ) {
 
-	public static ProductPurchaseCommand of(User user, Catalog catalog, Long productId) {
-		return new ProductPurchaseCommand(user, catalog, productId);
+	public static ProductPurchaseCommand of(Long productId, Long userId, Long catalogId) {
+		return new ProductPurchaseCommand(productId, userId, catalogId);
 	}
 }

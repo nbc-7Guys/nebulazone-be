@@ -168,6 +168,9 @@ public class ProductDomainService {
 	public void purchaseProduct(ProductPurchaseCommand command) {
 		Product product = findAvailableProductById(command.productId());
 
+		product.validNotOwner(command.userId());
+		product.validBelongsToCatalog(command.catalogId());
+
 		product.purchase();
 	}
 
