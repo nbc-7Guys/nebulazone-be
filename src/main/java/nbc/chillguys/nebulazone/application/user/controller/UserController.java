@@ -18,7 +18,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.user.dto.request.AddAddressUserRequest;
+import nbc.chillguys.nebulazone.application.user.dto.request.DeleteAddressUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
+import nbc.chillguys.nebulazone.application.user.dto.request.UpdateAddressUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.UpdateUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
@@ -60,7 +63,7 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 
-	@PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PutMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<UserResponse> updateUserProfileImage(
 		@ImageFile @RequestPart("profileImage") MultipartFile profileImage,
 		@AuthenticationPrincipal User user
@@ -76,6 +79,37 @@ public class UserController {
 		@AuthenticationPrincipal User user
 	) {
 		WithdrawUserResponse response = userService.withdrawUser(withdrawUserRequest, user);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("/me/address")
+	public ResponseEntity<UserResponse> addAddress(
+		@Valid @RequestBody AddAddressUserRequest addAddressUserRequest,
+		@AuthenticationPrincipal User user
+	) {
+		UserResponse response = userService.addAddress(addAddressUserRequest, user);
+
+		return ResponseEntity.status(HttpStatus.CREATED)
+			.body(response);
+	}
+
+	@PutMapping("/me/address")
+	public ResponseEntity<UserResponse> updateAddress(
+		@Valid @RequestBody UpdateAddressUserRequest updateAddressUserRequest,
+		@AuthenticationPrincipal User user
+	) {
+		UserResponse response = userService.updateAddress(updateAddressUserRequest, user);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@DeleteMapping("/me/address")
+	public ResponseEntity<UserResponse> deleteAddress(
+		@Valid @RequestBody DeleteAddressUserRequest deleteAddressUserRequest,
+		@AuthenticationPrincipal User user
+	) {
+		UserResponse response = userService.deleteAddress(deleteAddressUserRequest, user);
 
 		return ResponseEntity.ok(response);
 	}

@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +25,10 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import nbc.chillguys.nebulazone.application.user.dto.request.AddAddressUserRequest;
+import nbc.chillguys.nebulazone.application.user.dto.request.DeleteAddressUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
+import nbc.chillguys.nebulazone.application.user.dto.request.UpdateAddressUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.UpdateUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
@@ -74,7 +78,7 @@ class UserControllerTest {
 		// Given
 		SignUpUserRequest request = new SignUpUserRequest("test@test.com", "testPassword1!",
 			"01012345678", "test",
-			Set.of(new SignUpUserRequest.SignUpUserAddressRequest("test_road_address", "test_detail_address",
+			List.of(new SignUpUserRequest.SignUpUserAddressRequest("test_road_address", "test_detail_address",
 				"address_nickname")));
 
 		given(userService.signUp(any()))
@@ -232,7 +236,7 @@ class UserControllerTest {
 			.willReturn(userResponse);
 
 		// When
-		ResultActions perform = mockMvc.perform(multipart("/users")
+		ResultActions perform = mockMvc.perform(multipart("/users/me/image")
 			.file(imagePart)
 			.with(r -> {
 				r.setMethod(HttpMethod.PUT.name());
@@ -297,6 +301,109 @@ class UserControllerTest {
 
 		verify(userService, times(1)).withdrawUser(any(), any());
 
+	}
+
+	@Test
+	@WithCustomMockUser
+	@DisplayName("주소 추가 성공")
+	void success_addAddress() throws Exception {
+		// Given
+		AddAddressUserRequest request = new AddAddressUserRequest(
+			"test_road_address",
+			"test_detail_address",
+			"address_nickname"
+		);
+
+		given(userService.addAddress(any(AddAddressUserRequest.class), any()))
+			.willReturn(userResponse);
+
+		// When
+		ResultActions perform = mockMvc.perform(post("/users/me/address")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(request)));
+
+		// Then
+		perform.andDo(print())
+			.andExpectAll(
+				status().isCreated(),
+				jsonPath("$.addresses[0].addressNickname")
+					.value("address_nickname"),
+				jsonPath("$.addresses[0].roadAddress")
+					.value("test_road_address"),
+				jsonPath("$.addresses[0].detailAddress")
+					.value("test_detail_address")
+			);
+
+		verify(userService, times(1)).addAddress(any(AddAddressUserRequest.class), any());
+	}
+
+	@Test
+	@WithCustomMockUser
+	@DisplayName("주소 수정 성공")
+	void success_updateAddress() throws Exception {
+		// Given
+		UpdateAddressUserRequest request = new UpdateAddressUserRequest(
+			"old_nickname",
+			"new_road_address",
+			"new_detail_address",
+			"new_nickname"
+		);
+
+		given(userService.updateAddress(any(UpdateAddressUserRequest.class), any()))
+			.willReturn(userResponse);
+
+		// When
+		ResultActions perform = mockMvc.perform(put("/users/me/address")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(request)));
+
+		// Then
+		perform.andDo(print())
+			.andExpectAll(
+				status().isOk(),
+				jsonPath("$.addresses[0].addressNickname")
+					.value("address_nickname"),
+				jsonPath("$.addresses[0].roadAddress")
+					.value("test_road_address"),
+				jsonPath("$.addresses[0].detailAddress")
+					.value("test_detail_address")
+			);
+
+		verify(userService, times(1)).updateAddress(any(UpdateAddressUserRequest.class), any());
+	}
+
+	@Test
+	@WithCustomMockUser
+	@DisplayName("주소 삭제 성공")
+	void success_deleteAddress() throws Exception {
+		// Given
+		DeleteAddressUserRequest request = new DeleteAddressUserRequest(
+			"test_road_address",
+			"test_detail_address",
+			"address_nickname"
+		);
+
+		given(userService.deleteAddress(any(DeleteAddressUserRequest.class), any()))
+			.willReturn(userResponse);
+
+		// When
+		ResultActions perform = mockMvc.perform(delete("/users/me/address")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(request)));
+
+		// Then
+		perform.andDo(print())
+			.andExpectAll(
+				status().isOk(),
+				jsonPath("$.addresses[0].addressNickname")
+					.value("address_nickname"),
+				jsonPath("$.addresses[0].roadAddress")
+					.value("test_road_address"),
+				jsonPath("$.addresses[0].detailAddress")
+					.value("test_detail_address")
+			);
+
+		verify(userService, times(1)).deleteAddress(any(DeleteAddressUserRequest.class), any());
 	}
 
 }

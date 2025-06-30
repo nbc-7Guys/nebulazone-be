@@ -3,7 +3,7 @@ package nbc.chillguys.nebulazone.application.post.service;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -56,7 +56,7 @@ class PostServiceTest {
 
 	@BeforeEach
 	void init() {
-		HashSet<Address> addresses = new HashSet<>();
+		List<Address> addresses = new ArrayList<>();
 
 		IntStream.range(1, 4)
 			.forEach(i -> addresses.add(
