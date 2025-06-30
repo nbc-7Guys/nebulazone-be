@@ -325,7 +325,7 @@ class UserControllerTest {
 		// Then
 		perform.andDo(print())
 			.andExpectAll(
-				status().isOk(),
+				status().isCreated(),
 				jsonPath("$.addresses[0].addressNickname")
 					.value("address_nickname"),
 				jsonPath("$.addresses[0].roadAddress")
