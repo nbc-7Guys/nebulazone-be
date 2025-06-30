@@ -423,6 +423,7 @@ public class AuctionRedisService {
 	 * @param auctionId 삭제할 경매 ID
 	 * @author 정석현
 	 */
+	@Transactional
 	public void deleteAdminAuction(Long auctionId) {
 		RLock auctionDeleteLock = redissonClient.getLock(AUCTION_LOCK_DELETE_PREFIX + auctionId);
 
