@@ -1,7 +1,6 @@
 package nbc.chillguys.nebulazone.common.response;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,8 +20,7 @@ public class CommonResponse {
 	private final int status;
 	private final String message;
 	private final LocalDateTime timestamp;
-	@Builder.Default
-	private final List<FieldError> errors = new ArrayList<>();
+	private final List<FieldError> errors;
 
 	public static CommonResponse of(int status, String message) {
 		return CommonResponse.builder()

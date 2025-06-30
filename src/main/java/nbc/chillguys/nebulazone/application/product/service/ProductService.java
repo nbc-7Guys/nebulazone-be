@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionSchedulerService;
 import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
+import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
 import nbc.chillguys.nebulazone.application.product.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.UpdateProductRequest;
@@ -41,6 +42,7 @@ import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
+import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
 import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 
 @Service
@@ -49,9 +51,9 @@ public class ProductService {
 
 	private final ProductDomainService productDomainService;
 	private final AuctionDomainService auctionDomainService;
-	private final AuctionSchedulerService auctionSchedulerService;
 	private final CatalogDomainService catalogDomainService;
 	private final NotificationService notificationService;
+	private final AuctionRedisService auctionRedisService;
 	private final GcsClient gcsClient;
 	private final ApplicationEventPublisher eventPublisher;
 
@@ -75,9 +77,12 @@ public class ProductService {
 
 		if (createdProduct.getTxMethod() == ProductTxMethod.AUCTION) {
 			AuctionCreateCommand auctionCreateCommand = AuctionCreateCommand.of(createdProduct, productEndTime);
-			Auction savedAuction = auctionDomainService.createAuction(auctionCreateCommand);
-			auctionSchedulerService.autoAuctionEndSchedule(savedAuction, createdProduct.getId());
-			createdProduct.updateAuctionId(savedAuction.getId());
+			Auction createdAuction = auctionDomainService.createAuction(auctionCreateCommand);
+
+			CreateRedisAuctionDto createRedisAuctionDto = CreateRedisAuctionDto.of(createdProduct, createdAuction, user,
+				productEndTime, productImageUrls);
+			auctionRedisService.createAuction(createRedisAuctionDto);
+			createdProduct.updateAuctionId(createdAuction.getId());
 		}
 
 		productDomainService.saveProductToEs(createdProduct);

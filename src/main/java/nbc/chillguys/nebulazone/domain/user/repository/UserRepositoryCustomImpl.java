@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.domain.user.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -77,6 +78,18 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 				user.oAuthType.eq(oAuthType)
 			)
 			.fetchOne() != null;
+	}
+
+	@Override
+	public List<User> findActiveUserByIds(List<Long> userIds) {
+		QUser user = QUser.user;
+
+		return jpaQueryFactory
+			.selectFrom(user)
+			.where(user.id.in(userIds),
+				user.status.eq(UserStatus.ACTIVE))
+			.fetch();
+
 	}
 
 }

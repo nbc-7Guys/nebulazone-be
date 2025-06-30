@@ -11,8 +11,7 @@ public record TransactionAdminInfo(
 	String userNickname,
 	Long productId,
 	String productName,
-	LocalDateTime createdAt,
-	LocalDateTime modifiedAt
+	LocalDateTime createdAt
 ) {
 	public static TransactionAdminInfo from(Transaction tx) {
 		return new TransactionAdminInfo(
@@ -22,8 +21,7 @@ public record TransactionAdminInfo(
 			tx.getUser().getNickname(),
 			tx.getProduct().getId(),
 			tx.getProduct().getName(),
-			tx.getCreatedAt(),
-			tx.getModifiedAt()
+			tx.getCreatedAt()
 		);
 	}
 }

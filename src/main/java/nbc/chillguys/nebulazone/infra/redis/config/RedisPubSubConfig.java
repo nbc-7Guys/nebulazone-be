@@ -43,8 +43,9 @@ public class RedisPubSubConfig {
 		// 채팅방 관련 모든 채널 구독 (chat:room:*)
 		container.addMessageListener(listenerAdapter, Topic.pattern("chat:room:*"));
 
+		container.addMessageListener(listenerAdapter, Topic.pattern("auction:*:*"));
+
 		return container;
 	}
-
 
 }

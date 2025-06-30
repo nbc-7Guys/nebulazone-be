@@ -46,11 +46,11 @@ public class Bid extends BaseEntity {
 	private BidStatus status;
 
 	@Builder
-	private Bid(Auction auction, User user, Long price) {
+	private Bid(Auction auction, User user, Long price, String status) {
 		this.auction = auction;
 		this.user = user;
 		this.price = price;
-		this.status = BidStatus.BID;
+		this.status = BidStatus.of(status);
 	}
 
 	public void updateStatus(BidStatus status) {
@@ -59,22 +59,6 @@ public class Bid extends BaseEntity {
 
 	public void cancelBid() {
 		this.status = BidStatus.CANCEL;
-	}
-
-	public void wonBid() {
-		this.status = BidStatus.WON;
-	}
-
-	public boolean isNotBidOwner(User user) {
-		return !user.equals(this.user);
-	}
-
-	public boolean isDifferentAuction(Auction auction) {
-		return !this.auction.equals(auction);
-	}
-
-	public void updateBidPrice(Long price) {
-		this.price = price;
 	}
 
 }

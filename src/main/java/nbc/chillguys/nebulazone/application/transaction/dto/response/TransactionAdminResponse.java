@@ -14,9 +14,8 @@ public record TransactionAdminResponse(
 	Long productId,
 	String productName,
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	LocalDateTime createdAt,
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	LocalDateTime modifiedAt
+	LocalDateTime createdAtz
+
 ) {
 	public static TransactionAdminResponse from(TransactionAdminInfo info) {
 		return new TransactionAdminResponse(
@@ -26,8 +25,7 @@ public record TransactionAdminResponse(
 			info.userNickname(),
 			info.productId(),
 			info.productName(),
-			info.createdAt(),
-			info.modifiedAt()
+			info.createdAt()
 		);
 	}
 }

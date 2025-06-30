@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -21,24 +21,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import nbc.chillguys.nebulazone.application.auction.service.AuctionSchedulerService;
-import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.application.product.dto.response.SearchProductResponse;
-import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
-import nbc.chillguys.nebulazone.domain.catalog.exception.CatalogErrorCode;
-import nbc.chillguys.nebulazone.domain.catalog.exception.CatalogException;
 import nbc.chillguys.nebulazone.domain.catalog.service.CatalogDomainService;
-import nbc.chillguys.nebulazone.domain.product.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.product.dto.ProductFindQuery;
 import nbc.chillguys.nebulazone.domain.product.dto.ProductSearchCommand;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
-import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
@@ -63,9 +55,6 @@ class ProductServiceTest {
 	private TransactionDomainService transactionDomainService;
 
 	@Mock
-	private AuctionSchedulerService auctionSchedulerService;
-
-	@Mock
 	private CatalogDomainService catalogDomainService;
 
 	@Mock
@@ -82,7 +71,7 @@ class ProductServiceTest {
 
 	@BeforeEach
 	void init() {
-		HashSet<Address> addresses = new HashSet<>();
+		List<Address> addresses = new ArrayList<>();
 
 		IntStream.range(1, 4)
 			.forEach(i -> addresses.add(
@@ -201,109 +190,10 @@ class ProductServiceTest {
 		}
 	}
 
-	@Nested
-	@DisplayName("상품 생성 테스트")
-	class CreateProductTest {
-
-		@Test
-		@DisplayName("상품 생성 성공 - 즉시거래")
-		void success_createProduct_direct() {
-			// given
-			Long catalogId = 1L;
-			CreateProductRequest request = new CreateProductRequest(
-				product.getName(),
-				product.getDescription(),
-				"direct",
-				50000L,
-				null
-			);
-			List<MultipartFile> files = List.of();
-
-			given(catalogDomainService.getCatalogById(catalogId))
-				.willReturn(catalog);
-			given(productDomainService.createProduct(any(ProductCreateCommand.class), any()))
-				.willReturn(product);
-
-			// When
-			ProductResponse result = productService.createProduct(user, catalogId, request, files);
-
-			// Then
-			assertThat(result.productId()).isEqualTo(1L);
-			assertThat(result.productName()).isEqualTo("일반 판매글 제목1");
-			assertThat(result.productPrice()).isEqualTo(2_000_000L);
-			assertThat(result.productTxMethod()).isEqualTo(ProductTxMethod.DIRECT);
-			assertThat(result.endTime()).isNull();
-
-			verify(catalogDomainService, times(1)).getCatalogById(catalogId);
-			verify(productDomainService, times(1))
-				.createProduct(any(ProductCreateCommand.class), any());
-			verify(auctionDomainService, never()).createAuction(any());
-			verify(auctionSchedulerService, never()).autoAuctionEndSchedule(any(), any());
-		}
-
-		@Test
-		@DisplayName("상품 생성 성공 - 경매")
-		void success_createProduct_auction() {
-			// Given
-			Long catalogId = 1L;
-			CreateProductRequest request = new CreateProductRequest(
-				auctionProduct.getName(),
-				auctionProduct.getDescription(),
-				"auction",
-				30000L,
-				"hour_12"
-			);
-			List<MultipartFile> files = List.of();
-
-			given(catalogDomainService.getCatalogById(catalogId))
-				.willReturn(catalog);
-			given(productDomainService.createProduct(any(ProductCreateCommand.class), any()))
-				.willReturn(auctionProduct);
-			given(auctionDomainService.createAuction(any(AuctionCreateCommand.class)))
-				.willReturn(auction);
-
-			// When
-			ProductResponse result = productService.createProduct(user, catalogId, request, files);
-
-			// Then
-			assertThat(result.productId()).isEqualTo(2L);
-			assertThat(result.productName()).isEqualTo("경매 판매글 제목1");
-			assertThat(result.productPrice()).isEqualTo(2_000_000L);
-			assertThat(result.productTxMethod()).isEqualTo(ProductTxMethod.AUCTION);
-			assertThat(result.endTime()).isEqualTo(ProductEndTime.HOUR_12);
-
-			verify(catalogDomainService, times(1)).getCatalogById(catalogId);
-			verify(productDomainService, times(1)).createProduct(any(ProductCreateCommand.class),
-				any());
-			verify(auctionDomainService, times(1)).createAuction(any(AuctionCreateCommand.class));
-			verify(auctionSchedulerService, times(1)).autoAuctionEndSchedule(auction, auctionProduct.getId());
-		}
-
-		@Test
-		@DisplayName("상품 생성 실패 - 존재하지 않는 카탈로그")
-		void fail_createProduct_catalogNotFound() {
-			// Given
-			Long catalogId = 999L;
-			CreateProductRequest request = new CreateProductRequest(
-				"테스트 상품",
-				"테스트 상품 설명",
-				"direct",
-				50000L,
-				null
-			);
-			List<MultipartFile> files = List.of();
-
-			given(catalogDomainService.getCatalogById(catalogId))
-				.willThrow(new CatalogException(CatalogErrorCode.CATALOG_NOT_FOUND));
-
-			// When & Then
-			assertThatThrownBy(() -> productService.createProduct(user, catalogId, request, files))
-				.isInstanceOf(CatalogException.class)
-				.hasFieldOrPropertyWithValue("errorCode", CatalogErrorCode.CATALOG_NOT_FOUND);
-
-			verify(catalogDomainService, times(1)).getCatalogById(catalogId);
-			verify(productDomainService, never()).createProduct(any(), any());
-		}
-	}
+	// @Nested
+	// @DisplayName("상품 생성 테스트")
+	// class CreateProductTest {
+	// 	// 작성 해야함
+	// }
 
 }

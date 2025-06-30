@@ -1,7 +1,6 @@
 package nbc.chillguys.nebulazone.infra.redis.subscriber;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
@@ -13,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
+import nbc.chillguys.nebulazone.infra.redis.dto.AuctionPubSubMessage;
 import nbc.chillguys.nebulazone.infra.redis.dto.ChatPubSubMessage;
 
 /**
@@ -46,16 +46,32 @@ public class RedisMessageSubscriber implements MessageListener {
 		try {
 			// Redis 메시지를 문자열로 변환
 			String messageBody = new String(message.getBody(), StandardCharsets.UTF_8);
+			String channel = new String(message.getChannel());
 
-			// JSON을 ChatPubSubMessage 객체로 역직렬화
-			ChatPubSubMessage pubSubMessage = objectMapper.readValue(messageBody, ChatPubSubMessage.class);
+			if (channel.startsWith("chat:room")) {
+				// JSON을 ChatPubSubMessage 객체로 역직렬화
+				ChatPubSubMessage pubSubMessage = objectMapper.readValue(messageBody, ChatPubSubMessage.class);
 
-			// ChatPubSubMessage를 ChatMessageInfo로 변환
-			ChatMessageInfo chatMessageInfo = pubSubMessage.toChatMessageInfo();
+				// ChatPubSubMessage를 ChatMessageInfo로 변환
+				ChatMessageInfo chatMessageInfo = pubSubMessage.toChatMessageInfo();
 
-			// WebSocket 구독자들에게 브로드캐스트
-			String destination = "/topic/chat/" + pubSubMessage.getRoomId();
-			messagingTemplate.convertAndSend(destination, chatMessageInfo);
+				// WebSocket 구독자들에게 브로드캐스트
+				String destination = "/topic/chat/" + pubSubMessage.getRoomId();
+				messagingTemplate.convertAndSend(destination, chatMessageInfo);
+
+			} else if (channel.startsWith("auction:")) {
+
+				AuctionPubSubMessage auctionMessage = objectMapper.readValue(messageBody,
+					AuctionPubSubMessage.class);
+
+				Long auctionId = auctionMessage.auctionId();
+				String updateType = auctionMessage.updateType();
+
+				String destination = "/topic/auction/" + auctionId + "/" + updateType;
+
+				messagingTemplate.convertAndSend(destination, auctionMessage.data());
+
+			}
 
 		} catch (Exception e) {
 			log.error("Redis 메시지 처리 중 오류 발생 - 채널: {}, error: {}", message.getChannel(), e.getMessage(), e);
