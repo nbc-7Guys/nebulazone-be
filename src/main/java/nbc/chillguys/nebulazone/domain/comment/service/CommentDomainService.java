@@ -93,8 +93,8 @@ public class CommentDomainService {
 	public Comment updateComment(CommentUpdateCommand command) {
 		Comment comment = findActiveComment(command.commentId());
 
-		comment.validateBelongsToPost(command.post().getId());
-		comment.validateCommentOwner(command.user().getId());
+		comment.validateBelongsToPost(command.postId());
+		comment.validateCommentOwner(command.userId());
 
 		comment.update(command.content());
 

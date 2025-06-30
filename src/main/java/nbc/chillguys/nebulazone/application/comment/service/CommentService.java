@@ -61,10 +61,10 @@ public class CommentService {
 		return CommonPageResponse.from(response);
 	}
 
-	public CommentResponse updateComment(User user, Long postId, Long commentId, UpdateCommentRequest request) {
-		Post post = postDomainService.findActivePost(postId);
+	public CommentResponse updateComment(Long commentId, Long userId, Long postId, UpdateCommentRequest request) {
+		postDomainService.findActivePost(postId);
 
-		CommentUpdateCommand command = request.toCommand(user, post, commentId);
+		CommentUpdateCommand command = request.toCommand(commentId, userId, postId);
 		Comment comment = commentDomainService.updateComment(command);
 
 		return CommentResponse.from(comment);
@@ -77,14 +77,5 @@ public class CommentService {
 		commentDomainService.deleteComment(command);
 
 		return DeleteCommentResponse.from(commentId);
-	}
-
-	public CommentResponse updateComment(User user, Long postId, Long commentId, UpdateCommentRequest request) {
-		Post post = postDomainService.findMyActivePost(postId, user.getId());
-
-		CommentUpdateCommand command = request.toCommand(user, post, commentId);
-		Comment comment = commentDomainService.updateComment(command);
-
-		return CommentResponse.from(comment);
 	}
 }
