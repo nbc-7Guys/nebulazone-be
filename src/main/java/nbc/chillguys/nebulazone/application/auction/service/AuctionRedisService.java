@@ -45,7 +45,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
 import nbc.chillguys.nebulazone.infra.redis.dto.FindAllAuctionsDto;
-import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
+import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
 import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
@@ -64,7 +64,7 @@ public class AuctionRedisService {
 	private final TransactionDomainService transactionDomainService;
 	private final ProductDomainService productDomainService;
 
-	private final WebSocketSessionRedisService webSocketSessionRedisService;
+	private final RedisMessagePublisher redisMessagePublisher;
 
 	/**
 	 * redis 경매 생성<br>
@@ -186,7 +186,7 @@ public class AuctionRedisService {
 			EndAuctionResponse response = EndAuctionResponse.of(auction, wonBidVo, wonAuctionProduct);
 
 			try {
-				webSocketSessionRedisService.sendAuctionEndUpdate(auctionId, response);
+				redisMessagePublisher.publishAuctionUpdate(auctionId, "won", response);
 			} catch (Exception e) {
 				log.error("수동 낙찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
 			}

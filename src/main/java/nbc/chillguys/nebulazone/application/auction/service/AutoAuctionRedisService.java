@@ -31,7 +31,7 @@ import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
-import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
+import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
 import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
@@ -49,7 +49,7 @@ public class AutoAuctionRedisService {
 	private final UserDomainService userDomainService;
 	private final TransactionDomainService transactionDomainService;
 
-	private final WebSocketSessionRedisService webSocketSessionRedisService;
+	private final RedisMessagePublisher redisMessagePublisher;
 
 	/**
 	 * 자동 경매 종료<br>
@@ -149,7 +149,7 @@ public class AutoAuctionRedisService {
 
 					if (wonBidVo != null) {
 						EndAuctionResponse response = EndAuctionResponse.of(auction, wonBidVo, wonAuctionProduct);
-						webSocketSessionRedisService.sendAuctionEndUpdate(auctionId, response);
+						redisMessagePublisher.publishAuctionUpdate(auctionId, "won", response);
 					}
 
 				} catch (Exception e) {

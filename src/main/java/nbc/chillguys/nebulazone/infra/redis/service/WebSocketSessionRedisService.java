@@ -3,7 +3,6 @@ package nbc.chillguys.nebulazone.infra.redis.service;
 import java.time.Duration;
 
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +23,6 @@ public class WebSocketSessionRedisService {
 	private static final Duration SESSION_TTL = Duration.ofHours(12);
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ObjectMapper objectMapper;
-	private final SimpMessagingTemplate messagingTemplate;
 
 	// 세션ID : user 매핑
 	public void registerUser(String sessionId, SessionUser sessionUser) {
@@ -148,21 +146,4 @@ public class WebSocketSessionRedisService {
 		}
 	}
 
-	public void sendBidUpdate(Long auctionId, Object bidData) {
-		try {
-			String destination = "/topic/auction/" + auctionId + "/bid";
-			messagingTemplate.convertAndSend(destination, bidData);
-		} catch (Exception e) {
-			log.error("입찰 업데이트 전송 실패 - auctionId: {}, error: {}", auctionId, e.getMessage(), e);
-		}
-	}
-
-	public void sendAuctionEndUpdate(Long auctionId, Object endData) {
-		try {
-			String destination = "/topic/auction/" + auctionId + "/end";
-			messagingTemplate.convertAndSend(destination, endData);
-		} catch (Exception e) {
-			log.error("경매 종료 업데이트 전송 실패 - auctionId: {}, error: {}", auctionId, e.getMessage(), e);
-		}
-	}
 }
