@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.infra.redis.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
@@ -32,7 +33,7 @@ public record UserDto(
 
 	Set<UserRole> roles,
 
-	Set<Address> addresses,
+	List<Address> addresses,
 
 	LocalDateTime deletedAt
 ) {

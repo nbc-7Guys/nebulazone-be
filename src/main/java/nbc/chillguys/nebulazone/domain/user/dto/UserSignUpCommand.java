@@ -1,7 +1,6 @@
 package nbc.chillguys.nebulazone.domain.user.dto;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.List;
 
 import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
@@ -14,7 +13,7 @@ public record UserSignUpCommand(
 	String phone,
 	String nickname,
 	String profileImageUrl,
-	Set<Address> addresses,
+	List<Address> addresses,
 	OAuthType oAuthType,
 	String oauthId
 ) {
@@ -31,7 +30,7 @@ public record UserSignUpCommand(
 					.detailAddress(a.detailAddress())
 					.addressNickname(a.addressNickname())
 					.build())
-				.collect(Collectors.toSet()),
+				.toList(),
 			OAuthType.DOMAIN,
 			null
 		);

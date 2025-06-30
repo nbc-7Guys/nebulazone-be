@@ -1,8 +1,10 @@
 package nbc.chillguys.nebulazone.domain.user.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
+import nbc.chillguys.nebulazone.domain.user.dto.UserAddressCommand;
 import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
 import nbc.chillguys.nebulazone.domain.user.exception.UserException;
 
@@ -79,13 +82,13 @@ public class User extends BaseEntity {
 		name = "user_addresses",
 		joinColumns = @JoinColumn(name = "user_id")
 	)
-	private Set<Address> addresses;
+	private List<Address> addresses;
 
 	private LocalDateTime deletedAt;
 
 	@Builder
 	public User(String email, String password, String phone, String nickname, String profileImage, long point,
-		OAuthType oAuthType, String oAuthId, Set<UserRole> roles, Set<Address> addresses) {
+		OAuthType oAuthType, String oAuthId, Set<UserRole> roles, List<Address> addresses) {
 		this.email = email;
 		this.password = password;
 		this.phone = phone;
@@ -95,7 +98,7 @@ public class User extends BaseEntity {
 		this.oAuthType = oAuthType;
 		this.oAuthId = oAuthId;
 		this.roles = roles != null ? roles : new HashSet<>();
-		this.addresses = addresses != null ? addresses : new HashSet<>();
+		this.addresses = addresses != null ? addresses : new ArrayList<>();
 		this.status = UserStatus.ACTIVE;
 	}
 
@@ -162,7 +165,18 @@ public class User extends BaseEntity {
 		return this.roles.stream()
 			.map(role -> new SimpleGrantedAuthority(role.name()))
 			.collect(Collectors.toSet());
+	}
 
+	public void addAddress(UserAddressCommand command) {
+		this.addresses.add(Address.builder()
+			.detailAddress(command.detailAddress())
+			.roadAddress(command.roadAddress())
+			.addressNickname(command.addressNickname())
+			.build());
+	}
+
+	public void removeAddress(Address address) {
+		this.addresses.remove(address);
 	}
 
 }

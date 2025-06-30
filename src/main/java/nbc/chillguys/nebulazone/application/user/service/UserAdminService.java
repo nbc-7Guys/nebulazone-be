@@ -35,10 +35,8 @@ public class UserAdminService {
 
 		Page<UserAdminInfo> infoPage = userAdminDomainService.findUsers(command, pageable);
 
-		// Page<AdminUserResponse>
 		Page<UserAdminResponse> responsePage = infoPage.map(UserAdminResponse::from);
 
-		// 래핑
 		return CommonPageResponse.from(responsePage);
 	}
 
