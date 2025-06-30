@@ -366,7 +366,7 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 구매 성공")
 		void success_purchaseProduct() {
-			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, product.getId());
+			ProductPurchaseCommand command = new ProductPurchaseCommand(product.getId(), 2L, catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -378,7 +378,7 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 구매 실패 - 판매 상품을 찾을 수 없음")
 		void fail_purchaseProduct_productNotFound() {
-			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, product.getId());
+			ProductPurchaseCommand command = new ProductPurchaseCommand(product.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
@@ -392,7 +392,7 @@ class ProductDomainServiceUnitTest {
 		void fail_purchaseProduct_alreadySold() {
 			success_purchaseProduct();
 
-			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, product.getId());
+			ProductPurchaseCommand command = new ProductPurchaseCommand(product.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -404,7 +404,7 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 구매 실패 - 옥션 상품은 구매 불가")
 		void fail_purchaseProduct_auctionProductNotPurchasable() {
-			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, auctionProduct.getId());
+			ProductPurchaseCommand command = new ProductPurchaseCommand(auctionProduct.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(auctionProduct));
 
