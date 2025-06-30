@@ -19,7 +19,7 @@ public enum ProductEndTime {
 
 	private final long seconds;
 
-	public static ProductEndTime of(String endTime) {
+	public static ProductEndTime from(String endTime) {
 		if (endTime == null || endTime.isBlank()) {
 			return null;
 		}

@@ -16,7 +16,7 @@ public record ChangeToAuctionTypeRequest(
 ) {
 
 	public ProductEndTime getProductEndTime() {
-		return ProductEndTime.of(endTime);
+		return ProductEndTime.from(endTime);
 	}
 
 	public ChangeToAuctionTypeCommand toCommand(User user, Catalog catalog, Long productId) {
