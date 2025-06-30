@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.domain.product.listener;
+package nbc.chillguys.nebulazone.application.product.listener;
 
 import java.time.LocalDateTime;
 
@@ -7,12 +7,14 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
+import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @RequiredArgsConstructor
 @Component
@@ -20,6 +22,7 @@ public class PurchaseProductEventListener {
 
 	private final ProductDomainService productDomainService;
 	private final TransactionDomainService transactionDomainService;
+	private final NotificationService notificationService;
 
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void handlePurchaseProduct(PurchaseProductEvent event) {
@@ -29,8 +32,9 @@ public class PurchaseProductEventListener {
 		String txMethod = product.getTxMethod().name();
 		LocalDateTime purchasedAt = event.purchasedAt();
 		Long price = product.getPrice();
+		User buyer = event.buyer();
 		TransactionCreateCommand buyerTxCreateCommand = TransactionCreateCommand.of(
-			event.buyer(), UserType.BUYER, product, txMethod, price, purchasedAt
+			buyer, UserType.BUYER, product, txMethod, price, purchasedAt
 		);
 		transactionDomainService.createTransaction(buyerTxCreateCommand);
 
@@ -38,5 +42,9 @@ public class PurchaseProductEventListener {
 			product.getSeller(), UserType.SELLER, product, txMethod, price, purchasedAt
 		);
 		transactionDomainService.createTransaction(sellerTxCreateCommand);
+
+		notificationService.sendProductPurchaseNotification(
+			product.getId(), product.getSellerId(), buyer.getId(), product.getName(), buyer.getNickname()
+		);
 	}
 }
