@@ -93,11 +93,13 @@ public class ProductService {
 	}
 
 	@Transactional
-	public ProductResponse changeToAuctionType(User user, Long catalogId, Long productId,
-		ChangeToAuctionTypeRequest request) {
-		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
-
-		ChangeToAuctionTypeCommand command = request.toCommand(user, catalog, productId);
+	public ProductResponse changeToAuctionType(
+		Long productId,
+		Long userId,
+		Long catalogId,
+		ChangeToAuctionTypeRequest request
+	) {
+		ChangeToAuctionTypeCommand command = request.toCommand(productId, userId, catalogId);
 		Product product = productDomainService.changeToAuctionType(command);
 
 		productDomainService.saveProductToEs(product);
