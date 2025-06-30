@@ -16,7 +16,7 @@ public record GetPostResponse(
 	Long userId,
 	String author,
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	LocalDateTime createdAt,
+	LocalDateTime modifiedAt,
 	List<String> imageUrls
 ) {
 	public static GetPostResponse from(Post post) {
@@ -27,7 +27,7 @@ public record GetPostResponse(
 			post.getType().name(),
 			post.getUserId(),
 			post.getUserNickname(),
-			post.getCreatedAt(),
+			post.getModifiedAt(),
 			post.getPostImages().stream()
 				.map(PostImage::getUrl)
 				.toList()

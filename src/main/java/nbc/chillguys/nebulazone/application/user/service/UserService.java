@@ -1,27 +1,30 @@
 package nbc.chillguys.nebulazone.application.user.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import nbc.chillguys.nebulazone.application.user.dto.request.AddAddressUserRequest;
+import nbc.chillguys.nebulazone.application.user.dto.request.DeleteAddressUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.SignUpUserRequest;
+import nbc.chillguys.nebulazone.application.user.dto.request.UpdateAddressUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.UpdateUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest;
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
 import nbc.chillguys.nebulazone.application.user.dto.response.WithdrawUserResponse;
+import nbc.chillguys.nebulazone.domain.user.dto.UserAddressCommand;
 import nbc.chillguys.nebulazone.domain.user.dto.UserSignUpCommand;
 import nbc.chillguys.nebulazone.domain.user.dto.UserUpdateCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 	private final UserDomainService userDomainService;
-	private final S3Service s3Service;
+	private final GcsClient gcsClient;
 	private final UserCacheService userCacheService;
 
 	public UserResponse signUp(SignUpUserRequest signUpUserRequest) {
@@ -52,28 +55,52 @@ public class UserService {
 		return UserResponse.from(user);
 	}
 
-	@Transactional
-	public UserResponse updateUserProfileImage(MultipartFile profileImage, User user) {
-		if (user.getProfileImage() != null) {
-			s3Service.generateDeleteUrlAndDeleteFile(user.getProfileImage());
+	public UserResponse updateUserProfileImage(MultipartFile profileImage, User loggedInUser) {
+		if (loggedInUser.getProfileImage() != null) {
+			gcsClient.deleteFile(loggedInUser.getProfileImage());
 		}
 
-		String profileImageUrl = s3Service.generateUploadUrlAndUploadFile(profileImage);
+		String profileImageUrl = gcsClient.uploadFile(profileImage);
 
-		userDomainService.updateUserProfileImage(profileImageUrl, user);
+		User updatedUser = userDomainService.updateUserProfileImage(profileImageUrl, loggedInUser);
+
+		userCacheService.deleteUserById(updatedUser.getId());
+
+		return UserResponse.from(updatedUser);
+	}
+
+	public WithdrawUserResponse withdrawUser(WithdrawUserRequest withdrawUserRequest, User loggedInUser) {
+		userDomainService.validPassword(withdrawUserRequest.password(), loggedInUser.getPassword());
+
+		User withdrawnUser = userDomainService.withdrawUser(loggedInUser);
+
+		userCacheService.deleteUserById(withdrawnUser.getId());
+
+		return WithdrawUserResponse.from(withdrawnUser.getId());
+	}
+
+	public UserResponse addAddress(AddAddressUserRequest addAddressUserRequest, User loggedInUser) {
+		User user = userDomainService.addAddress(loggedInUser,
+			UserAddressCommand.from(addAddressUserRequest));
 
 		userCacheService.deleteUserById(user.getId());
 
 		return UserResponse.from(user);
 	}
 
-	public WithdrawUserResponse withdrawUser(WithdrawUserRequest withdrawUserRequest, User user) {
-		userDomainService.validPassword(withdrawUserRequest.password(), user.getPassword());
-
-		userDomainService.withdrawUser(user);
+	public UserResponse updateAddress(UpdateAddressUserRequest updateAddressUserRequest, User loggedInUser) {
+		User user = userDomainService.updateAddress(loggedInUser, UserAddressCommand.from(updateAddressUserRequest));
 
 		userCacheService.deleteUserById(user.getId());
 
-		return WithdrawUserResponse.from(user.getId());
+		return UserResponse.from(user);
+	}
+
+	public UserResponse deleteAddress(DeleteAddressUserRequest deleteAddressUserRequest, User loggedInUser) {
+		User user = userDomainService.removeAddress(loggedInUser, UserAddressCommand.from(deleteAddressUserRequest));
+
+		userCacheService.deleteUserById(user.getId());
+
+		return UserResponse.from(user);
 	}
 }

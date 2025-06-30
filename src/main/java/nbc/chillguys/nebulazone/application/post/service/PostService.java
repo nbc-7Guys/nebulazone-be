@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.application.post.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,78 +18,53 @@ import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.SearchPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse;
 import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
-import nbc.chillguys.nebulazone.domain.post.dto.PostDeleteCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
+import nbc.chillguys.nebulazone.domain.post.event.DeletePostEvent;
+import nbc.chillguys.nebulazone.domain.post.event.UpdatePostEvent;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
 import nbc.chillguys.nebulazone.domain.post.vo.PostDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
 	private final PostDomainService postDomainService;
-	private final S3Service s3Service;
+	private final GcsClient gcsClient;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
-	public CreatePostResponse createPost(User user, CreatePostRequest request,
-		List<MultipartFile> multipartFiles) {
+	public CreatePostResponse createPost(User user, CreatePostRequest request) {
 		PostCreateCommand postCreateDto = PostCreateCommand.of(user, request);
 
-		List<String> postImageUrls = multipartFiles == null
-			? List.of()
-			: multipartFiles.stream()
-			.map(s3Service::generateUploadUrlAndUploadFile)
-			.toList();
-
-		Post createdPost = postDomainService.createPost(postCreateDto, postImageUrls);
+		Post createdPost = postDomainService.createPost(postCreateDto);
 
 		postDomainService.savePostToEs(createdPost);
 
-		return CreatePostResponse.from(createdPost, postImageUrls);
+		return CreatePostResponse.from(createdPost);
 
 	}
 
-	public UpdatePostResponse updatePost(
-		Long userId,
-		Long postId,
-		UpdatePostRequest request,
-		List<MultipartFile> imageFiles
-	) {
+	@Transactional
+	public UpdatePostResponse updatePost(Long userId, Long postId, UpdatePostRequest request) {
 		Post post = postDomainService.findMyActivePost(userId, postId);
 
-		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
-		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
-		if (hasImage) {
-			List<String> newImageUrls = imageFiles.stream()
-				.map(s3Service::generateUploadUrlAndUploadFile)
-				.toList();
-			imageUrls.addAll(newImageUrls);
+		PostUpdateCommand command = request.toCommand();
+		Post updatedPost = postDomainService.updatePost(postId, userId, command);
 
-			post.getPostImages().stream()
-				.filter(postImage -> !imageUrls.contains(postImage.getUrl()))
-				.forEach((postImage) -> s3Service.generateDeleteUrlAndDeleteFile(postImage.getUrl()));
-		}
-
-		PostUpdateCommand command = request.toCommand(userId, postId, imageUrls);
-
-		Post updatedPost = postDomainService.updatePost(command);
-
-		postDomainService.savePostToEs(updatedPost);
+		eventPublisher.publishEvent(new UpdatePostEvent(post));
 
 		return UpdatePostResponse.from(updatedPost);
 	}
 
 	public DeletePostResponse deletePost(Long userId, Long postId) {
-		PostDeleteCommand command = PostDeleteCommand.of(userId, postId);
+		postDomainService.deletePost(postId, userId);
 
-		postDomainService.deletePost(command);
-
-		postDomainService.deletePostFromEs(postId);
+		eventPublisher.publishEvent(new DeletePostEvent(postId));
 
 		return DeletePostResponse.from(postId);
 	}
@@ -105,5 +81,30 @@ public class PostService {
 		Post post = postDomainService.getActivePostWithUserAndImages(postId);
 
 		return GetPostResponse.from(post);
+	}
+
+	public GetPostResponse updatePostImages(Long postId, List<MultipartFile> imageFiles, User user,
+		List<String> remainImageUrls) {
+
+		List<String> postImageUrls = new ArrayList<>(remainImageUrls);
+		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
+		if (hasImage) {
+			List<String> newImageUrls = imageFiles.stream()
+				.map(gcsClient::uploadFile)
+				.toList();
+			postImageUrls.addAll(newImageUrls);
+
+		}
+		Post post = postDomainService.findActivePost(postId);
+
+		post.getPostImages().stream()
+			.filter(postImage -> !postImageUrls.contains(postImage.getUrl()))
+			.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
+
+		Post updatedPost = postDomainService.updatePostImages(post, postImageUrls, user.getId());
+
+		postDomainService.savePostToEs(updatedPost);
+
+		return GetPostResponse.from(updatedPost);
 	}
 }

@@ -22,14 +22,14 @@ import nbc.chillguys.nebulazone.domain.post.dto.PostAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostAdminUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.service.PostAdminDomainService;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 
 @Service
 @RequiredArgsConstructor
 public class PostAdminService {
 
 	private final PostAdminDomainService postsAdminDomainService;
-	private final S3Service s3Service;
+	private final GcsClient gcsClient;
 
 	public CommonPageResponse<PostAdminResponse> findPosts(PostAdminSearchRequest request, Pageable pageable) {
 		PostAdminSearchQueryCommand command = new PostAdminSearchQueryCommand(
@@ -47,27 +47,10 @@ public class PostAdminService {
 		return GetPostResponse.from(post);
 	}
 
-	public UpdatePostResponse updateAdminPost(
-		Long postId,
-		UpdatePostRequest request,
-		List<MultipartFile> imageFiles
-	) {
+	public UpdatePostResponse updateAdminPost(Long postId, UpdatePostRequest request) {
 		Post post = postsAdminDomainService.findMyActivePost(postId);
 
-		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
-		boolean hasImage = !imageFiles.isEmpty();
-		if (hasImage) {
-			List<String> newImageUrls = imageFiles.stream()
-				.map(s3Service::generateUploadUrlAndUploadFile)
-				.toList();
-			imageUrls.addAll(newImageUrls);
-
-			post.getPostImages().stream()
-				.filter(postImage -> !imageUrls.contains(postImage.getUrl()))
-				.forEach((postImage) -> s3Service.generateDeleteUrlAndDeleteFile(postImage.getUrl()));
-		}
-
-		PostAdminUpdateCommand command = request.toAdminCommand(postId, imageUrls);
+		PostAdminUpdateCommand command = request.toAdminCommand(postId);
 
 		Post updatedPost = postsAdminDomainService.updatePost(command);
 
@@ -92,4 +75,29 @@ public class PostAdminService {
 		postsAdminDomainService.restorePost(postId);
 	}
 
+	public GetPostResponse updatePostImages(Long postId, List<MultipartFile> imageFiles,
+		List<String> remainImageUrls) {
+
+		List<String> postImageUrls = new ArrayList<>(remainImageUrls);
+
+		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
+		if (hasImage) {
+			List<String> newImageUrls = imageFiles.stream()
+				.map(gcsClient::uploadFile)
+				.toList();
+			postImageUrls.addAll(newImageUrls);
+		}
+
+		Post post = postsAdminDomainService.findActivePost(postId);
+
+		post.getPostImages().stream()
+			.filter(postImage -> !postImageUrls.contains(postImage.getUrl()))
+			.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
+
+		Post updatedPost = postsAdminDomainService.updatePostImages(post, postImageUrls);
+
+		postsAdminDomainService.savePostToEs(updatedPost);
+
+		return GetPostResponse.from(updatedPost);
+	}
 }

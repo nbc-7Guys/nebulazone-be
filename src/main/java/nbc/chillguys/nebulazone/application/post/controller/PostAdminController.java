@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.post.dto.request.PostAdminSearchRequest;
 import nbc.chillguys.nebulazone.application.post.dto.request.PostAdminUpdateTypeRequest;
+import nbc.chillguys.nebulazone.application.post.dto.request.UpdateImagesPostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.request.UpdatePostRequest;
 import nbc.chillguys.nebulazone.application.post.dto.response.DeletePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
@@ -62,10 +64,8 @@ public class PostAdminController {
 	@PutMapping("/{postId}")
 	public ResponseEntity<UpdatePostResponse> updateAdminPost(
 		@PathVariable("postId") Long postId,
-		@Valid @RequestPart("post") UpdatePostRequest request,
-		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles
-	) {
-		UpdatePostResponse response = postAdminService.updateAdminPost(postId, request, imageFiles);
+		@Valid @RequestBody UpdatePostRequest request) {
+		UpdatePostResponse response = postAdminService.updateAdminPost(postId, request);
 
 		return ResponseEntity.ok(response);
 	}
@@ -94,4 +94,16 @@ public class PostAdminController {
 		return ResponseEntity.noContent().build();
 	}
 
+	@PutMapping(value = "/{postId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<GetPostResponse> updatePostImages(
+		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
+		@PathVariable("postId") Long postId,
+		@Valid @RequestPart("post") UpdateImagesPostRequest request
+	) {
+
+		GetPostResponse response = postAdminService.updatePostImages(postId, imageFiles,
+			request.remainImageUrls());
+
+		return ResponseEntity.ok(response);
+	}
 }

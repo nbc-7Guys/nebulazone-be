@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import nbc.chillguys.nebulazone.application.auth.dto.request.SignInRequest;
 import nbc.chillguys.nebulazone.application.auth.dto.response.SignInResponse;
+import nbc.chillguys.nebulazone.application.auth.metrics.AuthMetrics;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -36,6 +38,9 @@ class AuthServiceTest {
 
 	@Mock
 	private JwtUtil jwtUtil;
+
+	@Mock
+	private AuthMetrics authMetrics;
 
 	@InjectMocks
 	private AuthService authService;
@@ -54,7 +59,7 @@ class AuthServiceTest {
 			.point(0)
 			.oAuthType(OAuthType.DOMAIN)
 			.roles(Set.of(UserRole.ROLE_USER))
-			.addresses(Set.of(Address.builder()
+			.addresses(List.of(Address.builder()
 				.addressNickname("test_address_nickname")
 				.roadAddress("test_road_address")
 				.detailAddress("test_detail_address")

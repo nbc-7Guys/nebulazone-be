@@ -33,13 +33,13 @@ public class ProductDomainService {
 
 	/**
 	 * 판매 상품 생성
+	 *
 	 * @param command 유저, 카탈로그, 상품 이름, 상품 가격, 상품 설명, 상품 거래 종류, 경매 종료 시간
-	 * @param productImageUrls 상품 이미지 리스트
 	 * @return Product
 	 * @author 전나겸
 	 */
 	@Transactional
-	public Product createProduct(ProductCreateCommand command, List<String> productImageUrls) {
+	public Product createProduct(ProductCreateCommand command) {
 
 		Product product = Product.builder()
 			.seller(command.user())
@@ -50,13 +50,12 @@ public class ProductDomainService {
 			.txMethod(command.txMethod())
 			.build();
 
-		product.addProductImages(productImageUrls);
-
 		return productRepository.save(product);
 	}
 
 	/**
 	 * 삭제되지 않은 판매 상품 조회
+	 *
 	 * @param productId 상품 id
 	 * @return product
 	 * @author 윤정환
@@ -67,7 +66,20 @@ public class ProductDomainService {
 	}
 
 	/**
+	 * 삭제되지 않은 판매 상품 조회 (비관적 락 적용)
+	 *
+	 * @param productId 상품 id
+	 * @return product
+	 * @author 윤정환
+	 */
+	public Product findActiveProductByIdForUpdate(Long productId) {
+		return productRepository.findActiveProductByIdForUpdate(productId)
+			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
+	}
+
+	/**
 	 * 판매되지 않은 일반 판매 상품 조회
+	 *
 	 * @param productId 상품 id
 	 * @return product
 	 * @author 윤정환
@@ -82,7 +94,24 @@ public class ProductDomainService {
 	}
 
 	/**
+	 * 판매되지 않은 일반 판매 상품 조회 (비관적 락 적용)
+	 *
+	 * @param productId 상품 id
+	 * @return product
+	 * @author 윤정환
+	 */
+	public Product findAvailableProductByIdForUpdate(Long productId) {
+		Product product = findActiveProductByIdForUpdate(productId);
+
+		product.validNotSold();
+		product.validPurchasable();
+
+		return product;
+	}
+
+	/**
 	 * 판매 상품 수정
+	 *
 	 * @param command 판매 상품 수정 정보
 	 * @return product
 	 * @author 윤정환
@@ -94,13 +123,14 @@ public class ProductDomainService {
 		product.validBelongsToCatalog(command.catalog().getId());
 		product.validNotProductOwner(command.user().getId());
 
-		product.update(command.name(), command.description(), command.imageUrls());
+		product.update(command.name(), command.description());
 
 		return product;
 	}
 
 	/**
 	 * 판매 방식 옥션으로 변경
+	 *
 	 * @param command 판매 싱픔 정보
 	 * @return product
 	 * @author 윤정환
@@ -188,6 +218,32 @@ public class ProductDomainService {
 			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
 
 		product.validBelongsToCatalog(query.catalogId());
+
+		return product;
+	}
+
+	/**
+	 * 상품이 팔렸다고 ES에 기록
+	 *
+	 * @param productId 상품 id
+	 * @author 윤정환
+	 */
+	public void markProductAsPurchased(Long productId) {
+		productEsRepository.markProductAsPurchased(productId);
+	}
+
+	/**
+	 * 상품 이미지 수정
+	 * @param product 수정할 대상 상품
+	 * @param productImageUrs 수정할 Image 리스트
+	 * @param userId 로그인 유저id
+	 * @return 수정된 상품
+	 * @author 전나겸
+	 */
+	public Product updateProductImages(Product product, List<String> productImageUrs, Long userId) {
+
+		product.validNotProductOwner(userId);
+		product.updateProductImage(productImageUrs);
 
 		return product;
 	}

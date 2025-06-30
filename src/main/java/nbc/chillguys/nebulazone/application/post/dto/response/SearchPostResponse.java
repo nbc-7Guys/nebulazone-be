@@ -15,7 +15,7 @@ public record SearchPostResponse(
 	Long userId,
 	String author,
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	LocalDateTime createdAt,
+	LocalDateTime modifiedAt,
 	List<String> imageUrls
 ) {
 	public static SearchPostResponse from(PostDocument postDocument) {
@@ -26,7 +26,7 @@ public record SearchPostResponse(
 			postDocument.type(),
 			postDocument.userId(),
 			postDocument.author(),
-			postDocument.createdAt(),
+			postDocument.modifiedAt(),
 			postDocument.imageUrls()
 		);
 	}

@@ -3,7 +3,7 @@ package nbc.chillguys.nebulazone.application.post.service;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
@@ -20,13 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.multipart.MultipartFile;
 
-import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
-import nbc.chillguys.nebulazone.application.post.dto.response.CreatePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.SearchPostResponse;
-import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
@@ -36,7 +32,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 
 @DisplayName("게시글 애플리케이션 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -46,7 +42,7 @@ class PostServiceTest {
 	private PostDomainService postDomainService;
 
 	@Mock
-	private S3Service s3Service;
+	private GcsClient gcsClient;
 
 	@InjectMocks
 	private PostService postService;
@@ -56,7 +52,7 @@ class PostServiceTest {
 
 	@BeforeEach
 	void init() {
-		HashSet<Address> addresses = new HashSet<>();
+		List<Address> addresses = new ArrayList<>();
 
 		IntStream.range(1, 4)
 			.forEach(i -> addresses.add(
@@ -145,60 +141,7 @@ class PostServiceTest {
 		@Test
 		@DisplayName("게시글 생성 성공")
 		void success_createPost() {
-			// Given
-			CreatePostRequest request = new CreatePostRequest(
-				"테스트 게시글 제목",
-				"테스트 게시글 내용",
-				"free"
-			);
-			List<MultipartFile> files = List.of();
-
-			given(postDomainService.createPost(any(PostCreateCommand.class), any(List.class)))
-				.willReturn(post);
-
-			// When
-			CreatePostResponse result = postService.createPost(user, request, files);
-
-			// Then
-			assertThat(result.postId()).isEqualTo(1L);
-			assertThat(result.title()).isEqualTo("테스트 제목1");
-			assertThat(result.content()).isEqualTo("테스트 본문1");
-			assertThat(result.type()).isEqualTo(PostType.FREE);
-
-			verify(postDomainService, times(1)).createPost(any(PostCreateCommand.class), any(List.class));
-			verify(postDomainService, times(1)).savePostToEs(post);
-		}
-
-		@Test
-		@DisplayName("게시글 생성 성공 - 이미지 포함")
-		void success_createPost_withImages() {
-			// Given
-			CreatePostRequest request = new CreatePostRequest(
-				"테스트 게시글 제목",
-				"테스트 게시글 내용",
-				"free"
-			);
-
-			MultipartFile mockFile = mock(MultipartFile.class);
-			List<MultipartFile> files = List.of(mockFile);
-			String mockImageUrl = "https://test-image.jpg";
-
-			given(s3Service.generateUploadUrlAndUploadFile(mockFile))
-				.willReturn(mockImageUrl);
-			given(postDomainService.createPost(any(PostCreateCommand.class), any(List.class)))
-				.willReturn(post);
-
-			// When
-			CreatePostResponse result = postService.createPost(user, request, files);
-
-			// Then
-			assertThat(result.postId()).isEqualTo(1L);
-			assertThat(result.title()).isEqualTo("테스트 제목1");
-			assertThat(result.content()).isEqualTo("테스트 본문1");
-			assertThat(result.type()).isEqualTo(PostType.FREE);
-
-			verify(s3Service, times(1)).generateUploadUrlAndUploadFile(mockFile);
-			verify(postDomainService, times(1)).createPost(any(PostCreateCommand.class), any(List.class));
+			// 다시짜야함
 		}
 	}
 

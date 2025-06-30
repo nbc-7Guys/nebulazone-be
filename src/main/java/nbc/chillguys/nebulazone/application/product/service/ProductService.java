@@ -1,16 +1,19 @@
 package nbc.chillguys.nebulazone.application.product.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.auction.service.AuctionSchedulerService;
+import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
+import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
 import nbc.chillguys.nebulazone.application.product.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.UpdateProductRequest;
@@ -33,37 +36,28 @@ import nbc.chillguys.nebulazone.domain.product.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
-import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
-import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
-import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
-import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
+import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
+import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
-	private final UserDomainService userDomainService;
 	private final ProductDomainService productDomainService;
 	private final AuctionDomainService auctionDomainService;
-	private final TransactionDomainService transactionDomainService;
-	private final AuctionSchedulerService auctionSchedulerService;
 	private final CatalogDomainService catalogDomainService;
-	private final S3Service s3Service;
+	private final NotificationService notificationService;
+	private final AuctionRedisService auctionRedisService;
+	private final GcsClient gcsClient;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
-	public ProductResponse createProduct(User user, Long catalogId, CreateProductRequest request,
-		List<MultipartFile> multipartFiles) {
-
-		List<String> productImageUrls = multipartFiles == null
-			? List.of()
-			: multipartFiles.stream()
-			.map(s3Service::generateUploadUrlAndUploadFile)
-			.toList();
+	public ProductResponse createProduct(User user, Long catalogId, CreateProductRequest request) {
 
 		Catalog findCatalog = catalogDomainService.getCatalogById(catalogId);
 
@@ -71,13 +65,17 @@ public class ProductService {
 
 		ProductEndTime productEndTime = request.getProductEndTime();
 
-		Product createdProduct = productDomainService.createProduct(productCreateCommand, productImageUrls);
+		Product createdProduct = productDomainService.createProduct(productCreateCommand);
 
 		if (createdProduct.getTxMethod() == ProductTxMethod.AUCTION) {
 			AuctionCreateCommand auctionCreateCommand = AuctionCreateCommand.of(createdProduct, productEndTime);
-			Auction savedAuction = auctionDomainService.createAuction(auctionCreateCommand);
-			auctionSchedulerService.autoAuctionEndSchedule(savedAuction, createdProduct.getId());
-			createdProduct.updateAuctionId(savedAuction.getId());
+			Auction createdAuction = auctionDomainService.createAuction(auctionCreateCommand);
+
+			CreateRedisAuctionDto createRedisAuctionDto = CreateRedisAuctionDto.of(
+				createdProduct, createdAuction, user, productEndTime);
+
+			auctionRedisService.createAuction(createRedisAuctionDto);
+			createdProduct.updateAuctionId(createdAuction.getId());
 		}
 
 		productDomainService.saveProductToEs(createdProduct);
@@ -85,30 +83,10 @@ public class ProductService {
 		return ProductResponse.from(createdProduct, productEndTime);
 	}
 
-	public ProductResponse updateProduct(
-		User user,
-		Long catalogId,
-		Long productId,
-		UpdateProductRequest request,
-		List<MultipartFile> imageFiles
-	) {
-		Product product = productDomainService.findActiveProductById(productId);
+	public ProductResponse updateProduct(User user, Long catalogId, Long productId, UpdateProductRequest request) {
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
-		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
-		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
-		if (hasImage) {
-			List<String> newImageUrls = imageFiles.stream()
-				.map(s3Service::generateUploadUrlAndUploadFile)
-				.toList();
-			imageUrls.addAll(newImageUrls);
-
-			product.getProductImages().stream()
-				.filter(productImage -> !imageUrls.contains(productImage.getUrl()))
-				.forEach((productImage) -> s3Service.generateDeleteUrlAndDeleteFile(productImage.getUrl()));
-		}
-
-		ProductUpdateCommand command = request.toCommand(user, catalog, productId, imageUrls);
+		ProductUpdateCommand command = request.toCommand(user, catalog, productId);
 		Product updatedProduct = productDomainService.updateProduct(command);
 
 		productDomainService.saveProductToEs(updatedProduct);
@@ -117,12 +95,8 @@ public class ProductService {
 	}
 
 	@Transactional
-	public ProductResponse changeToAuctionType(
-		User user,
-		Long catalogId,
-		Long productId,
-		ChangeToAuctionTypeRequest request
-	) {
+	public ProductResponse changeToAuctionType(User user, Long catalogId, Long productId,
+		ChangeToAuctionTypeRequest request) {
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		ChangeToAuctionTypeCommand command = request.toCommand(user, catalog, productId);
@@ -152,10 +126,10 @@ public class ProductService {
 		return DeleteProductResponse.from(productId);
 	}
 
+	@DistributedLock(key = "'lock:purchase:product:' + #productId")
 	@Transactional
-	public PurchaseProductResponse purchaseProduct(User loggedInUser, Long catalogId, Long productId) {
-		User user = userDomainService.findActiveUserById(loggedInUser.getId());
-		Product product = productDomainService.findAvailableProductById(productId);
+	public PurchaseProductResponse purchaseProduct(User user, Long catalogId, Long productId) {
+		Product product = productDomainService.findAvailableProductByIdForUpdate(productId);
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		product.validPurchasable(user.getId());
@@ -164,18 +138,13 @@ public class ProductService {
 		ProductPurchaseCommand command = ProductPurchaseCommand.of(user, catalog, productId);
 		productDomainService.purchaseProduct(command);
 
-		productDomainService.saveProductToEs(product);
+		LocalDateTime purchasedAt = LocalDateTime.now();
+		eventPublisher.publishEvent(new PurchaseProductEvent(user, product, purchasedAt));
 
-		TransactionCreateCommand buyerTxCreateCommand
-			= TransactionCreateCommand.of(user, UserType.BUYER, product, product.getTxMethod().name(),
-			product.getPrice());
-		Transaction buyerTx = transactionDomainService.createTransaction(buyerTxCreateCommand);
-		TransactionCreateCommand sellerTxCreateCommand
-			= TransactionCreateCommand.of(product.getSeller(), UserType.SELLER, product, product.getTxMethod().name(),
-			product.getPrice());
-		Transaction sellerTx = transactionDomainService.createTransaction(sellerTxCreateCommand);
+		notificationService.sendProductPurchaseNotification(product.getId(), product.getSellerId(), user.getId(),
+			product.getName(), user.getNickname());
 
-		return PurchaseProductResponse.from(buyerTx, sellerTx);
+		return PurchaseProductResponse.from(product, purchasedAt);
 	}
 
 	public Page<SearchProductResponse> searchProduct(String productName, String sellerNickname,
@@ -196,5 +165,36 @@ public class ProductService {
 		Product product = productDomainService.getProductByIdWithUserAndImages(query);
 
 		return ProductResponse.from(product);
+	}
+
+	public ProductResponse updateProductImages(Long productId, List<MultipartFile> imageFiles, User user,
+		List<String> remainImageUrls) {
+
+		List<String> productImageUrs = new ArrayList<>(remainImageUrls);
+		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
+		if (hasImage) {
+			List<String> newImageUrls = imageFiles.stream()
+				.map(gcsClient::uploadFile)
+				.toList();
+			productImageUrs.addAll(newImageUrls);
+
+		}
+
+		Product product = productDomainService.findActiveProductById(productId);
+
+		product.getProductImages().stream()
+			.filter(postImage -> !productImageUrs.contains(postImage.getUrl()))
+			.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
+
+		Product updatedProduct = productDomainService.updateProductImages(product, productImageUrs, user.getId());
+
+		if (updatedProduct.getTxMethod() == ProductTxMethod.AUCTION) {
+
+			auctionRedisService.updateAuctionProductImages(updatedProduct.getAuctionId(), productImageUrs);
+		}
+
+		productDomainService.saveProductToEs(updatedProduct);
+
+		return ProductResponse.from(updatedProduct);
 	}
 }

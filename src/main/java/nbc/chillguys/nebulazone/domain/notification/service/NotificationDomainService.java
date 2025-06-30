@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.notification.dto.NotificationInfo;
 import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
 import nbc.chillguys.nebulazone.domain.notification.entity.Notification;
+import nbc.chillguys.nebulazone.domain.notification.exception.NotificationErrorCode;
+import nbc.chillguys.nebulazone.domain.notification.exception.NotificationException;
 import nbc.chillguys.nebulazone.domain.notification.repository.NotificationRepository;
 
 @Service
@@ -34,15 +36,13 @@ public class NotificationDomainService {
 	@Transactional
 	public void readNotification(Long userId, Long notificationId) {
 		Notification notification = notificationRepository.findQueryNotificationByUserAndId(userId, notificationId)
-			.orElseThrow(() -> new RuntimeException("해당 알림은 존재하지 않습니다."));
+			.orElseThrow(() -> new NotificationException(NotificationErrorCode.NOTIFICATION_NOT_FOUND));
 
 		notification.markAsRead();
 	}
 
-	@Transactional
-	public void readAllNotification(Long userId) {
-		List<Notification> allNotifications = notificationRepository.findAllByTargetUserId(userId);
-		allNotifications.forEach(Notification::markAsRead);
+	public Long readAllNotification(Long userId) {
+		return notificationRepository.markAllAsRead(userId);
 	}
 
 	public List<NotificationInfo> findUnreadNotifications(Long userId) {

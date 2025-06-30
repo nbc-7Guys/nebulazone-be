@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nbc.chillguys.nebulazone.application.chat.dto.request.ImageMessageRequest;
 import nbc.chillguys.nebulazone.domain.chat.dto.request.ChatSendTextMessageCommand;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.MessageType;
@@ -16,7 +17,7 @@ import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.infra.aws.s3.S3Service;
+import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
 import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
 import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
@@ -27,7 +28,7 @@ import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
 public class ChatMessageService {
 
 	private final ChatMessageRedisService chatMessageRedisService;
-	private final S3Service s3Service;
+	private final GcsClient gcsClient;
 	private final RedisMessagePublisher redisMessagePublisher;
 	private final ChatDomainService chatDomainService;
 	private final WebSocketSessionRedisService webSocketSessionRedisService;
@@ -67,12 +68,12 @@ public class ChatMessageService {
 	 * @param roomId 메시지를 보낼 방ID
 	 * @param type 타입
 	 */
-	public void sendImageMessage(User user, MultipartFile multipartFile, Long roomId, String type) {
+	public void sendImageMessage(User user, Long roomId, ImageMessageRequest request) {
 		SessionUser sessionUser = SessionUser.from(user);
 
 		chatDomainService.validateUserAccessToChatRoom(user, roomId);
-		String imageUrl = s3Service.generateUploadUrlAndUploadFile(multipartFile);
-		MessageType messageType = MessageType.valueOf(type);
+		String imageUrl = gcsClient.uploadFile(request.image());
+		MessageType messageType = MessageType.valueOf(request.type());
 		sendAndSaveMessage(roomId, imageUrl, messageType, sessionUser);
 	}
 

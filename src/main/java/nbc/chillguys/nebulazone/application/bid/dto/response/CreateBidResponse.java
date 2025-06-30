@@ -1,13 +1,22 @@
 package nbc.chillguys.nebulazone.application.bid.dto.response;
 
-import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
 public record CreateBidResponse(
-	Long bidId,
-	Long bidPrice
+	Long auctionId,
+	Long bidPrice,
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	LocalDateTime bidTime
 ) {
 
-	public static CreateBidResponse from(Bid bid) {
-		return new CreateBidResponse(bid.getId(), bid.getPrice());
+	public static CreateBidResponse from(BidVo bidVo) {
+		return new CreateBidResponse(
+			bidVo.getAuctionId(),
+			bidVo.getBidPrice(),
+			bidVo.getBidCreatedAt());
 	}
 }

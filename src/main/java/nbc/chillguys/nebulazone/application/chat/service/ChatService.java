@@ -15,6 +15,7 @@ import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryRes
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponses;
 import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
+import nbc.chillguys.nebulazone.domain.chat.entity.ChatHistory;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
@@ -25,6 +26,7 @@ import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
+import nonapi.io.github.classgraph.fileslice.Slice;
 
 @Slf4j
 @Service
@@ -61,9 +63,12 @@ public class ChatService {
 	/**
 	 * 구매자와 판매자가 동일 유저인지 확인
 	 *
+	 * <p>자기 자신과는 채팅할 수 없도록 유효성을 검증</p>
+	 *
 	 * @param buyerId 구매자 ID
 	 * @param productId 판매 상품 ID
-	 * @throws ChatException CANNOT_CHAT_WITH_SELF
+	 * @throws ChatException 구매자와 판매자가 동일한 경우 (CANNOT_CHAT_WITH_SELF)
+	 * @author 박형우
 	 */
 	private void validateBuyerIsNotSeller(Long buyerId, Long productId) {
 		Product availableProductById = productDomainService.findAvailableProductById(productId);
@@ -72,6 +77,17 @@ public class ChatService {
 		}
 	}
 
+	/**
+	 * 새로운 채팅방을 생성하고 참여자를 등록
+	 *
+	 * <p>구매자와 판매자 간의 새로운 채팅방을 생성하고,
+	 * 판매자에게 채팅방 생성 알림을 발송</p>
+	 *
+	 * @param user 채팅방을 생성하는 사용자 (구매자)
+	 * @param request 채팅방 생성 요청 데이터
+	 * @return 생성된 채팅방 정보
+	 * @author 박형우
+	 */
 	public ChatRoom createChatRoom(User user, CreateChatRoomRequest request) {
 		// 기존에 참여중인 방이 없다면 거래상품 구매자, 판매자 생성
 		Product product = productDomainService.findAvailableProductById(request.productId());
@@ -118,19 +134,24 @@ public class ChatService {
 	 * @return the find chat room response
 	 */
 	@Transactional(readOnly = true)
-	public List<FindChatHistoryResponse> findChatHistories(User user, Long roomId) {
+	public List<FindChatHistoryResponse> findChatHistories(User user, Long roomId, Long lastId, int size) {
 
 		chatDomainService.validateUserAccessToChatRoom(user, roomId);
 
-		List<FindChatHistoryResponse> responses = chatDomainService.findChatHistoryResponses(roomId);
+		List<FindChatHistoryResponse> responses = chatDomainService.findChatHistoryResponses(roomId, lastId, size);
 
 		return responses;
 	}
 
 	/**
 	 * 채팅방 나가기
-	 * @param user the auth user
-	 * @param roomId the room id
+	 *
+	 * <p>사용자가 채팅방에서 나가며, 해당 채팅방의 다른 참여자들에게
+	 * 나감 알림 메시지를 WebSocket을 통해 브로드캐스트</p>
+	 *
+	 * @param user 채팅방을 나가는 사용자
+	 * @param roomId 나갈 채팅방 ID
+	 * @author 박형우
 	 */
 	@Transactional
 	public void exitChatRoom(User user, Long roomId) {

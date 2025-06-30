@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.domain.transaction.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,7 +17,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import nbc.chillguys.nebulazone.domain.common.audit.BaseEntity;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
@@ -23,7 +24,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "transactions")
-public class Transaction extends BaseEntity {
+public class Transaction {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,12 +50,23 @@ public class Transaction extends BaseEntity {
 	@JoinColumn(name = "product_id", nullable = false)
 	private Product product;
 
+	@Column(updatable = false, nullable = false)
+	private LocalDateTime createdAt;
+
 	@Builder
-	public Transaction(Long price, TransactionMethod method, User user, UserType userType, Product product) {
+	public Transaction(
+		Long price,
+		TransactionMethod method,
+		User user,
+		UserType userType,
+		Product product,
+		LocalDateTime createdAt
+	) {
 		this.price = price;
 		this.method = method;
 		this.user = user;
 		this.userType = userType;
 		this.product = product;
+		this.createdAt = createdAt;
 	}
 }

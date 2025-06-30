@@ -4,26 +4,35 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import nbc.chillguys.nebulazone.domain.bid.dto.FindBidInfo;
+import nbc.chillguys.nebulazone.domain.bid.dto.FindBidsByAuctionInfo;
+import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
 public record FindBidResponse(
-	Long BidId,
-	String nickname,
-	String productName,
-	String bidStatusMessage,
+	String bidUserNickname,
+	String bidStatus,
 	Long bidPrice,
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	LocalDateTime bidTime
+	LocalDateTime bidTime,
+	Long auctionId
 
 ) {
 
-	public static FindBidResponse from(FindBidInfo findBidInfo) {
+	public static FindBidResponse from(FindBidsByAuctionInfo findBidsByAuctionInfo) {
 		return new FindBidResponse(
-			findBidInfo.bidId(),
-			findBidInfo.nickname(),
-			findBidInfo.productName(),
-			findBidInfo.bidStatus().getMessage(),
-			findBidInfo.bidPrice(),
-			findBidInfo.bidTime());
+			findBidsByAuctionInfo.bidUserNickname(),
+			findBidsByAuctionInfo.bidStatus().name(),
+			findBidsByAuctionInfo.bidPrice(),
+			findBidsByAuctionInfo.bidTime(),
+			findBidsByAuctionInfo.auctionId()
+		);
+	}
+
+	public static FindBidResponse from(BidVo bidvo) {
+		return new FindBidResponse(
+			bidvo.getBidUserNickname(),
+			bidvo.getBidStatus(),
+			bidvo.getBidPrice(),
+			bidvo.getBidCreatedAt(),
+			bidvo.getAuctionId());
 	}
 }

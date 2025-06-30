@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -20,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import nbc.chillguys.nebulazone.domain.user.dto.UserAddressCommand;
 import nbc.chillguys.nebulazone.domain.user.dto.UserSignUpCommand;
 import nbc.chillguys.nebulazone.domain.user.dto.UserUpdateCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
@@ -57,11 +60,11 @@ class UserDomainServiceTest {
 			.point(0)
 			.oAuthType(OAuthType.KAKAO)
 			.roles(Set.of(UserRole.ROLE_USER))
-			.addresses(Set.of(Address.builder()
+			.addresses(new ArrayList<>(List.of(Address.builder()
 				.addressNickname("test_address_nickname")
 				.roadAddress("test_road_address")
 				.detailAddress("test_detail_address")
-				.build()))
+				.build())))
 			.build();
 
 		ReflectionTestUtils.setField(user, "id", 1L);
@@ -80,7 +83,7 @@ class UserDomainServiceTest {
 				"01012345678",
 				"test",
 				"test.jpg",
-				Set.of(Address.builder()
+				List.of(Address.builder()
 					.addressNickname("test_address_nickname")
 					.roadAddress("test_road_address")
 					.detailAddress("test_detail_address")
@@ -104,11 +107,11 @@ class UserDomainServiceTest {
 				.isEqualTo("test");
 			assertThat(savedUser.getAddresses().size())
 				.isEqualTo(1);
-			assertThat(savedUser.getAddresses().iterator().next().getAddressNickname())
+			assertThat(savedUser.getAddresses().getFirst().getAddressNickname())
 				.isEqualTo("test_address_nickname");
-			assertThat(savedUser.getAddresses().iterator().next().getRoadAddress())
+			assertThat(savedUser.getAddresses().getFirst().getRoadAddress())
 				.isEqualTo("test_road_address");
-			assertThat(savedUser.getAddresses().iterator().next().getDetailAddress())
+			assertThat(savedUser.getAddresses().getFirst().getDetailAddress())
 				.isEqualTo("test_detail_address");
 			assertThat(savedUser.getRoles().size())
 				.isEqualTo(1);
@@ -143,11 +146,11 @@ class UserDomainServiceTest {
 				.isEqualTo("test");
 			assertThat(findedUser.getAddresses().size())
 				.isEqualTo(1);
-			assertThat(findedUser.getAddresses().iterator().next().getAddressNickname())
+			assertThat(findedUser.getAddresses().getFirst().getAddressNickname())
 				.isEqualTo("test_address_nickname");
-			assertThat(findedUser.getAddresses().iterator().next().getRoadAddress())
+			assertThat(findedUser.getAddresses().getFirst().getRoadAddress())
 				.isEqualTo("test_road_address");
-			assertThat(findedUser.getAddresses().iterator().next().getDetailAddress())
+			assertThat(findedUser.getAddresses().getFirst().getDetailAddress())
 				.isEqualTo("test_detail_address");
 			assertThat(findedUser.getRoles().size())
 				.isEqualTo(1);
@@ -195,11 +198,11 @@ class UserDomainServiceTest {
 				.isEqualTo("test");
 			assertThat(findedUser.getAddresses().size())
 				.isEqualTo(1);
-			assertThat(findedUser.getAddresses().iterator().next().getAddressNickname())
+			assertThat(findedUser.getAddresses().getFirst().getAddressNickname())
 				.isEqualTo("test_address_nickname");
-			assertThat(findedUser.getAddresses().iterator().next().getRoadAddress())
+			assertThat(findedUser.getAddresses().getFirst().getRoadAddress())
 				.isEqualTo("test_road_address");
-			assertThat(findedUser.getAddresses().iterator().next().getDetailAddress())
+			assertThat(findedUser.getAddresses().getFirst().getDetailAddress())
 				.isEqualTo("test_detail_address");
 			assertThat(findedUser.getRoles().size())
 				.isEqualTo(1);
@@ -247,11 +250,11 @@ class UserDomainServiceTest {
 				.isEqualTo("test");
 			assertThat(findedUser.getAddresses().size())
 				.isEqualTo(1);
-			assertThat(findedUser.getAddresses().iterator().next().getAddressNickname())
+			assertThat(findedUser.getAddresses().getFirst().getAddressNickname())
 				.isEqualTo("test_address_nickname");
-			assertThat(findedUser.getAddresses().iterator().next().getRoadAddress())
+			assertThat(findedUser.getAddresses().getFirst().getRoadAddress())
 				.isEqualTo("test_road_address");
-			assertThat(findedUser.getAddresses().iterator().next().getDetailAddress())
+			assertThat(findedUser.getAddresses().getFirst().getDetailAddress())
 				.isEqualTo("test_detail_address");
 			assertThat(findedUser.getRoles().size())
 				.isEqualTo(1);
@@ -365,6 +368,36 @@ class UserDomainServiceTest {
 			assertThat(exception.getErrorCode())
 				.isEqualTo(UserErrorCode.ALREADY_EXISTS_PHONE);
 
+		}
+
+		@Test
+		@DisplayName("이메일+OAuthType 존재 여부 검증 성공")
+		void success_validEmailWithOAuthType_exists() {
+			// Given
+			given(userRepository.existsByEmailAndOAuthType("test@test.com", OAuthType.KAKAO))
+				.willReturn(true);
+
+			// When
+			boolean result = userDomainService.validEmailWithOAuthType("test@test.com", OAuthType.KAKAO);
+
+			// Then
+			verify(userRepository, times(1)).existsByEmailAndOAuthType("test@test.com", OAuthType.KAKAO);
+			assertThat(result).isTrue();
+		}
+
+		@Test
+		@DisplayName("이메일+OAuthType 존재 여부 검증 실패")
+		void success_validEmailWithOAuthType_notExists() {
+			// Given
+			given(userRepository.existsByEmailAndOAuthType("notfound@test.com", OAuthType.DOMAIN))
+				.willReturn(false);
+
+			// When
+			boolean result = userDomainService.validEmailWithOAuthType("notfound@test.com", OAuthType.DOMAIN);
+
+			// Then
+			verify(userRepository, times(1)).existsByEmailAndOAuthType("notfound@test.com", OAuthType.DOMAIN);
+			assertThat(result).isFalse();
 		}
 	}
 
@@ -492,6 +525,172 @@ class UserDomainServiceTest {
 				.isNotEqualTo(originalDeletedAt)
 				.isNotNull();
 
+		}
+	}
+
+	@Nested
+	@DisplayName("유저 주소 관리 테스트")
+	class UserAddressTest {
+
+		@Test
+		@DisplayName("주소 추가 성공")
+		void success_addAddress() {
+			// Given
+			UserAddressCommand command = new UserAddressCommand(
+				null, "new_road_address", "new_detail_address", "new_test_address_nickname"
+			);
+
+			User userWithNewAddress = User.builder()
+				.email(user.getEmail())
+				.password(user.getPassword())
+				.phone(user.getPhone())
+				.nickname(user.getNickname())
+				.profileImage(user.getProfileImage())
+				.point(user.getPoint())
+				.oAuthType(user.getOAuthType())
+				.roles(user.getRoles())
+				.addresses(List.of(
+					user.getAddresses().getFirst(),
+					Address.builder()
+						.addressNickname("new_address_nickname")
+						.roadAddress("new_road_address")
+						.detailAddress("new_detail_address")
+						.build()
+				))
+				.build();
+			ReflectionTestUtils.setField(userWithNewAddress, "id", 1L);
+
+			given(userRepository.save(any(User.class)))
+				.willReturn(userWithNewAddress);
+
+			// When
+			User result = userDomainService.addAddress(user, command);
+
+			// Then
+			verify(userRepository, times(1)).save(any(User.class));
+			assertThat(result.getAddresses().size()).isEqualTo(2);
+			assertThat(result.getAddresses().stream()
+				.anyMatch(a -> a.getAddressNickname().equals("new_address_nickname"))).isTrue();
+		}
+
+		@Test
+		@DisplayName("주소 추가 실패 - 이미 존재하는 별칭")
+		void fail_addAddress_alreadyExists() {
+			// Given
+			UserAddressCommand command = new UserAddressCommand(
+				null, "new_detail_address", "new_road_address", "test_address_nickname"
+			);
+
+			// When
+			UserException exception = assertThrows(UserException.class,
+				() -> userDomainService.addAddress(user, command));
+
+			// Then
+			assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.ALREADY_EXISTS_ADDRESS);
+		}
+
+		@Test
+		@DisplayName("주소 수정 성공")
+		void success_updateAddress() {
+			// Given
+			UserAddressCommand command = new UserAddressCommand(
+				"test_address_nickname", "updated_road", "updated_detail", "updated_nickname"
+			);
+
+			User userWithUpdatedAddress = User.builder()
+				.email(user.getEmail())
+				.password(user.getPassword())
+				.phone(user.getPhone())
+				.nickname(user.getNickname())
+				.profileImage(user.getProfileImage())
+				.point(user.getPoint())
+				.oAuthType(user.getOAuthType())
+				.roles(user.getRoles())
+				.addresses(List.of(Address.builder()
+					.addressNickname("updated_nickname")
+					.roadAddress("updated_road")
+					.detailAddress("updated_detail")
+					.build()))
+				.build();
+			ReflectionTestUtils.setField(userWithUpdatedAddress, "id", 1L);
+
+			given(userRepository.save(any(User.class)))
+				.willReturn(userWithUpdatedAddress);
+
+			// When
+			User result = userDomainService.updateAddress(user, command);
+
+			// Then
+			verify(userRepository, times(1)).save(any(User.class));
+			assertThat(result.getAddresses().size()).isEqualTo(1);
+			Address updated = result.getAddresses().getFirst();
+			assertThat(updated.getAddressNickname()).isEqualTo("updated_nickname");
+			assertThat(updated.getRoadAddress()).isEqualTo("updated_road");
+			assertThat(updated.getDetailAddress()).isEqualTo("updated_detail");
+		}
+
+		@Test
+		@DisplayName("주소 수정 실패 - 기존 별칭 없음")
+		void fail_updateAddress_noOldNickname() {
+			// Given
+			UserAddressCommand command = new UserAddressCommand(
+				"not_exist_nickname", "updated_road", "updated_detail", "updated_nickname"
+			);
+
+			// When
+			UserException exception = assertThrows(UserException.class,
+				() -> userDomainService.updateAddress(user, command));
+
+			// Then
+			assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.ADDRESS_NOT_EXISTS);
+		}
+
+		@Test
+		@DisplayName("주소 삭제 성공")
+		void success_removeAddress() {
+			// Given
+			UserAddressCommand command = new UserAddressCommand(
+				null, "test_road_address", "test_detail_address", "test_address_nickname"
+			);
+
+			User userWithoutAddress = User.builder()
+				.email(user.getEmail())
+				.password(user.getPassword())
+				.phone(user.getPhone())
+				.nickname(user.getNickname())
+				.profileImage(user.getProfileImage())
+				.point(user.getPoint())
+				.oAuthType(user.getOAuthType())
+				.roles(user.getRoles())
+				.addresses(List.of())
+				.build();
+			ReflectionTestUtils.setField(userWithoutAddress, "id", 1L);
+
+			given(userRepository.save(any(User.class)))
+				.willReturn(userWithoutAddress);
+
+			// When
+			User result = userDomainService.removeAddress(user, command);
+
+			// Then
+			verify(userRepository, times(1)).save(any(User.class));
+			assertThat(result.getAddresses()).isEmpty();
+		}
+
+		@Test
+		@DisplayName("주소 삭제 실패 - 존재하지 않는 주소")
+		void fail_removeAddress_notExists() {
+			// Given
+			UserAddressCommand command = new UserAddressCommand(
+				null, "test_road_address", "test_detail_address", "not_exist_nickname"
+			);
+
+			// When
+			UserException exception = assertThrows(UserException.class,
+				() -> userDomainService.removeAddress(user, command));
+
+			// Then
+			assertThat(exception.getErrorCode()).isEqualTo(UserErrorCode.ADDRESS_NOT_EXISTS);
 		}
 	}
 

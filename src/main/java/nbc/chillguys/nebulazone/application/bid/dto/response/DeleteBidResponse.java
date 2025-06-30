@@ -1,10 +1,20 @@
 package nbc.chillguys.nebulazone.application.bid.dto.response;
 
+import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
+
 public record DeleteBidResponse(
-	Long commentId
+	String BidUuid,
+	Long bidPrice,
+	Long auctionId,
+	String bidStatus
 ) {
 
-	public static DeleteBidResponse from(Long commentId) {
-		return new DeleteBidResponse(commentId);
+	public static DeleteBidResponse from(BidVo bidVo) {
+		return new DeleteBidResponse(
+			bidVo.getBidUuid(),
+			bidVo.getBidPrice(),
+			bidVo.getAuctionId(),
+			bidVo.getBidStatus()
+		);
 	}
 }

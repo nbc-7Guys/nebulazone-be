@@ -28,6 +28,7 @@ public class Notification {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "notification_id")
 	private Long id;
 
 	@Column(name = "target_user_id", nullable = false)
@@ -40,11 +41,10 @@ public class Notification {
 	private String title;
 
 	@Column(nullable = false)
-
 	private String content;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(nullable = false, name = "notification_type")
 	private NotificationType type;
 
 	@Column(nullable = false, name = "is_read")

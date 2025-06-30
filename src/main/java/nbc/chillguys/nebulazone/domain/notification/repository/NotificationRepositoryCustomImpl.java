@@ -62,4 +62,15 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
 				.fetchOne());
 	}
 
+	@Override
+	public Long markAllAsRead(Long userId) {
+		return jpaQueryFactory
+			.update(notification)
+			.set(notification.isRead, true)
+			.where(
+				notification.targetUserId.eq(userId),
+				notification.isRead.eq(false)
+			)
+			.execute();
+	}
 }

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -66,7 +66,7 @@ class ProductDomainServiceUnitTest {
 
 	@BeforeEach
 	void init() {
-		HashSet<Address> addresses = new HashSet<>();
+		List<Address> addresses = new ArrayList<>();
 
 		IntStream.range(1, 4)
 			.forEach(i -> addresses.add(
@@ -131,8 +131,6 @@ class ProductDomainServiceUnitTest {
 				new CreateProductRequest("경매 판매글 제목1", "경매 판매글 내용1", "auction",
 					2_000_000L, "hour_24"));
 
-			List<String> imageUrls = List.of("image1.jpg, image2.jpg");
-
 			Product savedProduct = Product.builder()
 				.name("경매 판매글 제목1")
 				.description("경매 판매글 내용1")
@@ -143,13 +141,11 @@ class ProductDomainServiceUnitTest {
 			ReflectionTestUtils.setField(savedProduct, "id", 1L);
 
 			given(productRepository.save(any(Product.class))).will(i -> {
-				Product product = i.getArgument(0);
-				product.addProductImages(imageUrls);
-				return product;
+				return i.<Product>getArgument(0);
 			});
 
 			// when
-			Product result = productDomainService.createProduct(productCreateCommand, imageUrls);
+			Product result = productDomainService.createProduct(productCreateCommand);
 
 			// then
 			assertThat(result.getName()).isEqualTo(productCreateCommand.name());
@@ -168,15 +164,13 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 수정 성공")
 		void success_updateProduct() {
-			List<String> imageUrls = List.of("update_url.jpg");
 			ProductUpdateCommand command
-				= new ProductUpdateCommand(user, catalog, product.getId(), imageUrls, "수정된 이름", "수정된 본문");
+				= new ProductUpdateCommand(user, catalog, product.getId(), "수정된 이름", "수정된 본문");
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
 			Product result = productDomainService.updateProduct(command);
 
-			assertEquals(command.imageUrls().size(), result.getProductImages().size());
 			assertEquals(command.name(), result.getName());
 			assertEquals(command.description(), result.getDescription());
 		}
@@ -184,9 +178,8 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 수정 실패 - 판매 상품을 찾을 수 없음")
 		void fail_updateProduct_productNotFound() {
-			List<String> imageUrls = List.of("update_url.jpg");
 			ProductUpdateCommand command
-				= new ProductUpdateCommand(user, catalog, product.getId(), imageUrls, "수정된 이름", "수정된 본문");
+				= new ProductUpdateCommand(user, catalog, product.getId(), "수정된 이름", "수정된 본문");
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
@@ -198,12 +191,11 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 수정 실패 - 카테고리에 해당 판매 상품을 찾을 수 없음")
 		void fail_updateProduct_notBelongsToCatalog() {
-			List<String> imageUrls = List.of("update_url.jpg");
 			Catalog catalog = Catalog.builder().build();
 			ReflectionTestUtils.setField(catalog, "id", 2L);
 
 			ProductUpdateCommand command
-				= new ProductUpdateCommand(user, catalog, product.getId(), imageUrls, "수정된 이름", "수정된 본문");
+				= new ProductUpdateCommand(user, catalog, product.getId(), "수정된 이름", "수정된 본문");
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -215,12 +207,11 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 수정 실패 - 판매 상품 주인이 아님")
 		void fail_updateProduct_notProductOwner() {
-			List<String> imageUrls = List.of("update_url.jpg");
 			User user = User.builder().build();
 			ReflectionTestUtils.setField(user, "id", 2L);
 
 			ProductUpdateCommand command
-				= new ProductUpdateCommand(user, catalog, product.getId(), imageUrls, "수정된 이름", "수정된 본문");
+				= new ProductUpdateCommand(user, catalog, product.getId(), "수정된 이름", "수정된 본문");
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
