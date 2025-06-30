@@ -90,7 +90,8 @@ public class UserController {
 	) {
 		UserResponse response = userService.addAddress(addAddressUserRequest, user);
 
-		return ResponseEntity.ok(response);
+		return ResponseEntity.status(HttpStatus.CREATED)
+			.body(response);
 	}
 
 	@PutMapping("/me/address")
