@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
@@ -48,8 +49,6 @@ public class PostAdminService {
 	}
 
 	public UpdatePostResponse updateAdminPost(Long postId, UpdatePostRequest request) {
-		Post post = postsAdminDomainService.findMyActivePost(postId);
-
 		PostAdminUpdateCommand command = request.toAdminCommand(postId);
 
 		Post updatedPost = postsAdminDomainService.updatePost(command);
@@ -75,6 +74,7 @@ public class PostAdminService {
 		postsAdminDomainService.restorePost(postId);
 	}
 
+	@Transactional
 	public GetPostResponse updatePostImages(Long postId, List<MultipartFile> imageFiles,
 		List<String> remainImageUrls) {
 
