@@ -19,12 +19,11 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Encoding;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.product.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
+import nbc.chillguys.nebulazone.application.product.dto.request.UpdateImagesProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.UpdateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.response.DeleteProductResponse;
 import nbc.chillguys.nebulazone.application.product.dto.response.ProductResponse;
@@ -42,35 +41,25 @@ public class ProductController {
 
 	private final ProductService productService;
 
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(
-		content = @Content(encoding = @Encoding(name = "product", contentType = MediaType.APPLICATION_JSON_VALUE))
-	)
-	@PostMapping(value = "/catalogs/{catalogId}/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(value = "/catalogs/{catalogId}/products")
 	public ResponseEntity<ProductResponse> createProduct(
 		@AuthenticationPrincipal User user,
 		@PathVariable("catalogId") Long catalogId,
-		@Valid @RequestPart("product") CreateProductRequest request,
-		@RequestPart(value = "images", required = false) List<MultipartFile> multipartFiles) {
+		@Valid @RequestBody CreateProductRequest request) {
 
-		ProductResponse productResponse = productService.createProduct(user, catalogId, request,
-			multipartFiles);
+		ProductResponse productResponse = productService.createProduct(user, catalogId, request);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(productResponse);
 	}
 
-	@io.swagger.v3.oas.annotations.parameters.RequestBody(
-		content = @Content(encoding = @Encoding(name = "product", contentType = MediaType.APPLICATION_JSON_VALUE))
-	)
-	@PutMapping(path = "/catalogs/{catalogId}/products/{productId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PutMapping(path = "/catalogs/{catalogId}/products/{productId}")
 	public ResponseEntity<ProductResponse> updateProduct(
 		@AuthenticationPrincipal User user,
 		@PathVariable("catalogId") Long catalogId,
 		@PathVariable("productId") Long productId,
-		@Valid @RequestPart("product") UpdateProductRequest request,
-		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles
-	) {
+		@Valid @RequestBody UpdateProductRequest request) {
 		ProductResponse response
-			= productService.updateProduct(user, catalogId, productId, request, imageFiles);
+			= productService.updateProduct(user, catalogId, productId, request);
 
 		return ResponseEntity.ok(response);
 	}
@@ -132,6 +121,21 @@ public class ProductController {
 		@PathVariable("productId") Long productId
 	) {
 		ProductResponse response = productService.getProduct(catalogId, productId);
+
+		return ResponseEntity.ok(response);
+	}
+
+	@PutMapping(value = "/catalogs/{catalogId}/products/{productId}/images",
+		consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<ProductResponse> updateProductImages(
+		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
+		@PathVariable("productId") Long productId,
+		@AuthenticationPrincipal User user,
+		@Valid @RequestPart("product") UpdateImagesProductRequest request
+	) {
+
+		ProductResponse response = productService.updateProductImages(productId, imageFiles, user,
+			request.remainImageUrls());
 
 		return ResponseEntity.ok(response);
 	}

@@ -1,15 +1,12 @@
 package nbc.chillguys.nebulazone.domain.comment.dto;
 
-import nbc.chillguys.nebulazone.domain.post.entity.Post;
-import nbc.chillguys.nebulazone.domain.user.entity.User;
-
 public record CommentDeleteCommand(
-	User user,
-	Post post,
-	Long commentId
+	Long commentId,
+	Long userId,
+	Long postId
 ) {
 
-	public static CommentDeleteCommand of(User user, Post post, Long commentId) {
-		return new CommentDeleteCommand(user, post, commentId);
+	public static CommentDeleteCommand of(Long commentId, Long userId, Long postId) {
+		return new CommentDeleteCommand(commentId, userId, postId);
 	}
 }

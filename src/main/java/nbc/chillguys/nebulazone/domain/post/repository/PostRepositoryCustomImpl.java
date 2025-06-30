@@ -53,4 +53,14 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
 			)
 			.fetchOne());
 	}
+
+	@Override
+	public boolean existActivePost(Long postId) {
+		QPost post = QPost.post;
+
+		return queryFactory.selectOne()
+			.from(post)
+			.where(post.isDeleted.eq(false), post.id.eq(postId))
+			.fetchFirst() != null;
+	}
 }

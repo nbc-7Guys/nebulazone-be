@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.domain.product.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -64,11 +66,12 @@ public class ProductAdminDomainService {
 
 		product.update(
 			request.name(),
-			request.description(),
-			request.productImageUrls()
+			request.description()
 		);
+
 		if (request.txMethod() != null && request.txMethod() != product.getTxMethod()) {
 			product.changeTxMethod(request.txMethod(), request.price());
+
 		} else if (request.price() != null && !request.price().equals(product.getPrice())) {
 			product.changePrice(request.price());
 		}
@@ -115,4 +118,16 @@ public class ProductAdminDomainService {
 			.orElseThrow(() -> new ProductException(ProductErrorCode.PRODUCT_NOT_FOUND));
 	}
 
+	/**
+	 * 상품 이미지 업데이트
+	 *
+	 * @param product 대상 상품
+	 * @param productImageUrs 수정할 Image 리스트
+	 * @return 수정된 상품
+	 * @author 전나겸
+	 */
+	public Product updateProductImages(Product product, List<String> productImageUrs) {
+		product.updateProductImage(productImageUrs);
+		return product;
+	}
 }

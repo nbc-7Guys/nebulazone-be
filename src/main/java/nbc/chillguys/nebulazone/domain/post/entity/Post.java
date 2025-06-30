@@ -71,28 +71,21 @@ public class Post extends BaseEntity {
 		this.user = user;
 	}
 
-	public void addPostImages(List<String> postImagesUrl) {
-		if (postImagesUrl != null) {
-			this.postImages.addAll(postImagesUrl.stream()
-				.map(PostImage::new)
-				.toList());
+	public void updatePostImages(List<String> postImagesUrl) {
+		this.postImages.clear();
+
+		if (!postImagesUrl.isEmpty()) {
+			this.postImages.addAll(
+				postImagesUrl.stream()
+					.map(PostImage::new)
+					.toList());
 		}
 
 	}
 
-	public void update(String title, String content, List<String> imageUrls) {
+	public void update(String title, String content) {
 		this.title = title;
 		this.content = content;
-		this.postImages.clear();
-
-		boolean hasImage = !imageUrls.isEmpty();
-		if (hasImage) {
-			this.postImages.addAll(
-				imageUrls.stream()
-					.map(PostImage::new)
-					.toList()
-			);
-		}
 	}
 
 	public void validatePostOwner(Long userId) {

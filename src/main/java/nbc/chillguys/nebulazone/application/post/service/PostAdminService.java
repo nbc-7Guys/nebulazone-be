@@ -47,27 +47,10 @@ public class PostAdminService {
 		return GetPostResponse.from(post);
 	}
 
-	public UpdatePostResponse updateAdminPost(
-		Long postId,
-		UpdatePostRequest request,
-		List<MultipartFile> imageFiles
-	) {
+	public UpdatePostResponse updateAdminPost(Long postId, UpdatePostRequest request) {
 		Post post = postsAdminDomainService.findMyActivePost(postId);
 
-		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
-		boolean hasImage = !imageFiles.isEmpty();
-		if (hasImage) {
-			List<String> newImageUrls = imageFiles.stream()
-				.map(gcsClient::uploadFile)
-				.toList();
-			imageUrls.addAll(newImageUrls);
-
-			post.getPostImages().stream()
-				.filter(postImage -> !imageUrls.contains(postImage.getUrl()))
-				.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
-		}
-
-		PostAdminUpdateCommand command = request.toAdminCommand(postId, imageUrls);
+		PostAdminUpdateCommand command = request.toAdminCommand(postId);
 
 		Post updatedPost = postsAdminDomainService.updatePost(command);
 
@@ -92,4 +75,29 @@ public class PostAdminService {
 		postsAdminDomainService.restorePost(postId);
 	}
 
+	public GetPostResponse updatePostImages(Long postId, List<MultipartFile> imageFiles,
+		List<String> remainImageUrls) {
+
+		List<String> postImageUrls = new ArrayList<>(remainImageUrls);
+
+		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
+		if (hasImage) {
+			List<String> newImageUrls = imageFiles.stream()
+				.map(gcsClient::uploadFile)
+				.toList();
+			postImageUrls.addAll(newImageUrls);
+		}
+
+		Post post = postsAdminDomainService.findActivePost(postId);
+
+		post.getPostImages().stream()
+			.filter(postImage -> !postImageUrls.contains(postImage.getUrl()))
+			.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
+
+		Post updatedPost = postsAdminDomainService.updatePostImages(post, postImageUrls);
+
+		postsAdminDomainService.savePostToEs(updatedPost);
+
+		return GetPostResponse.from(updatedPost);
+	}
 }

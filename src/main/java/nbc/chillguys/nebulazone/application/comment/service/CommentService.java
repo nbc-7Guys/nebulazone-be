@@ -52,30 +52,30 @@ public class CommentService {
 			size = COMMENT_SIZE_PER_PAGE;
 		}
 
-		Post post = postDomainService.findActivePost(postId);
+		postDomainService.validActivePost(postId);
 
-		CommentListFindQuery query = CommentListFindQuery.of(post, page - 1, size);
+		CommentListFindQuery query = CommentListFindQuery.of(postId, page - 1, size);
 		Page<CommentWithUserInfo> comments = commentDomainService.findComments(query);
 		Page<CommentDetailResponse> response = comments.map(CommentDetailResponse::from);
 
 		return CommonPageResponse.from(response);
 	}
 
-	public DeleteCommentResponse deleteComment(User user, Long postId, Long commentId) {
-		Post post = postDomainService.findMyActivePost(postId, user.getId());
+	public CommentResponse updateComment(Long commentId, Long userId, Long postId, UpdateCommentRequest request) {
+		postDomainService.validActivePost(postId);
 
-		CommentDeleteCommand command = CommentDeleteCommand.of(user, post, commentId);
-		commentDomainService.deleteComment(command);
-
-		return DeleteCommentResponse.from(commentId);
-	}
-
-	public CommentResponse updateComment(User user, Long postId, Long commentId, UpdateCommentRequest request) {
-		Post post = postDomainService.findMyActivePost(postId, user.getId());
-
-		CommentUpdateCommand command = request.toCommand(user, post, commentId);
+		CommentUpdateCommand command = request.toCommand(commentId, userId, postId);
 		Comment comment = commentDomainService.updateComment(command);
 
 		return CommentResponse.from(comment);
+	}
+
+	public DeleteCommentResponse deleteComment(Long commentId, Long userId, Long postId) {
+		postDomainService.validActivePost(postId);
+
+		CommentDeleteCommand command = CommentDeleteCommand.of(commentId, userId, postId);
+		commentDomainService.deleteComment(command);
+
+		return DeleteCommentResponse.from(commentId);
 	}
 }
