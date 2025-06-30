@@ -110,9 +110,8 @@ class PostDomainServiceUnitTest {
 		@Test
 		@DisplayName("게시글 수정 성공")
 		void success_updatePost() {
-			List<String> imageUrls = List.of("image1.jpg, image2.jpg");
 			PostUpdateCommand command
-				= new PostUpdateCommand("수정된 제목", "수정된 본문", imageUrls);
+				= new PostUpdateCommand("수정된 제목", "수정된 본문");
 
 			given(postRepository.findActivePostByIdWithUser(post.getId())).willReturn(Optional.ofNullable(post));
 
@@ -120,15 +119,13 @@ class PostDomainServiceUnitTest {
 
 			assertEquals(command.title(), result.getTitle());
 			assertEquals(command.content(), result.getContent());
-			assertEquals(command.imageUrls().size(), result.getPostImages().size());
 		}
 
 		@Test
 		@DisplayName("게시글 수정 실패 - 게시글을 찾을 수 없음")
 		void fail_updatePost_postNotFound() {
-			List<String> imageUrls = List.of("image1.jpg, image2.jpg");
 			PostUpdateCommand command
-				= new PostUpdateCommand("수정된 제목", "수정된 본문", imageUrls);
+				= new PostUpdateCommand("수정된 제목", "수정된 본문");
 
 			given(postRepository.findActivePostByIdWithUser(post.getId())).willReturn(Optional.empty());
 
@@ -144,7 +141,7 @@ class PostDomainServiceUnitTest {
 		void fail_updatePost_notPostOwner() {
 			List<String> imageUrls = List.of("image1.jpg, image2.jpg");
 			PostUpdateCommand command
-				= new PostUpdateCommand("수정된 제목", "수정된 본문", imageUrls);
+				= new PostUpdateCommand("수정된 제목", "수정된 본문");
 
 			given(postRepository.findActivePostByIdWithUser(post.getId())).willReturn(Optional.ofNullable(post));
 

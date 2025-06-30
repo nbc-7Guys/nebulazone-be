@@ -76,9 +76,9 @@ class ProductControllerTest {
 				ProductEndTime.HOUR_12,
 				fixedCreatedAt,
 				fixedModifiedAt,
-				List.of("auction_image1.jpg", "auction_image2.jpg"));
+				List.of());
 
-			given(productService.createProduct(any(), eq(catalogId), any(CreateProductRequest.class), any()))
+			given(productService.createProduct(any(), eq(catalogId), any(CreateProductRequest.class)))
 				.willReturn(expectedResponse);
 
 			// When
@@ -115,7 +115,7 @@ class ProductControllerTest {
 					jsonPath("$.createdAt").value("2025-06-13 15:30:00"),
 					jsonPath("$.modifiedAt").value("2025-06-13 15:30:00"),
 					jsonPath("$.productImageUrls").isArray(),
-					jsonPath("$.productImageUrls.length()").value(2)
+					jsonPath("$.productImageUrls.length()").value(0)
 				);
 		}
 
@@ -133,9 +133,9 @@ class ProductControllerTest {
 
 			ProductResponse expectedResponse = new ProductResponse(2L, "테스트 즉시거래 상품", "테스트 즉시거래 상품 설명",
 				800000L, ProductTxMethod.DIRECT, false, null, fixedCreatedAt, fixedModifiedAt,
-				List.of("direct_image1.jpg"));
+				List.of());
 
-			given(productService.createProduct(any(), eq(catalogId), any(CreateProductRequest.class), any()))
+			given(productService.createProduct(any(), eq(catalogId), any(CreateProductRequest.class)))
 				.willReturn(expectedResponse);
 
 			// When
@@ -162,7 +162,7 @@ class ProductControllerTest {
 					jsonPath("$.createdAt").value("2025-06-13 16:00:00"),
 					jsonPath("$.modifiedAt").value("2025-06-13 16:00:00"),
 					jsonPath("$.productImageUrls").isArray(),
-					jsonPath("$.productImageUrls.length()").value(1)
+					jsonPath("$.productImageUrls.length()").value(0)
 				);
 		}
 	}
