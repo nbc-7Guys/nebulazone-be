@@ -61,6 +61,7 @@ public class AuctionAdminDomainService {
 	 * @throws AuctionException 경매가 존재하지 않을 때 발생
 	 * @author 정석현
 	 */
+	@Transactional
 	public void deleteAuction(Long auctionId) {
 		Auction auction = findByAuctionById(auctionId);
 		auction.delete(); // 소프트 딜리트: deleted=true, deletedAt=now

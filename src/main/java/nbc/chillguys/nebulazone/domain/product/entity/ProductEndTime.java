@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.domain.product.entity;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 import lombok.Getter;
@@ -24,6 +26,15 @@ public enum ProductEndTime {
 
 		return Arrays.stream(ProductEndTime.values())
 			.filter(t -> t.name().equalsIgnoreCase(endTime))
+			.findFirst()
+			.orElseThrow(() -> new ProductException(ProductErrorCode.INVALID_END_TIME));
+	}
+
+	public static ProductEndTime from(LocalDateTime endTime) {
+		long seconds = Duration.between(LocalDateTime.now(), endTime).getSeconds();
+
+		return Arrays.stream(ProductEndTime.values())
+			.filter(t -> t.getSeconds() == seconds)
 			.findFirst()
 			.orElseThrow(() -> new ProductException(ProductErrorCode.INVALID_END_TIME));
 	}
