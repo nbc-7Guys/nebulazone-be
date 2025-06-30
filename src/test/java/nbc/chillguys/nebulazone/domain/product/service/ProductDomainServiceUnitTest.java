@@ -228,8 +228,9 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 방식 수정 성공")
 		void success_changeToAuctionType() {
-			ChangeToAuctionTypeCommand command
-				= new ChangeToAuctionTypeCommand(user, catalog, product.getId(), 100000L, ProductEndTime.HOUR_24);
+			ChangeToAuctionTypeCommand command = new ChangeToAuctionTypeCommand(
+				auctionProduct.getId(), user.getId(), catalog.getId(), 100000L, ProductEndTime.HOUR_24
+			);
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -242,8 +243,9 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 방식 수정 실패 - 판매 상품을 찾을 수 없음")
 		void fail_changeToAuctionType_productNotFound() {
-			ChangeToAuctionTypeCommand command
-				= new ChangeToAuctionTypeCommand(user, catalog, product.getId(), 100000L, ProductEndTime.HOUR_24);
+			ChangeToAuctionTypeCommand command = new ChangeToAuctionTypeCommand(
+				auctionProduct.getId(), user.getId(), catalog.getId(), 100000L, ProductEndTime.HOUR_24
+			);
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
@@ -258,8 +260,9 @@ class ProductDomainServiceUnitTest {
 			Catalog catalog = Catalog.builder().build();
 			ReflectionTestUtils.setField(catalog, "id", 2L);
 
-			ChangeToAuctionTypeCommand command
-				= new ChangeToAuctionTypeCommand(user, catalog, product.getId(), 100000L, ProductEndTime.HOUR_24);
+			ChangeToAuctionTypeCommand command = new ChangeToAuctionTypeCommand(
+				auctionProduct.getId(), user.getId(), catalog.getId(), 100000L, ProductEndTime.HOUR_24
+			);
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -274,8 +277,9 @@ class ProductDomainServiceUnitTest {
 			User user = User.builder().build();
 			ReflectionTestUtils.setField(user, "id", 2L);
 
-			ChangeToAuctionTypeCommand command
-				= new ChangeToAuctionTypeCommand(user, catalog, product.getId(), 100000L, ProductEndTime.HOUR_24);
+			ChangeToAuctionTypeCommand command = new ChangeToAuctionTypeCommand(
+				auctionProduct.getId(), user.getId(), catalog.getId(), 100000L, ProductEndTime.HOUR_24
+			);
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -288,7 +292,7 @@ class ProductDomainServiceUnitTest {
 		@DisplayName("판매 방식 수정 실패 - 이미 판매 방식이 경매임")
 		void fail_changeToAuctionType_alreadyAuctionType() {
 			ChangeToAuctionTypeCommand command = new ChangeToAuctionTypeCommand(
-				user, catalog, auctionProduct.getId(), 100000L, ProductEndTime.HOUR_24
+				auctionProduct.getId(), user.getId(), catalog.getId(), 100000L, ProductEndTime.HOUR_24
 			);
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(auctionProduct));
