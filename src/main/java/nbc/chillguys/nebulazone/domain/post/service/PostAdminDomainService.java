@@ -1,5 +1,7 @@
 package nbc.chillguys.nebulazone.domain.post.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -51,7 +53,7 @@ public class PostAdminDomainService {
 	public Post updatePost(PostAdminUpdateCommand command) {
 		Post post = findActivePost(command.postId());
 
-		post.update(command.title(), command.content(), command.imageUrls());
+		post.update(command.title(), command.content());
 		savePostToEs(post);
 
 		return post;
@@ -175,4 +177,18 @@ public class PostAdminDomainService {
 		postEsRepository.deleteById(postId);
 	}
 
+	/**
+	 * 게시글의 이미지 업데이트
+	 *
+	 * @param post 업데이트할 이미지
+	 * @param postImageUrls 이미지 url 리스트
+	 * @return 업데이트된 Post
+	 * @author 전나겸
+	 */
+	public Post updatePostImages(Post post, List<String> postImageUrls) {
+
+		post.updatePostImages(postImageUrls);
+
+		return post;
+	}
 }

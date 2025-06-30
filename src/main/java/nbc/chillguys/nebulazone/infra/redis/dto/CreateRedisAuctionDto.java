@@ -1,7 +1,5 @@
 package nbc.chillguys.nebulazone.infra.redis.dto;
 
-import java.util.List;
-
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
@@ -11,17 +9,14 @@ public record CreateRedisAuctionDto(
 	Product product,
 	Auction auction,
 	User user,
-	ProductEndTime productEndTime,
-	List<String> productImageUrls
+	ProductEndTime productEndTime
 ) {
-	public static CreateRedisAuctionDto of(Product product, Auction auction, User user, ProductEndTime productEndTime,
-		List<String> productImageUrls) {
+	public static CreateRedisAuctionDto of(Product product, Auction auction, User user, ProductEndTime productEndTime) {
 		return new CreateRedisAuctionDto(
 			product,
 			auction,
 			user,
-			productEndTime,
-			productImageUrls
+			productEndTime
 		);
 	}
 }

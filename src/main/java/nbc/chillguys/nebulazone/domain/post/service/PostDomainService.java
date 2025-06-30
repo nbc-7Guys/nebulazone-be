@@ -30,13 +30,12 @@ public class PostDomainService {
 	/**
 	 * 게시글 생성
 	 *
-	 * @param command       유저, 게시글 제목, 게시글 내용, 게시판 종류
-	 * @param postImageUrls 게시글 이미지 리스트
+	 * @param command 유저, 게시글 제목, 게시글 내용, 게시판 종류
 	 * @return Post
 	 * @author 전나겸
 	 */
 	@Transactional
-	public Post createPost(PostCreateCommand command, List<String> postImageUrls) {
+	public Post createPost(PostCreateCommand command) {
 
 		Post post = Post.builder()
 			.title(command.title())
@@ -44,9 +43,6 @@ public class PostDomainService {
 			.type(command.type())
 			.user(command.user())
 			.build();
-
-		post.addPostImages(postImageUrls);
-
 		return postRepository.save(post);
 	}
 
@@ -64,8 +60,7 @@ public class PostDomainService {
 		Post post = findActivePost(postId);
 
 		post.validatePostOwner(userId);
-
-		post.update(command.title(), command.content(), command.imageUrls());
+		post.update(command.title(), command.content());
 
 		return post;
 	}
@@ -173,5 +168,20 @@ public class PostDomainService {
 	public Post getActivePostWithUserAndImages(Long postId) {
 		return postRepository.findActivePostByIdWithUserAndImages(postId)
 			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
+	}
+
+	/**
+	 * 게시글 이미지 수정
+	 *
+	 * @param post 대상 게시글
+	 * @param postImageUrls 이미지 url 리스트
+	 * @param userId 게시글 작성자
+	 * @author 전나겸
+	 */
+	public Post updatePostImages(Post post, List<String> postImageUrls, Long userId) {
+		post.validatePostOwner(userId);
+		post.updatePostImages(postImageUrls);
+
+		return post;
 	}
 }

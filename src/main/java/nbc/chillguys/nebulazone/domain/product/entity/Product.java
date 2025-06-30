@@ -97,18 +97,13 @@ public class Product extends BaseEntity {
 		this.catalog = catalog;
 	}
 
-	public void addProductImages(List<String> productImageUrls) {
-		if (productImageUrls != null) {
-			this.productImages.addAll(productImageUrls.stream()
-				.map(ProductImage::new)
-				.toList());
-		}
+	public void update(String name, String description) {
+		this.name = name;
+		this.description = description;
 
 	}
 
-	public void update(String name, String description, List<String> imageUrls) {
-		this.name = name;
-		this.description = description;
+	public void updateProductImage(List<String> imageUrls) {
 		this.productImages.clear();
 
 		boolean hasImage = !imageUrls.isEmpty();

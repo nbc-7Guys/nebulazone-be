@@ -78,10 +78,9 @@ public class AuctionRedisService {
 		Auction auction = redisAuctionDto.auction();
 		User user = redisAuctionDto.user();
 		ProductEndTime productEndTime = redisAuctionDto.productEndTime();
-		List<String> productImageUrls = redisAuctionDto.productImageUrls();
 
 		String auctionKey = AUCTION_PREFIX + auction.getId();
-		AuctionVo auctionVo = AuctionVo.of(product, auction, user, productImageUrls);
+		AuctionVo auctionVo = AuctionVo.of(product, auction, user, List.of());
 
 		Map<String, Object> auctionVoMap = objectMapper.convertValue(auctionVo, new TypeReference<>() {
 		});
@@ -401,6 +400,12 @@ public class AuctionRedisService {
 		return (long)Optional.ofNullable(objects)
 			.orElse(Set.of())
 			.size();
+	}
+
+	public void updateAuctionProductImages(Long auctionId, List<String> productImages) {
+		String auctionKey = AUCTION_PREFIX + auctionId;
+
+		redisTemplate.opsForHash().put(auctionKey, "productImageUrls", productImages);
 	}
 
 	private void acquireLockOrThrow(RLock auctionLock) {
