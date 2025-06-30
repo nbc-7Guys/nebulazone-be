@@ -56,7 +56,7 @@ public class PostController {
 	public ResponseEntity<UpdatePostResponse> updatePost(
 		@AuthenticationPrincipal User user,
 		@PathVariable("postId") Long postId,
-		@Valid @RequestPart("post") UpdatePostRequest request) {
+		@Valid @RequestBody UpdatePostRequest request) {
 		UpdatePostResponse res = postService.updatePost(user.getId(), postId, request);
 
 		return ResponseEntity.ok(res);

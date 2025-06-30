@@ -57,7 +57,7 @@ public class ProductController {
 		@AuthenticationPrincipal User user,
 		@PathVariable("catalogId") Long catalogId,
 		@PathVariable("productId") Long productId,
-		@Valid @RequestPart("product") UpdateProductRequest request) {
+		@Valid @RequestBody UpdateProductRequest request) {
 		ProductResponse response
 			= productService.updateProduct(user, catalogId, productId, request);
 
