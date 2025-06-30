@@ -29,7 +29,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
 
 	@Override
 	public Page<CommentWithUserInfo> findComments(CommentListFindQuery query) {
-		long postId = query.post().getId();
+		long postId = query.postId();
 		int page = query.page();
 		int size = query.size();
 
