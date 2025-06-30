@@ -61,6 +61,15 @@ public class CommentService {
 		return CommonPageResponse.from(response);
 	}
 
+	public CommentResponse updateComment(User user, Long postId, Long commentId, UpdateCommentRequest request) {
+		Post post = postDomainService.findActivePost(postId);
+
+		CommentUpdateCommand command = request.toCommand(user, post, commentId);
+		Comment comment = commentDomainService.updateComment(command);
+
+		return CommentResponse.from(comment);
+	}
+
 	public DeleteCommentResponse deleteComment(User user, Long postId, Long commentId) {
 		Post post = postDomainService.findMyActivePost(postId, user.getId());
 
