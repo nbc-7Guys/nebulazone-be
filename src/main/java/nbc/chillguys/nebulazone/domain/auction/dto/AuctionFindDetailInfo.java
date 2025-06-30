@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.domain.auction.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.querydsl.core.annotations.QueryProjection;
 
@@ -15,8 +16,8 @@ public record AuctionFindDetailInfo(
 	LocalDateTime endTime,
 	Long productId,
 	String productName,
-	String productImageUrl,
-	LocalDateTime productCreatedAt,
+	List<String> productImageUrl,
+	LocalDateTime createdAt,
 	Long bidCount
 ) {
 

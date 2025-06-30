@@ -1,7 +1,11 @@
 package nbc.chillguys.nebulazone.domain.bid.entity;
 
+import java.util.Arrays;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
+import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
 
 @Getter
 @AllArgsConstructor
@@ -12,4 +16,10 @@ public enum BidStatus {
 
 	private final String message;
 
+	public static BidStatus of(String bidStatus) {
+		return Arrays.stream(BidStatus.values())
+			.filter(type -> type.name().equalsIgnoreCase(bidStatus))
+			.findFirst()
+			.orElseThrow(() -> new BidException(BidErrorCode.INVALID_BID_STATUS));
+	}
 }

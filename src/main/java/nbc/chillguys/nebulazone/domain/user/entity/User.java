@@ -135,15 +135,6 @@ public class User extends BaseEntity {
 		this.point -= usePoint;
 	}
 
-	public void updatePoint(long beforePoint, long afterPoint) {
-
-		long differentPrice = afterPoint - beforePoint;
-		if (differentPrice > 0 && this.point < differentPrice) {
-			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
-		}
-		this.point -= differentPrice;
-	}
-
 	public boolean hasNotEnoughPoint(Long price) {
 		return this.point < price;
 	}

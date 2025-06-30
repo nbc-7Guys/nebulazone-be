@@ -1,5 +1,9 @@
 package nbc.chillguys.nebulazone.infra.redis.config;
 
+import org.redisson.Redisson;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +19,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 @Configuration
 @EnableCaching
 public class RedisConfig {
+
+	@Value("${spring.data.redis.host}")
+	private String host;
+
+	@Value("${spring.data.redis.port}")
+	private int port;
 
 	/**
 	 * 기본 Redis Template (기존 캐싱 및 메시지 저장용)
@@ -34,6 +44,30 @@ public class RedisConfig {
 
 		redisTemplate.afterPropertiesSet();
 		return redisTemplate;
+	}
+
+	/**
+	 * Redisson 분산 락 설정<br>
+	 * 서버 CPU 2코어, 4GB 기준 - 커넥션풀: 코어 수 * 2, 최소 연결 수: 커넥션 풀의 1/4<br>
+	 * redis 연결 실패 시: 1500ms 간격으로 3번 재시도<br>
+	 * redis 응답이 3초 넘으면 타임아웃
+	 * @author 전나겸
+	 */
+	@Bean
+	public RedissonClient redissonClient() {
+		Config config = new Config();
+
+		String redisAddress = "redis://" + host + ":" + port;
+
+		config.useSingleServer()
+			.setAddress(redisAddress)
+			.setConnectionPoolSize(20)
+			.setConnectionMinimumIdleSize(5)
+			.setRetryAttempts(3)
+			.setRetryInterval(1500)
+			.setTimeout(3000);
+
+		return Redisson.create(config);
 	}
 
 	private ObjectMapper createObjectMapper() {

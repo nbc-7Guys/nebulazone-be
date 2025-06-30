@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.domain.user.service;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -252,6 +253,16 @@ public class UserDomainService {
 	 */
 	public boolean validEmailWithOAuthType(String email, OAuthType oAuthType) {
 		return userRepository.existsByEmailAndOAuthType(email, oAuthType);
+	}
+
+	/**
+	 * userId 리스트 정보로 활성화된 유저를 모두 조회
+	 * @param userIds 조회할 유저 id List
+	 * @return 조회된 User 리스트
+	 * @author 전나겸
+	 */
+	public List<User> findActiveUserByIds(List<Long> userIds) {
+		return userRepository.findActiveUserByIds(userIds);
 	}
 
 	/**
