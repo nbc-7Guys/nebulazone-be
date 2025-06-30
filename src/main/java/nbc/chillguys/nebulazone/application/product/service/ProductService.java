@@ -138,6 +138,8 @@ public class ProductService {
 		ProductPurchaseCommand command = ProductPurchaseCommand.of(user, catalog, productId);
 		productDomainService.purchaseProduct(command);
 
+		product.getSeller().addPoint(product.getPrice());
+
 		LocalDateTime purchasedAt = LocalDateTime.now();
 		eventPublisher.publishEvent(new PurchaseProductEvent(user, product, purchasedAt));
 
