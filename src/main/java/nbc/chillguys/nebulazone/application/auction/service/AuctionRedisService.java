@@ -407,7 +407,22 @@ public class AuctionRedisService {
 			.size();
 	}
 
-	@Transactional
+	/**
+	 * 어드민 경매 삭제 처리
+	 *
+	 * <p>
+	 * 1. Redisson 분산락을 이용해 동시 삭제 방지<br>
+	 * 2. 경매 도메인에서 Auction 삭제 처리 및 관련 엔티티 상태 반영<br>
+	 * 3. 레디스에서 해당 경매의 입찰 이력(BID ZSet) 조회 후,
+	 *    - 입찰자 포인트 반환 (진행 중인 입찰에 한함)
+	 *    - 입찰 이력 생성 및 저장
+	 * 4. 연관 상품(Product)도 함께 논리 삭제 및 Elasticsearch에서 삭제<br>
+	 * 5. 레디스에서 경매/입찰 데이터 정리<br>
+	 * </p>
+	 *
+	 * @param auctionId 삭제할 경매 ID
+	 * @author 정석현
+	 */
 	public void deleteAdminAuction(Long auctionId) {
 		RLock auctionDeleteLock = redissonClient.getLock(AUCTION_LOCK_DELETE_PREFIX + auctionId);
 
@@ -460,6 +475,20 @@ public class AuctionRedisService {
 		}
 	}
 
+	/**
+	 * 어드민 경매 정보 수정 (분산락 없음)
+	 *
+	 * <p>
+	 * 1. 경매 Vo 객체의 검증 메서드(`validateUpdatableByAdmin`)로 비즈니스 제약 체크<br>
+	 * 2. 수정값(시작가, 현재가, 종료시간 등) 적용<br>
+	 * 3. 변경된 AuctionVo를 레디스에 반영(Hash, ZSet 갱신)<br>
+	 * 4. DB/Elasticsearch 등 영속 데이터 동기화<br>
+	 * </p>
+	 *
+	 * @param auctionId 수정할 경매 ID
+	 * @param command   어드민이 입력한 수정 정보(시작가, 현재가, 종료시간 등)
+	 * @author 정석현
+	 */
 	public void updateAdminAuction(Long auctionId, AuctionAdminUpdateCommand command) {
 		String auctionKey = AUCTION_PREFIX + auctionId;
 		AuctionVo auctionVo = getAuctionVoElseThrow(auctionId);
