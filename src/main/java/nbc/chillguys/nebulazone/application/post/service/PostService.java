@@ -18,11 +18,11 @@ import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.SearchPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.UpdatePostResponse;
 import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
-import nbc.chillguys.nebulazone.domain.post.dto.PostDeleteCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
+import nbc.chillguys.nebulazone.domain.post.event.DeletePostEvent;
 import nbc.chillguys.nebulazone.domain.post.event.UpdatePostEvent;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
 import nbc.chillguys.nebulazone.domain.post.vo.PostDocument;
@@ -88,11 +88,9 @@ public class PostService {
 	}
 
 	public DeletePostResponse deletePost(Long userId, Long postId) {
-		PostDeleteCommand command = PostDeleteCommand.of(userId, postId);
+		postDomainService.deletePost(postId, userId);
 
-		postDomainService.deletePost(command);
-
-		postDomainService.deletePostFromEs(postId);
+		eventPublisher.publishEvent(new DeletePostEvent(postId));
 
 		return DeletePostResponse.from(postId);
 	}

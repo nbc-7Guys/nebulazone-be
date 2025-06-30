@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
-import nbc.chillguys.nebulazone.domain.post.dto.PostDeleteCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
@@ -86,14 +85,15 @@ public class PostDomainService {
 	/**
 	 * 게시글 삭제
 	 *
-	 * @param command 게시글 삭제 정보
+	 * @param postId 게시글 id
+	 * @param userId 유저 id
 	 * @author 윤정환
 	 */
 	@Transactional
-	public void deletePost(PostDeleteCommand command) {
-		Post post = findActivePost(command.postId());
+	public void deletePost(Long postId, Long userId) {
+		Post post = findActivePost(postId);
 
-		post.validatePostOwner(command.userId());
+		post.validatePostOwner(userId);
 
 		post.delete();
 	}
