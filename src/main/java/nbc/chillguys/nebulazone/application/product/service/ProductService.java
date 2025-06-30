@@ -35,6 +35,7 @@ import nbc.chillguys.nebulazone.domain.product.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.event.ChangeToAuctionTypeEvent;
 import nbc.chillguys.nebulazone.domain.product.event.DeleteProductEvent;
 import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
 import nbc.chillguys.nebulazone.domain.product.event.UpdateProductEvent;
@@ -103,9 +104,9 @@ public class ProductService {
 		ChangeToAuctionTypeCommand command = request.toCommand(productId, userId, catalogId);
 		Product product = productDomainService.changeToAuctionType(command);
 
-		productDomainService.saveProductToEs(product);
-
 		auctionDomainService.createAuction(AuctionCreateCommand.of(product, request.getProductEndTime()));
+
+		eventPublisher.publishEvent(new ChangeToAuctionTypeEvent(product));
 
 		return ProductResponse.from(product, request.getProductEndTime());
 	}
