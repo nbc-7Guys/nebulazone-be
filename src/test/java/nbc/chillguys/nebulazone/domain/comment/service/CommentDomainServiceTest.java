@@ -218,7 +218,7 @@ class CommentDomainServiceTest {
 		@Test
 		@DisplayName("댓글 조회 성공")
 		void success_updateComment() {
-			CommentListFindQuery query = new CommentListFindQuery(post, 0, 20);
+			CommentListFindQuery query = new CommentListFindQuery(post.getId(), 0, 20);
 
 			Pageable pageable = PageRequest.of(query.page(), query.size());
 			List<CommentWithUserInfo> comments = List.of(
