@@ -60,7 +60,7 @@ public class CommentController {
 		@PathVariable("commentId") Long commentId,
 		@Valid @RequestBody UpdateCommentRequest request
 	) {
-		CommentResponse response = commentService.updateComment(user, postId, commentId, request);
+		CommentResponse response = commentService.updateComment(commentId, user.getId(), postId, request);
 
 		return ResponseEntity.ok(response);
 	}
@@ -71,7 +71,7 @@ public class CommentController {
 		@PathVariable("postId") Long postId,
 		@PathVariable("commentId") Long commentId
 	) {
-		DeleteCommentResponse response = commentService.deleteComment(user, postId, commentId);
+		DeleteCommentResponse response = commentService.deleteComment(commentId, user.getId(), postId);
 
 		return ResponseEntity.ok(response);
 	}

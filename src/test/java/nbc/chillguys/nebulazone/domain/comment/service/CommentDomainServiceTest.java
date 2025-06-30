@@ -157,7 +157,8 @@ class CommentDomainServiceTest {
 		@Test
 		@DisplayName("댓글 수정 성공")
 		void success_updateComment() {
-			CommentUpdateCommand command = new CommentUpdateCommand(user, post, comment.getId(), "수정된 댓글");
+			CommentUpdateCommand command
+				= new CommentUpdateCommand(comment.getId(), user.getId(), post.getId(), "수정된 댓글");
 
 			given(commentRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.ofNullable(comment));
 
@@ -169,7 +170,8 @@ class CommentDomainServiceTest {
 		@Test
 		@DisplayName("댓글 수정 실패 - 댓글을 찾을 수 없음")
 		void fail_updateComment_commentNotFound() {
-			CommentUpdateCommand command = new CommentUpdateCommand(user, post, comment.getId(), "수정된 댓글");
+			CommentUpdateCommand command
+				= new CommentUpdateCommand(comment.getId(), user.getId(), post.getId(), "수정된 댓글");
 
 			given(commentRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.empty());
 
@@ -183,7 +185,8 @@ class CommentDomainServiceTest {
 		void fail_updateComment_notBelongToPost() {
 			Post post = Post.builder().build();
 			ReflectionTestUtils.setField(post, "id", 3L);
-			CommentUpdateCommand command = new CommentUpdateCommand(user, post, comment.getId(), "수정된 댓글");
+			CommentUpdateCommand command
+				= new CommentUpdateCommand(comment.getId(), user.getId(), post.getId(), "수정된 댓글");
 
 			given(commentRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.ofNullable(comment));
 
@@ -197,7 +200,8 @@ class CommentDomainServiceTest {
 		void fail_updateComment_notCommentOwner() {
 			User user = User.builder().build();
 			ReflectionTestUtils.setField(user, "id", 2L);
-			CommentUpdateCommand command = new CommentUpdateCommand(user, post, comment.getId(), "수정된 댓글");
+			CommentUpdateCommand command
+				= new CommentUpdateCommand(comment.getId(), user.getId(), post.getId(), "수정된 댓글");
 
 			given(commentRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.ofNullable(comment));
 
@@ -214,7 +218,7 @@ class CommentDomainServiceTest {
 		@Test
 		@DisplayName("댓글 조회 성공")
 		void success_updateComment() {
-			CommentListFindQuery query = new CommentListFindQuery(post, 0, 20);
+			CommentListFindQuery query = new CommentListFindQuery(post.getId(), 0, 20);
 
 			Pageable pageable = PageRequest.of(query.page(), query.size());
 			List<CommentWithUserInfo> comments = List.of(
@@ -246,7 +250,7 @@ class CommentDomainServiceTest {
 		@Test
 		@DisplayName("댓글 삭제 성공")
 		void success_deleteComment() {
-			CommentDeleteCommand command = new CommentDeleteCommand(user, post, comment.getId());
+			CommentDeleteCommand command = new CommentDeleteCommand(comment.getId(), user.getId(), post.getId());
 
 			given(commentRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.ofNullable(comment));
 
@@ -259,7 +263,7 @@ class CommentDomainServiceTest {
 		@Test
 		@DisplayName("댓글 삭제 실패 - 댓글을 찾을 수 없음")
 		void fail_deleteComment_commentNotFound() {
-			CommentDeleteCommand command = new CommentDeleteCommand(user, post, comment.getId());
+			CommentDeleteCommand command = new CommentDeleteCommand(comment.getId(), user.getId(), post.getId());
 
 			given(commentRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.empty());
 
@@ -273,7 +277,7 @@ class CommentDomainServiceTest {
 		void fail_deleteComment_notBelongToPost() {
 			Post post = Post.builder().build();
 			ReflectionTestUtils.setField(post, "id", 3L);
-			CommentDeleteCommand command = new CommentDeleteCommand(user, post, comment.getId());
+			CommentDeleteCommand command = new CommentDeleteCommand(comment.getId(), user.getId(), post.getId());
 
 			given(commentRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.ofNullable(comment));
 
@@ -287,7 +291,7 @@ class CommentDomainServiceTest {
 		void fail_deleteComment_notCommentOwner() {
 			User user = User.builder().build();
 			ReflectionTestUtils.setField(user, "id", 2L);
-			CommentDeleteCommand command = new CommentDeleteCommand(user, post, comment.getId());
+			CommentDeleteCommand command = new CommentDeleteCommand(comment.getId(), user.getId(), post.getId());
 
 			given(commentRepository.findByIdAndDeletedFalse(any(Long.class))).willReturn(Optional.ofNullable(comment));
 

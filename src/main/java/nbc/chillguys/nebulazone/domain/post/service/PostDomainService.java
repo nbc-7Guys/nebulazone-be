@@ -83,6 +83,18 @@ public class PostDomainService {
 	}
 
 	/**
+	 * 삭제되지 않은 게시글이 존재하는지 검증
+	 *
+	 * @param postId 게시글 id
+	 * @author 윤정환
+	 */
+	public void validActivePost(Long postId) {
+		if (!postRepository.existActivePost(postId)) {
+			throw new PostException(PostErrorCode.POST_NOT_FOUND);
+		}
+	}
+
+	/**
 	 * 게시글 삭제
 	 *
 	 * @param postId 게시글 id
