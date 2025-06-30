@@ -2,6 +2,7 @@ package nbc.chillguys.nebulazone.application.product.listener;
 
 import java.time.LocalDateTime;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -24,6 +25,7 @@ public class PurchaseProductEventListener {
 	private final TransactionDomainService transactionDomainService;
 	private final NotificationService notificationService;
 
+	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void handlePurchaseProduct(PurchaseProductEvent event) {
 		Product product = event.product();
