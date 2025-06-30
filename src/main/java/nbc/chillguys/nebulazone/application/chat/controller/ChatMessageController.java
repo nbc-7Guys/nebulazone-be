@@ -57,7 +57,7 @@ public class ChatMessageController {
 	 *
 	 * <p>Multipart 형태로 이미지 파일을 업로드하고 채팅방에 이미지 메시지를 전송</p>
 	 *
-	 * @param User 인증된 사용자 정보
+	 * @param user 인증된 사용자 정보
 	 * @param roomId 메시지를 전송할 채팅방 ID
 	 * @param multipartFile 업로드할 이미지 파일
 	 * @param type 이미지 메타데이터 (타입 정보)
@@ -65,12 +65,12 @@ public class ChatMessageController {
 	 */
 	@PostMapping(value = "/send/image/{roomId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public void sendImage(
-		@AuthenticationPrincipal User User,
+		@AuthenticationPrincipal User user,
 		@PathVariable @NotBlank(message = "roomId를 입력해주세요") Long roomId,
 		@RequestPart("image") MultipartFile multipartFile,
 		@RequestPart("meta") String type
 	) {
-		chatMessageService.sendImageMessage(User, multipartFile, roomId, type);
+		chatMessageService.sendImageMessage(user, multipartFile, roomId, type);
 	}
 
 }
