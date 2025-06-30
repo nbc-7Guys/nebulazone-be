@@ -96,7 +96,7 @@ public class PostController {
 		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
 		@PathVariable("postId") Long postId,
 		@AuthenticationPrincipal User user,
-		@Valid @RequestPart("post") UpdateImagesPostRequest request
+		@RequestPart("post") UpdateImagesPostRequest request
 	) {
 
 		GetPostResponse response = postService.updatePostImages(postId, imageFiles, user, request.remainImageUrls());

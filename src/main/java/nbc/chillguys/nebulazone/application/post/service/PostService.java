@@ -87,7 +87,12 @@ public class PostService {
 	public GetPostResponse updatePostImages(Long postId, List<MultipartFile> imageFiles, User user,
 		List<String> remainImageUrls) {
 
-		List<String> postImageUrls = new ArrayList<>(remainImageUrls);
+		List<String> postImageUrls = new ArrayList<>();
+
+		if (remainImageUrls != null) {
+			postImageUrls.addAll(remainImageUrls);
+		}
+
 		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
 		if (hasImage) {
 			List<String> newImageUrls = imageFiles.stream()
