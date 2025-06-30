@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.application.post.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
+import nbc.chillguys.nebulazone.domain.post.event.UpdatePostEvent;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
 import nbc.chillguys.nebulazone.domain.post.vo.PostDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -33,6 +35,7 @@ public class PostService {
 
 	private final PostDomainService postDomainService;
 	private final GcsClient gcsClient;
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
 	public CreatePostResponse createPost(User user, CreatePostRequest request,
@@ -79,7 +82,7 @@ public class PostService {
 
 		Post updatedPost = postDomainService.updatePost(postId, userId, command);
 
-		postDomainService.savePostToEs(updatedPost);
+		eventPublisher.publishEvent(new UpdatePostEvent(post));
 
 		return UpdatePostResponse.from(updatedPost);
 	}
