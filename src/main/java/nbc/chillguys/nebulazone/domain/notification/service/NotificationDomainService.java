@@ -41,7 +41,6 @@ public class NotificationDomainService {
 		notification.markAsRead();
 	}
 
-	@Transactional
 	public Long readAllNotification(Long userId) {
 		return notificationRepository.markAllAsRead(userId);
 	}

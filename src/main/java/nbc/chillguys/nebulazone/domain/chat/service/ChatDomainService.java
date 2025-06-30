@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,9 +28,6 @@ import nbc.chillguys.nebulazone.domain.product.exception.ProductErrorCode;
 import nbc.chillguys.nebulazone.domain.product.exception.ProductException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
-/**
- * The type Chat service.
- */
 @Service
 @RequiredArgsConstructor
 public class ChatDomainService {
@@ -82,11 +82,14 @@ public class ChatDomainService {
 	 * @return 채팅 기록 응답(FindChatHistoryResponse) 리스트
 	 */
 	@Transactional(readOnly = true)
-	public List<FindChatHistoryResponse> findChatHistoryResponses(Long roomId) {
-		List<ChatHistory> chatHistory = chatRoomHistoryRepository.findAllByChatRoomIdOrderBySendTimeAsc(roomId);
+	public List<FindChatHistoryResponse> findChatHistoryResponses(Long roomId, Long lastId, int size) {
+		PageRequest pageRequest = PageRequest.of(0, size);
 
-		List<FindChatHistoryResponse> responses = chatHistory.stream()
-			.map(history -> FindChatHistoryResponse.from(history))
+		Slice<ChatHistory> slice = chatRoomHistoryRepository.findAllByChatRoomIdOrderBySendTimeAsc(
+			roomId, lastId, pageRequest);
+
+		List<FindChatHistoryResponse> responses = slice.getContent().stream()
+			.map(FindChatHistoryResponse::from)
 			.toList();
 
 		return responses;

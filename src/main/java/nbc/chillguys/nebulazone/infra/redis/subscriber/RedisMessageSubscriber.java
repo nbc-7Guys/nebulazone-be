@@ -17,6 +17,11 @@ import nbc.chillguys.nebulazone.infra.redis.dto.ChatPubSubMessage;
 
 /**
  * Redis Pub/Sub 메시지를 구독하여 WebSocket으로 브로드캐스트하는 서비스
+ *
+ * <p>Redis에서 발행된 채팅 메시지를 수신하여 WebSocket을 통해
+ * 해당 채팅방의 모든 구독자들에게 실시간으로 전달</p>
+ *
+ * @author 박형우
  */
 @Slf4j
 @Service
@@ -29,8 +34,12 @@ public class RedisMessageSubscriber implements MessageListener {
 	/**
 	 * Redis에서 발행된 메시지를 수신하여 WebSocket으로 브로드캐스트
 	 *
+	 * <p>Redis Pub/Sub 채널에서 수신한 채팅 메시지를 파싱하고,
+	 * 해당 채팅방을 구독하고 있는 모든 클라이언트에게 WebSocket을 통해 전달</p>
+	 *
 	 * @param message Redis에서 수신한 메시지
-	 * @param pattern 구독한 채널 패턴
+	 * @param pattern 구독한 채널 패턴 (사용되지 않음)
+	 * @author 박형우
 	 */
 	@Override
 	public void onMessage(Message message, byte[] pattern) {
