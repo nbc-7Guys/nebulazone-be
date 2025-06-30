@@ -2,10 +2,8 @@ package nbc.chillguys.nebulazone.application.product.dto.request;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.product.dto.ChangeToAuctionTypeCommand;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
-import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 public record ChangeToAuctionTypeRequest(
 	@NotNull(message = "시작 가격을 입력해주세요.")
@@ -19,7 +17,7 @@ public record ChangeToAuctionTypeRequest(
 		return ProductEndTime.of(endTime);
 	}
 
-	public ChangeToAuctionTypeCommand toCommand(User user, Catalog catalog, Long productId) {
-		return new ChangeToAuctionTypeCommand(user, catalog, productId, price, getProductEndTime());
+	public ChangeToAuctionTypeCommand toCommand(Long productId, Long userId, Long catalogId) {
+		return new ChangeToAuctionTypeCommand(productId, userId, catalogId, price, getProductEndTime());
 	}
 }

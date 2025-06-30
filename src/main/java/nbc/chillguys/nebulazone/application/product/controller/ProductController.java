@@ -59,7 +59,7 @@ public class ProductController {
 		@PathVariable("productId") Long productId,
 		@Valid @RequestBody UpdateProductRequest request) {
 		ProductResponse response
-			= productService.updateProduct(user, catalogId, productId, request);
+			= productService.updateProduct(productId, user.getId(), catalogId, request);
 
 		return ResponseEntity.ok(response);
 	}
@@ -71,7 +71,7 @@ public class ProductController {
 		@PathVariable("productId") Long productId,
 		@Valid @RequestBody ChangeToAuctionTypeRequest request
 	) {
-		ProductResponse response = productService.changeToAuctionType(user, catalogId, productId, request);
+		ProductResponse response = productService.changeToAuctionType(productId, user.getId(), catalogId, request);
 
 		return ResponseEntity.ok(response);
 	}
@@ -82,7 +82,7 @@ public class ProductController {
 		@PathVariable("catalogId") Long catalogId,
 		@PathVariable("productId") Long productId
 	) {
-		DeleteProductResponse response = productService.deleteProduct(user, catalogId, productId);
+		DeleteProductResponse response = productService.deleteProduct(productId, user.getId(), catalogId);
 
 		return ResponseEntity.ok(response);
 	}

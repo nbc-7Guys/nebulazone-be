@@ -165,7 +165,7 @@ class ProductDomainServiceUnitTest {
 		@DisplayName("판매 상품 수정 성공")
 		void success_updateProduct() {
 			ProductUpdateCommand command
-				= new ProductUpdateCommand(user, catalog, product.getId(), "수정된 이름", "수정된 본문");
+				= new ProductUpdateCommand(product.getId(), user.getId(), catalog.getId(), "수정된 이름", "수정된 본문");
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -179,7 +179,7 @@ class ProductDomainServiceUnitTest {
 		@DisplayName("판매 상품 수정 실패 - 판매 상품을 찾을 수 없음")
 		void fail_updateProduct_productNotFound() {
 			ProductUpdateCommand command
-				= new ProductUpdateCommand(user, catalog, product.getId(), "수정된 이름", "수정된 본문");
+				= new ProductUpdateCommand(product.getId(), user.getId(), catalog.getId(), "수정된 이름", "수정된 본문");
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
@@ -195,7 +195,7 @@ class ProductDomainServiceUnitTest {
 			ReflectionTestUtils.setField(catalog, "id", 2L);
 
 			ProductUpdateCommand command
-				= new ProductUpdateCommand(user, catalog, product.getId(), "수정된 이름", "수정된 본문");
+				= new ProductUpdateCommand(product.getId(), user.getId(), catalog.getId(), "수정된 이름", "수정된 본문");
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -211,7 +211,7 @@ class ProductDomainServiceUnitTest {
 			ReflectionTestUtils.setField(user, "id", 2L);
 
 			ProductUpdateCommand command
-				= new ProductUpdateCommand(user, catalog, product.getId(), "수정된 이름", "수정된 본문");
+				= new ProductUpdateCommand(product.getId(), user.getId(), catalog.getId(), "수정된 이름", "수정된 본문");
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -228,8 +228,9 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 방식 수정 성공")
 		void success_changeToAuctionType() {
-			ChangeToAuctionTypeCommand command
-				= new ChangeToAuctionTypeCommand(user, catalog, product.getId(), 100000L, ProductEndTime.HOUR_24);
+			ChangeToAuctionTypeCommand command = new ChangeToAuctionTypeCommand(
+				auctionProduct.getId(), user.getId(), catalog.getId(), 100000L, ProductEndTime.HOUR_24
+			);
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -242,8 +243,9 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 방식 수정 실패 - 판매 상품을 찾을 수 없음")
 		void fail_changeToAuctionType_productNotFound() {
-			ChangeToAuctionTypeCommand command
-				= new ChangeToAuctionTypeCommand(user, catalog, product.getId(), 100000L, ProductEndTime.HOUR_24);
+			ChangeToAuctionTypeCommand command = new ChangeToAuctionTypeCommand(
+				auctionProduct.getId(), user.getId(), catalog.getId(), 100000L, ProductEndTime.HOUR_24
+			);
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
@@ -258,8 +260,9 @@ class ProductDomainServiceUnitTest {
 			Catalog catalog = Catalog.builder().build();
 			ReflectionTestUtils.setField(catalog, "id", 2L);
 
-			ChangeToAuctionTypeCommand command
-				= new ChangeToAuctionTypeCommand(user, catalog, product.getId(), 100000L, ProductEndTime.HOUR_24);
+			ChangeToAuctionTypeCommand command = new ChangeToAuctionTypeCommand(
+				auctionProduct.getId(), user.getId(), catalog.getId(), 100000L, ProductEndTime.HOUR_24
+			);
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -274,8 +277,9 @@ class ProductDomainServiceUnitTest {
 			User user = User.builder().build();
 			ReflectionTestUtils.setField(user, "id", 2L);
 
-			ChangeToAuctionTypeCommand command
-				= new ChangeToAuctionTypeCommand(user, catalog, product.getId(), 100000L, ProductEndTime.HOUR_24);
+			ChangeToAuctionTypeCommand command = new ChangeToAuctionTypeCommand(
+				auctionProduct.getId(), user.getId(), catalog.getId(), 100000L, ProductEndTime.HOUR_24
+			);
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -288,7 +292,7 @@ class ProductDomainServiceUnitTest {
 		@DisplayName("판매 방식 수정 실패 - 이미 판매 방식이 경매임")
 		void fail_changeToAuctionType_alreadyAuctionType() {
 			ChangeToAuctionTypeCommand command = new ChangeToAuctionTypeCommand(
-				user, catalog, auctionProduct.getId(), 100000L, ProductEndTime.HOUR_24
+				auctionProduct.getId(), user.getId(), catalog.getId(), 100000L, ProductEndTime.HOUR_24
 			);
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(auctionProduct));
@@ -306,7 +310,7 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 삭제 성공")
 		void success_deleteProduct() {
-			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
+			ProductDeleteCommand command = new ProductDeleteCommand(product.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -319,7 +323,7 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 삭제 실패 - 판매 상품을 찾을 수 없음")
 		void fail_changeToAuctionType_productNotFound() {
-			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
+			ProductDeleteCommand command = new ProductDeleteCommand(product.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
@@ -334,7 +338,7 @@ class ProductDomainServiceUnitTest {
 			Catalog catalog = Catalog.builder().build();
 			ReflectionTestUtils.setField(catalog, "id", 2L);
 
-			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
+			ProductDeleteCommand command = new ProductDeleteCommand(product.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -349,7 +353,7 @@ class ProductDomainServiceUnitTest {
 			User user = User.builder().build();
 			ReflectionTestUtils.setField(user, "id", 2L);
 
-			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
+			ProductDeleteCommand command = new ProductDeleteCommand(product.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -366,7 +370,7 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 구매 성공")
 		void success_purchaseProduct() {
-			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, product.getId());
+			ProductPurchaseCommand command = new ProductPurchaseCommand(product.getId(), 2L, catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -378,7 +382,7 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 구매 실패 - 판매 상품을 찾을 수 없음")
 		void fail_purchaseProduct_productNotFound() {
-			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, product.getId());
+			ProductPurchaseCommand command = new ProductPurchaseCommand(product.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
@@ -392,7 +396,7 @@ class ProductDomainServiceUnitTest {
 		void fail_purchaseProduct_alreadySold() {
 			success_purchaseProduct();
 
-			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, product.getId());
+			ProductPurchaseCommand command = new ProductPurchaseCommand(product.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -404,7 +408,7 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 구매 실패 - 옥션 상품은 구매 불가")
 		void fail_purchaseProduct_auctionProductNotPurchasable() {
-			ProductPurchaseCommand command = new ProductPurchaseCommand(user, catalog, auctionProduct.getId());
+			ProductPurchaseCommand command = new ProductPurchaseCommand(auctionProduct.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(auctionProduct));
 
