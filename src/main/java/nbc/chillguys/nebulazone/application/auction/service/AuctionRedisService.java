@@ -4,6 +4,7 @@ import static nbc.chillguys.nebulazone.application.auction.consts.AuctionConst.*
 import static nbc.chillguys.nebulazone.application.bid.consts.BidConst.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +27,12 @@ import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuction
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.EndAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindSortTypeAuctionResponse;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionAdminUpdateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
+import nbc.chillguys.nebulazone.domain.auction.service.AuctionAdminDomainService;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
@@ -59,6 +62,7 @@ public class AuctionRedisService {
 	private final RedissonClient redissonClient;
 
 	private final AuctionDomainService auctionDomainService;
+	private final AuctionAdminDomainService auctionAdminDomainService;
 	private final UserDomainService userDomainService;
 	private final BidDomainService bidDomainService;
 	private final TransactionDomainService transactionDomainService;
@@ -401,6 +405,79 @@ public class AuctionRedisService {
 		return (long)Optional.ofNullable(objects)
 			.orElse(Set.of())
 			.size();
+	}
+
+	@Transactional
+	public void deleteAdminAuction(Long auctionId) {
+		RLock auctionDeleteLock = redissonClient.getLock(AUCTION_LOCK_DELETE_PREFIX + auctionId);
+
+		try {
+			acquireLockOrThrow(auctionDeleteLock);
+
+			Auction deletedAuction = auctionDomainService.deleteAuction(auctionId);
+
+			Set<Object> bidObjects = redisTemplate.opsForZSet().range(BID_PREFIX + auctionId, 0, -1);
+
+			if (bidObjects != null && !bidObjects.isEmpty()) {
+				List<BidVo> bidVoList = bidObjects.stream()
+					.map(bid -> objectMapper.convertValue(bid, BidVo.class))
+					.toList();
+
+				List<Long> bidUserIds = bidVoList.stream()
+					.map(BidVo::getBidUserId)
+					.distinct()
+					.toList();
+
+				List<User> bidUsers = userDomainService.findActiveUserByIds(bidUserIds);
+
+				Map<Long, User> userMap = bidUsers.stream()
+					.collect(Collectors.toMap(User::getId, user -> user));
+
+				bidVoList.stream()
+					.filter(bidVo -> userMap.containsKey(bidVo.getBidUserId()))
+					.forEach(bidVo -> {
+						if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
+							User bidUser = userMap.get(bidVo.getBidUserId());
+							bidUser.addPoint(bidVo.getBidPrice());
+						}
+					});
+
+				bidDomainService.createAllBid(deletedAuction, bidVoList, userMap);
+			}
+
+			Product product = deletedAuction.getProduct();
+			product.delete();
+			productDomainService.deleteProductFromEs(product.getId());
+
+			redisTemplate.opsForZSet().remove(AUCTION_ENDING_PREFIX, auctionId);
+			redisTemplate.delete(AUCTION_PREFIX + auctionId);
+			redisTemplate.delete(BID_PREFIX + auctionId);
+
+		} finally {
+			if (auctionDeleteLock.isLocked() && auctionDeleteLock.isHeldByCurrentThread()) {
+				auctionDeleteLock.unlock();
+			}
+		}
+	}
+
+	public void updateAdminAuction(Long auctionId, AuctionAdminUpdateCommand command) {
+		String auctionKey = AUCTION_PREFIX + auctionId;
+		AuctionVo auctionVo = getAuctionVoElseThrow(auctionId);
+
+		auctionVo.validateUpdatableByAdmin(command);
+
+		auctionVo.updateByAdmin(command.startPrice(), command.currentPrice(), command.endTime());
+
+		Map<String, Object> auctionVoMap = objectMapper.convertValue(auctionVo, new TypeReference<>() {
+		});
+		redisTemplate.opsForHash().putAll(auctionKey, auctionVoMap);
+
+		if (command.endTime() != null) {
+			long score = command.endTime().atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
+			redisTemplate.opsForZSet().add(AUCTION_ENDING_PREFIX, auctionId, score);
+		}
+
+		auctionAdminDomainService.updateAuction(auctionId, command);
 	}
 
 	private void acquireLockOrThrow(RLock auctionLock) {
