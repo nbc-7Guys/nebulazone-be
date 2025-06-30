@@ -54,15 +54,17 @@ public class PostDomainService {
 	/**
 	 * 게시글 수정
 	 *
+	 * @param postId  게시글 id
+	 * @param userId  유저 id
 	 * @param command 게시글 수정 정보
 	 * @return post
 	 * @author 윤정환
 	 */
 	@Transactional
-	public Post updatePost(PostUpdateCommand command) {
-		Post post = findActivePost(command.postId());
+	public Post updatePost(Long postId, Long userId, PostUpdateCommand command) {
+		Post post = findActivePost(postId);
 
-		post.validatePostOwner(command.userId());
+		post.validatePostOwner(userId);
 
 		post.update(command.title(), command.content(), command.imageUrls());
 

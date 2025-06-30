@@ -75,9 +75,9 @@ public class PostService {
 				.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
 		}
 
-		PostUpdateCommand command = request.toCommand(userId, postId, imageUrls);
+		PostUpdateCommand command = request.toCommand(imageUrls);
 
-		Post updatedPost = postDomainService.updatePost(command);
+		Post updatedPost = postDomainService.updatePost(postId, userId, command);
 
 		postDomainService.savePostToEs(updatedPost);
 
