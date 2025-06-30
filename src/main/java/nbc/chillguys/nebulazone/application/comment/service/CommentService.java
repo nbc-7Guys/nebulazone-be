@@ -52,7 +52,7 @@ public class CommentService {
 			size = COMMENT_SIZE_PER_PAGE;
 		}
 
-		Post post = postDomainService.findActivePost(postId);
+		postDomainService.validActivePost(postId);
 
 		CommentListFindQuery query = CommentListFindQuery.of(postId, page - 1, size);
 		Page<CommentWithUserInfo> comments = commentDomainService.findComments(query);
