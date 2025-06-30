@@ -476,7 +476,7 @@ public class AuctionRedisService {
 	}
 
 	/**
-	 * 어드민 경매 정보 수정 (분산락 없음)
+	 * 어드민 경매 정보 수정
 	 *
 	 * <p>
 	 * 1. 경매 Vo 객체의 검증 메서드(`validateUpdatableByAdmin`)로 비즈니스 제약 체크<br>

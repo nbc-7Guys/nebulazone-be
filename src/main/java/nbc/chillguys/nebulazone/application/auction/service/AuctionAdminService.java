@@ -66,7 +66,7 @@ public class AuctionAdminService {
 			.toList();
 
 		CreateRedisAuctionDto redisDto =
-			new CreateRedisAuctionDto(product, restoredAuction, user, productEndTime, imageUrls);
+			new CreateRedisAuctionDto(product, restoredAuction, user, productEndTime);
 
 		auctionRedisService.createAuction(redisDto);
 	}
