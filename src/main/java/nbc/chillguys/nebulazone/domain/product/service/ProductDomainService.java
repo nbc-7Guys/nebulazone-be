@@ -120,8 +120,8 @@ public class ProductDomainService {
 	public Product updateProduct(ProductUpdateCommand command) {
 		Product product = findActiveProductById(command.productId());
 
-		product.validBelongsToCatalog(command.catalog().getId());
-		product.validNotProductOwner(command.user().getId());
+		product.validBelongsToCatalog(command.catalogId());
+		product.validNotProductOwner(command.userId());
 
 		product.update(command.name(), command.description());
 
@@ -139,8 +139,8 @@ public class ProductDomainService {
 	public Product changeToAuctionType(ChangeToAuctionTypeCommand command) {
 		Product product = findActiveProductById(command.productId());
 
-		product.validBelongsToCatalog(command.catalog().getId());
-		product.validNotProductOwner(command.user().getId());
+		product.validBelongsToCatalog(command.catalogId());
+		product.validNotProductOwner(command.userId());
 
 		product.changeToAuctionType(command.price());
 
@@ -156,8 +156,8 @@ public class ProductDomainService {
 	public Product deleteProduct(ProductDeleteCommand command) {
 		Product product = findActiveProductById(command.productId());
 
-		product.validBelongsToCatalog(command.catalog().getId());
-		product.validNotProductOwner(command.user().getId());
+		product.validBelongsToCatalog(command.catalogId());
+		product.validNotProductOwner(command.userId());
 
 		product.delete();
 
@@ -168,9 +168,10 @@ public class ProductDomainService {
 	public void purchaseProduct(ProductPurchaseCommand command) {
 		Product product = findAvailableProductById(command.productId());
 
-		product.purchase();
+		product.validNotOwner(command.userId());
+		product.validBelongsToCatalog(command.catalogId());
 
-		product.getSeller().addPoint(product.getPrice());
+		product.purchase();
 	}
 
 	/**
