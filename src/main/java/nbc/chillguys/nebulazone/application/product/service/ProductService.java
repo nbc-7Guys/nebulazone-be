@@ -55,14 +55,7 @@ public class ProductService {
 	private final ApplicationEventPublisher eventPublisher;
 
 	@Transactional
-	public ProductResponse createProduct(User user, Long catalogId, CreateProductRequest request,
-		List<MultipartFile> multipartFiles) {
-
-		List<String> productImageUrls = multipartFiles == null
-			? List.of()
-			: multipartFiles.stream()
-			.map(gcsClient::uploadFile)
-			.toList();
+	public ProductResponse createProduct(User user, Long catalogId, CreateProductRequest request) {
 
 		Catalog findCatalog = catalogDomainService.getCatalogById(catalogId);
 
@@ -70,14 +63,15 @@ public class ProductService {
 
 		ProductEndTime productEndTime = request.getProductEndTime();
 
-		Product createdProduct = productDomainService.createProduct(productCreateCommand, productImageUrls);
+		Product createdProduct = productDomainService.createProduct(productCreateCommand);
 
 		if (createdProduct.getTxMethod() == ProductTxMethod.AUCTION) {
 			AuctionCreateCommand auctionCreateCommand = AuctionCreateCommand.of(createdProduct, productEndTime);
 			Auction createdAuction = auctionDomainService.createAuction(auctionCreateCommand);
 
-			CreateRedisAuctionDto createRedisAuctionDto = CreateRedisAuctionDto.of(createdProduct, createdAuction, user,
-				productEndTime, productImageUrls);
+			CreateRedisAuctionDto createRedisAuctionDto = CreateRedisAuctionDto.of(
+				createdProduct, createdAuction, user, productEndTime);
+
 			auctionRedisService.createAuction(createRedisAuctionDto);
 			createdProduct.updateAuctionId(createdAuction.getId());
 		}
@@ -87,30 +81,10 @@ public class ProductService {
 		return ProductResponse.from(createdProduct, productEndTime);
 	}
 
-	public ProductResponse updateProduct(
-		User user,
-		Long catalogId,
-		Long productId,
-		UpdateProductRequest request,
-		List<MultipartFile> imageFiles
-	) {
-		Product product = productDomainService.findActiveProductById(productId);
+	public ProductResponse updateProduct(User user, Long catalogId, Long productId, UpdateProductRequest request) {
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
-		List<String> imageUrls = new ArrayList<>(request.remainImageUrls());
-		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
-		if (hasImage) {
-			List<String> newImageUrls = imageFiles.stream()
-				.map(gcsClient::uploadFile)
-				.toList();
-			imageUrls.addAll(newImageUrls);
-
-			product.getProductImages().stream()
-				.filter(productImage -> !imageUrls.contains(productImage.getUrl()))
-				.forEach((productImage) -> gcsClient.deleteFile(productImage.getUrl()));
-		}
-
-		ProductUpdateCommand command = request.toCommand(user, catalog, productId, imageUrls);
+		ProductUpdateCommand command = request.toCommand(user, catalog, productId);
 		Product updatedProduct = productDomainService.updateProduct(command);
 
 		productDomainService.saveProductToEs(updatedProduct);
@@ -119,12 +93,8 @@ public class ProductService {
 	}
 
 	@Transactional
-	public ProductResponse changeToAuctionType(
-		User user,
-		Long catalogId,
-		Long productId,
-		ChangeToAuctionTypeRequest request
-	) {
+	public ProductResponse changeToAuctionType(User user, Long catalogId, Long productId,
+		ChangeToAuctionTypeRequest request) {
 		Catalog catalog = catalogDomainService.getCatalogById(catalogId);
 
 		ChangeToAuctionTypeCommand command = request.toCommand(user, catalog, productId);
@@ -189,5 +159,36 @@ public class ProductService {
 		Product product = productDomainService.getProductByIdWithUserAndImages(query);
 
 		return ProductResponse.from(product);
+	}
+
+	public ProductResponse updateProductImages(Long productId, List<MultipartFile> imageFiles, User user,
+		List<String> remainImageUrls) {
+
+		List<String> productImageUrs = new ArrayList<>(remainImageUrls);
+		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
+		if (hasImage) {
+			List<String> newImageUrls = imageFiles.stream()
+				.map(gcsClient::uploadFile)
+				.toList();
+			productImageUrs.addAll(newImageUrls);
+
+		}
+
+		Product product = productDomainService.findActiveProductById(productId);
+
+		product.getProductImages().stream()
+			.filter(postImage -> !productImageUrs.contains(postImage.getUrl()))
+			.forEach((postImage) -> gcsClient.deleteFile(postImage.getUrl()));
+
+		Product updatedProduct = productDomainService.updateProductImages(product, productImageUrs, user.getId());
+
+		if (updatedProduct.getTxMethod() == ProductTxMethod.AUCTION) {
+
+			auctionRedisService.updateAuctionProductImages(updatedProduct.getAuctionId(), productImageUrs);
+		}
+
+		productDomainService.saveProductToEs(updatedProduct);
+
+		return ProductResponse.from(updatedProduct);
 	}
 }

@@ -106,9 +106,13 @@ public class Product extends BaseEntity {
 
 	}
 
-	public void update(String name, String description, List<String> imageUrls) {
+	public void update(String name, String description) {
 		this.name = name;
 		this.description = description;
+
+	}
+
+	public void updateProductImage(List<String> imageUrls) {
 		this.productImages.clear();
 
 		boolean hasImage = !imageUrls.isEmpty();
