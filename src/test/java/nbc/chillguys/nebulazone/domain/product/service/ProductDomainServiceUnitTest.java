@@ -310,7 +310,7 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 삭제 성공")
 		void success_deleteProduct() {
-			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
+			ProductDeleteCommand command = new ProductDeleteCommand(product.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -323,7 +323,7 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 삭제 실패 - 판매 상품을 찾을 수 없음")
 		void fail_changeToAuctionType_productNotFound() {
-			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
+			ProductDeleteCommand command = new ProductDeleteCommand(product.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.empty());
 
@@ -338,7 +338,7 @@ class ProductDomainServiceUnitTest {
 			Catalog catalog = Catalog.builder().build();
 			ReflectionTestUtils.setField(catalog, "id", 2L);
 
-			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
+			ProductDeleteCommand command = new ProductDeleteCommand(product.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
@@ -353,7 +353,7 @@ class ProductDomainServiceUnitTest {
 			User user = User.builder().build();
 			ReflectionTestUtils.setField(user, "id", 2L);
 
-			ProductDeleteCommand command = new ProductDeleteCommand(user, catalog, product.getId());
+			ProductDeleteCommand command = new ProductDeleteCommand(product.getId(), user.getId(), catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(product));
 
