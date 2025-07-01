@@ -18,6 +18,7 @@ public class AutoAuctionDomainService {
 	/**
 	 * 경매 자동 종료<br>
 	 * 유찰 시 로깅만, 입찰 시 경매 상태 변경 및 낙찰가 업데이트
+	 *
 	 * @param auctionId 종료할 경매 id
 	 * @param bidPrice 낙찰 가격
 	 * @return 종료된 경매

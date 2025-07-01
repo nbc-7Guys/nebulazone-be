@@ -1,7 +1,5 @@
 package nbc.chillguys.nebulazone.application.auction.scheduler;
 
-import static nbc.chillguys.nebulazone.application.auction.consts.AuctionConst.*;
-
 import java.util.Optional;
 import java.util.Set;
 
@@ -13,6 +11,7 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.service.AutoAuctionRedisService;
+import nbc.chillguys.nebulazone.infra.redis.constant.AuctionConstants;
 
 @Component
 @RequiredArgsConstructor
@@ -29,7 +28,8 @@ public class AuctionEndingScheduler {
 	public void processEndedAuctions() {
 		long nowTimeStamp = System.currentTimeMillis() / 1000;
 
-		Set<Object> object = redisTemplate.opsForZSet().rangeByScore(AUCTION_ENDING_PREFIX, 0, nowTimeStamp);
+		Set<Object> object = redisTemplate.opsForZSet()
+			.rangeByScore(AuctionConstants.AUCTION_ENDING_PREFIX, 0, nowTimeStamp);
 
 		Optional.ofNullable(object)
 			.orElse(Set.of())

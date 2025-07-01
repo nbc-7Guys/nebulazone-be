@@ -22,6 +22,7 @@ public class AuctionDomainService {
 
 	/**
 	 * 경매 생성
+	 *
 	 * @param command 경매상품, 종료시간
 	 * @author 전나겸
 	 */
@@ -40,7 +41,8 @@ public class AuctionDomainService {
 
 	/**
 	 * 경매 상세 조회
-	 * @param auctionId 조회할 경매
+	 *
+	 * @param auctionId 조회할 경매 id
 	 * @return 상품 등록자, 상품정보, 입찰 건수 정보가 포함된 경매 조회
 	 * @author 전나겸
 	 */
@@ -51,6 +53,14 @@ public class AuctionDomainService {
 
 	}
 
+	/**
+	 * 수동 낙찰
+	 *
+	 * @param auctionId 낙찰 대상 경매 id
+	 * @param bidPrice 낙찰 가격
+	 * @return 낙찰 대상 경매
+	 * @author 전나겸
+	 */
 	@Transactional
 	public Auction manualEndAuction(Long auctionId, Long bidPrice) {
 
@@ -68,6 +78,7 @@ public class AuctionDomainService {
 
 	/**
 	 * 경매 삭제 == 경매 취소(수동 유찰)
+	 *
 	 * @param auctionId 삭제할 경매 id
 	 * @return 삭제된 경매 id
 	 * @author 전나겸
@@ -86,6 +97,7 @@ public class AuctionDomainService {
 
 	/**
 	 * 삭제되지 않은 경매 단건 조회
+	 *
 	 * @param productId 판매 상품 id
 	 * @return auction
 	 * @author 윤정환
@@ -97,6 +109,7 @@ public class AuctionDomainService {
 
 	/**
 	 * 경매가 RDB에 없으면 NotFound 에러 발생
+	 *
 	 * @param auctionId 확인할 경매 id
 	 * @author 전나겸
 	 */
@@ -108,6 +121,7 @@ public class AuctionDomainService {
 
 	/**
 	 * 진행 중인 모든 경매 조회 (Redis 동기화용)
+	 *
 	 * @return 삭제되지 않고 낙찰되지 않은 경매 목록
 	 * @author 전나겸
 	 */

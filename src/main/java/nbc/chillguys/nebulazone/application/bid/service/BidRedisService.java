@@ -1,15 +1,11 @@
 package nbc.chillguys.nebulazone.application.bid.service;
 
-import static nbc.chillguys.nebulazone.application.bid.consts.BidConst.*;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +28,8 @@ import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
+import nbc.chillguys.nebulazone.infra.redis.constant.BidConstants;
+import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
 import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
@@ -43,7 +41,6 @@ public class BidRedisService {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ObjectMapper objectMapper;
-	private final RedissonClient redissonClient;
 
 	private final UserDomainService userDomainService;
 
@@ -52,8 +49,8 @@ public class BidRedisService {
 	private final BidMetrics bidMetrics;
 
 	/**
-	 * redis 경매 입찰<br>
-	 * Redisson RLock을 사용하여 수평 확장시 동시성 문제를 방지
+	 * redis 경매 입찰
+	 *
 	 * @param auctionId 입찰 대상 경매 id
 	 * @param user 로그인 유저(입찰 유저)
 	 * @param bidPrice 입찰가
@@ -61,72 +58,66 @@ public class BidRedisService {
 	 * @author 전나겸
 	 */
 	@Transactional
+	@DistributedLock(key = "'bid:lock:auction:' + #auctionId")
 	public CreateBidResponse createBid(Long auctionId, User user, Long bidPrice) {
 		long start = System.currentTimeMillis();
 
-		RLock bidLock = redissonClient.getLock(BID_LOCK_PREFIX + auctionId + ":" + user.getId());
 		User loginUser = userDomainService.findActiveUserById(user.getId());
 
-		acquireLockOrThrow(bidLock);
+		AuctionVo auctionVo = auctionRedisService.getAuctionVoElseThrow(auctionId);
+
+		auctionVo.validAuctionNotClosed();
+		auctionVo.validWonAuction();
+		auctionVo.validAuctionOwnerNotBid(user.getId());
+		auctionVo.validMinimumBidPrice(bidPrice);
+
+		String bidKey = BidConstants.BID_PREFIX + auctionId;
+
+		Set<Object> allBid = redisTemplate.opsForZSet().range(bidKey, 0, -1);
+		BidVo findBidVo = Optional.ofNullable(allBid)
+			.orElse(Set.of())
+			.stream()
+			.map(o -> objectMapper.convertValue(o, BidVo.class))
+			.filter(bidVo -> bidVo.getBidUserId().equals(user.getId()))
+			.filter(bidVo -> bidVo.getBidStatus().equals(BidStatus.BID.name()))
+			.findFirst()
+			.orElse(null);
+
+		if (findBidVo != null) {
+			loginUser.addPoint(findBidVo.getBidPrice());
+			redisTemplate.opsForZSet().remove(bidKey, findBidVo);
+			findBidVo.cancelBid();
+			redisTemplate.opsForZSet().add(bidKey, findBidVo, findBidVo.getBidPrice());
+		}
+
+		BidVo bidVo = BidVo.of(auctionId, user, bidPrice);
+
+		redisTemplate.opsForZSet().add(bidKey, bidVo, bidPrice);
+
+		auctionRedisService.updateAuctionCurrentPrice(auctionId, bidPrice);
+		loginUser.usePoint(bidPrice);
+
+		CreateBidResponse response = CreateBidResponse.from(bidVo);
 
 		try {
-			AuctionVo auctionVo = auctionRedisService.getAuctionVoElseThrow(auctionId);
-
-			auctionVo.validAuctionNotClosed();
-			auctionVo.validWonAuction();
-			auctionVo.validAuctionOwnerNotBid(user.getId());
-			auctionVo.validMinimumBidPrice(bidPrice);
-
-			String bidKey = BID_PREFIX + auctionId;
-
-			Set<Object> allBid = redisTemplate.opsForZSet().range(bidKey, 0, -1);
-			BidVo findBidVo = Optional.ofNullable(allBid)
-				.orElse(Set.of())
-				.stream()
-				.map(o -> objectMapper.convertValue(o, BidVo.class))
-				.filter(bidVo -> bidVo.getBidUserId().equals(user.getId()))
-				.filter(bidVo -> bidVo.getBidStatus().equals(BidStatus.BID.name()))
-				.findFirst()
-				.orElse(null);
-
-			if (findBidVo != null) {
-				loginUser.addPoint(findBidVo.getBidPrice());
-				redisTemplate.opsForZSet().remove(bidKey, findBidVo);
-				findBidVo.cancelBid();
-				redisTemplate.opsForZSet().add(bidKey, findBidVo, findBidVo.getBidPrice());
-			}
-
-			BidVo bidVo = BidVo.of(auctionId, user, bidPrice);
-
-			redisTemplate.opsForZSet().add(bidKey, bidVo, bidPrice);
-
-			auctionRedisService.updateAuctionCurrentPrice(auctionId, bidPrice);
-			loginUser.usePoint(bidPrice);
-
-			CreateBidResponse response = CreateBidResponse.from(bidVo);
-
-			try {
-				redisMessagePublisher.publishAuctionUpdate(auctionId, "bid", response);
-			} catch (Exception e) {
-				log.error("입찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
-			}
-
-			bidMetrics.countBidSuccess();
-			bidMetrics.recordBidAmount(bidPrice);
-
-			return response;
-
-		} finally {
-			long elapsed = System.currentTimeMillis() - start;
-			bidMetrics.recordBidLatency(elapsed);
-			bidLock.unlock();
+			redisMessagePublisher.publishAuctionUpdate(auctionId, "bid", response);
+		} catch (Exception e) {
+			log.error("입찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
 		}
+
+		bidMetrics.countBidSuccess();
+		bidMetrics.recordBidAmount(bidPrice);
+
+		long elapsed = System.currentTimeMillis() - start;
+		bidMetrics.recordBidLatency(elapsed);
+
+		return response;
 
 	}
 
 	/**
-	 * redis 경매 입찰 취소<br>
-	 * Redisson RLock을 사용하여 동시성 제어
+	 * redis 경매 입찰 취소
+	 *
 	 * @param user 로그인 유저(입찰 취소 요청자)
 	 * @param auctionId 입찰 취소 대상 경매 id
 	 * @param bidPrice 취소할 입찰 가격
@@ -134,72 +125,67 @@ public class BidRedisService {
 	 * @author 전나겸
 	 */
 	@Transactional
+	@DistributedLock(key = "'bid:deleteLock:' + #auctionId")
 	public DeleteBidResponse statusBid(User user, Long auctionId, Long bidPrice) {
-		RLock bidLock = redissonClient.getLock(BID_DELETE_LOCK_PREFIX + auctionId);
 		User loginUser = userDomainService.findActiveUserById(user.getId());
 
-		acquireLockOrThrow(bidLock);
+		AuctionVo auctionVo = auctionRedisService.getAuctionVoElseThrow(auctionId);
+
+		auctionVo.validAuctionNotClosed();
+		auctionVo.validWonAuction();
+		auctionVo.validBidCancelBefore30Minutes();
+
+		String bidKey = BidConstants.BID_PREFIX + auctionId;
+		Set<Object> objectBidVo = redisTemplate.opsForZSet().rangeByScore(bidKey, bidPrice, bidPrice);
+
+		BidVo findBidVo = Optional.ofNullable(objectBidVo)
+			.orElse(Set.of())
+			.stream()
+			.map(o -> objectMapper.convertValue(o, BidVo.class))
+			.filter(bidVo -> BidStatus.BID.name().equals(bidVo.getBidStatus()))
+			.filter(bidVo -> bidVo.getBidUserId().equals(user.getId()))
+			.findFirst()
+			.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
+
+		findBidVo.validNotBidOwner(user.getId());
+		findBidVo.validBidStatusIsCancel();
+		findBidVo.validBidStatusIsWon();
+		findBidVo.validAuctionMismatch(auctionId);
+
+		redisTemplate.opsForZSet().remove(bidKey, findBidVo);
+		findBidVo.cancelBid();
+		redisTemplate.opsForZSet().add(bidKey, findBidVo, findBidVo.getBidPrice());
+
+		Set<Object> allBids = redisTemplate.opsForZSet().reverseRange(bidKey, 0, -1);
+
+		Long newCurrentPrice = Optional.ofNullable(allBids)
+			.orElse(Set.of())
+			.stream()
+			.map(o -> objectMapper.convertValue(o, BidVo.class))
+			.filter(bidVo -> BidStatus.BID.name().equals(bidVo.getBidStatus()))
+			.findFirst()
+			.map(BidVo::getBidPrice)
+			.orElse(0L);
+
+		auctionRedisService.updateAuctionCurrentPrice(auctionId, newCurrentPrice);
+		loginUser.addPoint(bidPrice);
+
+		DeleteBidResponse response = DeleteBidResponse.from(findBidVo);
 
 		try {
-			AuctionVo auctionVo = auctionRedisService.getAuctionVoElseThrow(auctionId);
-
-			auctionVo.validAuctionNotClosed();
-			auctionVo.validWonAuction();
-			auctionVo.validBidCancelBefore30Minutes();
-
-			String bidKey = BID_PREFIX + auctionId;
-			Set<Object> objectBidVo = redisTemplate.opsForZSet().rangeByScore(bidKey, bidPrice, bidPrice);
-
-			BidVo findBidVo = Optional.ofNullable(objectBidVo)
-				.orElse(Set.of())
-				.stream()
-				.map(o -> objectMapper.convertValue(o, BidVo.class))
-				.filter(bidVo -> BidStatus.BID.name().equals(bidVo.getBidStatus()))
-				.filter(bidVo -> bidVo.getBidUserId().equals(user.getId()))
-				.findFirst()
-				.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
-
-			findBidVo.validNotBidOwner(user.getId());
-			findBidVo.validBidStatusIsCancel();
-			findBidVo.validBidStatusIsWon();
-			findBidVo.validAuctionMismatch(auctionId);
-
-			redisTemplate.opsForZSet().remove(bidKey, findBidVo);
-			findBidVo.cancelBid();
-			redisTemplate.opsForZSet().add(bidKey, findBidVo, findBidVo.getBidPrice());
-
-			Set<Object> allBids = redisTemplate.opsForZSet().reverseRange(bidKey, 0, -1);
-
-			Long newCurrentPrice = Optional.ofNullable(allBids)
-				.orElse(Set.of())
-				.stream()
-				.map(o -> objectMapper.convertValue(o, BidVo.class))
-				.filter(bidVo -> BidStatus.BID.name().equals(bidVo.getBidStatus()))
-				.findFirst()
-				.map(BidVo::getBidPrice)
-				.orElse(0L);
-
-			auctionRedisService.updateAuctionCurrentPrice(auctionId, newCurrentPrice);
-			loginUser.addPoint(bidPrice);
-
-			DeleteBidResponse response = DeleteBidResponse.from(findBidVo);
-
-			try {
-				redisMessagePublisher.publishAuctionUpdate(auctionId, "bid", response);
-			} catch (Exception e) {
-				log.error("입찰 취소 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
-			}
-
-			bidMetrics.countBidCancel();
-			return response;
-
-		} finally {
-			bidLock.unlock();
+			redisMessagePublisher.publishAuctionUpdate(auctionId, "bid", response);
+		} catch (Exception e) {
+			log.error("입찰 취소 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
 		}
+
+		bidMetrics.countBidCancel();
+		return response;
+
 	}
 
 	/**
 	 * redis의 특정 경매의 입찰 내역 조회 후 페이징 반환
+	 *
 	 * @param auctionId 조회할 대상 경매 id
 	 * @param page 페이지
 	 * @param size 출력 개수
@@ -208,7 +194,7 @@ public class BidRedisService {
 	 */
 	public Page<FindBidResponse> findBidsByAuctionId(Long auctionId, int page, int size) {
 
-		String bidKey = BID_PREFIX + auctionId;
+		String bidKey = BidConstants.BID_PREFIX + auctionId;
 		Long totalElements = redisTemplate.opsForZSet().zCard(bidKey);
 
 		if (totalElements == null) {
@@ -241,7 +227,7 @@ public class BidRedisService {
 		List<BidVo> myBidVoList = new ArrayList<>();
 
 		for (Long auctionId : auctionIds) {
-			String bidKey = BID_PREFIX + auctionId;
+			String bidKey = BidConstants.BID_PREFIX + auctionId;
 			Set<Object> objects = redisTemplate.opsForZSet().range(bidKey, 0, -1);
 
 			List<BidVo> myBidsByAuctionId = Optional.ofNullable(objects)
@@ -262,13 +248,15 @@ public class BidRedisService {
 
 	/**
 	 * redis에 저장된 특정 경매의 낙찰 예정인 입찰 정보 조회
+	 *
 	 * @param auctionId 경매 id
 	 * @param bidPrice 낙찰 예정인 입찰 가격
 	 * @return 조회된 BidVo
 	 * @author 전나겸
 	 */
 	public BidVo findWonBidVo(Long auctionId, Long bidPrice) {
-		Set<Object> objects = redisTemplate.opsForZSet().rangeByScore(BID_PREFIX + auctionId, bidPrice, bidPrice);
+		Set<Object> objects = redisTemplate.opsForZSet()
+			.rangeByScore(BidConstants.BID_PREFIX + auctionId, bidPrice, bidPrice);
 
 		return Optional.ofNullable(objects)
 			.orElse(Set.of())
@@ -277,12 +265,6 @@ public class BidRedisService {
 			.findFirst()
 			.orElse(null);
 
-	}
-
-	private void acquireLockOrThrow(RLock bidLock) {
-		if (!bidLock.tryLock()) {
-			throw new BidException(BidErrorCode.BID_PROCESSING_BUSY);
-		}
 	}
 
 }
