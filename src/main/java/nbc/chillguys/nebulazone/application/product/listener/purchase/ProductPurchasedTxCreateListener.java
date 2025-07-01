@@ -7,6 +7,7 @@ import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -27,6 +28,7 @@ public class ProductPurchasedTxCreateListener {
 	private final TransactionDomainService transactionDomainService;
 
 	@Async
+	@Transactional(rollbackFor = Exception.class)
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	@Retryable(
 		backoff = @Backoff(delay = 2000),
