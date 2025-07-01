@@ -17,6 +17,7 @@ import nbc.chillguys.nebulazone.domain.bid.dto.BidAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.service.BidAdminDomainService;
+import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +67,7 @@ public class BidAdminService {
 		);
 	}
 
+	@DistributedLock(key = "#bidId")
 	public void deleteBid(Long bidId) {
 		Bid bid = bidAdminDomainService.findByBidId(bidId);
 		bidAdminDomainService.deleteBid(bidId);
