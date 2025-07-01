@@ -31,9 +31,5 @@ toss:
 frontend:
   url: test-front-end-url
 
-google:
-  application:
-    credentials: test-key.json
-
 security:
   logstash-key: test_logstash_key
