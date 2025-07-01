@@ -2,6 +2,7 @@ package nbc.chillguys.nebulazone.application.bid.service;
 
 import static nbc.chillguys.nebulazone.application.bid.consts.BidConst.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -285,4 +286,84 @@ public class BidRedisService {
 		}
 	}
 
+	/**
+	 * 어드민이 Redis에 저장된 특정 입찰(Bid)의 상태를 업데이트하는 메서드입니다.<br>
+	 * 입찰은 (userId, price, bidCreatedAt) 조합으로 식별하며,<br>
+	 * Redisson 분산락을 활용해 동시성 문제를 방지합니다.<br>
+	 *
+	 * @param auctionId     경매 ID
+	 * @param userId        입찰자(유저) ID
+	 * @param price         입찰 가격
+	 * @param bidCreatedAt  입찰 생성 시각
+	 * @param status        변경할 입찰 상태 (예: "BID", "CANCEL", "WON" 등)
+	 * @author 정석현
+	 */
+	public void updateBidStatusByAdmin(Long auctionId, Long userId, Long price, LocalDateTime bidCreatedAt,
+		String status) {
+		RLock bidLock = redissonClient.getLock(BID_LOCK_PREFIX + auctionId);
+		acquireLockOrThrow(bidLock);
+		try {
+			String bidKey = BID_PREFIX + auctionId;
+			Set<Object> allBids = redisTemplate.opsForZSet().range(bidKey, 0, -1);
+
+			BidVo targetBid = Optional.ofNullable(allBids).orElse(Set.of()).stream()
+				.map(o -> objectMapper.convertValue(o, BidVo.class))
+				.filter(b -> b.getBidUserId().equals(userId))
+				.filter(b -> b.getBidPrice().equals(price))
+				.filter(b -> b.getBidCreatedAt().isEqual(bidCreatedAt))
+				.findFirst()
+				.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
+
+			redisTemplate.opsForZSet().remove(bidKey, targetBid);
+			targetBid.updateStatus(status);
+			redisTemplate.opsForZSet().add(bidKey, targetBid, targetBid.getBidPrice());
+
+		} finally {
+			bidLock.unlock();
+		}
+	}
+
+	/**
+	 * 어드민이 Redis에 저장된 특정 입찰(Bid)을 삭제하는 메서드입니다.<br>
+	 * 입찰은 (userId, price, bidCreatedAt) 조합으로 식별합니다.<br>
+	 * 입찰 상태가 BID(진행중)였다면, 삭제 후 현재가를 재계산해 경매 정보도 최신화합니다.<br>
+	 * Redisson 분산락을 활용해 동시성 문제를 방지합니다.<br>
+	 *
+	 * @param auctionId     경매 ID
+	 * @param userId        입찰자(유저) ID
+	 * @param price         입찰 가격
+	 * @param bidCreatedAt  입찰 생성 시각
+	 * @author 정석현
+	 */
+	public void deleteBidByAdmin(Long auctionId, Long userId, Long price, LocalDateTime bidCreatedAt) {
+		RLock bidLock = redissonClient.getLock(BID_LOCK_PREFIX + auctionId);
+		acquireLockOrThrow(bidLock);
+		try {
+			String bidKey = BID_PREFIX + auctionId;
+			Set<Object> allBids = redisTemplate.opsForZSet().range(bidKey, 0, -1);
+
+			BidVo targetBid = Optional.ofNullable(allBids).orElse(Set.of()).stream()
+				.map(o -> objectMapper.convertValue(o, BidVo.class))
+				.filter(b -> b.getBidUserId().equals(userId))
+				.filter(b -> b.getBidPrice().equals(price))
+				.filter(b -> b.getBidCreatedAt().isEqual(bidCreatedAt))
+				.findFirst()
+				.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
+
+			redisTemplate.opsForZSet().remove(bidKey, targetBid);
+
+			if (targetBid.getBidStatus().equals(BidStatus.BID.name())) {
+				Set<Object> remainingBids = redisTemplate.opsForZSet().reverseRange(bidKey, 0, -1);
+				Long newCurrentPrice = Optional.ofNullable(remainingBids).orElse(Set.of()).stream()
+					.map(o -> objectMapper.convertValue(o, BidVo.class))
+					.filter(bidVo -> BidStatus.BID.name().equals(bidVo.getBidStatus()))
+					.findFirst()
+					.map(BidVo::getBidPrice)
+					.orElse(0L);
+				auctionRedisService.updateAuctionCurrentPrice(auctionId, newCurrentPrice);
+			}
+		} finally {
+			bidLock.unlock();
+		}
+	}
 }
