@@ -1,7 +1,6 @@
 # Nebulazone-BE
 
-Nebulazone-BE는 NBC-7Guys 팀의 클라우드 컴퓨팅 기반 프로젝트인 Nebulazone의 백엔드 저장소입니다. 이 프로젝트는 Docker와 Kubernetes를 활용한 컨테이너 기반의 분산 시스템
-구축을 목표로 합니다.
+Nebulazone-BE는 NBC-7Guys 팀의 클라우드 컴퓨팅 기반 프로젝트인 Nebulazone의 백엔드 저장소입니다. 이 프로젝트는 Docker와 Kubernetes를 활용한 컨테이너 기반의 분산 시스템 구축을 목표로 합니다.
 
 ---
 
