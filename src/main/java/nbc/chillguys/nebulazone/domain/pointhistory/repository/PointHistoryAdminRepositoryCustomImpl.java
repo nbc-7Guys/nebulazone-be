@@ -24,10 +24,9 @@ public class PointHistoryAdminRepositoryCustomImpl implements PointHistoryAdminR
 	@Override
 	public Page<AdminPointHistoryResponse> searchAdminPointHistories(PointHistoryAdminRequest request,
 		Pageable pageable) {
-		QUser user = pointHistory.user;
+		QUser user = QUser.user;
 		BooleanBuilder builder = new BooleanBuilder();
-
-		// 조건 설정 (기존과 동일)
+		
 		if (request.email() != null && !request.email().isBlank()) {
 			builder.and(user.email.containsIgnoreCase(request.email()));
 		}
@@ -47,7 +46,6 @@ public class PointHistoryAdminRepositoryCustomImpl implements PointHistoryAdminR
 			builder.and(pointHistory.createdAt.loe(request.endDate()));
 		}
 
-		// 데이터 조회 쿼리
 		List<AdminPointHistoryResponse> results = queryFactory
 			.select(new QAdminPointHistoryResponse(
 				pointHistory.id,
@@ -61,13 +59,12 @@ public class PointHistoryAdminRepositoryCustomImpl implements PointHistoryAdminR
 				user.nickname
 			))
 			.from(pointHistory)
-			.leftJoin(pointHistory.user, user).fetchJoin()
+			.leftJoin(pointHistory.user, user)
 			.where(builder)
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
 			.fetch();
 
-		// 별도 COUNT 쿼리
 		Long total = queryFactory
 			.select(pointHistory.count())
 			.from(pointHistory)

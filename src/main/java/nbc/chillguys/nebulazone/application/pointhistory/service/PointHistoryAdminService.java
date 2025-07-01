@@ -49,12 +49,15 @@ public class PointHistoryAdminService {
 	public void approvePointHistory(Long pointHistoryId) {
 		PointHistory pointHistory = pointHistoryAdminDomainService.approvePointHistory(pointHistoryId);
 
+		UserPointChargeCommand command = new UserPointChargeCommand(
+			pointHistory.getUser().getId(),
+			pointHistory.getPrice()
+		);
+
 		if (pointHistory.getPointHistoryType() == PointHistoryType.CHARGE) {
-			UserPointChargeCommand command = new UserPointChargeCommand(
-				pointHistory.getUser().getId(),
-				pointHistory.getPrice()
-			);
 			userDomainService.chargeUserPoint(command);
+		} else if (pointHistory.getPointHistoryType() == PointHistoryType.EXCHANGE) {
+			userDomainService.exchangeUserPoint(command);
 		}
 	}
 

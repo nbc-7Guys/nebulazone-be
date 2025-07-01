@@ -183,7 +183,8 @@ public class UserDomainService {
 	 * @author 정석현
 	 */
 	public void validEnoughPoint(User user, Long price) {
-		if (user.hasNotEnoughPoint(price)) {
+		User targetUser = findActiveUserById(user.getId());
+		if (targetUser.hasNotEnoughPoint(price)) {
 			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
 		}
 	}
@@ -242,6 +243,11 @@ public class UserDomainService {
 	public void chargeUserPoint(UserPointChargeCommand command) {
 		User user = findActiveUserById(command.userId());
 		user.addPoint(command.point());
+	}
+
+	public void exchangeUserPoint(UserPointChargeCommand command) {
+		User user = findActiveUserById(command.userId());
+		user.decreasePoint(command.point());
 	}
 
 	/**
