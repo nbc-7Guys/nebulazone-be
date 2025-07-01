@@ -40,9 +40,6 @@ dependencies {
     // queryDSL
     implementation 'io.github.openfeign.querydsl:querydsl-jpa:6.11'
     annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:6.11:jpa'
-    //  "cannot find symbol: annotation Entity" 또는 "package jakarta.annotation does not exist" 오류 발생시 주석 풀고 추가
-//    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
-//    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
 
     // swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
@@ -62,14 +59,13 @@ dependencies {
     // ES
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 
-    // AOP
+    // GCS
     implementation platform('com.google.cloud:libraries-bom:26.61.0')
     implementation 'com.google.cloud:google-cloud-storage'
-
-    // TestContainers
-    testImplementation platform('org.testcontainers:testcontainers-bom:1.19.8')
-    testImplementation 'org.testcontainers:junit-jupiter'
-    testImplementation 'org.testcontainers:mysql'
+    
+    // ShedLock (스케줄러 중복 실행 방지)
+    implementation 'net.javacrumbs.shedlock:shedlock-spring:5.16.0'
+    implementation 'net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.16.0'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'

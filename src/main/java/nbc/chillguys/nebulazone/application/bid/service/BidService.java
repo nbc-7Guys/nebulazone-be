@@ -35,6 +35,7 @@ public class BidService {
 
 	/**
 	 * 특정 경매의 입찰 내역 조회
+	 *
 	 * @param auctionId 경매 id
 	 * @param page 페이징
 	 * @param size 사이즈
@@ -59,6 +60,7 @@ public class BidService {
 
 	/**
 	 * 내 입찰 내역 조회
+	 *
 	 * @param user 로그인 유저
 	 * @param page 페이징
 	 * @param size 사이즈
