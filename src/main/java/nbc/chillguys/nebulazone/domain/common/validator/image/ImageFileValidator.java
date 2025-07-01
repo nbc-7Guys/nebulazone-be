@@ -13,7 +13,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class ImageFileValidator implements ConstraintValidator<ImageFile, Object> {
-	private static final Tika tika = new Tika();
+	private final Tika tika = new Tika();
 	private static final List<String> VALID_TYPE_LIST = List.of(
 		MediaType.IMAGE_JPEG_VALUE,
 		"image/pjpeg",

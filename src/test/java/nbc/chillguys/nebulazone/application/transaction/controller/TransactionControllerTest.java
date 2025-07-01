@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -30,11 +32,19 @@ import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
 import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("거래 내역 컨트롤러 단위 테스트")
-@WebMvcTest(TransactionController.class)
+@WebMvcTest(
+	controllers = TransactionController.class,
+	excludeFilters = {
+		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+			JwtAuthenticationFilter.class
+		})
+	}
+)
 @Import({TestSecurityConfig.class, TestMockConfig.class})
 class TransactionControllerTest {
 

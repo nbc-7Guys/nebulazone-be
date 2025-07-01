@@ -13,6 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -27,11 +29,19 @@ import nbc.chillguys.nebulazone.application.catalog.service.CatalogService;
 import nbc.chillguys.nebulazone.application.review.dto.response.ReviewResponse;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
+import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
 import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})
 @DisplayName("카탈로그 컨트롤러 단위 테스트")
-@WebMvcTest(CatalogController.class)
+@WebMvcTest(
+	controllers = CatalogController.class,
+	excludeFilters = {
+		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+			JwtAuthenticationFilter.class
+		})
+	}
+)
 class CatalogControllerTest {
 	@MockitoBean
 	private CatalogService catalogService;

@@ -14,10 +14,12 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 import nbc.chillguys.nebulazone.infra.security.constant.JwtConstants;
-import nbc.chillguys.nebulazone.infra.security.constant.TokenExpiredConstant;
+import nbc.chillguys.nebulazone.infra.security.constant.JwtProperties;
 import nbc.chillguys.nebulazone.infra.security.dto.AuthTokens;
 import nbc.chillguys.nebulazone.infra.security.exception.JwtTokenErrorCode;
 import nbc.chillguys.nebulazone.infra.security.exception.JwtTokenException;
@@ -25,16 +27,18 @@ import nbc.chillguys.nebulazone.infra.security.filter.exception.JwtFilterErrorCo
 import nbc.chillguys.nebulazone.infra.security.filter.exception.JwtFilterException;
 
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
-	private final SecretKey secretKey;
-	private final TokenExpiredConstant tokenExpiredConstant;
 	private final UserCacheService userCacheService;
+	private final JwtProperties jwtProperties;
 
-	public JwtUtil(@Value("${jwt.secret.key}") String secretKey, TokenExpiredConstant tokenExpiredConstant,
-		UserCacheService userCacheService) {
-		this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes());
-		this.tokenExpiredConstant = tokenExpiredConstant;
-		this.userCacheService = userCacheService;
+	@Value("${jwt.secret.key}")
+	private String key;
+	private SecretKey secretKey;
+
+	@PostConstruct
+	public void init() {
+		this.secretKey = Keys.hmacShaKeyFor(key.getBytes());
 	}
 
 	public String generateAccessToken(User user) {
@@ -45,7 +49,7 @@ public class JwtUtil {
 			.id(user.getId().toString())
 			.claim(JwtConstants.KEY_ROLES, user.getRoles())
 			.issuedAt(now)
-			.expiration(tokenExpiredConstant.getAccessTokenExpiredDate(now))
+			.expiration(jwtProperties.getAccessTokenExpiredDate(now))
 			.signWith(secretKey, Jwts.SIG.HS256)
 			.compact();
 	}
@@ -58,7 +62,7 @@ public class JwtUtil {
 			.id(user.getId().toString())
 			.claim(JwtConstants.KEY_ROLES, user.getRoles())
 			.issuedAt(now)
-			.expiration(tokenExpiredConstant.getRefreshTokenExpiredDate(now))
+			.expiration(jwtProperties.getRefreshTokenExpiredDate(now))
 			.signWith(secretKey, Jwts.SIG.HS256)
 			.compact();
 	}

@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.util.StandardCharset;
@@ -17,6 +18,7 @@ import nbc.chillguys.nebulazone.common.response.CommonResponse;
 import nbc.chillguys.nebulazone.common.util.LogUtils;
 import nbc.chillguys.nebulazone.infra.security.filter.exception.JwtFilterException;
 
+@Component
 @RequiredArgsConstructor
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 	private final ObjectMapper objectMapper;

@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -20,12 +22,20 @@ import nbc.chillguys.nebulazone.application.chat.dto.request.ImageMessageRequest
 import nbc.chillguys.nebulazone.application.chat.service.ChatMessageService;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
 import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})
 @DisplayName("채팅 메시지 컨트롤러 단위 테스트")
-@WebMvcTest(ChatMessageController.class)
+@WebMvcTest(
+	controllers = ChatMessageController.class,
+	excludeFilters = {
+		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+			JwtAuthenticationFilter.class
+		})
+	}
+)
 class ChatMessageControllerTest {
 
 	private static final Long CHAT_ROOM_ID = 1L;

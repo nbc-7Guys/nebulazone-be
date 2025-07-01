@@ -2,7 +2,6 @@ package nbc.chillguys.nebulazone.application.chat.controller;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -14,6 +13,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -30,12 +31,20 @@ import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.MessageType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
 import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})
 @DisplayName("채팅 컨트롤러 단위 테스트")
-@WebMvcTest(ChatController.class)
+@WebMvcTest(
+	controllers = ChatController.class,
+	excludeFilters = {
+		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+			JwtAuthenticationFilter.class
+		})
+	}
+)
 class ChatControllerTest {
 
 	private static final Long PRODUCT_ID = 1L;
