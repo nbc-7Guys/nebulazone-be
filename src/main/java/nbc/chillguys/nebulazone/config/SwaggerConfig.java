@@ -1,5 +1,6 @@
 package nbc.chillguys.nebulazone.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,6 +23,9 @@ public class SwaggerConfig {
 
 	private final ObjectMapper objectMapper;
 
+	@Value("${springdoc.server.url}")
+	private String serverUrl;
+
 	@PostConstruct
 	public void init() {
 		ModelConverters.getInstance().addConverter(new ModelResolver(objectMapper));
@@ -30,7 +34,7 @@ public class SwaggerConfig {
 	@Bean
 	public OpenAPI openApi() {
 		return new OpenAPI()
-			.addServersItem(new Server().url("https://api2.nebulazone.store"))
+			.addServersItem(new Server().url(serverUrl))
 			.addSecurityItem(new SecurityRequirement().addList("bearer-key").addList("Refresh-Token"))
 			.components(new Components()
 				.addSecuritySchemes("bearer-key",
