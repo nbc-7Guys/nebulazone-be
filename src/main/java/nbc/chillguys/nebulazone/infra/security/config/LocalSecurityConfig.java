@@ -16,8 +16,8 @@ import nbc.chillguys.nebulazone.infra.oauth.handler.OAuth2SuccessHandler;
 import nbc.chillguys.nebulazone.infra.oauth.service.OAuthService;
 import nbc.chillguys.nebulazone.infra.security.filter.BanCheckFilter;
 import nbc.chillguys.nebulazone.infra.security.filter.CustomAuthenticationEntryPoint;
-import nbc.chillguys.nebulazone.infra.security.filter.ExceptionLoggingFilter;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
+import nbc.chillguys.nebulazone.infra.security.filter.LoggingFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -27,7 +27,7 @@ public class LocalSecurityConfig {
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final OAuthService oAuthService;
 	private final OAuth2SuccessHandler oAuth2SuccessHandler;
-	private final ExceptionLoggingFilter exceptionLoggingFilter;
+	private final LoggingFilter loggingFilter;
 	private final BanCheckFilter banCheckFilter;
 	private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
@@ -78,9 +78,9 @@ public class LocalSecurityConfig {
 			)
 			.exceptionHandling(exception ->
 				exception.authenticationEntryPoint(entryPoint))
-			.addFilterBefore(exceptionLoggingFilter, UsernamePasswordAuthenticationFilter.class)
-			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(banCheckFilter, UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
 			.build();
 	}
 }

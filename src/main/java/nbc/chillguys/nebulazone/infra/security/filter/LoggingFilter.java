@@ -21,9 +21,9 @@ import lombok.NonNull;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Component
-public class ExceptionLoggingFilter extends OncePerRequestFilter {
+public class LoggingFilter extends OncePerRequestFilter {
 
-	private static final Logger log = LoggerFactory.getLogger(ExceptionLoggingFilter.class);
+	private static final Logger log = LoggerFactory.getLogger(LoggingFilter.class);
 
 	private static final Set<String> EXCLUDED_PATHS = Set.of(
 		"/actuator/prometheus", "/actuator/health", "/actuator/info",
