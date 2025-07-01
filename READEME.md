@@ -51,7 +51,7 @@ Nebulazone은 클라우드 환경에서 효율적이고 확장 가능한 서비�
 
 - Orchestration: Kubernetes
 
-- Cloud Platform: GCP (VM, GCS, GKE, CloudFlare)
+- Cloud Platform: GCP (VM, GCS, GKE, Cloudflare)
 
 - CI/CD: Github Actions, ArgoCD
 
