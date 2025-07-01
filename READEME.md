@@ -6,7 +6,15 @@ Nebulazone-BE는 NBC-7Guys 팀의 클라우드 컴퓨팅 기반 프로젝트인 
 ---
 
 ## 🚀 프로젝트 소개
-Nebulazone은 클라우드 환경에서 효율적이고 확장 가능한 서비스를 제공하기 위해 설계되었습니다. 이 백엔드 서비스는 프론트엔드 애플리케이션과 연동하여 사용자에게 다양한 기능을 제공하며, MSA(
+Nebulazone은 클라우드 환경에서 효율적이고 확장 가능한 서비스를 제공하기 위해 설계되었습니다. 이 백엔드 서비스는 프론트엔드 애플리케이션과 연동하여 사용자에게 다양한 기능을 제공합니다.
+
+---
+
+## 📖 ERD (Entity Relationship Diagram)
+
+![ERD](https://github.com/nbc-7Guys/.github/blob/26fbab7dc6eec5b77a4398b0788e22abe2da2300/images/erd.png)
+
+---
 
 ### 주요 목표
 
@@ -56,10 +64,6 @@ Nebulazone은 클라우드 환경에서 효율적이고 확장 가능한 서비�
 - Version Control: Git, GitHub
 
 ---
-
-## 📖 ERD (Entity Relationship Diagram)
-
-![ERD](https://github.com/nbc-7Guys/.github/blob/26fbab7dc6eec5b77a4398b0788e22abe2da2300/images/erd.png)
 
 ## 🏛️ 프로젝트 패키지 구조
 우리 `nebulazone` 프로젝트는 역할과 책임에 따라 코드를 분리하는 **계층형 아키텍처(Layered Architecture)**를 기반으로 설계되었습니다. 이는 비즈니스 로직과 외부 기술을 분리하여 유연하고 테스트하기 쉬우며, 유지보수가 용이한 구조를 만드는 것을 목표로 합니다.
