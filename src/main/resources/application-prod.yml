@@ -2,14 +2,17 @@ server:
   port: 8080
 
 spring:
+  profiles:
+    active: prod
+
   application:
     name: nebulazone
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/nebulazone?useSSL=false&allowPublicKeyRetrieval=true
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
+    url:
+    username:
+    password:
 
   jpa:
     open-in-view: false
@@ -25,7 +28,7 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host:
       port: 6379
 
   security:
@@ -69,7 +72,7 @@ spring:
             user-name-attribute: response
 
   elasticsearch:
-    uris: http://localhost:9200
+    uris: ${ES_URI}
 
 jwt:
   secret:
@@ -100,7 +103,7 @@ toss:
   secret-key: ${TOSS_SECRET_KEY}
 
 frontend:
-  url: http://localhost:5173
+  url: ${FRONT_END_URL}
 
 gcp:
   storage:
@@ -111,4 +114,4 @@ security:
 
 springdoc:
   server:
-    url: http://localhost:8080
+    url: https://api2.nebulazone.store
