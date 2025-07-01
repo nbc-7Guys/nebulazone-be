@@ -4,16 +4,19 @@ import static nbc.chillguys.nebulazone.domain.catalog.entity.QCatalog.*;
 import static nbc.chillguys.nebulazone.domain.chat.entity.QChatRoom.*;
 import static nbc.chillguys.nebulazone.domain.chat.entity.QChatRoomUser.*;
 import static nbc.chillguys.nebulazone.domain.product.entity.QProduct.*;
+import static nbc.chillguys.nebulazone.domain.product.entity.QProductImage.*;
 import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 
 import java.util.List;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.catalog.entity.QCatalog;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
+import nbc.chillguys.nebulazone.domain.product.entity.QProductImage;
 
 @RequiredArgsConstructor
 public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
@@ -30,14 +33,25 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 				product.catalog.id,
 				product.id,
 				product.price,
-				product.isSold
+				product.isSold,
+				productImage.url.min()
 			))
 			.from(chatRoom)
 			.join(chatRoomUser).on(chatRoomUser.chatRoom.eq(chatRoom))
 			.join(chatRoom.product, product)
 			.join(product.seller, user)
 			.join(product.catalog, catalog)
+			.leftJoin(product.productImages, productImage)
 			.where(chatRoomUser.user.id.eq(userId))
+			.groupBy(
+				product.name,
+				user.nickname,
+				chatRoom.id,
+				product.catalog.id,
+				product.id,
+				product.price,
+				product.isSold
+			)
 			.fetch();
 	}
 }
