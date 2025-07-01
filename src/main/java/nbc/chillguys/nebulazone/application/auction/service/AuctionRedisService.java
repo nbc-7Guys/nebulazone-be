@@ -4,6 +4,7 @@ import static nbc.chillguys.nebulazone.application.auction.consts.AuctionConst.*
 import static nbc.chillguys.nebulazone.application.bid.consts.BidConst.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +27,12 @@ import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuction
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.EndAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindSortTypeAuctionResponse;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionAdminUpdateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
+import nbc.chillguys.nebulazone.domain.auction.service.AuctionAdminDomainService;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
@@ -59,6 +62,7 @@ public class AuctionRedisService {
 	private final RedissonClient redissonClient;
 
 	private final AuctionDomainService auctionDomainService;
+	private final AuctionAdminDomainService auctionAdminDomainService;
 	private final UserDomainService userDomainService;
 	private final BidDomainService bidDomainService;
 	private final TransactionDomainService transactionDomainService;
@@ -400,6 +404,109 @@ public class AuctionRedisService {
 		return (long)Optional.ofNullable(objects)
 			.orElse(Set.of())
 			.size();
+	}
+
+	/**
+	 * 어드민 경매 삭제 처리
+	 *
+	 * <p>
+	 * 1. Redisson 분산락을 이용해 동시 삭제 방지<br>
+	 * 2. 경매 도메인에서 Auction 삭제 처리 및 관련 엔티티 상태 반영<br>
+	 * 3. 레디스에서 해당 경매의 입찰 이력(BID ZSet) 조회 후,
+	 *    - 입찰자 포인트 반환 (진행 중인 입찰에 한함)
+	 *    - 입찰 이력 생성 및 저장
+	 * 4. 연관 상품(Product)도 함께 논리 삭제 및 Elasticsearch에서 삭제<br>
+	 * 5. 레디스에서 경매/입찰 데이터 정리<br>
+	 * </p>
+	 *
+	 * @param auctionId 삭제할 경매 ID
+	 * @author 정석현
+	 */
+	@Transactional
+	public void deleteAdminAuction(Long auctionId) {
+		RLock auctionDeleteLock = redissonClient.getLock(AUCTION_LOCK_DELETE_PREFIX + auctionId);
+
+		try {
+			acquireLockOrThrow(auctionDeleteLock);
+
+			Auction deletedAuction = auctionDomainService.deleteAuction(auctionId);
+
+			Set<Object> bidObjects = redisTemplate.opsForZSet().range(BID_PREFIX + auctionId, 0, -1);
+
+			if (bidObjects != null && !bidObjects.isEmpty()) {
+				List<BidVo> bidVoList = bidObjects.stream()
+					.map(bid -> objectMapper.convertValue(bid, BidVo.class))
+					.toList();
+
+				List<Long> bidUserIds = bidVoList.stream()
+					.map(BidVo::getBidUserId)
+					.distinct()
+					.toList();
+
+				List<User> bidUsers = userDomainService.findActiveUserByIds(bidUserIds);
+
+				Map<Long, User> userMap = bidUsers.stream()
+					.collect(Collectors.toMap(User::getId, user -> user));
+
+				bidVoList.stream()
+					.filter(bidVo -> userMap.containsKey(bidVo.getBidUserId()))
+					.forEach(bidVo -> {
+						if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
+							User bidUser = userMap.get(bidVo.getBidUserId());
+							bidUser.addPoint(bidVo.getBidPrice());
+						}
+					});
+
+				bidDomainService.createAllBid(deletedAuction, bidVoList, userMap);
+			}
+
+			Product product = deletedAuction.getProduct();
+			product.delete();
+			productDomainService.deleteProductFromEs(product.getId());
+
+			redisTemplate.opsForZSet().remove(AUCTION_ENDING_PREFIX, auctionId);
+			redisTemplate.delete(AUCTION_PREFIX + auctionId);
+			redisTemplate.delete(BID_PREFIX + auctionId);
+
+		} finally {
+			if (auctionDeleteLock.isLocked() && auctionDeleteLock.isHeldByCurrentThread()) {
+				auctionDeleteLock.unlock();
+			}
+		}
+	}
+
+	/**
+	 * 어드민 경매 정보 수정
+	 *
+	 * <p>
+	 * 1. 경매 Vo 객체의 검증 메서드(`validateUpdatableByAdmin`)로 비즈니스 제약 체크<br>
+	 * 2. 수정값(시작가, 현재가, 종료시간 등) 적용<br>
+	 * 3. 변경된 AuctionVo를 레디스에 반영(Hash, ZSet 갱신)<br>
+	 * 4. DB/Elasticsearch 등 영속 데이터 동기화<br>
+	 * </p>
+	 *
+	 * @param auctionId 수정할 경매 ID
+	 * @param command   어드민이 입력한 수정 정보(시작가, 현재가, 종료시간 등)
+	 * @author 정석현
+	 */
+	public void updateAdminAuction(Long auctionId, AuctionAdminUpdateCommand command) {
+		String auctionKey = AUCTION_PREFIX + auctionId;
+		AuctionVo auctionVo = getAuctionVoElseThrow(auctionId);
+
+		auctionVo.validateUpdatableByAdmin(command);
+
+		auctionVo.updateByAdmin(command.startPrice(), command.currentPrice(), command.endTime());
+
+		Map<String, Object> auctionVoMap = objectMapper.convertValue(auctionVo, new TypeReference<>() {
+		});
+		redisTemplate.opsForHash().putAll(auctionKey, auctionVoMap);
+
+		if (command.endTime() != null) {
+			long score = command.endTime().atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
+			redisTemplate.opsForZSet().add(AUCTION_ENDING_PREFIX, auctionId, score);
+		}
+
+		auctionAdminDomainService.updateAuction(auctionId, command);
 	}
 
 	public void updateAuctionProductImages(Long auctionId, List<String> productImages) {

@@ -119,6 +119,7 @@ public class NotificationService {
 
 		} catch (Exception e) {
 			log.error("상품 구매 알림 실패 - productId={}, error={}", productId, e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 

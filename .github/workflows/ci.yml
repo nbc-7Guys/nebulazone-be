@@ -51,3 +51,5 @@ jobs:
 
       - name: Run tests
         run: ./gradlew clean test
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: test-key.json

@@ -6,18 +6,18 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.product.event.DeleteProductEvent;
+import nbc.chillguys.nebulazone.domain.product.event.ChangeToAuctionTypeEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 
 @RequiredArgsConstructor
 @Component
-public class DeleteProductEventListener {
+public class ChangedToAuctionTypeEventListener {
 
 	private final ProductDomainService productDomainService;
 
 	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void handleUpdateProduct(DeleteProductEvent event) {
-		productDomainService.deleteProductFromEs(event.productId());
+	public void handle(ChangeToAuctionTypeEvent event) {
+		productDomainService.saveProductToEs(event.product());
 	}
 }

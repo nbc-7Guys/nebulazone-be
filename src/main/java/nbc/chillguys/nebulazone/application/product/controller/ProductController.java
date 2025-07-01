@@ -131,7 +131,7 @@ public class ProductController {
 		@ImageFile @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles,
 		@PathVariable("productId") Long productId,
 		@AuthenticationPrincipal User user,
-		@Valid @RequestPart("product") UpdateImagesProductRequest request
+		@RequestPart("product") UpdateImagesProductRequest request
 	) {
 
 		ProductResponse response = productService.updateProductImages(productId, imageFiles, user,

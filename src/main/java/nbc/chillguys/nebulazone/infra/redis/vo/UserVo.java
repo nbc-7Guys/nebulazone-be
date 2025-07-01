@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.infra.redis.dto;
+package nbc.chillguys.nebulazone.infra.redis.vo;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,7 +10,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.domain.user.entity.UserStatus;
 
-public record UserDto(
+public record UserVo(
 	Long id,
 
 	String email,
@@ -37,8 +37,8 @@ public record UserDto(
 
 	LocalDateTime deletedAt
 ) {
-	public static UserDto from(User user) {
-		return new UserDto(
+	public static UserVo from(User user) {
+		return new UserVo(
 			user.getId(),
 			user.getEmail(),
 			user.getPassword(),
@@ -55,21 +55,21 @@ public record UserDto(
 		);
 	}
 
-	public static User toUser(UserDto userDto) {
+	public static User toUser(UserVo userVo) {
 		return new User(
-			userDto.id,
-			userDto.email,
-			userDto.password,
-			userDto.phone,
-			userDto.nickname,
-			userDto.profileImage,
-			userDto.point,
-			userDto.oAuthType,
-			userDto.oAuthId,
-			userDto.status,
-			userDto.roles,
-			userDto.addresses,
-			userDto.deletedAt
+			userVo.id,
+			userVo.email,
+			userVo.password,
+			userVo.phone,
+			userVo.nickname,
+			userVo.profileImage,
+			userVo.point,
+			userVo.oAuthType,
+			userVo.oAuthId,
+			userVo.status,
+			userVo.roles,
+			userVo.addresses,
+			userVo.deletedAt
 		);
 	}
 }
