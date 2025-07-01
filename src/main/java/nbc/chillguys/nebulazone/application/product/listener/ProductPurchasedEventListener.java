@@ -10,7 +10,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
-import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
+import nbc.chillguys.nebulazone.domain.product.event.ProductPurchasedEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
@@ -19,7 +19,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @RequiredArgsConstructor
 @Component
-public class PurchaseProductEventListener {
+public class ProductPurchasedEventListener {
 
 	private final ProductDomainService productDomainService;
 	private final TransactionDomainService transactionDomainService;
@@ -27,7 +27,7 @@ public class PurchaseProductEventListener {
 
 	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void handlePurchaseProduct(PurchaseProductEvent event) {
+	public void handle(ProductPurchasedEvent event) {
 		Product product = event.product();
 		productDomainService.markProductAsPurchased(product.getId());
 
