@@ -86,5 +86,28 @@ public class BidDomainService {
 	public Page<FindBidsByAuctionInfo> findBidsByAuctionId(Long auctionId, int page, int size) {
 		return bidRepository.findBidsWithUserByAuctionId(auctionId, page, size);
 	}
+
+	/**
+	 * 데이터베이스에 백업할 redis의 입찰 내역들
+	 *
+	 * @param bids 저장할 입찰 리스트
+	 * @author 전나겸
+	 */
+	@Transactional
+	public void saveAllBids(List<Bid> bids) {
+		bidRepository.saveAll(bids);
+	}
+
+	/**
+	 * 복구할 입찰 내역 조회
+	 *
+	 * @param auctionId 복구할 대상 경매 id
+	 * @return 복구한 입찰 리스트
+	 * @author 전나겸
+	 */
+	@Transactional(readOnly = true)
+	public List<Bid> findActiveBidsForRecovery(Long auctionId) {
+		return bidRepository.findActiveBidsByAuctionId(auctionId);
+	}
 }
 

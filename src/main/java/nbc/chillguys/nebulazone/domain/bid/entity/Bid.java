@@ -61,4 +61,8 @@ public class Bid extends BaseEntity {
 		this.status = BidStatus.CANCEL;
 	}
 
+	public Long getBidUserId() {
+		return user.getId();
+	}
+
 }
