@@ -11,7 +11,7 @@ Nebulazone은 클라우드 환경에서 효율적이고 확장 가능한 서비�
 
 ## 📖 ERD (Entity Relationship Diagram)
 
-![ERD](https://github.com/nbc-7Guys/.github/blob/26fbab7dc6eec5b77a4398b0788e22abe2da2300/images/erd.png)
+![ERD](https://github.com/nbc-7Guys/.github/blob/49b888a92c9f6628ccbb03a5bdca4a54ee9a99b3/images/erd.png)
 
 ---
 
