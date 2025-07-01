@@ -20,83 +20,90 @@ import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 @ExtendWith(MockitoExtension.class)
 class PointHistoryAdminServiceTest {
 
-    @Mock
-    private PointHistoryAdminDomainService pointHistoryAdminDomainService;
+	@Mock
+	private PointHistoryAdminDomainService pointHistoryAdminDomainService;
 
-    @Mock
-    private UserDomainService userDomainService;
+	@Mock
+	private UserDomainService userDomainService;
 
-    @InjectMocks
-    private PointHistoryAdminService pointHistoryAdminService;
+	@InjectMocks
+	private PointHistoryAdminService pointHistoryAdminService;
 
-    @Nested
-    @DisplayName("포인트 요청 승인")
-    class ApprovePointHistoryTest {
+	@Nested
+	@DisplayName("포인트 요청 승인")
+	class ApprovePointHistoryTest {
 
-        @Test
-        @DisplayName("성공: CHARGE 타입 포인트 요청 승인 시 상태 변경 및 포인트 충전")
-        void success_approvePointHistory_chargeType() {
-            // given
-            Long pointHistoryId = 1L;
-            Long userId = 2L;
-            Long price = 1000L;
+		@Test
+		@DisplayName("성공: CHARGE 타입 포인트 요청 승인 시 상태 변경 및 포인트 충전")
+		void success_approvePointHistory_chargeType() {
+			// given
+			Long pointHistoryId = 1L;
+			Long userId = 2L;
+			Long price = 1000L;
 
-            User user = mock(User.class);
-            given(user.getId()).willReturn(userId);
+			User user = mock(User.class);
+			given(user.getId()).willReturn(userId);
 
-            PointHistory pointHistory = mock(PointHistory.class);
-            given(pointHistory.getPointHistoryType()).willReturn(PointHistoryType.CHARGE);
-            given(pointHistory.getUser()).willReturn(user);
-            given(pointHistory.getPrice()).willReturn(price);
+			PointHistory pointHistory = mock(PointHistory.class);
+			given(pointHistory.getPointHistoryType()).willReturn(PointHistoryType.CHARGE);
+			given(pointHistory.getUser()).willReturn(user);
+			given(pointHistory.getPrice()).willReturn(price);
 
-            given(pointHistoryAdminDomainService.approvePointHistory(pointHistoryId))
-                .willReturn(pointHistory);
+			given(pointHistoryAdminDomainService.approvePointHistory(pointHistoryId))
+				.willReturn(pointHistory);
 
-            // when
-            pointHistoryAdminService.approvePointHistory(pointHistoryId);
+			// when
+			pointHistoryAdminService.approvePointHistory(pointHistoryId);
 
-            // then
-            verify(pointHistoryAdminDomainService).approvePointHistory(pointHistoryId);
-            verify(userDomainService).chargeUserPoint(any(UserPointChargeCommand.class));
-        }
+			// then
+			verify(pointHistoryAdminDomainService).approvePointHistory(pointHistoryId);
+			verify(userDomainService).chargeUserPoint(any(UserPointChargeCommand.class));
+		}
 
-        @Test
-        @DisplayName("성공: CHARGE 타입이 아닌 포인트 요청 승인 시 상태만 변경")
-        void success_approvePointHistory_nonChargeType() {
-            // given
-            Long pointHistoryId = 1L;
+		@Test
+		@DisplayName("성공: CHARGE 타입이 아닌 포인트 요청 승인 시 상태만 변경")
+		void success_approvePointHistory_nonChargeType() {
+			// given
+			Long pointHistoryId = 1L;
 
-            PointHistory pointHistory = mock(PointHistory.class);
-            given(pointHistory.getPointHistoryType()).willReturn(PointHistoryType.EXCHANGE);
+			// PointHistory와 User 모두 mock 생성
+			PointHistory pointHistory = mock(PointHistory.class);
+			User user = mock(User.class);
 
-            given(pointHistoryAdminDomainService.approvePointHistory(pointHistoryId))
-                .willReturn(pointHistory);
+			// mock에 리턴값 지정 (핵심!!)
+			given(pointHistory.getPointHistoryType()).willReturn(PointHistoryType.EXCHANGE);
+			given(pointHistory.getUser()).willReturn(user); // NPE 방지
+			given(pointHistory.getPrice()).willReturn(1000L); // 실제로 사용된다면 가격도 세팅
+			given(user.getId()).willReturn(1L);
 
-            // when
-            pointHistoryAdminService.approvePointHistory(pointHistoryId);
+			given(pointHistoryAdminDomainService.approvePointHistory(pointHistoryId))
+				.willReturn(pointHistory);
 
-            // then
-            verify(pointHistoryAdminDomainService).approvePointHistory(pointHistoryId);
-            verify(userDomainService, never()).chargeUserPoint(any(UserPointChargeCommand.class));
-        }
-    }
+			// when
+			pointHistoryAdminService.approvePointHistory(pointHistoryId);
 
-    @Nested
-    @DisplayName("포인트 요청 거절")
-    class RejectPointHistoryTest {
+			// then
+			verify(pointHistoryAdminDomainService).approvePointHistory(pointHistoryId);
+			verify(userDomainService, never()).chargeUserPoint(any(UserPointChargeCommand.class));
+		}
 
-        @Test
-        @DisplayName("성공: 포인트 요청 거절 시 상태 변경")
-        void success_rejectPointHistory() {
-            // given
-            Long pointHistoryId = 1L;
+		@Nested
+		@DisplayName("포인트 요청 거절")
+		class RejectPointHistoryTest {
 
-            // when
-            pointHistoryAdminService.rejectPointHistory(pointHistoryId);
+			@Test
+			@DisplayName("성공: 포인트 요청 거절 시 상태 변경")
+			void success_rejectPointHistory() {
+				// given
+				Long pointHistoryId = 1L;
 
-            // then
-            verify(pointHistoryAdminDomainService).rejectPointHistory(pointHistoryId);
-            verify(userDomainService, never()).chargeUserPoint(any(UserPointChargeCommand.class));
-        }
-    }
+				// when
+				pointHistoryAdminService.rejectPointHistory(pointHistoryId);
+
+				// then
+				verify(pointHistoryAdminDomainService).rejectPointHistory(pointHistoryId);
+				verify(userDomainService, never()).chargeUserPoint(any(UserPointChargeCommand.class));
+			}
+		}
+	}
 }

@@ -161,6 +161,10 @@ public class User extends BaseEntity {
 		this.point += point;
 	}
 
+	public void decreasePoint(Long point) {
+		this.point -= point;
+	}
+
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return this.roles.stream()
 			.map(role -> new SimpleGrantedAuthority(role.name()))
