@@ -107,8 +107,6 @@ frontend:
   url: ${FRONT_END_URL}
 
 gcp:
-  credentials:
-    location: ${GCP_KEY}
   storage:
     bucket: nbc-nebulazone
 
