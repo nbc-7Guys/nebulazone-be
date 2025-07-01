@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -31,12 +33,20 @@ import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
+import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
 import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("포인트 히스토리 어드민 컨트롤러 테스트")
 @Import({TestSecurityConfig.class, TestMockConfig.class})
-@WebMvcTest(PointHistoryAdminController.class)
+@WebMvcTest(
+	controllers = PointHistoryAdminController.class,
+	excludeFilters = {
+		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+			JwtAuthenticationFilter.class
+		})
+	}
+)
 class PointHistoryAdminControllerTest {
 
 	@Autowired

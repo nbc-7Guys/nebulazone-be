@@ -1,9 +1,7 @@
 package nbc.chillguys.nebulazone.application.auction.service;
 
-import static nbc.chillguys.nebulazone.application.auction.consts.AuctionConst.*;
-import static nbc.chillguys.nebulazone.application.bid.consts.BidConst.*;
-
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -11,8 +9,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -26,10 +22,12 @@ import nbc.chillguys.nebulazone.application.auction.dto.request.ManualEndAuction
 import nbc.chillguys.nebulazone.application.auction.dto.response.DeleteAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.EndAuctionResponse;
 import nbc.chillguys.nebulazone.application.auction.dto.response.FindSortTypeAuctionResponse;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionAdminUpdateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.entity.AuctionSortType;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
+import nbc.chillguys.nebulazone.domain.auction.service.AuctionAdminDomainService;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
@@ -43,8 +41,11 @@ import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
+import nbc.chillguys.nebulazone.infra.redis.constant.AuctionConstants;
+import nbc.chillguys.nebulazone.infra.redis.constant.BidConstants;
 import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
 import nbc.chillguys.nebulazone.infra.redis.dto.FindAllAuctionsDto;
+import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
 import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
@@ -56,9 +57,9 @@ public class AuctionRedisService {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ObjectMapper objectMapper;
-	private final RedissonClient redissonClient;
 
 	private final AuctionDomainService auctionDomainService;
+	private final AuctionAdminDomainService auctionAdminDomainService;
 	private final UserDomainService userDomainService;
 	private final BidDomainService bidDomainService;
 	private final TransactionDomainService transactionDomainService;
@@ -69,6 +70,7 @@ public class AuctionRedisService {
 	/**
 	 * redis 경매 생성<br>
 	 * hash로 auctionVo 저장, ZSet으로 경매 종료 순서를 관리
+	 *
 	 * @param redisAuctionDto 경매 생성을 위한 요청값
 	 * @author 전나겸
 	 */
@@ -79,7 +81,7 @@ public class AuctionRedisService {
 		User user = redisAuctionDto.user();
 		ProductEndTime productEndTime = redisAuctionDto.productEndTime();
 
-		String auctionKey = AUCTION_PREFIX + auction.getId();
+		String auctionKey = AuctionConstants.AUCTION_PREFIX + auction.getId();
 		AuctionVo auctionVo = AuctionVo.of(product, auction, user, List.of());
 
 		Map<String, Object> auctionVoMap = objectMapper.convertValue(auctionVo, new TypeReference<>() {
@@ -87,12 +89,13 @@ public class AuctionRedisService {
 		redisTemplate.opsForHash().putAll(auctionKey, auctionVoMap);
 
 		long endTimestamp = System.currentTimeMillis() / 1000 + productEndTime.getSeconds();
-		redisTemplate.opsForZSet().add(AUCTION_ENDING_PREFIX, auction.getId(), endTimestamp);
+		redisTemplate.opsForZSet().add(AuctionConstants.AUCTION_ENDING_PREFIX, auction.getId(), endTimestamp);
 
 	}
 
 	/**
-	 * 수동 낙찰<br>
+	 * 수동 낙찰
+	 *
 	 * @param auctionId 종료할 경매 id
 	 * @param loginUser 로그인 유저
 	 * @param request 낙찰 요청 reqeust
@@ -100,47 +103,124 @@ public class AuctionRedisService {
 	 * @author 전나겸
 	 */
 	@Transactional
+	@DistributedLock(key = "'auction:ending:lock:' + #auctionId")
 	public EndAuctionResponse manualEndAuction(Long auctionId, User loginUser, ManualEndAuctionRequest request) {
-		RLock auctionEndingLock = redissonClient.getLock(AUCTION_LOCK_ENDING_PREFIX + auctionId);
+
+		Map<Object, Object> auctionMap = redisTemplate.opsForHash()
+			.entries(AuctionConstants.AUCTION_PREFIX + auctionId);
+		AuctionVo auctionVo = objectMapper.convertValue(auctionMap, AuctionVo.class);
+
+		auctionVo.validNotAuctionOwner(loginUser);
+		auctionVo.validMismatchBidPrice(request.bidPrice());
+		auctionVo.validAuctionNotClosed();
+		auctionVo.validWonAuction();
+
+		Auction auction = auctionDomainService.manualEndAuction(auctionId, request.bidPrice());
+		Product wonAuctionProduct = auction.getProduct();
+		wonAuctionProduct.purchase();
+
+		User seller = wonAuctionProduct.getSeller();
+		seller.addPoint(auction.getCurrentPrice());
+
+		Set<Object> objects = redisTemplate.opsForZSet().range(BidConstants.BID_PREFIX + auctionId, 0, -1);
+
+		List<BidVo> bidVoList = Optional.ofNullable(objects)
+			.orElse(Set.of())
+			.stream()
+			.map(bid -> objectMapper.convertValue(bid, BidVo.class))
+			.peek(bidVo -> {
+				if (bidVo.getBidPrice().equals(auction.getCurrentPrice())
+					&& bidVo.getBidStatus().equals(BidStatus.BID.name())) {
+					bidVo.wonBid();
+				}
+			})
+			.toList();
+
+		BidVo wonBidVo = bidVoList.stream()
+			.filter(bidVo -> BidStatus.WON.name().equals(bidVo.getBidStatus()))
+			.findFirst()
+			.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
+
+		wonBidVo.validMismatchBidOwner(request.bidUserId());
+
+		List<Long> bidUserIds = bidVoList.stream()
+			.map(BidVo::getBidUserId)
+			.distinct()
+			.toList();
+
+		List<User> bidUsers = userDomainService.findActiveUserByIds(bidUserIds);
+
+		Map<Long, User> userMap = bidUsers.stream()
+			.collect(Collectors.toMap(User::getId, user -> user));
+
+		bidVoList.stream()
+			.filter(bidVo -> userMap.containsKey(bidVo.getBidUserId()))
+			.forEach(bidVo -> {
+
+				User bidUser = userMap.get(bidVo.getBidUserId());
+
+				if (BidStatus.WON.name().equals(bidVo.getBidStatus())) {
+					TransactionCreateCommand buyerTxCreateCommand = TransactionCreateCommand.of(bidUser,
+						UserType.BUYER, wonAuctionProduct, wonAuctionProduct.getTxMethod().name(),
+						auction.getCurrentPrice(), LocalDateTime.now());
+
+					transactionDomainService.createTransaction(buyerTxCreateCommand);
+
+				} else if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
+					bidUser.addPoint(bidVo.getBidPrice());
+				}
+			});
+
+		bidDomainService.createAllBid(auction, bidVoList, userMap);
+
+		TransactionCreateCommand sellerTxCreateCommand = TransactionCreateCommand.of(seller, UserType.SELLER,
+			wonAuctionProduct, wonAuctionProduct.getTxMethod().name(),
+			auction.getCurrentPrice(), LocalDateTime.now());
+
+		transactionDomainService.createTransaction(sellerTxCreateCommand);
+
+		redisTemplate.opsForZSet().remove(AuctionConstants.AUCTION_ENDING_PREFIX, auctionId);
+		redisTemplate.delete(AuctionConstants.AUCTION_PREFIX + auctionId);
+		redisTemplate.delete(BidConstants.BID_PREFIX + auctionId);
+
+		EndAuctionResponse response = EndAuctionResponse.of(auction, wonBidVo, wonAuctionProduct);
 
 		try {
-			acquireLockOrThrow(auctionEndingLock);
+			redisMessagePublisher.publishAuctionUpdate(auctionId, "won", response);
+		} catch (Exception e) {
+			log.error("수동 낙찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
+		}
 
-			Map<Object, Object> auctionMap = redisTemplate.opsForHash().entries(AUCTION_PREFIX + auctionId);
-			AuctionVo auctionVo = objectMapper.convertValue(auctionMap, AuctionVo.class);
+		return response;
 
-			auctionVo.validNotAuctionOwner(loginUser);
-			auctionVo.validMismatchBidPrice(request.bidPrice());
-			auctionVo.validAuctionNotClosed();
-			auctionVo.validWonAuction();
+	}
 
-			Auction auction = auctionDomainService.manualEndAuction(auctionId, request.bidPrice());
-			Product wonAuctionProduct = auction.getProduct();
-			wonAuctionProduct.purchase();
+	/**
+	 * 내 경매 삭제
+	 * @param auctionId 삭제할 경매 id
+	 * @param loginUser 로그인 유저
+	 * @return 경매 삭제 응답 값
+	 * @author 전나겸
+	 */
+	@Transactional
+	@DistributedLock(key = "'auction:delete:lock:' + #auctionId")
+	public DeleteAuctionResponse deleteAuction(Long auctionId, User loginUser) {
 
-			User seller = wonAuctionProduct.getSeller();
-			seller.addPoint(auction.getCurrentPrice());
+		Map<Object, Object> entries = redisTemplate.opsForHash()
+			.entries(AuctionConstants.AUCTION_PREFIX + auctionId);
+		AuctionVo auctionVo = objectMapper.convertValue(entries, AuctionVo.class);
 
-			Set<Object> objects = redisTemplate.opsForZSet().range(BID_PREFIX + auctionId, 0, -1);
+		auctionVo.validNotAuctionOwner(loginUser);
+		Auction deletedAuction = auctionDomainService.deleteAuction(auctionId);
+
+		if (auctionVo.getCurrentPrice() >= auctionVo.getStartPrice()) {
+			Set<Object> objects = redisTemplate.opsForZSet().range(BidConstants.BID_PREFIX + auctionId, 0, -1);
 
 			List<BidVo> bidVoList = Optional.ofNullable(objects)
 				.orElse(Set.of())
 				.stream()
 				.map(bid -> objectMapper.convertValue(bid, BidVo.class))
-				.peek(bidVo -> {
-					if (bidVo.getBidPrice().equals(auction.getCurrentPrice())
-						&& bidVo.getBidStatus().equals(BidStatus.BID.name())) {
-						bidVo.wonBid();
-					}
-				})
 				.toList();
-
-			BidVo wonBidVo = bidVoList.stream()
-				.filter(bidVo -> BidStatus.WON.name().equals(bidVo.getBidStatus()))
-				.findFirst()
-				.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
-
-			wonBidVo.validMismatchBidOwner(request.bidUserId());
 
 			List<Long> bidUserIds = bidVoList.stream()
 				.map(BidVo::getBidUserId)
@@ -155,112 +235,25 @@ public class AuctionRedisService {
 			bidVoList.stream()
 				.filter(bidVo -> userMap.containsKey(bidVo.getBidUserId()))
 				.forEach(bidVo -> {
-
-					User bidUser = userMap.get(bidVo.getBidUserId());
-
-					if (BidStatus.WON.name().equals(bidVo.getBidStatus())) {
-						TransactionCreateCommand buyerTxCreateCommand = TransactionCreateCommand.of(bidUser,
-							UserType.BUYER, wonAuctionProduct, wonAuctionProduct.getTxMethod().name(),
-							auction.getCurrentPrice(), LocalDateTime.now());
-
-						transactionDomainService.createTransaction(buyerTxCreateCommand);
-
-					} else if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
+					if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
+						User bidUser = userMap.get(bidVo.getBidUserId());
 						bidUser.addPoint(bidVo.getBidPrice());
 					}
 				});
 
-			bidDomainService.createAllBid(auction, bidVoList, userMap);
-
-			TransactionCreateCommand sellerTxCreateCommand = TransactionCreateCommand.of(seller, UserType.SELLER,
-				wonAuctionProduct, wonAuctionProduct.getTxMethod().name(),
-				auction.getCurrentPrice(), LocalDateTime.now());
-
-			transactionDomainService.createTransaction(sellerTxCreateCommand);
-
-			redisTemplate.opsForZSet().remove(AUCTION_ENDING_PREFIX, auctionId);
-			redisTemplate.delete(AUCTION_PREFIX + auctionId);
-			redisTemplate.delete(BID_PREFIX + auctionId);
-
-			EndAuctionResponse response = EndAuctionResponse.of(auction, wonBidVo, wonAuctionProduct);
-
-			try {
-				redisMessagePublisher.publishAuctionUpdate(auctionId, "won", response);
-			} catch (Exception e) {
-				log.error("수동 낙찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
-			}
-
-			return response;
-
-		} finally {
-			auctionEndingLock.unlock();
+			bidDomainService.createAllBid(deletedAuction, bidVoList, userMap);
 		}
-	}
 
-	/**
-	 * 내 경매 삭제
-	 * @param auctionId 삭제할 경매 id
-	 * @param loginUser 로그인 유저
-	 * @return 경매 삭제 응답 값
-	 * @author 전나겸
-	 */
-	@Transactional
-	public DeleteAuctionResponse deleteAuction(Long auctionId, User loginUser) {
-		RLock auctionDelete = redissonClient.getLock(AUCTION_LOCK_DELETE_PREFIX + auctionId);
+		Product product = deletedAuction.getProduct();
+		product.delete();
 
-		try {
-			acquireLockOrThrow(auctionDelete);
+		productDomainService.deleteProductFromEs(product.getId());
 
-			Map<Object, Object> entries = redisTemplate.opsForHash().entries(AUCTION_PREFIX + auctionId);
-			AuctionVo auctionVo = objectMapper.convertValue(entries, AuctionVo.class);
+		redisTemplate.opsForZSet().remove(AuctionConstants.AUCTION_ENDING_PREFIX, auctionId);
+		redisTemplate.delete(AuctionConstants.AUCTION_PREFIX + auctionId);
+		redisTemplate.delete(BidConstants.BID_PREFIX + auctionId);
 
-			auctionVo.validNotAuctionOwner(loginUser);
-			Auction deletedAuction = auctionDomainService.deleteAuction(auctionId);
-
-			if (auctionVo.getCurrentPrice() >= auctionVo.getStartPrice()) {
-				Set<Object> objects = redisTemplate.opsForZSet().range(BID_PREFIX + auctionId, 0, -1);
-
-				List<BidVo> bidVoList = Optional.ofNullable(objects)
-					.orElse(Set.of())
-					.stream()
-					.map(bid -> objectMapper.convertValue(bid, BidVo.class))
-					.toList();
-
-				List<Long> bidUserIds = bidVoList.stream()
-					.map(BidVo::getBidUserId)
-					.distinct()
-					.toList();
-
-				List<User> bidUsers = userDomainService.findActiveUserByIds(bidUserIds);
-
-				Map<Long, User> userMap = bidUsers.stream()
-					.collect(Collectors.toMap(User::getId, user -> user));
-
-				bidVoList.stream()
-					.filter(bidVo -> userMap.containsKey(bidVo.getBidUserId()))
-					.forEach(bidVo -> {
-						if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
-							User bidUser = userMap.get(bidVo.getBidUserId());
-							bidUser.addPoint(bidVo.getBidPrice());
-						}
-					});
-
-				bidDomainService.createAllBid(deletedAuction, bidVoList, userMap);
-			}
-
-			Product product = deletedAuction.getProduct();
-			product.delete();
-
-			productDomainService.deleteProductFromEs(product.getId());
-
-			redisTemplate.opsForZSet().remove(AUCTION_ENDING_PREFIX, auctionId);
-			redisTemplate.delete(AUCTION_PREFIX + auctionId);
-			redisTemplate.delete(BID_PREFIX + auctionId);
-
-			return DeleteAuctionResponse.of(deletedAuction.getId(), product.getId());
-		} finally {
-			auctionDelete.unlock();
-		}
+		return DeleteAuctionResponse.of(deletedAuction.getId(), product.getId());
 
 	}
 
@@ -273,7 +266,7 @@ public class AuctionRedisService {
 	 */
 	public FindSortTypeAuctionResponse findAuctionsBySortType(AuctionSortType sortType) {
 
-		String findAuctionsBySortTypeKey = AUCTION_FIND_SORT_TYPE_PREFIX + sortType.name();
+		String findAuctionsBySortTypeKey = AuctionConstants.AUCTION_FIND_SORT_TYPE_PREFIX + sortType.name();
 
 		Object object = redisTemplate.opsForValue().get(findAuctionsBySortTypeKey);
 
@@ -288,7 +281,7 @@ public class AuctionRedisService {
 
 		FindSortTypeAuctionResponse response = switch (sortType) {
 			case CLOSING -> {
-				Set<Object> objects = redisTemplate.opsForZSet().range(AUCTION_ENDING_PREFIX, 0, 4);
+				Set<Object> objects = redisTemplate.opsForZSet().range(AuctionConstants.AUCTION_ENDING_PREFIX, 0, 4);
 
 				List<FindAllAuctionsDto> findAuctionsByClosing = Optional.ofNullable(objects)
 					.orElse(Set.of())
@@ -305,7 +298,7 @@ public class AuctionRedisService {
 			}
 
 			case POPULAR -> {
-				Set<Object> objects = redisTemplate.opsForZSet().range(AUCTION_ENDING_PREFIX, 0, -1);
+				Set<Object> objects = redisTemplate.opsForZSet().range(AuctionConstants.AUCTION_ENDING_PREFIX, 0, -1);
 
 				List<FindAllAuctionsDto> findAuctionsByPopular = Optional.ofNullable(objects)
 					.orElse(Set.of())
@@ -324,7 +317,8 @@ public class AuctionRedisService {
 			}
 		};
 
-		redisTemplate.opsForValue().set(findAuctionsBySortTypeKey, response, AUCTION_FIND_SORT_TYPE_TTL);
+		redisTemplate.opsForValue()
+			.set(findAuctionsBySortTypeKey, response, AuctionConstants.AUCTION_FIND_SORT_TYPE_TTL);
 		return response;
 	}
 
@@ -337,7 +331,7 @@ public class AuctionRedisService {
 	 */
 	public AuctionVo getAuctionVoElseThrow(Long auctionId) {
 		Map<Object, Object> auctionMap = redisTemplate.opsForHash()
-			.entries(AUCTION_PREFIX + auctionId);
+			.entries(AuctionConstants.AUCTION_PREFIX + auctionId);
 
 		if (auctionMap.isEmpty()) {
 			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND);
@@ -354,7 +348,7 @@ public class AuctionRedisService {
 	 */
 	public AuctionVo findRedisAuctionVo(Long auctionId) {
 		Map<Object, Object> auctionMap = redisTemplate.opsForHash()
-			.entries(AUCTION_PREFIX + auctionId);
+			.entries(AuctionConstants.AUCTION_PREFIX + auctionId);
 
 		if (auctionMap.isEmpty()) {
 			return null;
@@ -370,14 +364,14 @@ public class AuctionRedisService {
 	 * @author 전나겸
 	 */
 	public void updateAuctionCurrentPrice(Long auctionId, Long bidPrice) {
-		String auctionKey = AUCTION_PREFIX + auctionId;
+		String auctionKey = AuctionConstants.AUCTION_PREFIX + auctionId;
 
 		redisTemplate.opsForHash().put(auctionKey, "currentPrice", bidPrice);
 
 	}
 
 	public List<Long> findAllAuctionVoIds() {
-		Set<Object> objects = redisTemplate.opsForZSet().range(AUCTION_ENDING_PREFIX, 0, -1);
+		Set<Object> objects = redisTemplate.opsForZSet().range(AuctionConstants.AUCTION_ENDING_PREFIX, 0, -1);
 
 		return Optional.ofNullable(objects)
 			.orElse(Set.of())
@@ -395,22 +389,119 @@ public class AuctionRedisService {
 	 */
 	public Long calculateAuctionBidCount(Long auctionId) {
 		Set<Object> objects = redisTemplate.opsForZSet()
-			.range(BID_PREFIX + auctionId, 0, -1);
+			.range(BidConstants.BID_PREFIX + auctionId, 0, -1);
 
 		return (long)Optional.ofNullable(objects)
 			.orElse(Set.of())
 			.size();
 	}
 
+	/**
+	 * 어드민 경매 삭제 처리
+	 *
+	 * <p>
+	 * 1. Redisson 분산락을 이용해 동시 삭제 방지<br>
+	 * 2. 경매 도메인에서 Auction 삭제 처리 및 관련 엔티티 상태 반영<br>
+	 * 3. 레디스에서 해당 경매의 입찰 이력(BID ZSet) 조회 후,
+	 *    - 입찰자 포인트 반환 (진행 중인 입찰에 한함)
+	 *    - 입찰 이력 생성 및 저장
+	 * 4. 연관 상품(Product)도 함께 논리 삭제 및 Elasticsearch에서 삭제<br>
+	 * 5. 레디스에서 경매/입찰 데이터 정리<br>
+	 * </p>
+	 *
+	 * @param auctionId 삭제할 경매 ID
+	 * @author 정석현
+	 */
+	@Transactional
+	@DistributedLock(key = "'auction:delete:admin:lock:' + #auctionId")
+	public void deleteAdminAuction(Long auctionId) {
+
+		Auction deletedAuction = auctionDomainService.deleteAuction(auctionId);
+
+		Set<Object> bidObjects = redisTemplate.opsForZSet().range(BidConstants.BID_PREFIX + auctionId, 0, -1);
+
+		if (bidObjects != null && !bidObjects.isEmpty()) {
+			List<BidVo> bidVoList = bidObjects.stream()
+				.map(bid -> objectMapper.convertValue(bid, BidVo.class))
+				.toList();
+
+			List<Long> bidUserIds = bidVoList.stream()
+				.map(BidVo::getBidUserId)
+				.distinct()
+				.toList();
+
+			List<User> bidUsers = userDomainService.findActiveUserByIds(bidUserIds);
+
+			Map<Long, User> userMap = bidUsers.stream()
+				.collect(Collectors.toMap(User::getId, user -> user));
+
+			bidVoList.stream()
+				.filter(bidVo -> userMap.containsKey(bidVo.getBidUserId()))
+				.forEach(bidVo -> {
+					if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
+						User bidUser = userMap.get(bidVo.getBidUserId());
+						bidUser.addPoint(bidVo.getBidPrice());
+					}
+				});
+
+			bidDomainService.createAllBid(deletedAuction, bidVoList, userMap);
+		}
+
+		Product product = deletedAuction.getProduct();
+		product.delete();
+		productDomainService.deleteProductFromEs(product.getId());
+
+		redisTemplate.opsForZSet().remove(AuctionConstants.AUCTION_ENDING_PREFIX, auctionId);
+		redisTemplate.delete(AuctionConstants.AUCTION_PREFIX + auctionId);
+		redisTemplate.delete(BidConstants.BID_PREFIX + auctionId);
+
+	}
+
+	/**
+	 * 어드민 경매 정보 수정
+	 *
+	 * <p>
+	 * 1. 경매 Vo 객체의 검증 메서드(`validateUpdatableByAdmin`)로 비즈니스 제약 체크<br>
+	 * 2. 수정값(시작가, 현재가, 종료시간 등) 적용<br>
+	 * 3. 변경된 AuctionVo를 레디스에 반영(Hash, ZSet 갱신)<br>
+	 * 4. DB/Elasticsearch 등 영속 데이터 동기화<br>
+	 * </p>
+	 *
+	 * @param auctionId 수정할 경매 ID
+	 * @param command   어드민이 입력한 수정 정보(시작가, 현재가, 종료시간 등)
+	 * @author 정석현
+	 */
+	public void updateAdminAuction(Long auctionId, AuctionAdminUpdateCommand command) {
+		String auctionKey = AuctionConstants.AUCTION_PREFIX + auctionId;
+		AuctionVo auctionVo = getAuctionVoElseThrow(auctionId);
+
+		auctionVo.validateUpdatableByAdmin(command);
+
+		auctionVo.updateByAdmin(command.startPrice(), command.currentPrice(), command.endTime());
+
+		Map<String, Object> auctionVoMap = objectMapper.convertValue(auctionVo, new TypeReference<>() {
+		});
+		redisTemplate.opsForHash().putAll(auctionKey, auctionVoMap);
+
+		if (command.endTime() != null) {
+			long score = command.endTime().atZone(ZoneId.of("Asia/Seoul")).toEpochSecond();
+			redisTemplate.opsForZSet().add(AuctionConstants.AUCTION_ENDING_PREFIX, auctionId, score);
+		}
+
+		auctionAdminDomainService.updateAuction(auctionId, command);
+	}
+
+	/**
+	 * 특졍 경매의 이미지 url 수정
+	 *
+	 * @param auctionId 대상 경매 id
+	 * @param productImages 경매 상품 url 리스트
+	 * @author 전나겸
+	 */
 	public void updateAuctionProductImages(Long auctionId, List<String> productImages) {
-		String auctionKey = AUCTION_PREFIX + auctionId;
+		String auctionKey = AuctionConstants.AUCTION_PREFIX + auctionId;
 
 		redisTemplate.opsForHash().put(auctionKey, "productImageUrls", productImages);
 	}
 
-	private void acquireLockOrThrow(RLock auctionLock) {
-		if (!auctionLock.tryLock()) {
-			throw new AuctionException(AuctionErrorCode.AUCTION_PROCESSING_BUSY);
-		}
-	}
 }

@@ -10,6 +10,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,12 +29,20 @@ import nbc.chillguys.nebulazone.application.auth.dto.response.SignInResponse;
 import nbc.chillguys.nebulazone.application.auth.service.AuthService;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
 import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("auth 컨트롤러 단위 테스트")
 @Import({TestSecurityConfig.class, TestMockConfig.class})
-@WebMvcTest(AuthController.class)
+@WebMvcTest(
+	controllers = AuthController.class,
+	excludeFilters = {
+		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+			JwtAuthenticationFilter.class
+		})
+	}
+)
 class AuthControllerTest {
 	@MockitoBean
 	private AuthService authService;

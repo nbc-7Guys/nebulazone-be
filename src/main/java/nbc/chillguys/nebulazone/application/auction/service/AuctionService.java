@@ -25,6 +25,7 @@ public class AuctionService {
 	/**
 	 * 경매 상세 조회<br>
 	 * redis에서 먼저 살아있는 경매 데이터를 조회 후 있으면 바로 반환, 없다면 RDB에서 종료된 경매를 조회 후 반환
+	 *
 	 * @param auctionId 조회할 경매
 	 * @return 경매 상세조회 응답 값
 	 * @author 전나겸
@@ -39,7 +40,7 @@ public class AuctionService {
 		}
 
 		Bid highestPriceBid = bidDomainService.findHighBidByAuction(auctionId);
-		AuctionFindDetailInfo auctionFindDetailInfo = auctionDomainService.findAuction(auctionId);
+		AuctionFindDetailInfo auctionFindDetailInfo = auctionDomainService.findAuctionDetailInfoByAuctionId(auctionId);
 
 		return FindDetailAuctionResponse.of(auctionFindDetailInfo, highestPriceBid);
 	}

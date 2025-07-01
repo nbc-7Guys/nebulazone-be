@@ -26,7 +26,7 @@ public record CreateProductRequest(
 	}
 
 	public ProductEndTime getProductEndTime() {
-		return ProductEndTime.of(endTime);
+		return ProductEndTime.from(endTime);
 	}
 
 }

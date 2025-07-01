@@ -7,12 +7,14 @@ import java.util.Objects;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionAdminUpdateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionErrorCode;
 import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.entity.ProductImage;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Getter
@@ -45,8 +47,33 @@ public class AuctionVo {
 			product.isSold(),
 			user.getId(),
 			user.getNickname(),
-			user.getNickname(),
+			user.getEmail(),
 			productImageUrls
+		);
+	}
+
+	public static AuctionVo fromAuction(Auction auction) {
+		Product product = auction.getProduct();
+		User seller = product.getSeller();
+
+		List<String> imageUrls = product.getProductImages().stream()
+			.map(ProductImage::getUrl)
+			.toList();
+
+		return new AuctionVo(
+			auction.getId(),
+			auction.getStartPrice(),
+			auction.getCurrentPrice(),
+			auction.getEndTime(),
+			auction.isWon(),
+			auction.getCreatedAt(),
+			product.getId(),
+			product.getName(),
+			product.isSold(),
+			seller.getId(),
+			seller.getNickname(),
+			seller.getEmail(),
+			imageUrls
 		);
 	}
 
@@ -97,4 +124,33 @@ public class AuctionVo {
 			throw new AuctionException(AuctionErrorCode.AUCTION_NOT_OWNER);
 		}
 	}
+
+	public void validateUpdatableByAdmin(AuctionAdminUpdateCommand command) {
+		validAuctionNotClosed();
+
+		validWonAuction();
+
+		if (command.startPrice() != null && command.startPrice() <= 0) {
+			throw new AuctionException(AuctionErrorCode.INVALID_START_PRICE);
+		}
+		if (command.currentPrice() != null && command.currentPrice() < 0) {
+			throw new AuctionException(AuctionErrorCode.INVALID_CURRENT_PRICE);
+		}
+		if (command.endTime() != null && command.endTime().isBefore(LocalDateTime.now())) {
+			throw new AuctionException(AuctionErrorCode.AUCTION_END_TIME_INVALID);
+		}
+	}
+
+	public void updateByAdmin(Long startPrice, Long currentPrice, LocalDateTime endTime) {
+		if (startPrice != null) {
+			this.startPrice = startPrice;
+		}
+		if (currentPrice != null) {
+			this.currentPrice = currentPrice;
+		}
+		if (endTime != null) {
+			this.endTime = endTime;
+		}
+	}
+
 }

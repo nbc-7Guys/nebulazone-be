@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
-import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
 import nbc.chillguys.nebulazone.application.product.dto.request.ChangeToAuctionTypeRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.request.UpdateProductRequest;
@@ -37,9 +36,9 @@ import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.product.event.ChangeToAuctionTypeEvent;
-import nbc.chillguys.nebulazone.domain.product.event.DeleteProductEvent;
-import nbc.chillguys.nebulazone.domain.product.event.PurchaseProductEvent;
-import nbc.chillguys.nebulazone.domain.product.event.UpdateProductEvent;
+import nbc.chillguys.nebulazone.domain.product.event.ProductDeletedEvent;
+import nbc.chillguys.nebulazone.domain.product.event.ProductPurchasedEvent;
+import nbc.chillguys.nebulazone.domain.product.event.ProductUpdatedEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -90,7 +89,7 @@ public class ProductService {
 		ProductUpdateCommand command = request.toCommand(productId, userId, catalogId);
 		Product updatedProduct = productDomainService.updateProduct(command);
 
-		eventPublisher.publishEvent(new UpdateProductEvent(updatedProduct));
+		eventPublisher.publishEvent(new ProductUpdatedEvent(updatedProduct));
 
 		return ProductResponse.from(updatedProduct);
 	}
@@ -122,7 +121,7 @@ public class ProductService {
 			auction.delete();
 		}
 
-		eventPublisher.publishEvent(new DeleteProductEvent(productId));
+		eventPublisher.publishEvent(new ProductDeletedEvent(productId));
 
 		return DeleteProductResponse.from(productId);
 	}
@@ -143,7 +142,7 @@ public class ProductService {
 		product.getSeller().addPoint(product.getPrice());
 
 		LocalDateTime purchasedAt = LocalDateTime.now();
-		eventPublisher.publishEvent(new PurchaseProductEvent(user, product, purchasedAt));
+		eventPublisher.publishEvent(new ProductPurchasedEvent(user, product, purchasedAt));
 
 		return PurchaseProductResponse.from(product, purchasedAt);
 	}
@@ -172,7 +171,12 @@ public class ProductService {
 	public ProductResponse updateProductImages(Long productId, List<MultipartFile> imageFiles, User user,
 		List<String> remainImageUrls) {
 
-		List<String> productImageUrs = new ArrayList<>(remainImageUrls);
+		List<String> productImageUrs = new ArrayList<>();
+
+		if (remainImageUrls != null) {
+			productImageUrs.addAll(remainImageUrls);
+		}
+
 		boolean hasImage = imageFiles != null && !imageFiles.isEmpty();
 		if (hasImage) {
 			List<String> newImageUrls = imageFiles.stream()

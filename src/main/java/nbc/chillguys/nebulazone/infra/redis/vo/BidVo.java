@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import nbc.chillguys.nebulazone.domain.bid.entity.Bid;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
@@ -60,6 +61,19 @@ public class BidVo {
 		);
 	}
 
+	public static BidVo fromBid(Bid bid) {
+		return new BidVo(
+			UUID.randomUUID().toString(),
+			bid.getUser().getId(),
+			bid.getUser().getNickname(),
+			bid.getUser().getEmail(),
+			bid.getPrice(),
+			bid.getAuction().getId(),
+			bid.getStatus().name(),
+			bid.getCreatedAt()
+		);
+	}
+
 	public void cancelBid() {
 		this.bidStatus = BidStatus.CANCEL.name();
 		this.bidCreatedAt = LocalDateTime.now();
@@ -98,6 +112,10 @@ public class BidVo {
 
 	public void wonBid() {
 		this.bidStatus = BidStatus.WON.name();
+	}
+
+	public void updateStatus(String status) {
+		this.bidStatus = status;
 	}
 
 }

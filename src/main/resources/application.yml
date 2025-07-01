@@ -21,7 +21,7 @@ spring:
         show_sql: false
         format_sql: true
         use_sql_comments: true
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
 
   data:
     redis:
@@ -69,7 +69,7 @@ spring:
             user-name-attribute: response
 
   elasticsearch:
-    uris: ${ES_URI:http://localhost:9200}
+    uris: http://localhost:9200
 
 jwt:
   secret:
@@ -77,24 +77,20 @@ jwt:
 
   token:
     access:
-      second: 60
-      minute: 60
-      hour: 12
+      validity: 1d
     refresh:
-      second: 60
-      minute: 60
-      hour: 24
+      validity: 2d
 
 management:
+  server:
+    port: 9091
+    address: 0.0.0.0
   endpoints:
     web:
       exposure:
         include:
           - prometheus
           - health
-  endpoint:
-    prometheus:
-      access: unrestricted
   prometheus:
     metrics:
       export:
@@ -104,13 +100,15 @@ toss:
   secret-key: ${TOSS_SECRET_KEY}
 
 frontend:
-  url: ${FRONT_END_URL}
+  url: http://localhost:5173
 
 gcp:
-  credentials:
-    location: ${GCP_KEY}
   storage:
     bucket: nbc-nebulazone
 
 security:
   logstash-key: ${LOGSTASH_KEY}
+
+springdoc:
+  server:
+    url: http://localhost:8080

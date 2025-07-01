@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -29,12 +31,20 @@ import nbc.chillguys.nebulazone.application.product.service.ProductService;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
 import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})
 @DisplayName("상품 컨트롤러 단위 테스트")
-@WebMvcTest(ProductController.class)
+@WebMvcTest(
+	controllers = ProductController.class,
+	excludeFilters = {
+		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+			JwtAuthenticationFilter.class
+		})
+	}
+)
 class ProductControllerTest {
 	@MockitoBean
 	private ProductService productService;

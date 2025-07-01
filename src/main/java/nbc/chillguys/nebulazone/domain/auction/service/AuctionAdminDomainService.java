@@ -61,6 +61,7 @@ public class AuctionAdminDomainService {
 	 * @throws AuctionException 경매가 존재하지 않을 때 발생
 	 * @author 정석현
 	 */
+	@Transactional
 	public void deleteAuction(Long auctionId) {
 		Auction auction = findByAuctionById(auctionId);
 		auction.delete(); // 소프트 딜리트: deleted=true, deletedAt=now
@@ -71,15 +72,17 @@ public class AuctionAdminDomainService {
 	 * 소프트 딜리트된 경매장을 복구합니다.
 	 *
 	 * @param auctionId 복구 대상 경매 ID
+	 * @return 복구된 경매
 	 * @throws AuctionException 경매가 존재하지 않을 때 발생
 	 * @author 정석현
 	 */
 	@Transactional
-	public void restoreAuction(Long auctionId) {
+	public Auction restoreAuction(Long auctionId) {
 		Auction auction = findByAuctionById(auctionId);
 		auction.restore();
 		Product product = auction.getProduct();
 		productDomainService.saveProductToEs(product);
+		return auction;
 	}
 
 	/**

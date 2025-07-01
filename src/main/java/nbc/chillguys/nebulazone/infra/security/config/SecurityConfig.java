@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,11 +17,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.infra.oauth.handler.OAuth2SuccessHandler;
 import nbc.chillguys.nebulazone.infra.oauth.service.OAuthService;
-import nbc.chillguys.nebulazone.infra.security.JwtUtil;
 import nbc.chillguys.nebulazone.infra.security.filter.BanCheckFilter;
 import nbc.chillguys.nebulazone.infra.security.filter.CustomAuthenticationEntryPoint;
 import nbc.chillguys.nebulazone.infra.security.filter.ExceptionLoggingFilter;
@@ -27,6 +27,8 @@ import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@Profile("prod")
+@RequiredArgsConstructor
 public class SecurityConfig {
 	private final CustomAuthenticationEntryPoint entryPoint;
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -34,21 +36,26 @@ public class SecurityConfig {
 	private final OAuth2SuccessHandler oAuth2SuccessHandler;
 	private final ExceptionLoggingFilter exceptionLoggingFilter;
 	private final BanCheckFilter banCheckFilter;
+	private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
-	public SecurityConfig(ObjectMapper objectMapper, JwtUtil jwtUtil, OAuthService oAuthService,
-		OAuth2SuccessHandler oAuth2SuccessHandler, ExceptionLoggingFilter exceptionLoggingFilter,
-		BanCheckFilter banCheckFilter) {
-		this.entryPoint = new CustomAuthenticationEntryPoint(objectMapper);
-		this.jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtil, entryPoint);
-		this.oAuthService = oAuthService;
-		this.oAuth2SuccessHandler = oAuth2SuccessHandler;
-		this.exceptionLoggingFilter = exceptionLoggingFilter;
-		this.banCheckFilter = banCheckFilter;
+	@Bean
+	@Order(1)
+	public SecurityFilterChain managementSecurityFilterChain(HttpSecurity http) throws Exception {
+		return http
+			.securityMatcher("/actuator/**")
+			.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
+				.anyRequest().denyAll()
+			)
+			.csrf(AbstractHttpConfigurer::disable)
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.build();
 	}
 
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-		return httpSecurity
+	@Order(2)
+	public SecurityFilterChain appSecurityFilterChain(HttpSecurity http) throws Exception {
+		return http
 			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.csrf(AbstractHttpConfigurer::disable)
@@ -61,9 +68,6 @@ public class SecurityConfig {
 					"/swagger-resources/**",
 					"/favicon.ico",
 					"/error",
-					"/actuator/**",
-					"/metrics/**",
-					"/api/v1/**",
 					"/ws/**",
 					"/ws",
 					"/chat/**",
@@ -76,46 +80,36 @@ public class SecurityConfig {
 					"/auth/reissue",
 					"/oauth2/**"
 				).permitAll()
-				.requestMatchers("/admin/**").hasRole("ADMIN") // 어드민 전용
+				.requestMatchers("/admin/**").hasRole("ADMIN")
 				.requestMatchers(
 					HttpMethod.GET,
 					"/auctions/**",
 					"/catalogs/**",
 					"/products/**"
 				).permitAll()
-				.anyRequest().authenticated())
+				.anyRequest().authenticated()
+			)
 			.oauth2Login(oauth2 -> oauth2
-				.userInfoEndpoint(userInfo -> userInfo
-					.userService(oAuthService))
+				.userInfoEndpoint(userInfo -> userInfo.userService(oAuthService))
 				.successHandler(oAuth2SuccessHandler)
 				.authorizationEndpoint(authorization -> authorization
-					.authorizationRequestRepository(new HttpCookieOAuth2AuthorizationRequestRepository())
+					.authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
 				)
 			)
-			.exceptionHandling(exception ->
-				exception.authenticationEntryPoint(entryPoint))
-			.addFilterBefore(banCheckFilter, UsernamePasswordAuthenticationFilter.class)
-			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+			.exceptionHandling(exception -> exception.authenticationEntryPoint(entryPoint))
 			.addFilterBefore(exceptionLoggingFilter, UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(banCheckFilter, UsernamePasswordAuthenticationFilter.class)
 			.build();
 	}
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of(
-			"http://127.0.0.1:8080",    // 최종 배포 후 삭제
-			"http://localhost:8080",    // 최종 배포 후 삭제
-			"http://127.0.0.1:5173",    // 최종 배포 후 삭제
-			"http://localhost:5173",    // 최종 배포 후 삭제
-			"http://34.64.102.202:8080",    // 최종 배포 후 삭제
-			"http://34.64.102.202:5173",    // 최종 배포 후 삭제
-			"https://nebulazone-bz7n3o4r7-uguls-projects.vercel.app",
+		configuration.setAllowedOriginPatterns(List.of(
+			"https://nebulazone-*-uguls-projects.vercel.app",
 			"https://nebulazone-fe.vercel.app",
-			"https://nebulazone.store",
-			"https://www.nebulazone.store",
-			"https://api2.nebulazone.store",
-			"http://api2.nebulazone.store"
+			"https://*.nebulazone.store"
 		));
 		configuration.setAllowedMethods(List.of(
 			"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"

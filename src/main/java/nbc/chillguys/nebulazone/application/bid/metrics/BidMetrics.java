@@ -27,4 +27,8 @@ public class BidMetrics {
 			.register(meterRegistry)
 			.record(amount);
 	}
+
+	public void countBidCancel() {
+		meterRegistry.counter("bid.cancel.count").increment();
+	}
 }

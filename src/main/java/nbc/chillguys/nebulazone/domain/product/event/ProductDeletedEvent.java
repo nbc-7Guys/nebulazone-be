@@ -1,6 +1,6 @@
 package nbc.chillguys.nebulazone.domain.product.event;
 
-public record DeleteProductEvent(
+public record ProductDeletedEvent(
 	Long productId
 ) {
 }
