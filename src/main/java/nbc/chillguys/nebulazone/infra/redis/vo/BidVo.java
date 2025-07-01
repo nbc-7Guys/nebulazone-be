@@ -100,4 +100,8 @@ public class BidVo {
 		this.bidStatus = BidStatus.WON.name();
 	}
 
+	public void updateStatus(String status) {
+		this.bidStatus = status;
+	}
+
 }
