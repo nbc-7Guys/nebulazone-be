@@ -21,6 +21,7 @@ import nbc.chillguys.nebulazone.domain.auction.service.AutoAuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
@@ -45,6 +46,7 @@ public class AutoAuctionRedisService {
 	private final BidDomainService bidDomainService;
 	private final UserDomainService userDomainService;
 	private final TransactionDomainService transactionDomainService;
+	private final ProductDomainService productDomainService;
 
 	private final RedisMessagePublisher redisMessagePublisher;
 
@@ -83,6 +85,12 @@ public class AutoAuctionRedisService {
 			Product wonAuctionProduct = auction.getProduct();
 			wonAuctionProduct.purchase();
 
+			try {
+				productDomainService.deleteProductFromEs(wonAuctionProduct.getId());
+			} catch (Exception e) {
+				log.info("자동 낙찰 시 엘리스틱 서치에서 경매 삭제 중 에러 발생: {}", wonAuctionProduct.getId(), e);
+			}
+			
 			User seller = wonAuctionProduct.getSeller();
 			seller.addPoint(auction.getCurrentPrice());
 
