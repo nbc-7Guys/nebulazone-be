@@ -80,8 +80,8 @@ public class ChatController {
 	public ResponseEntity<List<FindChatHistoryResponse>> findChatHistories(
 		@AuthenticationPrincipal User user,
 		@PathVariable("roomId") Long roomId,
-		@RequestParam(required = false) Long lastId,
-		@RequestParam(defaultValue = "30") int size
+		@RequestParam(value = "lastId", required = false) Long lastId,
+		@RequestParam(value = "size", defaultValue = "30") int size
 	) {
 		List<FindChatHistoryResponse> chatHistories = chatService.findChatHistories(user, roomId, lastId, size);
 		return ResponseEntity.ok(chatHistories);
