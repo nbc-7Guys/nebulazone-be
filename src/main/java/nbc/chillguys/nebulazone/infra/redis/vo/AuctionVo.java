@@ -14,6 +14,7 @@ import nbc.chillguys.nebulazone.domain.auction.exception.AuctionException;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidErrorCode;
 import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.entity.ProductImage;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @Getter
@@ -46,8 +47,33 @@ public class AuctionVo {
 			product.isSold(),
 			user.getId(),
 			user.getNickname(),
-			user.getNickname(),
+			user.getEmail(),
 			productImageUrls
+		);
+	}
+
+	public static AuctionVo fromAuction(Auction auction) {
+		Product product = auction.getProduct();
+		User seller = product.getSeller();
+
+		List<String> imageUrls = product.getProductImages().stream()
+			.map(ProductImage::getUrl)
+			.toList();
+
+		return new AuctionVo(
+			auction.getId(),
+			auction.getStartPrice(),
+			auction.getCurrentPrice(),
+			auction.getEndTime(),
+			auction.isWon(),
+			auction.getCreatedAt(),
+			product.getId(),
+			product.getName(),
+			product.isSold(),
+			seller.getId(),
+			seller.getNickname(),
+			seller.getEmail(),
+			imageUrls
 		);
 	}
 

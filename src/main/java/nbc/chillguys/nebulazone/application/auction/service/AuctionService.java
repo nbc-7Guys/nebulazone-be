@@ -40,7 +40,7 @@ public class AuctionService {
 		}
 
 		Bid highestPriceBid = bidDomainService.findHighBidByAuction(auctionId);
-		AuctionFindDetailInfo auctionFindDetailInfo = auctionDomainService.findAuction(auctionId);
+		AuctionFindDetailInfo auctionFindDetailInfo = auctionDomainService.findAuctionDetailInfoByAuctionId(auctionId);
 
 		return FindDetailAuctionResponse.of(auctionFindDetailInfo, highestPriceBid);
 	}

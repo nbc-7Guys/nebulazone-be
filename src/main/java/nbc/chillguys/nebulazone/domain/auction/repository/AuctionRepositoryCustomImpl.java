@@ -6,6 +6,7 @@ import static nbc.chillguys.nebulazone.domain.product.entity.QProduct.*;
 import static nbc.chillguys.nebulazone.domain.product.entity.QProductImage.*;
 import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -112,15 +113,27 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 	}
 
 	@Override
-	public List<Auction> findAuctionsByNotDeletedAndIsWonFalse() {
-
+	public List<Auction> findActiveAuctionsForRecovery() {
 		return jpaQueryFactory
 			.selectFrom(auction)
 			.join(auction.product, product).fetchJoin()
-			.join(product.seller, user).fetchJoin()
-			.where(auction.deleted.eq(false),
-				auction.isWon.eq(false))
+			.join(auction.product.seller, user).fetchJoin()
+			.leftJoin(auction.product.productImages).fetchJoin()
+			.where(
+				auction.deleted.eq(false).or(auction.deleted.isNull()),
+				auction.endTime.after(LocalDateTime.now()),
+				auction.isWon.eq(false)
+			)
 			.fetch();
+	}
+
+	@Override
+	public void updateCurrentPriceForBackup(Long auctionId, Long currentPrice) {
+		jpaQueryFactory
+			.update(auction)
+			.set(auction.currentPrice, currentPrice)
+			.where(auction.id.eq(auctionId))
+			.execute();
 	}
 
 }

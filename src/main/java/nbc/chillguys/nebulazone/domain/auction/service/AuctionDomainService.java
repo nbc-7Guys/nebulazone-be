@@ -43,10 +43,10 @@ public class AuctionDomainService {
 	 * 경매 상세 조회
 	 *
 	 * @param auctionId 조회할 경매 id
-	 * @return 상품 등록자, 상품정보, 입찰 건수 정보가 포함된 경매 조회
+	 * @return AuctionFindDetailInfo
 	 * @author 전나겸
 	 */
-	public AuctionFindDetailInfo findAuction(Long auctionId) {
+	public AuctionFindDetailInfo findAuctionDetailInfoByAuctionId(Long auctionId) {
 
 		return auctionRepository.findAuctionDetail(auctionId)
 			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
@@ -120,13 +120,38 @@ public class AuctionDomainService {
 	}
 
 	/**
-	 * 진행 중인 모든 경매 조회 (Redis 동기화용)
+	 * 데이터베이스에 살아있는 경매 조회<br>
+	 * 종료 안된 경매들 Redis에 복구
 	 *
-	 * @return 삭제되지 않고 낙찰되지 않은 경매 목록
+	 * @return 조회된 옥션
 	 * @author 전나겸
 	 */
-	public List<Auction> findActiveAuctions() {
-		return auctionRepository.findAuctionsByNotDeletedAndIsWonFalse();
+	@Transactional(readOnly = true)
+	public List<Auction> findActiveAuctionsForRecovery() {
+		return auctionRepository.findActiveAuctionsForRecovery();
 	}
 
+	/**
+	 * redis 경매들을 데이터베이스에 백업
+	 *
+	 * @param auctionId 백업 대상 경매
+	 * @param currentPrice 현재 가격
+	 * @author 전나겸
+	 */
+	@Transactional
+	public void updateCurrentPriceForBackup(Long auctionId, Long currentPrice) {
+		auctionRepository.updateCurrentPriceForBackup(auctionId, currentPrice);
+	}
+
+	/**
+	 * 경매 조회
+	 *
+	 * @param auctionId 조회할 경매 id
+	 * @return 조회된 경매
+	 * @author 전나겸
+	 */
+	public Auction findByAuctionId(Long auctionId) {
+		return auctionRepository.findById(auctionId)
+			.orElseThrow(() -> new AuctionException(AuctionErrorCode.AUCTION_NOT_FOUND));
+	}
 }

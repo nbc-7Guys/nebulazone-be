@@ -11,8 +11,9 @@ public interface AuctionRepositoryCustom {
 
 	Optional<Auction> findByAuctionWithProduct(Long auctionId);
 
-	List<Auction> findAuctionsByNotDeletedAndIsWonFalse();
-
 	Optional<AuctionFindDetailInfo> findAuctionDetail(Long auctionId);
 
+	List<Auction> findActiveAuctionsForRecovery();
+
+	void updateCurrentPriceForBackup(Long auctionId, Long currentPrice);
 }

@@ -15,4 +15,6 @@ public interface BidRepositoryCustom {
 	Bid findHighestPriceBidByAuctionWithUser(Long auctionId);
 
 	Page<FindBidsByAuctionInfo> findBidsWithUserByAuctionId(Long auctionId, int page, int size);
+
+	List<Bid> findActiveBidsByAuctionId(Long auctionId);
 }

@@ -60,6 +60,17 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 	}
 
 	@Override
+	public List<Bid> findActiveBidsByAuctionId(Long auctionId) {
+		return jpaQueryFactory
+			.selectFrom(bid)
+			.join(bid.user, user).fetchJoin()
+			.where(
+				bid.auction.id.eq(auctionId)
+			)
+			.fetch();
+	}
+
+	@Override
 	public List<FindMyBidsInfo> findMyBids(Long userId) {
 
 		return jpaQueryFactory
