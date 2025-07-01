@@ -12,7 +12,7 @@ import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.exception.UserErrorCode;
 import nbc.chillguys.nebulazone.domain.user.exception.UserException;
 import nbc.chillguys.nebulazone.domain.user.repository.UserRepository;
-import nbc.chillguys.nebulazone.infra.redis.dto.UserDto;
+import nbc.chillguys.nebulazone.infra.redis.vo.UserVo;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +30,8 @@ public class UserCacheService {
 		Object cachedValue = redisTemplate.opsForValue().get(key);
 
 		if (cachedValue != null) {
-			UserDto userDto = objectMapper.convertValue(cachedValue, UserDto.class);
-			return UserDto.toUser(userDto);
+			UserVo userVo = objectMapper.convertValue(cachedValue, UserVo.class);
+			return UserVo.toUser(userVo);
 		}
 
 		return fetchAndCacheUser(userId, key, ttl);
@@ -47,9 +47,9 @@ public class UserCacheService {
 		User user = userRepository.findUserById(userId)
 			.orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
-		UserDto userDto = UserDto.from(user);
+		UserVo userVo = UserVo.from(user);
 
-		redisTemplate.opsForValue().set(key, userDto, ttl, TimeUnit.SECONDS);
+		redisTemplate.opsForValue().set(key, userVo, ttl, TimeUnit.SECONDS);
 
 		return user;
 	}
