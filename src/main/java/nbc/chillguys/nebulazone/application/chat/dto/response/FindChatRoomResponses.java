@@ -21,7 +21,8 @@ public record FindChatRoomResponses(
 		Long productId,
 		Long catalogId,
 		Long productPrice,
-		boolean isSold
+		boolean isSold,
+		String imageUrl
 	) {
 		public static FindChatRoomResponse from(ChatRoomInfo chatRoomInfo) {
 			return new FindChatRoomResponse(
@@ -31,7 +32,8 @@ public record FindChatRoomResponses(
 				chatRoomInfo.productId(),
 				chatRoomInfo.catalogId(),
 				chatRoomInfo.productPrice(),
-				chatRoomInfo.isSold()
+				chatRoomInfo.isSold(),
+				chatRoomInfo.productImageUrl() == null ? "" : chatRoomInfo.productImageUrl()
 			);
 		}
 	}

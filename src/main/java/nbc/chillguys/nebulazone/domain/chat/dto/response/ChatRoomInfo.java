@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.domain.chat.dto.response;
 
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
+import nbc.chillguys.nebulazone.domain.product.entity.ProductImage;
 
 public record ChatRoomInfo(
 	String productName,
@@ -9,7 +10,8 @@ public record ChatRoomInfo(
 	Long catalogId,
 	Long productId,
 	Long productPrice,
-	boolean isSold
+	boolean isSold,
+	String productImageUrl
 ) {
 	public static ChatRoomInfo from(ChatRoom chatRoom) {
 		return new ChatRoomInfo(
@@ -19,7 +21,8 @@ public record ChatRoomInfo(
 			chatRoom.getProduct().getCatalogId(),
 			chatRoom.getProduct().getId(),
 			chatRoom.getProduct().getPrice(),
-			chatRoom.getProduct().isSold()
+			chatRoom.getProduct().isSold(),
+			chatRoom.getProduct().getProductImages().getFirst().getUrl()
 		);
 	}
 }

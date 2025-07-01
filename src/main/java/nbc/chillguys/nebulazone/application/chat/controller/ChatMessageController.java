@@ -46,7 +46,7 @@ public class ChatMessageController {
 	 */
 	@MessageMapping("/send/{roomId}")
 	public void sendMessage(
-		@DestinationVariable Long roomId,
+		@DestinationVariable("roomId") Long roomId,
 		@Valid @Payload ChatSendTextMessageCommand command,
 		StompHeaderAccessor accessor
 	) {
@@ -68,7 +68,7 @@ public class ChatMessageController {
 	@PostMapping(value = "/send/image/{roomId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public void sendImage(
 		@AuthenticationPrincipal User user,
-		@PathVariable Long roomId,
+		@PathVariable("roomId") Long roomId,
 		@Valid @ModelAttribute ImageMessageRequest request
 	) {
 		chatMessageService.sendImageMessage(user, roomId, request);
