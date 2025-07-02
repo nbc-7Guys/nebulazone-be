@@ -216,6 +216,14 @@ public class BidRedisService {
 		return new PageImpl<>(findBidResponse, pageable, totalElements);
 	}
 
+	/**
+	 * 내 입찰 내역 조회
+	 *
+	 * @param userId 로그인한 유저 id
+	 * @param auctionIds 내가 입찰한 경매 id 리스트
+	 * @return 반환 입찰 내역 리스트
+	 * @author 전나겸
+	 */
 	public List<BidVo> findMyBidVoList(Long userId, List<Long> auctionIds) {
 
 		List<BidVo> myBidVoList = new ArrayList<>();

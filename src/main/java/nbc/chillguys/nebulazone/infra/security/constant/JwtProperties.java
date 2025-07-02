@@ -26,11 +26,11 @@ public record JwtProperties(
 	) {
 	}
 
-	private long getAccessTokenExpiredMillis() {
+	public long getAccessTokenExpiredMillis() {
 		return token.access().validity().toMillis();
 	}
 
-	private long getRefreshTokenExpiredMillis() {
+	public long getRefreshTokenExpiredMillis() {
 		return token.refresh().validity().toMillis();
 	}
 
@@ -40,5 +40,13 @@ public record JwtProperties(
 
 	public Date getRefreshTokenExpiredDate(Date now) {
 		return new Date(now.getTime() + getRefreshTokenExpiredMillis());
+	}
+
+	public long getAccessTokenValiditySeconds() {
+		return token.access().validity().getSeconds();
+	}
+
+	public long getRefreshTokenValiditySeconds() {
+		return token.refresh().validity().getSeconds();
 	}
 }

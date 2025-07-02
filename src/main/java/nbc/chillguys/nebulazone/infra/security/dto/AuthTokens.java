@@ -2,12 +2,19 @@ package nbc.chillguys.nebulazone.infra.security.dto;
 
 public record AuthTokens(
 	String accessToken,
-	String refreshToken
+	String refreshToken,
+	String tokenType,
+	Long expiresIn,
+	Long refreshExpiresIn
 ) {
-	public static AuthTokens of(String accessToken, String refreshToken) {
+	public static AuthTokens of(String accessToken, String refreshToken, String tokenType, Long expiresIn,
+		Long refreshExpiresIn) {
 		return new AuthTokens(
 			accessToken,
-			refreshToken
+			refreshToken,
+			tokenType,
+			expiresIn,
+			refreshExpiresIn
 		);
 	}
 }
