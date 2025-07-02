@@ -22,9 +22,9 @@ public record EndAuctionResponse(
 	public static EndAuctionResponse of(Auction auction, BidVo wonBidVo, Product product) {
 		return new EndAuctionResponse(
 			auction.getId(),
-			wonBidVo.getBidUserId(),
-			wonBidVo.getBidUserNickname(),
-			wonBidVo.getBidUserEmail(),
+			wonBidVo != null ? wonBidVo.getBidUserId() : null,
+			wonBidVo != null ? wonBidVo.getBidUserNickname() : null,
+			wonBidVo != null ? wonBidVo.getBidUserEmail() : null,
 			auction.getCurrentPrice(),
 			product.getName(),
 			auction.getModifiedAt()

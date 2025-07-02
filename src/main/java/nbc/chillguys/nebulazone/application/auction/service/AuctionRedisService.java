@@ -119,6 +119,12 @@ public class AuctionRedisService {
 		Product wonAuctionProduct = auction.getProduct();
 		wonAuctionProduct.purchase();
 
+		try {
+			productDomainService.markProductAsPurchased(wonAuctionProduct.getId());
+		} catch (Exception e) {
+			log.info("수동 낙찰 완료, ES에 판매 완료로 변경 중 에러발생, productId: {}", wonAuctionProduct.getId(), e);
+		}
+
 		User seller = wonAuctionProduct.getSeller();
 		seller.addPoint(auction.getCurrentPrice());
 
@@ -197,6 +203,7 @@ public class AuctionRedisService {
 
 	/**
 	 * 내 경매 삭제
+	 *
 	 * @param auctionId 삭제할 경매 id
 	 * @param loginUser 로그인 유저
 	 * @return 경매 삭제 응답 값
@@ -260,6 +267,7 @@ public class AuctionRedisService {
 	/**
 	 * 정렬기반 경매 조회<br>
 	 * CLOSING: 마감임박순, POPULAR: 인기순(입찰 건수)
+	 *
 	 * @param sortType 정렬 타입
 	 * @return 조회된 응답값
 	 * @author 전나겸
