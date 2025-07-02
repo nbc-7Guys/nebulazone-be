@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.domain.ban.dto.BanCreateCommand;
 import nbc.chillguys.nebulazone.domain.ban.dto.BanInfo;
@@ -35,6 +36,7 @@ public class BanAdminDomainService {
 	 * @param ipAddress 해제할 대상의 IP 주소
 	 * @author 정석현
 	 */
+	@Transactional
 	public void unban(String ipAddress) {
 		findByIpAddress(ipAddress);
 		banRepository.deleteByIpAddress(ipAddress);
