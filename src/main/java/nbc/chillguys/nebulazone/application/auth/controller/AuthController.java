@@ -56,6 +56,6 @@ public class AuthController {
 
 		SecurityContextHolder.getContext().setAuthentication(response.authentication());
 
-		return ResponseEntity.ok(RegenerateAccessTokenResponse.from(response.accessToken()));
+		return ResponseEntity.ok(RegenerateAccessTokenResponse.from(response));
 	}
 }

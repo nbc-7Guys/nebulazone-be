@@ -1,11 +1,15 @@
 package nbc.chillguys.nebulazone.application.auth.dto.response;
 
 public record RegenerateAccessTokenResponse(
-	String accessToken
+	String accessToken,
+	String tokenType,
+	Long expiresIn
 ) {
-	public static RegenerateAccessTokenResponse from(String accessToken) {
+	public static RegenerateAccessTokenResponse from(ReissueResponse reissueResponse) {
 		return new RegenerateAccessTokenResponse(
-			accessToken
+			reissueResponse.accessToken(),
+			reissueResponse.tokenType(),
+			reissueResponse.expiresIn()
 		);
 	}
 }

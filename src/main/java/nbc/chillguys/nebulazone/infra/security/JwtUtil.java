@@ -71,17 +71,21 @@ public class JwtUtil {
 		String accessToken = generateAccessToken(user);
 		String refreshToken = generateRefreshToken(user);
 
-		return AuthTokens.of(accessToken, refreshToken);
+		return AuthTokens.of(accessToken, refreshToken, JwtConstants.TOKEN_PREFIX,
+			jwtProperties.getAccessTokenValiditySeconds(), jwtProperties.getRefreshTokenValiditySeconds());
 	}
 
-	public String regenerateAccessToken(String refreshToken) {
+	public AuthTokens regenerateAccessToken(String refreshToken) {
 		if (isTokenExpired(refreshToken)) {
 			throw new JwtTokenException(JwtTokenErrorCode.REFRESH_TOKEN_EXPIRED);
 		}
 
 		User user = getUserFromToken(refreshToken);
 
-		return generateAccessToken(user);
+		String accessToken = generateAccessToken(user);
+
+		return AuthTokens.of(accessToken, null, JwtConstants.TOKEN_PREFIX,
+			jwtProperties.getAccessTokenValiditySeconds(), null);
 	}
 
 	public boolean isTokenExpired(String token) {

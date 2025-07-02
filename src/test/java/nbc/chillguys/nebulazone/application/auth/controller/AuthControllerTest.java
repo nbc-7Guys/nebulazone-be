@@ -58,7 +58,8 @@ class AuthControllerTest {
 	void success_signIn() throws Exception {
 		// Given
 		SignInRequest request = new SignInRequest("test@test.com", "encodedPassword1!");
-		SignInResponse response = new SignInResponse("test_access_token", "test_refresh_token");
+		SignInResponse response = new SignInResponse("test_access_token", "test_refresh_token",
+			"Bearer ", 86400L, 525600L);
 
 		given(authService.signIn(any()))
 			.willReturn(response);
@@ -75,8 +76,8 @@ class AuthControllerTest {
 				jsonPath("$.accessToken").value("test_access_token"),
 				cookie().exists("Refresh_Token"),
 				cookie().value("Refresh_Token", "test_refresh_token"),
-				cookie().httpOnly("Refresh_Token", true)
-				// cookie().secure("Refresh_Token", true) // HTTPS 설정 시 추가
+				cookie().httpOnly("Refresh_Token", true),
+				cookie().secure("Refresh_Token", true)
 			);
 
 	}
@@ -110,7 +111,8 @@ class AuthControllerTest {
 		Authentication authentication = new UsernamePasswordAuthenticationToken(
 			user, "regenerateAccessToken", user.getAuthorities()
 		);
-		ReissueResponse response = new ReissueResponse("regenerateAccessToken", authentication);
+		ReissueResponse response = new ReissueResponse("regenerateAccessToken", "Bearer ",
+			86400L, authentication);
 
 		given(authService.reissueAccessToken(anyString()))
 			.willReturn(response);
