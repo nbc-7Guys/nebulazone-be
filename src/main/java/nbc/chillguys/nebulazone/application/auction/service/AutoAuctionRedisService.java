@@ -90,7 +90,7 @@ public class AutoAuctionRedisService {
 			} catch (Exception e) {
 				log.info("자동 낙찰 시 엘리스틱 서치에서 경매 삭제 중 에러 발생: {}", wonAuctionProduct.getId(), e);
 			}
-			
+
 			User seller = wonAuctionProduct.getSeller();
 			seller.addPoint(auction.getCurrentPrice());
 
