@@ -8,7 +8,6 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.chat.service.ChatMessageService;
 import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
-import nbc.chillguys.nebulazone.infra.websocket.SessionUtil;
 
 @Component
 @RequiredArgsConstructor

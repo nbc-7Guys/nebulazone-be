@@ -65,16 +65,9 @@ class ChatMessageServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		user = createUser(USER_ID, USER_EMAIL, "테스트유저");
-		sessionUser = SessionUser.from(user);
-		textMessageCommand = new ChatSendTextMessageCommand(MESSAGE_CONTENT, "TEXT");
-	}
-
-	// 팩토리 메서드들
-	private User createUser(Long id, String email, String nickname) {
-		User user = User.builder()
-			.email(email)
-			.nickname(nickname)
+		user = User.builder()
+			.email(USER_EMAIL)
+			.nickname("테스트유저")
 			.oAuthType(OAuthType.KAKAO)
 			.roles(Set.of(UserRole.ROLE_USER))
 			.addresses(List.of(Address.builder()
@@ -84,24 +77,11 @@ class ChatMessageServiceTest {
 				.build()))
 			.point(0)
 			.build();
-		ReflectionTestUtils.setField(user, "id", id);
-		return user;
+		ReflectionTestUtils.setField(user, "id", USER_ID);
+		sessionUser = SessionUser.from(user);
+		textMessageCommand = new ChatSendTextMessageCommand(MESSAGE_CONTENT, "TEXT");
 	}
 
-	private List<ChatMessageInfo> createChatMessageInfoList() {
-		return List.of(
-			ChatMessageInfo.of(ROOM_ID, USER_ID, USER_EMAIL, "첫 번째 메시지", MessageType.TEXT, LocalDateTime.now()),
-			ChatMessageInfo.of(ROOM_ID, USER_ID, USER_EMAIL, "두 번째 메시지", MessageType.TEXT, LocalDateTime.now())
-		);
-	}
-
-	// 예외 검증 헬퍼 메서드
-	private void assertChatException(Runnable executable, ChatErrorCode expectedErrorCode) {
-		assertThatThrownBy(executable::run)
-			.isInstanceOf(ChatException.class)
-			.extracting("errorCode")
-			.isEqualTo(expectedErrorCode);
-	}
 
 	@Nested
 	@DisplayName("텍스트 메시지 전송")
@@ -135,9 +115,11 @@ class ChatMessageServiceTest {
 			given(webSocketSessionRedisService.getRoomIdBySessionId(SESSION_ID)).willReturn(ROOM_ID);
 
 			// when & then
-			assertChatException(() ->
-					chatMessageService.sendTextMessage(SESSION_ID, ROOM_ID, textMessageCommand),
-				ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+			assertThatThrownBy(() ->
+				chatMessageService.sendTextMessage(SESSION_ID, ROOM_ID, textMessageCommand))
+				.isInstanceOf(ChatException.class)
+				.extracting("errorCode")
+				.isEqualTo(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 
 			verify(webSocketSessionRedisService).getUserIdBySessionId(SESSION_ID);
 			verify(webSocketSessionRedisService).getRoomIdBySessionId(SESSION_ID);
@@ -154,9 +136,11 @@ class ChatMessageServiceTest {
 			given(webSocketSessionRedisService.getRoomIdBySessionId(SESSION_ID)).willReturn(differentRoomId);
 
 			// when & then
-			assertChatException(() ->
-					chatMessageService.sendTextMessage(SESSION_ID, ROOM_ID, textMessageCommand),
-				ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+			assertThatThrownBy(() ->
+				chatMessageService.sendTextMessage(SESSION_ID, ROOM_ID, textMessageCommand))
+				.isInstanceOf(ChatException.class)
+				.extracting("errorCode")
+				.isEqualTo(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 
 			verify(webSocketSessionRedisService).getUserIdBySessionId(SESSION_ID);
 			verify(webSocketSessionRedisService).getRoomIdBySessionId(SESSION_ID);
@@ -204,9 +188,11 @@ class ChatMessageServiceTest {
 				.given(chatDomainService).validateUserAccessToChatRoom(user, ROOM_ID);
 
 			// when & then
-			assertChatException(() ->
-					chatMessageService.sendImageMessage(user, ROOM_ID, image),
-				ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+			assertThatThrownBy(() ->
+				chatMessageService.sendImageMessage(user, ROOM_ID, image))
+				.isInstanceOf(ChatException.class)
+				.extracting("errorCode")
+				.isEqualTo(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 
 			verify(chatDomainService).validateUserAccessToChatRoom(user, ROOM_ID);
 			verify(gcsClient, never()).uploadFile(any());
@@ -223,7 +209,10 @@ class ChatMessageServiceTest {
 		@DisplayName("Redis 메시지 DB 저장 성공")
 		void success_saveMessagesToDb() {
 			// given
-			List<ChatMessageInfo> messagesFromRedis = createChatMessageInfoList();
+			List<ChatMessageInfo> messagesFromRedis = List.of(
+				ChatMessageInfo.of(ROOM_ID, USER_ID, USER_EMAIL, "첫 번째 메시지", MessageType.TEXT, LocalDateTime.now()),
+				ChatMessageInfo.of(ROOM_ID, USER_ID, USER_EMAIL, "두 번째 메시지", MessageType.TEXT, LocalDateTime.now())
+			);
 			given(chatMessageRedisService.getMessagesFromRedis(ROOM_ID)).willReturn(messagesFromRedis);
 			willDoNothing().given(chatDomainService).saveChatHistories(ROOM_ID, messagesFromRedis);
 			willDoNothing().given(chatMessageRedisService).deleteMessagesInRedis(ROOM_ID);
