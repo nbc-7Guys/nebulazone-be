@@ -260,7 +260,16 @@ public class AuctionRedisService {
 		redisTemplate.delete(AuctionConstants.AUCTION_PREFIX + auctionId);
 		redisTemplate.delete(BidConstants.BID_PREFIX + auctionId);
 
-		return DeleteAuctionResponse.of(deletedAuction.getId(), product.getId());
+		DeleteAuctionResponse response = DeleteAuctionResponse.of(deletedAuction.getId(), product.getId());
+
+		try {
+			redisMessagePublisher.publishAuctionUpdate(auctionId, "deleted", response);
+			log.info("경매 삭제 WebSocket 메시지 발행 성공 - auctionId: {}", auctionId);
+		} catch (Exception e) {
+			log.error("경매 삭제 WebSocket 메시지 발행 실패 - auctionId: {}, error: {}", auctionId, e.getMessage(), e);
+		}
+
+		return response;
 
 	}
 
@@ -462,6 +471,14 @@ public class AuctionRedisService {
 		redisTemplate.opsForZSet().remove(AuctionConstants.AUCTION_ENDING_PREFIX, auctionId);
 		redisTemplate.delete(AuctionConstants.AUCTION_PREFIX + auctionId);
 		redisTemplate.delete(BidConstants.BID_PREFIX + auctionId);
+
+		try {
+			DeleteAuctionResponse response = DeleteAuctionResponse.of(deletedAuction.getId(), product.getId());
+			redisMessagePublisher.publishAuctionUpdate(auctionId, "deleted", response);
+			log.info("관리자 경매 삭제 WebSocket 메시지 발행 성공 - auctionId: {}", auctionId);
+		} catch (Exception e) {
+			log.error("관리자 경매 삭제 WebSocket 메시지 발행 실패 - auctionId: {}, error: {}", auctionId, e.getMessage(), e);
+		}
 
 	}
 
