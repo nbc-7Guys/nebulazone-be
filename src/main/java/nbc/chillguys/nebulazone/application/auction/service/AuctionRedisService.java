@@ -119,6 +119,12 @@ public class AuctionRedisService {
 		Product wonAuctionProduct = auction.getProduct();
 		wonAuctionProduct.purchase();
 
+		try {
+			productDomainService.markProductAsPurchased(wonAuctionProduct.getId());
+		} catch (Exception e) {
+			log.info("수동 낙찰 완료, ES에 판매 완료로 변경 중 에러발생, productId: {}", wonAuctionProduct.getId(), e);
+		}
+
 		User seller = wonAuctionProduct.getSeller();
 		seller.addPoint(auction.getCurrentPrice());
 
@@ -141,7 +147,7 @@ public class AuctionRedisService {
 			.findFirst()
 			.orElseThrow(() -> new BidException(BidErrorCode.BID_NOT_FOUND));
 
-		wonBidVo.validMismatchBidOwner(request.bidUserId());
+		wonBidVo.validMismatchBidUsername(request.bidUserNickname());
 
 		List<Long> bidUserIds = bidVoList.stream()
 			.map(BidVo::getBidUserId)
@@ -187,8 +193,16 @@ public class AuctionRedisService {
 
 		try {
 			redisMessagePublisher.publishAuctionUpdate(auctionId, "won", response);
+			log.info("수동 낙찰 WebSocket 메시지 발행 성공 - auctionId: {}", auctionId);
 		} catch (Exception e) {
 			log.error("수동 낙찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
+		}
+
+		try {
+			redisMessagePublisher.publishAuctionUpdate(auctionId, "bid", response);
+			log.info("수동 낙찰 입찰 상태 업데이트 WebSocket 메시지 발행 성공 - auctionId: {}", auctionId);
+		} catch (Exception e) {
+			log.error("수동 낙찰 입찰 상태 업데이트 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
 		}
 
 		return response;
@@ -197,6 +211,7 @@ public class AuctionRedisService {
 
 	/**
 	 * 내 경매 삭제
+	 *
 	 * @param auctionId 삭제할 경매 id
 	 * @param loginUser 로그인 유저
 	 * @return 경매 삭제 응답 값
@@ -253,13 +268,23 @@ public class AuctionRedisService {
 		redisTemplate.delete(AuctionConstants.AUCTION_PREFIX + auctionId);
 		redisTemplate.delete(BidConstants.BID_PREFIX + auctionId);
 
-		return DeleteAuctionResponse.of(deletedAuction.getId(), product.getId());
+		DeleteAuctionResponse response = DeleteAuctionResponse.of(deletedAuction.getId(), product.getId());
+
+		try {
+			redisMessagePublisher.publishAuctionUpdate(auctionId, "deleted", response);
+			log.info("경매 삭제 WebSocket 메시지 발행 성공 - auctionId: {}", auctionId);
+		} catch (Exception e) {
+			log.error("경매 삭제 WebSocket 메시지 발행 실패 - auctionId: {}, error: {}", auctionId, e.getMessage(), e);
+		}
+
+		return response;
 
 	}
 
 	/**
 	 * 정렬기반 경매 조회<br>
 	 * CLOSING: 마감임박순, POPULAR: 인기순(입찰 건수)
+	 *
 	 * @param sortType 정렬 타입
 	 * @return 조회된 응답값
 	 * @author 전나겸
@@ -325,6 +350,7 @@ public class AuctionRedisService {
 	/**
 	 * redis에 저장된 특정 경매를 조회<br>
 	 * AuctionVo를 못찾으면 에러를 반환
+	 *
 	 * @param auctionId 조회할 경매 id
 	 * @return AuctionVo
 	 * @author 전나겸
@@ -342,6 +368,7 @@ public class AuctionRedisService {
 
 	/**
 	 * redis에 저장된 특정 경매를 조회
+	 *
 	 * @param auctionId 조회할 경매 id
 	 * @return 조회된 AuctionVo
 	 * @author 전나겸
@@ -359,6 +386,7 @@ public class AuctionRedisService {
 
 	/**
 	 * 특정 경매의 입찰 최고가 갱신
+	 *
 	 * @param auctionId 대상 경매 id
 	 * @param bidPrice 갱신할 입찰가 (null 가능 - 입찰이 모두 취소된 경우)
 	 * @author 전나겸
@@ -370,6 +398,12 @@ public class AuctionRedisService {
 
 	}
 
+	/**
+	 * 레디스의 전체 경매 id들 조회
+	 *
+	 * @return 조회된 경매 id 리스트
+	 * @author 전나겸
+	 */
 	public List<Long> findAllAuctionVoIds() {
 		Set<Object> objects = redisTemplate.opsForZSet().range(AuctionConstants.AUCTION_ENDING_PREFIX, 0, -1);
 
@@ -454,6 +488,14 @@ public class AuctionRedisService {
 		redisTemplate.opsForZSet().remove(AuctionConstants.AUCTION_ENDING_PREFIX, auctionId);
 		redisTemplate.delete(AuctionConstants.AUCTION_PREFIX + auctionId);
 		redisTemplate.delete(BidConstants.BID_PREFIX + auctionId);
+
+		try {
+			DeleteAuctionResponse response = DeleteAuctionResponse.of(deletedAuction.getId(), product.getId());
+			redisMessagePublisher.publishAuctionUpdate(auctionId, "deleted", response);
+			log.info("관리자 경매 삭제 WebSocket 메시지 발행 성공 - auctionId: {}", auctionId);
+		} catch (Exception e) {
+			log.error("관리자 경매 삭제 WebSocket 메시지 발행 실패 - auctionId: {}, error: {}", auctionId, e.getMessage(), e);
+		}
 
 	}
 

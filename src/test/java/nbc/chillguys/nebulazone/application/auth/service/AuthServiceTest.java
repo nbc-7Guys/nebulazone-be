@@ -21,7 +21,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import nbc.chillguys.nebulazone.application.auth.dto.request.SignInRequest;
 import nbc.chillguys.nebulazone.application.auth.dto.response.SignInResponse;
-import nbc.chillguys.nebulazone.application.auth.metrics.AuthMetrics;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -38,9 +37,6 @@ class AuthServiceTest {
 
 	@Mock
 	private JwtUtil jwtUtil;
-
-	@Mock
-	private AuthMetrics authMetrics;
 
 	@InjectMocks
 	private AuthService authService;
@@ -74,7 +70,8 @@ class AuthServiceTest {
 	void success_signIn() {
 		// Given
 		SignInRequest request = new SignInRequest("test@test.com", "encodedPassword1!");
-		AuthTokens authTokens = new AuthTokens("test_access_token", "test_refresh_token");
+		AuthTokens authTokens = new AuthTokens("test_access_token", "test_refresh_token",
+			"Bearer ", 86400L, 525600L);
 
 		given(userDomainService.findActiveUserByEmail(anyString()))
 			.willReturn(user);

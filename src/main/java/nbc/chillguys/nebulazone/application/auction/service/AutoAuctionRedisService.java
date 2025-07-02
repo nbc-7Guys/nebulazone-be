@@ -21,6 +21,7 @@ import nbc.chillguys.nebulazone.domain.auction.service.AutoAuctionDomainService;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
@@ -45,6 +46,7 @@ public class AutoAuctionRedisService {
 	private final BidDomainService bidDomainService;
 	private final UserDomainService userDomainService;
 	private final TransactionDomainService transactionDomainService;
+	private final ProductDomainService productDomainService;
 
 	private final RedisMessagePublisher redisMessagePublisher;
 
@@ -79,9 +81,16 @@ public class AutoAuctionRedisService {
 			return;
 		}
 
+		Product wonAuctionProduct = auction.getProduct();
+
 		if (auction.isWon()) {
-			Product wonAuctionProduct = auction.getProduct();
 			wonAuctionProduct.purchase();
+
+			try {
+				productDomainService.markProductAsPurchased(wonAuctionProduct.getId());
+			} catch (Exception e) {
+				log.info("자동 낙찰 완료, ES에 판매 완료로 변경 중 에러발생, productId: {}", wonAuctionProduct.getId(), e);
+			}
 
 			User seller = wonAuctionProduct.getSeller();
 			seller.addPoint(auction.getCurrentPrice());
@@ -135,7 +144,6 @@ public class AutoAuctionRedisService {
 			transactionDomainService.createTransaction(sellerTxCreateCommand);
 
 			try {
-
 				BidVo wonBidVo = bidVoList.stream()
 					.filter(bidVo -> BidStatus.WON.name().equals(bidVo.getBidStatus()))
 					.findFirst()
@@ -144,10 +152,31 @@ public class AutoAuctionRedisService {
 				if (wonBidVo != null) {
 					EndAuctionResponse response = EndAuctionResponse.of(auction, wonBidVo, wonAuctionProduct);
 					redisMessagePublisher.publishAuctionUpdate(auctionId, "won", response);
+
+					redisMessagePublisher.publishAuctionUpdate(auctionId, "bid", response);
+					log.info("자동 낙찰 입찰 상태 업데이트 WebSocket 메시지 발행 성공 - auctionId: {}", auctionId);
 				}
 
 			} catch (Exception e) {
 				log.error("자동 낙찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
+			}
+
+		} else {
+			try {
+				EndAuctionResponse response = EndAuctionResponse.of(auction, null, wonAuctionProduct);
+				redisMessagePublisher.publishAuctionUpdate(auctionId, "failed", response);
+
+				// 입찰 상태 업데이트를 위한 추가 WebSocket 메시지 발행
+				redisMessagePublisher.publishAuctionUpdate(auctionId, "bid", response);
+				log.info("유찰 입찰 상태 업데이트 WebSocket 메시지 발행 성공 - auctionId: {}", auctionId);
+			} catch (Exception e) {
+				log.error("유찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
+			}
+
+			try {
+				productDomainService.deleteProductFromEs(wonAuctionProduct.getId());
+			} catch (Exception e) {
+				log.info("자동 낙찰(유찰) 완료, ES 삭제 중 에러발생, productId: {}", wonAuctionProduct.getId(), e);
 			}
 
 		}

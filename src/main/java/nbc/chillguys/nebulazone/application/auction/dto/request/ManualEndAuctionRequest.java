@@ -6,8 +6,8 @@ public record ManualEndAuctionRequest(
 	@NotNull(message = "낙찰 대상인 입찰 가격은 필수 입니다.")
 	Long bidPrice,
 
-	@NotNull(message = "낙찰 대상인 입찰 유저id는 필수 입니다.")
-	Long bidUserId
+	@NotNull(message = "낙찰 대상인 입찰 닉네임 필수 입니다.")
+	String bidUserNickname
 
 ) {
 }

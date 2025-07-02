@@ -97,8 +97,8 @@ public class BidVo {
 		}
 	}
 
-	public void validMismatchBidOwner(Long bidUserId) {
-		if (!this.bidUserId.equals(bidUserId)) {
+	public void validMismatchBidUsername(String bidUserNickname) {
+		if (!this.bidUserNickname.equals(bidUserNickname)) {
 			throw new BidException(BidErrorCode.BID_USER_MISMATCH);
 		}
 	}
