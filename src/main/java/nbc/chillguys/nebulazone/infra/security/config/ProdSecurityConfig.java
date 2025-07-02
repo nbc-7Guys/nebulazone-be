@@ -4,8 +4,9 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -26,8 +27,9 @@ import nbc.chillguys.nebulazone.infra.security.filter.LoggingFilter;
 
 @Configuration
 @EnableWebSecurity
+@Profile("prod")
 @RequiredArgsConstructor
-public class LocalSecurityConfig {
+public class ProdSecurityConfig {
 	private final CustomAuthenticationEntryPoint entryPoint;
 	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	private final OAuthService oAuthService;
@@ -37,9 +39,24 @@ public class LocalSecurityConfig {
 	private final HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-		return httpSecurity
-			.cors(Customizer.withDefaults())
+	@Order(1)
+	public SecurityFilterChain managementSecurityFilterChain(HttpSecurity http) throws Exception {
+		return http
+			.securityMatcher("/actuator/**")
+			.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
+				.anyRequest().denyAll()
+			)
+			.csrf(AbstractHttpConfigurer::disable)
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.build();
+	}
+
+	@Bean
+	@Order(2)
+	public SecurityFilterChain appSecurityFilterChain(HttpSecurity http) throws Exception {
+		return http
+			.cors(cors -> cors.configurationSource(prodCorsConfigurationSource()))
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> auth
@@ -51,8 +68,6 @@ public class LocalSecurityConfig {
 					"/swagger-resources/**",
 					"/favicon.ico",
 					"/error",
-					"/actuator/**",
-					"/metrics/**",
 					"/ws/**",
 					"/ws",
 					"/chat/**",
@@ -72,17 +87,16 @@ public class LocalSecurityConfig {
 					"/catalogs/**",
 					"/products/**"
 				).permitAll()
-				.anyRequest().authenticated())
+				.anyRequest().authenticated()
+			)
 			.oauth2Login(oauth2 -> oauth2
-				.userInfoEndpoint(userInfo -> userInfo
-					.userService(oAuthService))
+				.userInfoEndpoint(userInfo -> userInfo.userService(oAuthService))
 				.successHandler(oAuth2SuccessHandler)
 				.authorizationEndpoint(authorization -> authorization
 					.authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository)
 				)
 			)
-			.exceptionHandling(exception ->
-				exception.authenticationEntryPoint(entryPoint))
+			.exceptionHandling(exception -> exception.authenticationEntryPoint(entryPoint))
 			.addFilterBefore(banCheckFilter, UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
@@ -90,12 +104,24 @@ public class LocalSecurityConfig {
 	}
 
 	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
+	public CorsConfigurationSource prodCorsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOriginPatterns(List.of("*"));
-		configuration.setAllowedMethods(List.of("*"));
-		configuration.setAllowedHeaders(List.of("*"));
-		configuration.setExposedHeaders(List.of("*"));
+		configuration.setAllowedOriginPatterns(List.of(
+			"https://nebulazone-*-uguls-projects.vercel.app",
+			"https://nebulazone-fe.vercel.app",
+			"https://*.nebulazone.store"
+		));
+		configuration.setAllowedMethods(List.of(
+			"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
+		));
+		configuration.setAllowedHeaders(List.of(
+			"Authorization",
+			"Content-Type",
+			"X-Requested-With"
+		));
+		configuration.setExposedHeaders(List.of(
+			"X-Total-Count"
+		));
 		configuration.setAllowCredentials(true);
 		configuration.setMaxAge(3600L);
 
