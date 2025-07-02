@@ -160,10 +160,18 @@ public class AutoAuctionRedisService {
 
 		} else {
 			try {
+				EndAuctionResponse response = EndAuctionResponse.of(auction, null, wonAuctionProduct);
+				redisMessagePublisher.publishAuctionUpdate(auctionId, "failed", response);
+			} catch (Exception e) {
+				log.error("유찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
+			}
+
+			try {
 				productDomainService.deleteProductFromEs(wonAuctionProduct.getId());
 			} catch (Exception e) {
-				log.info("자동 낙찰 완료, ES 삭제 중 에러발생, productId: {}", wonAuctionProduct.getId(), e);
+				log.info("자동 낙찰(유찰) 완료, ES 삭제 중 에러발생, productId: {}", wonAuctionProduct.getId(), e);
 			}
+
 		}
 
 		cleanUpRedisAuctionAndBid(auctionId);
