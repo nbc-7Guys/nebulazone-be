@@ -90,7 +90,7 @@ public class LocalSecurityConfig {
 	}
 
 	@Bean
-	public CorsConfigurationSource localCorsConfigurationSource() {
+	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOriginPatterns(List.of("*"));
 		configuration.setAllowedMethods(List.of("*"));
