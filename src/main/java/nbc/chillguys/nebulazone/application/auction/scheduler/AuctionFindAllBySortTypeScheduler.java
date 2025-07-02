@@ -18,7 +18,7 @@ public class AuctionFindAllBySortTypeScheduler {
 	private final AuctionRedisService auctionRedisService;
 	private final RedisTemplate<String, Object> redisTemplate;
 
-	@Scheduled(cron = "0 0 */6 * * *")
+	@Scheduled(cron = "0 */5 * * * *")
 	@SchedulerLock(name = "auctionCacheScheduler")
 	void refreshCache() {
 		for (AuctionSortType sortType : AuctionSortType.values()) {
