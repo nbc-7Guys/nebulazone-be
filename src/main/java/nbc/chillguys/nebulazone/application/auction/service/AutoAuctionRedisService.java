@@ -152,6 +152,9 @@ public class AutoAuctionRedisService {
 				if (wonBidVo != null) {
 					EndAuctionResponse response = EndAuctionResponse.of(auction, wonBidVo, wonAuctionProduct);
 					redisMessagePublisher.publishAuctionUpdate(auctionId, "won", response);
+
+					redisMessagePublisher.publishAuctionUpdate(auctionId, "bid", response);
+					log.info("자동 낙찰 입찰 상태 업데이트 WebSocket 메시지 발행 성공 - auctionId: {}", auctionId);
 				}
 
 			} catch (Exception e) {
@@ -162,6 +165,10 @@ public class AutoAuctionRedisService {
 			try {
 				EndAuctionResponse response = EndAuctionResponse.of(auction, null, wonAuctionProduct);
 				redisMessagePublisher.publishAuctionUpdate(auctionId, "failed", response);
+
+				// 입찰 상태 업데이트를 위한 추가 WebSocket 메시지 발행
+				redisMessagePublisher.publishAuctionUpdate(auctionId, "bid", response);
+				log.info("유찰 입찰 상태 업데이트 WebSocket 메시지 발행 성공 - auctionId: {}", auctionId);
 			} catch (Exception e) {
 				log.error("유찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
 			}
