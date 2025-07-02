@@ -45,7 +45,7 @@ public class ProdSecurityConfig {
 			.securityMatcher("/actuator/**")
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/actuator/health", "/actuator/prometheus").permitAll()
-				.anyRequest().denyAll()
+				.requestMatchers("/actuator/**").hasRole("ADMIN")
 			)
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -59,6 +59,7 @@ public class ProdSecurityConfig {
 			.cors(cors -> cors.configurationSource(prodCorsConfigurationSource()))
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.csrf(AbstractHttpConfigurer::disable)
+			.securityMatcher("/**", "!/actuator/**")
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers(
 					"/v3/api-docs/**",
