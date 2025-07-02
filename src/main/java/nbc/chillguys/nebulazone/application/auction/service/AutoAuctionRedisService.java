@@ -81,14 +81,15 @@ public class AutoAuctionRedisService {
 			return;
 		}
 
+		Product wonAuctionProduct = auction.getProduct();
+
 		if (auction.isWon()) {
-			Product wonAuctionProduct = auction.getProduct();
 			wonAuctionProduct.purchase();
 
 			try {
-				productDomainService.deleteProductFromEs(wonAuctionProduct.getId());
+				productDomainService.markProductAsPurchased(wonAuctionProduct.getId());
 			} catch (Exception e) {
-				log.info("자동 낙찰 시 엘리스틱 서치에서 경매 삭제 중 에러 발생: {}", wonAuctionProduct.getId(), e);
+				log.info("자동 낙찰 완료, ES에 판매 완료로 변경 중 에러발생, productId: {}", wonAuctionProduct.getId(), e);
 			}
 
 			User seller = wonAuctionProduct.getSeller();
@@ -143,7 +144,6 @@ public class AutoAuctionRedisService {
 			transactionDomainService.createTransaction(sellerTxCreateCommand);
 
 			try {
-
 				BidVo wonBidVo = bidVoList.stream()
 					.filter(bidVo -> BidStatus.WON.name().equals(bidVo.getBidStatus()))
 					.findFirst()
@@ -158,6 +158,12 @@ public class AutoAuctionRedisService {
 				log.error("자동 낙찰 WebSocket 브로드캐스트 실패 - auctionId: {}", auctionId, e);
 			}
 
+		} else {
+			try {
+				productDomainService.deleteProductFromEs(wonAuctionProduct.getId());
+			} catch (Exception e) {
+				log.info("자동 낙찰 완료, ES 삭제 중 에러발생, productId: {}", wonAuctionProduct.getId(), e);
+			}
 		}
 
 		cleanUpRedisAuctionAndBid(auctionId);
