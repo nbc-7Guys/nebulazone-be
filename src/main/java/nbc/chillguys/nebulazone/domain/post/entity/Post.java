@@ -60,8 +60,7 @@ public class Post extends BaseEntity {
 
 	@ElementCollection
 	@CollectionTable(name = "post_images", joinColumns = @JoinColumn(name = "post_id"))
-	@Column(name = "image_url")
-	private List<PostImage> postImages = new ArrayList<>();
+	private final List<PostImage> postImages = new ArrayList<>();
 
 	@Builder
 	private Post(String title, String content, PostType type, User user) {

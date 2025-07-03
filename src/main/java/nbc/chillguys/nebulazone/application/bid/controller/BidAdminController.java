@@ -49,8 +49,8 @@ public class BidAdminController {
 	}
 
 	@DeleteMapping("/{bidId}")
-	public ResponseEntity<Void> deleteBid(@PathVariable Long bidId) {
-		bidAdminService.deleteBid(bidId);
+	public ResponseEntity<Void> cancelStatusBid(@PathVariable Long bidId) {
+		bidAdminService.cancelStatusBid(bidId);
 		return ResponseEntity.noContent().build();
 	}
 }

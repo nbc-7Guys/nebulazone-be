@@ -25,7 +25,17 @@
       },
       "nori_part_of_speech": {
         "type": "nori_part_of_speech",
-        "stoptags": ["E", "J", "IC", "SF", "SE", "SSO", "SSC", "SC", "SY"]
+        "stoptags": [
+          "E",
+          "J",
+          "IC",
+          "SF",
+          "SE",
+          "SSO",
+          "SSC",
+          "SC",
+          "SY"
+        ]
       }
     }
   }

@@ -33,7 +33,7 @@ import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
+import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("거래 내역 컨트롤러 단위 테스트")
@@ -48,18 +48,15 @@ import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 @Import({TestSecurityConfig.class, TestMockConfig.class})
 class TransactionControllerTest {
 
-	@Autowired
-	MockMvc mockMvc;
-
-	@MockitoBean
-	TransactionService txService;
-
 	private static final Long TRANSACTION_ID = 1L;
 	private static final Long TX_PRICE = 150000L;
 	private static final String PRODUCT_NAME = "테스트 CPU";
-
 	private final LocalDateTime txTime1 = LocalDateTime.of(2024, 12, 30, 15, 30, 0);
 	private final LocalDateTime txTime2 = LocalDateTime.of(2024, 12, 30, 20, 30, 0);
+	@Autowired
+	MockMvc mockMvc;
+	@MockitoBean
+	TransactionService txService;
 
 	@Nested
 	@DisplayName("거래내역 조회")

@@ -82,7 +82,6 @@ class ChatMessageServiceTest {
 		textMessageCommand = new ChatSendTextMessageCommand(MESSAGE_CONTENT, "TEXT");
 	}
 
-
 	@Nested
 	@DisplayName("텍스트 메시지 전송")
 	class SendTextMessageTest {

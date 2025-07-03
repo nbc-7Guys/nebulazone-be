@@ -2,7 +2,6 @@ package nbc.chillguys.nebulazone.application.chat.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.times;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +23,10 @@ import nbc.chillguys.nebulazone.application.chat.dto.request.CreateChatRoomReque
 import nbc.chillguys.nebulazone.application.chat.dto.response.CreateChatRoomResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponses;
+import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
 import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
+import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
+import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 import nbc.chillguys.nebulazone.domain.chat.entity.MessageType;
@@ -39,9 +41,6 @@ import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
-import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
-import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
-import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
 
 @DisplayName("채팅 애플리케이션 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -123,7 +122,6 @@ class ChatServiceTest {
 			.build();
 		ReflectionTestUtils.setField(chatRoom, "id", CHAT_ROOM_ID);
 	}
-
 
 	@Nested
 	@DisplayName("채팅방 생성 또는 기존 채팅방 조회")
@@ -241,7 +239,7 @@ class ChatServiceTest {
 
 			// then
 			assertThat(result.chatRooms()).hasSize(2);
-			assertThat(result.chatRooms().get(0).chatRoomId()).isEqualTo(CHAT_ROOM_ID);
+			assertThat(result.chatRooms().getFirst().chatRoomId()).isEqualTo(CHAT_ROOM_ID);
 			verify(chatDomainService).findChatRooms(buyer);
 		}
 
@@ -268,7 +266,6 @@ class ChatServiceTest {
 		@DisplayName("채팅 기록 조회 성공")
 		void success_findChatHistories() {
 			// given
-			Long lastId = null;
 			int size = 30;
 			FindChatHistoryResponse response1 = new FindChatHistoryResponse(
 				1L, "안녕하세요", LocalDateTime.now(), MessageType.TEXT);
@@ -277,17 +274,17 @@ class ChatServiceTest {
 			List<FindChatHistoryResponse> responses = List.of(response1, response2);
 
 			willDoNothing().given(chatDomainService).validateUserAccessToChatRoom(buyer, CHAT_ROOM_ID);
-			given(chatDomainService.findChatHistoryResponses(CHAT_ROOM_ID, lastId, size)).willReturn(responses);
+			given(chatDomainService.findChatHistoryResponses(CHAT_ROOM_ID, null, size)).willReturn(responses);
 
 			// when
-			List<FindChatHistoryResponse> result = chatService.findChatHistories(buyer, CHAT_ROOM_ID, lastId, size);
+			List<FindChatHistoryResponse> result = chatService.findChatHistories(buyer, CHAT_ROOM_ID, null, size);
 
 			// then
 			assertThat(result).hasSize(2);
 			assertThat(result.get(0).message()).isEqualTo("안녕하세요");
 			assertThat(result.get(1).message()).isEqualTo("반갑습니다");
 			verify(chatDomainService).validateUserAccessToChatRoom(buyer, CHAT_ROOM_ID);
-			verify(chatDomainService).findChatHistoryResponses(CHAT_ROOM_ID, lastId, size);
+			verify(chatDomainService).findChatHistoryResponses(CHAT_ROOM_ID, null, size);
 		}
 
 		@Test

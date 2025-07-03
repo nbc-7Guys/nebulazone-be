@@ -54,7 +54,7 @@ public class DistributedLockAspect {
 	}
 
 	private String parseLockKey(ProceedingJoinPoint joinPoint, String keyExpression) {
-		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+		MethodSignature signature = (MethodSignature)joinPoint.getSignature();
 		Method method = signature.getMethod();
 
 		Object[] args = joinPoint.getArgs();

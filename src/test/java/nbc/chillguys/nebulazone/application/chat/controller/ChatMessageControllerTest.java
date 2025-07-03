@@ -23,7 +23,7 @@ import nbc.chillguys.nebulazone.application.chat.service.ChatMessageService;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
+import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})
@@ -49,7 +49,7 @@ class ChatMessageControllerTest {
 	class SendImageMessageTest {
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("이미지 메시지 전송 성공")
 		void sendImageMessage_Success() throws Exception {
 			// given
@@ -75,7 +75,7 @@ class ChatMessageControllerTest {
 		}
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("PNG 이미지 파일 전송 성공")
 		void sendImageMessage_PngFile_Success() throws Exception {
 			// given
@@ -111,7 +111,7 @@ class ChatMessageControllerTest {
 		}
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("빈 이미지 파일로 요청 - 200 성공 (현재 구현에서는 빈 파일도 허용)")
 		void sendImageMessage_EmptyImageFile() throws Exception {
 			// given
@@ -137,7 +137,7 @@ class ChatMessageControllerTest {
 		}
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("타입 파라미터 없이 요청 - 400 에러")
 		void sendImageMessage_NoTypeParameter() throws Exception {
 			// given
@@ -156,7 +156,7 @@ class ChatMessageControllerTest {
 		}
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("잘못된 채팅방 ID 형식 - 500 에러")
 		void sendImageMessage_InvalidRoomIdFormat() throws Exception {
 			// given
@@ -176,7 +176,7 @@ class ChatMessageControllerTest {
 		}
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("서비스 예외 발생 시 500 에러")
 		void sendImageMessage_ServiceException() throws Exception {
 			// given

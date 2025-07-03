@@ -36,7 +36,7 @@ import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
+import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("포인트 히스토리 컨트롤러 테스트")

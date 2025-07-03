@@ -9,10 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
 import nbc.chillguys.nebulazone.application.notification.dto.UnreadNotificationResponses;
 import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
-import nbc.chillguys.nebulazone.domain.notification.entity.NotificationType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 
 @RestController

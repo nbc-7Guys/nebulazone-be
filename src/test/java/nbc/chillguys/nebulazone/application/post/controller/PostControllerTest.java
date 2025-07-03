@@ -23,14 +23,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.SearchPostResponse;
 import nbc.chillguys.nebulazone.application.post.service.PostService;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
+import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})
@@ -50,9 +48,6 @@ class PostControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-	@Autowired
-	private ObjectMapper objectMapper;
-
 	@Nested
 	@DisplayName("게시글 생성")
 	class CreatePostTest {
@@ -60,7 +55,7 @@ class PostControllerTest {
 		@Test
 		@DisplayName("게시글 생성 성공")
 		@WithCustomMockUser
-		void success_createPost() throws Exception {
+		void success_createPost() {
 			// 다시 짜야함
 		}
 	}

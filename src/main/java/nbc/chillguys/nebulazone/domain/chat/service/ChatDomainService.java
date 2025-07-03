@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,9 +55,8 @@ public class ChatDomainService {
 	 */
 	@Transactional(readOnly = true)
 	public List<ChatRoomInfo> findChatRooms(User user) {
-		List<ChatRoomInfo> chatRooms = chatRoomRepository.findAllByUserId(user.getId());
 
-		return chatRooms;
+		return chatRoomRepository.findAllByUserId(user.getId());
 	}
 
 	/**
@@ -88,11 +86,9 @@ public class ChatDomainService {
 		Slice<ChatHistory> slice = chatRoomHistoryRepository.findAllByChatRoomIdOrderBySendTimeAsc(
 			roomId, lastId, pageRequest);
 
-		List<FindChatHistoryResponse> responses = slice.getContent().stream()
+		return slice.getContent().stream()
 			.map(FindChatHistoryResponse::from)
 			.toList();
-
-		return responses;
 	}
 
 	/**
@@ -149,8 +145,8 @@ public class ChatDomainService {
 	 *
 	 * @param roomId 저장할 채팅방 ID
 	 * @param messagesFromRedis 레디스에서 가져온 메시지들
-	 * @throws ChatErrorCode CHAT_ROOM_NOT_FOUND
 	 */
+	@Transactional
 	public void saveChatHistories(Long roomId, List<ChatMessageInfo> messagesFromRedis) {
 
 		ChatRoom chatRoom = findChatRoom(roomId);
@@ -182,9 +178,8 @@ public class ChatDomainService {
 	 */
 	@Transactional(readOnly = true)
 	public ChatRoom findChatRoom(Long roomId) {
-		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+		return chatRoomRepository.findById(roomId)
 			.orElseThrow(() -> new ChatException(ChatErrorCode.CHAT_ROOM_NOT_FOUND));
-		return chatRoom;
 	}
 
 }

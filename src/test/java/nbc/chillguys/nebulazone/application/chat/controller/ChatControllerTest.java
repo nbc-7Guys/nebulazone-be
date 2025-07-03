@@ -32,7 +32,7 @@ import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.MessageType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
+import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})
@@ -61,7 +61,7 @@ class ChatControllerTest {
 	class CreateChatRoomTest {
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("채팅방 생성 성공")
 		void createChatRoom_Success() throws Exception {
 			// given
@@ -84,7 +84,7 @@ class ChatControllerTest {
 		}
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("채팅방 생성 시 서비스 예외 발생")
 		void createChatRoom_ServiceException() throws Exception {
 			// given
@@ -106,7 +106,7 @@ class ChatControllerTest {
 	class FindChatRoomsTest {
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("참여중인 채팅방 목록 조회 성공")
 		void findChatRooms_Success() throws Exception {
 			// given
@@ -130,7 +130,7 @@ class ChatControllerTest {
 		}
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("참여중인 채팅방이 없는 경우")
 		void findChatRooms_Empty() throws Exception {
 			// given
@@ -154,7 +154,7 @@ class ChatControllerTest {
 	class FindChatHistoriesTest {
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("채팅 기록 조회 성공")
 		void findChatHistories_Success() throws Exception {
 			// given
@@ -177,7 +177,7 @@ class ChatControllerTest {
 		}
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("페이징 파라미터와 함께 채팅 기록 조회")
 		void findChatHistories_WithPaging() throws Exception {
 			// given
@@ -207,7 +207,7 @@ class ChatControllerTest {
 	class LeaveChatRoomTest {
 
 		@Test
-		@WithCustomMockUser(id = 1L)
+		@WithCustomMockUser
 		@DisplayName("채팅방 나가기 성공")
 		void leaveChatRoom_Success() throws Exception {
 			// given

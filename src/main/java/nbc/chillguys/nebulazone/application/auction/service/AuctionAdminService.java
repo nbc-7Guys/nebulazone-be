@@ -1,7 +1,5 @@
 package nbc.chillguys.nebulazone.application.auction.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,7 +17,6 @@ import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionAdminDomainService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
-import nbc.chillguys.nebulazone.domain.product.entity.ProductImage;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
 
@@ -59,11 +56,6 @@ public class AuctionAdminService {
 		Product product = restoredAuction.getProduct();
 		User user = product.getSeller();
 		ProductEndTime productEndTime = ProductEndTime.from(restoredAuction.getEndTime());
-
-		List<String> imageUrls = product.getProductImages()
-			.stream()
-			.map(ProductImage::getUrl)
-			.toList();
 
 		CreateRedisAuctionDto redisDto =
 			new CreateRedisAuctionDto(product, restoredAuction, user, productEndTime);

@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.notification.dto.NotificationInfo;
 import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
+import nbc.chillguys.nebulazone.domain.notification.dto.NotificationInfo;
 import nbc.chillguys.nebulazone.domain.notification.entity.Notification;
 import nbc.chillguys.nebulazone.domain.notification.exception.NotificationErrorCode;
 import nbc.chillguys.nebulazone.domain.notification.exception.NotificationException;
@@ -46,7 +46,6 @@ public class NotificationDomainService {
 	}
 
 	public List<NotificationInfo> findUnreadNotifications(Long userId) {
-		List<NotificationInfo> notifications = notificationRepository.findQueryAllUnreadNotification(userId);
-		return notifications;
+		return notificationRepository.findQueryAllUnreadNotification(userId);
 	}
 }

@@ -13,6 +13,14 @@ public record FindSortTypeAuctionResponse(
 	LocalDateTime lastUpdated
 ) {
 
+	public static FindSortTypeAuctionResponse from(List<FindAllAuctionsDto> findAllAuctionsDtoList) {
+		List<AuctionSortTypeInfo> auctionsBySortType = findAllAuctionsDtoList.stream()
+			.map(AuctionSortTypeInfo::from)
+			.toList();
+
+		return new FindSortTypeAuctionResponse(auctionsBySortType, LocalDateTime.now());
+	}
+
 	record AuctionSortTypeInfo(
 		Long auctionId,
 		Long startPrice,
@@ -38,13 +46,5 @@ public record FindSortTypeAuctionResponse(
 				findAllAuctionsDto.bidCount()
 			);
 		}
-	}
-
-	public static FindSortTypeAuctionResponse from(List<FindAllAuctionsDto> findAllAuctionsDtoList) {
-		List<AuctionSortTypeInfo> auctionsBySortType = findAllAuctionsDtoList.stream()
-			.map(AuctionSortTypeInfo::from)
-			.toList();
-
-		return new FindSortTypeAuctionResponse(auctionsBySortType, LocalDateTime.now());
 	}
 }

@@ -44,6 +44,13 @@ public class ChatPubSubMessage {
 	}
 
 	/**
+	 * Redis 채널명 생성
+	 */
+	public static String getChannelName(Long roomId) {
+		return "chat:room:" + roomId;
+	}
+
+	/**
 	 * ChatPubSubMessage를 ChatMessageInfo로 변환
 	 */
 	public ChatMessageInfo toChatMessageInfo() {
@@ -55,12 +62,5 @@ public class ChatPubSubMessage {
 			this.messageType,
 			this.timestamp
 		);
-	}
-
-	/**
-	 * Redis 채널명 생성
-	 */
-	public static String getChannelName(Long roomId) {
-		return "chat:room:" + roomId;
 	}
 }

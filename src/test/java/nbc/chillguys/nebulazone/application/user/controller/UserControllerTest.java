@@ -39,7 +39,7 @@ import nbc.chillguys.nebulazone.application.user.service.UserService;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
+import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("유저 컨트롤러 단위 테스트")
@@ -53,17 +53,7 @@ import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 	}
 )
 class UserControllerTest {
-	@MockitoBean
-	private UserService userService;
-
-	@Autowired
-	private MockMvc mockMvc;
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
 	private final LocalDateTime now = LocalDateTime.now();
-
 	private final UserResponse userResponse = new UserResponse(
 		1L,
 		"test@test.com",
@@ -81,6 +71,12 @@ class UserControllerTest {
 		now,
 		now
 	);
+	@MockitoBean
+	private UserService userService;
+	@Autowired
+	private MockMvc mockMvc;
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Test
 	@DisplayName("회원 가입 성공")
@@ -134,14 +130,13 @@ class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("유저 조회 성공")
-	void success_getUser() throws Exception {
+	@DisplayName("내 정보 조회 성공")
+	@WithCustomMockUser
+	void success_getMyInfo() throws Exception {
 		// Given
-		given(userService.getUser(anyLong()))
-			.willReturn(userResponse);
 
 		// When
-		ResultActions perform = mockMvc.perform(get("/users/{userId}", 1L));
+		ResultActions perform = mockMvc.perform(get("/users/me"));
 
 		// Then
 		perform.andDo(print())
@@ -156,25 +151,18 @@ class UserControllerTest {
 				jsonPath("$.nickname")
 					.value("test"),
 				jsonPath("$.profileImageUrl")
-					.value("test_profile_image_url"),
+					.value("test.jpg"),
 				jsonPath("$.point")
 					.value(0),
 				jsonPath("$.oAuthType")
 					.value("DOMAIN"),
 				jsonPath("$.addresses[0].addressNickname")
-					.value("address_nickname"),
+					.value("test_address_nickname"),
 				jsonPath("$.addresses[0].roadAddress")
 					.value("test_road_address"),
 				jsonPath("$.addresses[0].detailAddress")
-					.value("test_detail_address"),
-				jsonPath("$.createdAt")
-					.value(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))),
-				jsonPath("$.modifiedAt")
-					.value(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+					.value("test_detail_address")
 			);
-
-		verify(userService, times(1)).getUser(anyLong());
-
 	}
 
 	@Test

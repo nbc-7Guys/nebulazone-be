@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -17,6 +18,7 @@ import nbc.chillguys.nebulazone.application.pointhistory.dto.response.AdminPoint
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.QAdminPointHistoryResponse;
 import nbc.chillguys.nebulazone.domain.user.entity.QUser;
 
+@Repository
 @RequiredArgsConstructor
 public class PointHistoryAdminRepositoryCustomImpl implements PointHistoryAdminRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
@@ -26,7 +28,7 @@ public class PointHistoryAdminRepositoryCustomImpl implements PointHistoryAdminR
 		Pageable pageable) {
 		QUser user = QUser.user;
 		BooleanBuilder builder = new BooleanBuilder();
-		
+
 		if (request.email() != null && !request.email().isBlank()) {
 			builder.and(user.email.containsIgnoreCase(request.email()));
 		}

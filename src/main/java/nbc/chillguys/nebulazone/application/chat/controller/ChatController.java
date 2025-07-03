@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.chat.dto.request.CreateChatRoomRequest;
 import nbc.chillguys.nebulazone.application.chat.dto.response.CreateChatRoomResponse;
