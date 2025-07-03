@@ -18,6 +18,7 @@ import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
+import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
 import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
 import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
@@ -107,6 +108,7 @@ public class ChatMessageService {
 	 *
 	 * @param roomId 채팅방 id
 	 */
+	@DistributedLock(key = "'chat:save:' + #roomId")
 	@Transactional
 	public void saveMessagesToDb(Long roomId) {
 		// 채팅방Id를 기준으로 레디스에 있는 채팅기록들 불러오기
