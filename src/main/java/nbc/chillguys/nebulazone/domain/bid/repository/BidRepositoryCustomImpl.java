@@ -36,6 +36,7 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 		Pageable pageable = PageRequest.of(page, size);
 		List<FindBidsByAuctionInfo> contents = jpaQueryFactory.select(
 				new QFindBidsByAuctionInfo(
+					bid.user.id,
 					bid.price,
 					bid.createdAt,
 					bid.status,
