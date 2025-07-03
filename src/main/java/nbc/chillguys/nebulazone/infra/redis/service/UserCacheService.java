@@ -40,7 +40,11 @@ public class UserCacheService {
 	public void deleteUserById(Long userId) {
 		String key = USER_CACHE_PREFIX + userId;
 
-		redisTemplate.delete(key);
+		Object cachedValue = redisTemplate.opsForValue().get(key);
+
+		if (cachedValue != null) {
+			redisTemplate.delete(key);
+		}
 	}
 
 	private User fetchAndCacheUser(Long userId, String key, long ttl) {
