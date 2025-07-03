@@ -8,6 +8,7 @@ import nbc.chillguys.nebulazone.domain.bid.dto.FindBidsByAuctionInfo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
 public record FindBidResponse(
+	Long bidUserId,
 	String bidUserNickname,
 	String bidStatus,
 	Long bidPrice,
@@ -19,6 +20,7 @@ public record FindBidResponse(
 
 	public static FindBidResponse from(FindBidsByAuctionInfo findBidsByAuctionInfo) {
 		return new FindBidResponse(
+			findBidsByAuctionInfo.bidUserId(),
 			findBidsByAuctionInfo.bidUserNickname(),
 			findBidsByAuctionInfo.bidStatus().name(),
 			findBidsByAuctionInfo.bidPrice(),
@@ -29,6 +31,7 @@ public record FindBidResponse(
 
 	public static FindBidResponse from(BidVo bidvo) {
 		return new FindBidResponse(
+			bidvo.getBidUserId(),
 			bidvo.getBidUserNickname(),
 			bidvo.getBidStatus(),
 			bidvo.getBidPrice(),
