@@ -93,7 +93,7 @@ public class ProductController {
 		@PathVariable("catalogId") Long catalogId,
 		@PathVariable("productId") Long productId
 	) {
-		PurchaseProductResponse response = productService.purchaseProduct(user, catalogId, productId);
+		PurchaseProductResponse response = productService.purchaseProduct(user.getId(), catalogId, productId);
 
 		return ResponseEntity.ok(response);
 	}

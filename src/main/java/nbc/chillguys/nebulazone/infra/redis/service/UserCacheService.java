@@ -18,11 +18,10 @@ import nbc.chillguys.nebulazone.infra.redis.vo.UserVo;
 @RequiredArgsConstructor
 public class UserCacheService {
 
+	private static final String USER_CACHE_PREFIX = "user:";
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final UserRepository userRepository;
 	private final ObjectMapper objectMapper;
-
-	private static final String USER_CACHE_PREFIX = "user:";
 
 	public User getUserById(Long userId, long ttl) {
 		String key = USER_CACHE_PREFIX + userId;

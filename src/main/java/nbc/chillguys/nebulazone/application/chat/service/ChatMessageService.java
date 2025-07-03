@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +17,7 @@ import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
+import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
 import nbc.chillguys.nebulazone.infra.redis.service.WebSocketSessionRedisService;
 import nbc.chillguys.nebulazone.infra.websocket.dto.SessionUser;
@@ -64,9 +64,8 @@ public class ChatMessageService {
 	 * 메세지 전송(이미지).
 	 *
 	 * @param user 접속한 유저의 인증 객체
-	 * @param multipartFile 전송할 이미지 파일
+	 * @param request 전송할 이미지 파일 및 타입
 	 * @param roomId 메시지를 보낼 방ID
-	 * @param type 타입
 	 */
 	public void sendImageMessage(User user, Long roomId, ImageMessageRequest request) {
 		SessionUser sessionUser = SessionUser.from(user);
@@ -107,6 +106,7 @@ public class ChatMessageService {
 	 *
 	 * @param roomId 채팅방 id
 	 */
+	@DistributedLock(key = "'chat:save:' + #roomId")
 	@Transactional
 	public void saveMessagesToDb(Long roomId) {
 		// 채팅방Id를 기준으로 레디스에 있는 채팅기록들 불러오기

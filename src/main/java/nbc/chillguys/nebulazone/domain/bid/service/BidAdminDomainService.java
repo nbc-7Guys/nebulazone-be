@@ -57,7 +57,7 @@ public class BidAdminDomainService {
 	 * @author 정석현
 	 */
 	@Transactional
-	public void deleteBid(Long bidId) {
+	public void cancelStatusBid(Long bidId) {
 		Bid bid = findByBidId(bidId);
 		bid.cancelBid();
 	}

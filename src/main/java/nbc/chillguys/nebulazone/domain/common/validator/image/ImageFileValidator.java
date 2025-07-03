@@ -13,7 +13,6 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class ImageFileValidator implements ConstraintValidator<ImageFile, Object> {
-	private final Tika tika = new Tika();
 	private static final List<String> VALID_TYPE_LIST = List.of(
 		MediaType.IMAGE_JPEG_VALUE,
 		"image/pjpeg",
@@ -23,6 +22,7 @@ public class ImageFileValidator implements ConstraintValidator<ImageFile, Object
 		"image/x-windows-bmp"
 	);
 	private static final long MAX_SIZE = 2 * 1024 * 1024;
+	private final Tika tika = new Tika();
 
 	@Override
 	public boolean isValid(Object value, ConstraintValidatorContext context) {

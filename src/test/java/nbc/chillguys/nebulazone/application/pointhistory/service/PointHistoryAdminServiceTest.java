@@ -16,6 +16,7 @@ import nbc.chillguys.nebulazone.domain.pointhistory.service.PointHistoryAdminDom
 import nbc.chillguys.nebulazone.domain.user.dto.UserPointChargeCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
+import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 
 @ExtendWith(MockitoExtension.class)
 class PointHistoryAdminServiceTest {
@@ -25,6 +26,9 @@ class PointHistoryAdminServiceTest {
 
 	@Mock
 	private UserDomainService userDomainService;
+
+	@Mock
+	private UserCacheService userCacheService;
 
 	@InjectMocks
 	private PointHistoryAdminService pointHistoryAdminService;

@@ -17,22 +17,16 @@ import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
 import nbc.chillguys.nebulazone.domain.pointhistory.dto.PointHistoryCommand;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistory;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
-import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 import nbc.chillguys.nebulazone.domain.pointhistory.service.PointHistoryDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @Service
 @RequiredArgsConstructor
 public class PointHistoryService {
 
 	private final PointHistoryDomainService pointHistoryDomainService;
-	private final UserDomainService userDomainService;
 
 	public PointResponse createPointHistory(PointRequest request, User user) {
-		if (request.type() == PointHistoryType.EXCHANGE) {
-			userDomainService.validEnoughPoint(user, request.price());
-		}
 
 		PointHistoryCommand command = PointHistoryCommand.of(request, user);
 		PointHistory pointHistory = pointHistoryDomainService.createPointHistory(command, PointHistoryStatus.PENDING);

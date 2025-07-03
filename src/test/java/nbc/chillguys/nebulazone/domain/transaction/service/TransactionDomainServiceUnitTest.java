@@ -41,12 +41,6 @@ import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 @ExtendWith(MockitoExtension.class)
 class TransactionDomainServiceUnitTest {
 
-	@Mock
-	TransactionRepository transactionRepository;
-
-	@InjectMocks
-	TransactionDomainService transactionDomainService;
-
 	private static final String SELLER_EMAIL = "seller@test.com";
 	private static final String SELLER_NICKNAME = "판매자";
 	private static final String BUYER_EMAIL = "buyer@test.com";
@@ -61,20 +55,90 @@ class TransactionDomainServiceUnitTest {
 	private static final String DIRECT_METHOD = "DIRECT";
 	private static final String AUCTION_METHOD = "AUCTION";
 	private static final String INVALID_METHOD = "INVALID";
-
-	private User seller;
+	@Mock
+	TransactionRepository transactionRepository;
+	@InjectMocks
+	TransactionDomainService transactionDomainService;
 	private User buyer;
 	private User otherUser;
-	private Catalog catalog;
 	private Product product;
 
 	@BeforeEach
 	void setUp() {
-		seller = createUser(1L, SELLER_EMAIL, SELLER_NICKNAME);
+		User seller = createUser(1L, SELLER_EMAIL, SELLER_NICKNAME);
 		buyer = createUser(2L, BUYER_EMAIL, BUYER_NICKNAME);
 		otherUser = createUser(3L, OTHER_USER_EMAIL, OTHER_USER_NICKNAME);
-		catalog = createCatalog(1L, CATALOG_NAME, CATALOG_DESCRIPTION);
-		product = createProduct(1L, PRODUCT_NAME, PRODUCT_DESCRIPTION, TRANSACTION_PRICE, seller, catalog);
+		Catalog catalog = createCatalog();
+		product = createProduct(seller, catalog);
+	}
+
+	// 팩토리 메서드들
+	private User createUser(Long id, String email, String nickname) {
+		User user = User.builder()
+			.email(email)
+			.nickname(nickname)
+			.oAuthType(OAuthType.DOMAIN)
+			.roles(Set.of(UserRole.ROLE_USER))
+			.build();
+		ReflectionTestUtils.setField(user, "id", id);
+		return user;
+	}
+
+	private Catalog createCatalog() {
+		Catalog catalog = Catalog.builder()
+			.name(TransactionDomainServiceUnitTest.CATALOG_NAME)
+			.description(TransactionDomainServiceUnitTest.CATALOG_DESCRIPTION)
+			.type(CatalogType.CPU)
+			.build();
+		ReflectionTestUtils.setField(catalog, "id", 1L);
+		return catalog;
+	}
+
+	private Product createProduct(User seller, Catalog catalog) {
+		Product product = Product.builder()
+			.name(TransactionDomainServiceUnitTest.PRODUCT_NAME)
+			.description(TransactionDomainServiceUnitTest.PRODUCT_DESCRIPTION)
+			.price(TransactionDomainServiceUnitTest.TRANSACTION_PRICE)
+			.txMethod(ProductTxMethod.DIRECT)
+			.seller(seller)
+			.catalog(catalog)
+			.build();
+		ReflectionTestUtils.setField(product, "id", 1L);
+		return product;
+	}
+
+	private Transaction createTransaction(Long id, User user, Product product, TransactionMethod method) {
+		Transaction transaction = Transaction.builder()
+			.user(user)
+			.product(product)
+			.method(method)
+			.price(TransactionDomainServiceUnitTest.TRANSACTION_PRICE)
+			.build();
+		ReflectionTestUtils.setField(transaction, "id", id);
+		return transaction;
+	}
+
+	private List<TransactionFindAllInfo> createTransactionFindAllInfoList() {
+		return List.of(
+			new TransactionFindAllInfo(1L, TRANSACTION_PRICE, TransactionMethod.DIRECT,
+				LocalDateTime.now(), PRODUCT_NAME, true, 1L, buyer.getNickname(), UserType.BUYER),
+			new TransactionFindAllInfo(2L, TRANSACTION_PRICE + 50000L, TransactionMethod.AUCTION,
+				LocalDateTime.now().minusHours(1), PRODUCT_NAME, true, 1L, buyer.getNickname(), UserType.BUYER)
+		);
+	}
+
+	private TransactionFindDetailInfo createTransactionFindDetailInfo(Long transactionId) {
+		return new TransactionFindDetailInfo(transactionId, 1L, SELLER_NICKNAME, SELLER_EMAIL,
+			TRANSACTION_PRICE, LocalDateTime.now(), TransactionMethod.DIRECT,
+			1L, PRODUCT_NAME, LocalDateTime.now().minusDays(1), true);
+	}
+
+	// 공통 예외 검증 헬퍼 메서드
+	private void assertTransactionException(Runnable executable, TransactionErrorCode expectedErrorCode) {
+		assertThatThrownBy(executable::run)
+			.isInstanceOf(TransactionException.class)
+			.extracting("errorCode")
+			.isEqualTo(expectedErrorCode);
 	}
 
 	@Nested
@@ -88,7 +152,7 @@ class TransactionDomainServiceUnitTest {
 			TransactionCreateCommand command = TransactionCreateCommand.of(
 				buyer, UserType.BUYER, product, DIRECT_METHOD, TRANSACTION_PRICE, LocalDateTime.now());
 			Transaction expectedTransaction = createTransaction(1L, buyer, product,
-				TransactionMethod.DIRECT, TRANSACTION_PRICE);
+				TransactionMethod.DIRECT);
 
 			given(transactionRepository.save(any(Transaction.class))).willReturn(expectedTransaction);
 
@@ -109,7 +173,7 @@ class TransactionDomainServiceUnitTest {
 			TransactionCreateCommand command = TransactionCreateCommand.of(
 				buyer, UserType.BUYER, product, AUCTION_METHOD, TRANSACTION_PRICE, LocalDateTime.now());
 			Transaction expectedTransaction = createTransaction(2L, buyer, product,
-				TransactionMethod.AUCTION, TRANSACTION_PRICE);
+				TransactionMethod.AUCTION);
 
 			given(transactionRepository.save(any(Transaction.class))).willReturn(expectedTransaction);
 
@@ -157,7 +221,7 @@ class TransactionDomainServiceUnitTest {
 
 			// then
 			assertThat(result.getTotalElements()).isEqualTo(2);
-			assertThat(result.getContent().get(0).txPrice()).isEqualTo(TRANSACTION_PRICE);
+			assertThat(result.getContent().getFirst().txPrice()).isEqualTo(TRANSACTION_PRICE);
 			assertThat(result.getContent().get(0).productName()).isEqualTo(PRODUCT_NAME);
 			assertThat(result.getContent().get(0).txMethod()).isEqualTo(TransactionMethod.DIRECT);
 			assertThat(result.getContent().get(1).txMethod()).isEqualTo(TransactionMethod.AUCTION);
@@ -215,75 +279,5 @@ class TransactionDomainServiceUnitTest {
 			assertTransactionException(() -> transactionDomainService.findMyTransaction(otherUser, transactionId),
 				TransactionErrorCode.NOT_FOUNT_TRANSACTION);
 		}
-	}
-
-	// 팩토리 메서드들
-	private User createUser(Long id, String email, String nickname) {
-		User user = User.builder()
-			.email(email)
-			.nickname(nickname)
-			.oAuthType(OAuthType.DOMAIN)
-			.roles(Set.of(UserRole.ROLE_USER))
-			.build();
-		ReflectionTestUtils.setField(user, "id", id);
-		return user;
-	}
-
-	private Catalog createCatalog(Long id, String name, String description) {
-		Catalog catalog = Catalog.builder()
-			.name(name)
-			.description(description)
-			.type(CatalogType.CPU)
-			.build();
-		ReflectionTestUtils.setField(catalog, "id", id);
-		return catalog;
-	}
-
-	private Product createProduct(Long id, String name, String description, Long price, User seller, Catalog catalog) {
-		Product product = Product.builder()
-			.name(name)
-			.description(description)
-			.price(price)
-			.txMethod(ProductTxMethod.DIRECT)
-			.seller(seller)
-			.catalog(catalog)
-			.build();
-		ReflectionTestUtils.setField(product, "id", id);
-		return product;
-	}
-
-	private Transaction createTransaction(Long id, User user, Product product,
-		TransactionMethod method, Long price) {
-		Transaction transaction = Transaction.builder()
-			.user(user)
-			.product(product)
-			.method(method)
-			.price(price)
-			.build();
-		ReflectionTestUtils.setField(transaction, "id", id);
-		return transaction;
-	}
-
-	private List<TransactionFindAllInfo> createTransactionFindAllInfoList() {
-		return List.of(
-			new TransactionFindAllInfo(1L, TRANSACTION_PRICE, TransactionMethod.DIRECT,
-				LocalDateTime.now(), PRODUCT_NAME, true, 1L, buyer.getNickname(), UserType.BUYER),
-			new TransactionFindAllInfo(2L, TRANSACTION_PRICE + 50000L, TransactionMethod.AUCTION,
-				LocalDateTime.now().minusHours(1), PRODUCT_NAME, true, 1L, buyer.getNickname(), UserType.BUYER)
-		);
-	}
-
-	private TransactionFindDetailInfo createTransactionFindDetailInfo(Long transactionId) {
-		return new TransactionFindDetailInfo(transactionId, 1L, SELLER_NICKNAME, SELLER_EMAIL,
-			TRANSACTION_PRICE, LocalDateTime.now(), TransactionMethod.DIRECT,
-			1L, PRODUCT_NAME, LocalDateTime.now().minusDays(1), true);
-	}
-
-	// 공통 예외 검증 헬퍼 메서드
-	private void assertTransactionException(Runnable executable, TransactionErrorCode expectedErrorCode) {
-		assertThatThrownBy(executable::run)
-			.isInstanceOf(TransactionException.class)
-			.extracting("errorCode")
-			.isEqualTo(expectedErrorCode);
 	}
 }

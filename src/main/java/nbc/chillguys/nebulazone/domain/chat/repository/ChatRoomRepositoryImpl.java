@@ -9,15 +9,15 @@ import static nbc.chillguys.nebulazone.domain.user.entity.QUser.*;
 
 import java.util.List;
 
+import org.springframework.stereotype.Repository;
+
 import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.catalog.entity.QCatalog;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
-import nbc.chillguys.nebulazone.domain.product.entity.QProductImage;
 
+@Repository
 @RequiredArgsConstructor
 public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;

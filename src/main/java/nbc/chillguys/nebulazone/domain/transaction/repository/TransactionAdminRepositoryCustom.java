@@ -7,5 +7,5 @@ import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionAdminSearchQue
 import nbc.chillguys.nebulazone.domain.transaction.entity.Transaction;
 
 public interface TransactionAdminRepositoryCustom {
-	public Page<Transaction> searchTransactions(TransactionAdminSearchQueryCommand command, Pageable pageable);
+	Page<Transaction> searchTransactions(TransactionAdminSearchQueryCommand command, Pageable pageable);
 }

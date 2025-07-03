@@ -72,7 +72,7 @@ public class Product extends BaseEntity {
 
 	@ElementCollection
 	@CollectionTable(name = "product_images", joinColumns = @JoinColumn(name = "product_id"))
-	private List<ProductImage> productImages = new ArrayList<>();
+	private final List<ProductImage> productImages = new ArrayList<>();
 
 	@Builder
 	private Product(

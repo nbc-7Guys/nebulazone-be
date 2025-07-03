@@ -13,20 +13,18 @@ import nbc.chillguys.nebulazone.application.chat.dto.request.CreateChatRoomReque
 import nbc.chillguys.nebulazone.application.chat.dto.response.CreateChatRoomResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponses;
+import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
 import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
-import nbc.chillguys.nebulazone.domain.chat.entity.ChatHistory;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatException;
 import nbc.chillguys.nebulazone.domain.chat.service.ChatDomainService;
 import nbc.chillguys.nebulazone.domain.notification.entity.NotificationType;
-import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
-import nonapi.io.github.classgraph.fileslice.Slice;
 
 @Slf4j
 @Service
@@ -138,9 +136,7 @@ public class ChatService {
 
 		chatDomainService.validateUserAccessToChatRoom(user, roomId);
 
-		List<FindChatHistoryResponse> responses = chatDomainService.findChatHistoryResponses(roomId, lastId, size);
-
-		return responses;
+		return chatDomainService.findChatHistoryResponses(roomId, lastId, size);
 	}
 
 	/**

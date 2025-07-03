@@ -13,12 +13,14 @@ import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 import nbc.chillguys.nebulazone.domain.pointhistory.service.PointHistoryAdminDomainService;
 import nbc.chillguys.nebulazone.domain.user.dto.UserPointChargeCommand;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
+import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 
 @Service
 @RequiredArgsConstructor
 public class PointHistoryAdminService {
 	private final PointHistoryAdminDomainService pointHistoryAdminDomainService;
 	private final UserDomainService userDomainService;
+	private final UserCacheService userCacheService;
 
 	/**
 	 * 포인트 히스토리 목록을 검색/조회합니다.<br>
@@ -59,6 +61,7 @@ public class PointHistoryAdminService {
 		} else if (pointHistory.getPointHistoryType() == PointHistoryType.EXCHANGE) {
 			userDomainService.exchangeUserPoint(command);
 		}
+		userCacheService.deleteUserById(pointHistory.getUser().getId());
 	}
 
 	/**

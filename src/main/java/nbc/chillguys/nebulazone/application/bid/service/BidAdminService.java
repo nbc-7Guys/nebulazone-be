@@ -45,7 +45,7 @@ public class BidAdminService {
 		}
 
 		BidAdminSearchQueryCommand command = new BidAdminSearchQueryCommand(
-			request.auctionId(),
+			null,
 			request.userId(),
 			request.status()
 		);
@@ -57,7 +57,7 @@ public class BidAdminService {
 		Bid bid = bidAdminDomainService.findByBidId(bidId);
 		bidAdminDomainService.updateBidStatus(bidId, status);
 
-		bidRedisService.updateBidStatusByAdmin(
+		bidRedisService.updateBidByAdmin(
 			bid.getAuction().getId(),
 			bid.getUser().getId(),
 			bid.getPrice(),
@@ -66,11 +66,11 @@ public class BidAdminService {
 		);
 	}
 
-	public void deleteBid(Long bidId) {
+	public void cancelStatusBid(Long bidId) {
 		Bid bid = bidAdminDomainService.findByBidId(bidId);
-		bidAdminDomainService.deleteBid(bidId);
+		bidAdminDomainService.cancelStatusBid(bidId);
 
-		bidRedisService.deleteBidByAdmin(
+		bidRedisService.cancelBidByAdmin(
 			bid.getAuction().getId(),
 			bid.getUser().getId(),
 			bid.getPrice(),

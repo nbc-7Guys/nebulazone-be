@@ -140,9 +140,7 @@ class ProductDomainServiceUnitTest {
 				.build();
 			ReflectionTestUtils.setField(savedProduct, "id", 1L);
 
-			given(productRepository.save(any(Product.class))).will(i -> {
-				return i.<Product>getArgument(0);
-			});
+			given(productRepository.save(any(Product.class))).will(i -> i.<Product>getArgument(0));
 
 			// when
 			Product result = productDomainService.createProduct(productCreateCommand);
@@ -408,7 +406,8 @@ class ProductDomainServiceUnitTest {
 		@Test
 		@DisplayName("판매 상품 구매 실패 - 옥션 상품은 구매 불가")
 		void fail_purchaseProduct_auctionProductNotPurchasable() {
-			ProductPurchaseCommand command = new ProductPurchaseCommand(auctionProduct.getId(), user.getId(), catalog.getId());
+			ProductPurchaseCommand command = new ProductPurchaseCommand(auctionProduct.getId(), user.getId(),
+				catalog.getId());
 
 			given(productRepository.findActiveProductById(any(Long.class))).willReturn(Optional.of(auctionProduct));
 

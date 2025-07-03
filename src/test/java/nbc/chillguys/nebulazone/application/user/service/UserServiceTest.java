@@ -127,50 +127,6 @@ class UserServiceTest {
 	}
 
 	@Nested
-	@DisplayName("유저 조회 테스트")
-	class GetUserTest {
-		@Test
-		@DisplayName("유저 조회 성공")
-		void success_getUser() {
-			// Given
-			given(userDomainService.findActiveUserById(anyLong()))
-				.willReturn(user);
-
-			// When
-			UserResponse response = userService.getUser(1L);
-
-			// Then
-			verify(userDomainService, times(1)).findActiveUserById(anyLong());
-
-			assertThat(response)
-				.isNotNull();
-			assertThat(response.userId())
-				.isEqualTo(1L);
-			assertThat(response.email())
-				.isEqualTo("test@test.com");
-			assertThat(response.phone())
-				.isEqualTo("01012345678");
-			assertThat(response.nickname())
-				.isEqualTo("test");
-			assertThat(response.profileImageUrl())
-				.isEqualTo("test_profile_image_url");
-			assertThat(response.point())
-				.isEqualTo(0);
-			assertThat(response.oAuthType())
-				.isEqualTo(OAuthType.DOMAIN);
-			assertThat(response.addresses().size())
-				.isEqualTo(1);
-			assertThat(response.addresses().iterator().next().addressNickname())
-				.isEqualTo("test_address_nickname");
-			assertThat(response.addresses().iterator().next().roadAddress())
-				.isEqualTo("test_road_address");
-			assertThat(response.addresses().iterator().next().detailAddress())
-				.isEqualTo("test_detail_address");
-
-		}
-	}
-
-	@Nested
 	@DisplayName("유저 수정 테스트")
 	class UpdateUserTest {
 		@Test

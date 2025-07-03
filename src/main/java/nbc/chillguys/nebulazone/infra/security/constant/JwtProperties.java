@@ -10,22 +10,6 @@ public record JwtProperties(
 	Token token
 ) {
 
-	public record Token(
-		Access access,
-		Refresh refresh
-	) {
-	}
-
-	public record Access(
-		Duration validity
-	) {
-	}
-
-	public record Refresh(
-		Duration validity
-	) {
-	}
-
 	public long getAccessTokenExpiredMillis() {
 		return token.access().validity().toMillis();
 	}
@@ -48,5 +32,21 @@ public record JwtProperties(
 
 	public long getRefreshTokenValiditySeconds() {
 		return token.refresh().validity().getSeconds();
+	}
+
+	public record Token(
+		Access access,
+		Refresh refresh
+	) {
+	}
+
+	public record Access(
+		Duration validity
+	) {
+	}
+
+	public record Refresh(
+		Duration validity
+	) {
 	}
 }

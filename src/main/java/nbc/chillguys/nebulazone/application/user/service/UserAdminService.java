@@ -17,12 +17,14 @@ import nbc.chillguys.nebulazone.domain.user.dto.UserAdminInfo;
 import nbc.chillguys.nebulazone.domain.user.dto.UserAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.service.UserAdminDomainService;
+import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 
 @Service
 @RequiredArgsConstructor
 public class UserAdminService {
 
 	private final UserAdminDomainService userAdminDomainService;
+	private final UserCacheService userCacheService;
 
 	@Transactional(readOnly = true)
 	public CommonPageResponse<UserAdminResponse> findUsers(UserAdminSearchQuery request, Pageable pageable) {
@@ -49,14 +51,17 @@ public class UserAdminService {
 
 	public void updateUserStatus(Long userId, UserAdminUpdateStatusRequest request) {
 		userAdminDomainService.updateUserStatus(userId, request.status());
+		userCacheService.deleteUserById(userId);
 	}
 
 	public void updateUserRoles(Long userId, UserAdminUpdateRolesRequest request) {
 		userAdminDomainService.updateUserRoles(userId, request.roles());
+		userCacheService.deleteUserById(userId);
 	}
 
 	public void updateUser(Long userId, UserAdminUpdateRequest request) {
 		userAdminDomainService.updateUser(userId, request);
+		userCacheService.deleteUserById(userId);
 	}
 
 }

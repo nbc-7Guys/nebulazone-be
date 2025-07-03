@@ -9,7 +9,9 @@
     "analyzer": {
       "korean_english": {
         "type": "custom",
-        "char_filter": ["slash_to_space"],
+        "char_filter": [
+          "slash_to_space"
+        ],
         "tokenizer": "my_nori_tokenizer",
         "filter": [
           "lowercase",
@@ -26,7 +28,17 @@
       },
       "nori_part_of_speech": {
         "type": "nori_part_of_speech",
-        "stoptags": ["E", "J", "IC", "SF", "SE", "SSO", "SSC", "SC", "SY"]
+        "stoptags": [
+          "E",
+          "J",
+          "IC",
+          "SF",
+          "SE",
+          "SSO",
+          "SSC",
+          "SC",
+          "SY"
+        ]
       }
     },
     "char_filter": {

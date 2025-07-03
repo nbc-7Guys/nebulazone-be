@@ -54,12 +54,12 @@ public class NotificationRepositoryCustomImpl implements NotificationRepositoryC
 	@Override
 	public Optional<Notification> findQueryNotificationByUserAndId(Long userId, Long notificationId) {
 		return Optional.ofNullable(jpaQueryFactory
-				.selectFrom(notification)
-				.where(
-					notification.targetUserId.eq(userId),
-					notification.id.eq(notificationId)
-				)
-				.fetchOne());
+			.selectFrom(notification)
+			.where(
+				notification.targetUserId.eq(userId),
+				notification.id.eq(notificationId)
+			)
+			.fetchOne());
 	}
 
 	@Override

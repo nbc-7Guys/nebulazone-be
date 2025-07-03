@@ -33,6 +33,7 @@ import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.redis.constant.BidConstants;
 import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
+import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
@@ -43,9 +44,8 @@ public class BidRedisService {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ObjectMapper objectMapper;
-
 	private final UserDomainService userDomainService;
-
+	private final UserCacheService userCacheService;
 	private final AuctionRedisService auctionRedisService;
 	private final RedisMessagePublisher redisMessagePublisher;
 	private final BidMetrics bidMetrics;
@@ -75,28 +75,37 @@ public class BidRedisService {
 		String bidKey = BidConstants.BID_PREFIX + auctionId;
 
 		Set<Object> allBid = redisTemplate.opsForZSet().range(bidKey, 0, -1);
-		BidVo findBidVo = Optional.ofNullable(allBid)
+
+		BidVo bidVo = Optional.ofNullable(allBid)
 			.orElse(Set.of())
 			.stream()
 			.map(o -> objectMapper.convertValue(o, BidVo.class))
-			.filter(bidVo -> bidVo.getBidUserId().equals(user.getId()))
-			.filter(bidVo -> bidVo.getBidStatus().equals(BidStatus.BID.name()))
+			.filter(bv -> bv.getBidUserId().equals(user.getId()))
+			.filter(bv -> bv.getBidStatus().equals(BidStatus.BID.name()))
 			.findFirst()
-			.orElse(null);
+			.map(bv -> {
+				redisTemplate.opsForZSet().remove(bidKey, bv);
+				bv.cancelBid();
+				redisTemplate.opsForZSet().add(bidKey, bv, bv.getBidPrice());
+				loginUser.minusPoint(bidPrice - bv.getBidPrice());
 
-		if (findBidVo != null) {
-			loginUser.addPoint(findBidVo.getBidPrice());
-			redisTemplate.opsForZSet().remove(bidKey, findBidVo);
-			findBidVo.cancelBid();
-			redisTemplate.opsForZSet().add(bidKey, findBidVo, findBidVo.getBidPrice());
-		}
+				BidVo newBidVo = BidVo.of(auctionId, user, bidPrice);
+				redisTemplate.opsForZSet().add(bidKey, newBidVo, bidPrice);
 
-		BidVo bidVo = BidVo.of(auctionId, user, bidPrice);
+				return newBidVo;
+			})
+			.orElseGet(() -> {
+				BidVo newBidVo = BidVo.of(auctionId, user, bidPrice);
+				redisTemplate.opsForZSet().add(bidKey, newBidVo, bidPrice);
 
-		redisTemplate.opsForZSet().add(bidKey, bidVo, bidPrice);
+				loginUser.minusPoint(bidPrice);
+
+				return newBidVo;
+			});
+
+		userCacheService.deleteUserById(loginUser.getId());
 
 		auctionRedisService.updateAuctionCurrentPrice(auctionId, bidPrice);
-		loginUser.usePoint(bidPrice);
 
 		CreateBidResponse response = CreateBidResponse.from(bidVo);
 
@@ -162,7 +171,8 @@ public class BidRedisService {
 			.orElse(0L);
 
 		auctionRedisService.updateAuctionCurrentPrice(auctionId, newCurrentPrice);
-		loginUser.addPoint(bidPrice);
+		loginUser.plusPoint(bidPrice);
+		userCacheService.deleteUserById(loginUser.getId());
 
 		DeleteBidResponse response = DeleteBidResponse.from(findBidVo);
 
@@ -282,7 +292,7 @@ public class BidRedisService {
 	 * @author 정석현
 	 */
 	@DistributedLock(key = "'bid:lock:auction:' + #auctionId")
-	public void updateBidStatusByAdmin(Long auctionId, Long userId, Long price, LocalDateTime bidCreatedAt,
+	public void updateBidByAdmin(Long auctionId, Long userId, Long price, LocalDateTime bidCreatedAt,
 		String status) {
 
 		String bidKey = BidConstants.BID_PREFIX + auctionId;
@@ -315,7 +325,7 @@ public class BidRedisService {
 	 * @author 정석현
 	 */
 	@DistributedLock(key = "'bid:lock:auction:' + #auctionId")
-	public void deleteBidByAdmin(Long auctionId, Long userId, Long price, LocalDateTime bidCreatedAt) {
+	public void cancelBidByAdmin(Long auctionId, Long userId, Long price, LocalDateTime bidCreatedAt) {
 
 		String bidKey = BidConstants.BID_PREFIX + auctionId;
 		Set<Object> allBids = redisTemplate.opsForZSet().range(bidKey, 0, -1);
@@ -332,12 +342,12 @@ public class BidRedisService {
 
 		if (targetBid.getBidStatus().equals(BidStatus.BID.name())) {
 			Set<Object> remainingBids = redisTemplate.opsForZSet().reverseRange(bidKey, 0, -1);
-			Long newCurrentPrice = Optional.ofNullable(remainingBids).orElse(Set.of()).stream()
+			Optional<BidVo> newTopBid = Optional.ofNullable(remainingBids).orElse(Set.of()).stream()
 				.map(o -> objectMapper.convertValue(o, BidVo.class))
 				.filter(bidVo -> BidStatus.BID.name().equals(bidVo.getBidStatus()))
-				.findFirst()
-				.map(BidVo::getBidPrice)
-				.orElse(0L);
+				.findFirst();
+
+			Long newCurrentPrice = newTopBid.map(BidVo::getBidPrice).orElse(0L);
 			auctionRedisService.updateAuctionCurrentPrice(auctionId, newCurrentPrice);
 		}
 

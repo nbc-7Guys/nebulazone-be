@@ -42,9 +42,11 @@ import nbc.chillguys.nebulazone.domain.product.event.ProductUpdatedEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
+import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
 import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
+import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +58,8 @@ public class ProductService {
 	private final AuctionRedisService auctionRedisService;
 	private final GcsClient gcsClient;
 	private final ApplicationEventPublisher eventPublisher;
+	private final UserDomainService userDomainService;
+	private final UserCacheService userCacheService;
 
 	@Transactional
 	public ProductResponse createProduct(User user, Long catalogId, CreateProductRequest request) {
@@ -128,18 +132,22 @@ public class ProductService {
 
 	@DistributedLock(key = "'lock:purchase:product:' + #productId")
 	@Transactional
-	public PurchaseProductResponse purchaseProduct(User user, Long catalogId, Long productId) {
+	public PurchaseProductResponse purchaseProduct(Long userId, Long catalogId, Long productId) {
+		User user = userDomainService.findActiveUserById(userId);
 		Product product = productDomainService.findAvailableProductByIdForUpdate(productId);
 
-		product.validNotOwner(user.getId());
+		product.validNotOwner(userId);
 		product.validBelongsToCatalog(catalogId);
 
-		user.usePoint(product.getPrice());
+		user.minusPoint(product.getPrice());
+		userCacheService.deleteUserById(userId);
 
-		ProductPurchaseCommand command = ProductPurchaseCommand.of(productId, user.getId(), catalogId);
+		ProductPurchaseCommand command = ProductPurchaseCommand.of(productId, userId, catalogId);
 		productDomainService.purchaseProduct(command);
 
-		product.getSeller().addPoint(product.getPrice());
+		User seller = product.getSeller();
+		seller.plusPoint(product.getPrice());
+		userCacheService.deleteUserById(seller.getId());
 
 		LocalDateTime purchasedAt = LocalDateTime.now();
 		eventPublisher.publishEvent(new ProductPurchasedEvent(user, product, purchasedAt));

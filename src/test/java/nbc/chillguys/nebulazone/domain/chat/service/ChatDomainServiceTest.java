@@ -46,7 +46,6 @@ import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 @ExtendWith(MockitoExtension.class)
 class ChatDomainServiceTest {
 
-	// 테스트 상수
 	private static final String SELLER_EMAIL = "seller@test.com";
 	private static final String BUYER_EMAIL = "buyer@test.com";
 	private static final String PRODUCT_NAME = "테스트 상품";
@@ -62,7 +61,6 @@ class ChatDomainServiceTest {
 	private ChatRoomHistoryRepository chatRoomHistoryRepository;
 	@InjectMocks
 	private ChatDomainService chatDomainService;
-	// 공통 테스트 픽스처
 	private User seller;
 	private User buyer;
 	private Product product;
@@ -71,18 +69,10 @@ class ChatDomainServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		seller = createUser(SELLER_ID, SELLER_EMAIL, "판매자");
-		buyer = createUser(BUYER_ID, BUYER_EMAIL, "구매자");
-		product = createProduct(PRODUCT_ID, PRODUCT_NAME, seller);
-		chatRoom = createChatRoom(CHAT_ROOM_ID, product);
-		chatRoomUser = createChatRoomUser(chatRoom, buyer);
-	}
-
-	// 팩토리 메서드들
-	private User createUser(Long id, String email, String nickname) {
-		User user = User.builder()
-			.email(email)
-			.nickname(nickname)
+		// seller
+		seller = User.builder()
+			.email(SELLER_EMAIL)
+			.nickname("판매자")
 			.oAuthType(OAuthType.KAKAO)
 			.roles(Set.of(UserRole.ROLE_USER))
 			.addresses(List.of(Address.builder()
@@ -92,95 +82,42 @@ class ChatDomainServiceTest {
 				.build()))
 			.point(0)
 			.build();
-		ReflectionTestUtils.setField(user, "id", id);
-		return user;
-	}
+		ReflectionTestUtils.setField(seller, "id", SELLER_ID);
 
-	private Product createProduct(Long id, String name, User seller) {
-		Product product = Product.builder()
-			.name(name)
+		// buyer
+		buyer = User.builder()
+			.email(BUYER_EMAIL)
+			.nickname("구매자")
+			.oAuthType(OAuthType.KAKAO)
+			.roles(Set.of(UserRole.ROLE_USER))
+			.addresses(List.of(Address.builder()
+				.addressNickname("테스트주소")
+				.roadAddress("테스트도로명")
+				.detailAddress("테스트상세주소")
+				.build()))
+			.point(0)
+			.build();
+		ReflectionTestUtils.setField(buyer, "id", BUYER_ID);
+
+		// product
+		product = Product.builder()
+			.name(PRODUCT_NAME)
 			.txMethod(ProductTxMethod.DIRECT)
 			.seller(seller)
 			.build();
-		ReflectionTestUtils.setField(product, "id", id);
-		return product;
-	}
+		ReflectionTestUtils.setField(product, "id", PRODUCT_ID);
 
-	private Product createAuctionProduct(Long id, User seller) {
-		Product product = Product.builder()
-			.name(PRODUCT_NAME)
-			.txMethod(ProductTxMethod.AUCTION)
-			.seller(seller)
-			.build();
-		ReflectionTestUtils.setField(product, "id", id);
-		return product;
-	}
-
-	private ChatRoom createChatRoom(Long id, Product product) {
-		ChatRoom chatRoom = ChatRoom.builder()
+		// chatRoom
+		chatRoom = ChatRoom.builder()
 			.product(product)
 			.build();
-		ReflectionTestUtils.setField(chatRoom, "id", id);
-		return chatRoom;
-	}
+		ReflectionTestUtils.setField(chatRoom, "id", CHAT_ROOM_ID);
 
-	private ChatRoomUser createChatRoomUser(ChatRoom chatRoom, User user) {
-		return ChatRoomUser.builder()
+		chatRoomUser = ChatRoomUser.builder()
 			.chatRoom(chatRoom)
-			.user(user)
+			.user(buyer)
 			.build();
-	}
 
-	private List<ChatRoomInfo> createChatRoomInfoList() {
-		ChatRoomInfo chatRoomInfo1 = new ChatRoomInfo(
-			PRODUCT_NAME, "판매자", CHAT_ROOM_ID, 1L, PRODUCT_ID, 100000L, false, "test-image-url-1");
-		ChatRoomInfo chatRoomInfo2 = new ChatRoomInfo(
-			"다른 상품", "판매자", 2L, 1L, 2L, 200000L, false, "test-image-url-2");
-		return List.of(chatRoomInfo1, chatRoomInfo2);
-	}
-
-	private List<ChatHistory> createChatHistoryList() {
-		ChatHistory history1 = ChatHistory.builder()
-			.chatRoom(chatRoom)
-			.userId(SELLER_ID)
-			.message("안녕하세요")
-			.messageType(MessageType.TEXT)
-			.sendtime(LocalDateTime.now())
-			.build();
-		ReflectionTestUtils.setField(history1, "id", 1L);
-
-		ChatHistory history2 = ChatHistory.builder()
-			.chatRoom(chatRoom)
-			.userId(BUYER_ID)
-			.message("반갑습니다")
-			.messageType(MessageType.TEXT)
-			.sendtime(LocalDateTime.now())
-			.build();
-		ReflectionTestUtils.setField(history2, "id", 2L);
-
-		return List.of(history1, history2);
-	}
-
-	private List<ChatMessageInfo> createChatMessageInfoList() {
-		return List.of(
-			ChatMessageInfo.of(CHAT_ROOM_ID, SELLER_ID, SELLER_EMAIL, "안녕하세요", MessageType.TEXT, LocalDateTime.now()),
-			ChatMessageInfo.of(CHAT_ROOM_ID, BUYER_ID, BUYER_EMAIL, "반갑습니다", MessageType.TEXT, LocalDateTime.now())
-		);
-	}
-
-	// 예외 검증 헬퍼 메서드들
-	private void assertChatException(Runnable executable, ChatErrorCode expectedErrorCode) {
-		assertThatThrownBy(executable::run)
-			.isInstanceOf(ChatException.class)
-			.extracting("errorCode")
-			.isEqualTo(expectedErrorCode);
-	}
-
-	private void assertProductException(Runnable executable, ProductErrorCode expectedErrorCode) {
-		assertThatThrownBy(executable::run)
-			.isInstanceOf(ProductException.class)
-			.extracting("errorCode")
-			.isEqualTo(expectedErrorCode);
 	}
 
 	@Nested
@@ -227,7 +164,11 @@ class ChatDomainServiceTest {
 		@DisplayName("참여중인 채팅방 목록 조회 성공")
 		void success_findChatRooms() {
 			// given
-			List<ChatRoomInfo> chatRoomInfos = createChatRoomInfoList();
+			ChatRoomInfo chatRoomInfo1 = new ChatRoomInfo(
+				PRODUCT_NAME, "판매자", CHAT_ROOM_ID, 1L, PRODUCT_ID, 100000L, false, "test-image-url-1");
+			ChatRoomInfo chatRoomInfo2 = new ChatRoomInfo(
+				"다른 상품", "판매자", 2L, 1L, 2L, 200000L, false, "test-image-url-2");
+			List<ChatRoomInfo> chatRoomInfos = List.of(chatRoomInfo1, chatRoomInfo2);
 			given(chatRoomRepository.findAllByUserId(BUYER_ID)).willReturn(chatRoomInfos);
 
 			// when
@@ -281,9 +222,11 @@ class ChatDomainServiceTest {
 				.willReturn(false);
 
 			// when & then
-			assertChatException(() ->
-					chatDomainService.validateUserAccessToChatRoom(buyer, CHAT_ROOM_ID),
-				ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+			assertThatThrownBy(() ->
+				chatDomainService.validateUserAccessToChatRoom(buyer, CHAT_ROOM_ID))
+				.isInstanceOf(ChatException.class)
+				.extracting("errorCode")
+				.isEqualTo(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 
 			verify(chatRoomUserRepository).existsByIdChatRoomIdAndIdUserId(CHAT_ROOM_ID, BUYER_ID);
 		}
@@ -300,7 +243,23 @@ class ChatDomainServiceTest {
 			Long lastId = null;
 			int size = 30;
 			PageRequest pageRequest = PageRequest.of(0, size);
-			List<ChatHistory> chatHistories = createChatHistoryList();
+			ChatHistory history1 = ChatHistory.builder()
+				.chatRoom(chatRoom)
+				.userId(SELLER_ID)
+				.message("안녕하세요")
+				.messageType(MessageType.TEXT)
+				.sendtime(LocalDateTime.now())
+				.build();
+			ReflectionTestUtils.setField(history1, "id", 1L);
+			ChatHistory history2 = ChatHistory.builder()
+				.chatRoom(chatRoom)
+				.userId(BUYER_ID)
+				.message("반갑습니다")
+				.messageType(MessageType.TEXT)
+				.sendtime(LocalDateTime.now())
+				.build();
+			ReflectionTestUtils.setField(history2, "id", 2L);
+			List<ChatHistory> chatHistories = List.of(history1, history2);
 			Slice<ChatHistory> slice = new SliceImpl<>(chatHistories, pageRequest, false);
 
 			given(chatRoomHistoryRepository.findAllByChatRoomIdOrderBySendTimeAsc(CHAT_ROOM_ID, lastId, pageRequest))
@@ -364,12 +323,26 @@ class ChatDomainServiceTest {
 		@DisplayName("채팅방 생성 실패 - 경매 상품")
 		void fail_createChatRoom_auctionProduct() {
 			// given
-			Product auctionProduct = createAuctionProduct(PRODUCT_ID, seller);
+			Product auctionProduct = Product.builder()
+				.name(PRODUCT_NAME)
+				.txMethod(ProductTxMethod.AUCTION)
+				.seller(seller)
+				.build();
+			ReflectionTestUtils.setField(auctionProduct, "id", PRODUCT_ID);
+
+			Product product = Product.builder()
+				.name(PRODUCT_NAME)
+				.txMethod(ProductTxMethod.AUCTION)
+				.seller(seller)
+				.build();
+			ReflectionTestUtils.setField(product, "id", PRODUCT_ID);
 
 			// when & then
-			assertProductException(() ->
-					chatDomainService.createChatRoom(auctionProduct, buyer, seller),
-				ProductErrorCode.INVALID_PRODUCT_TYPE);
+			assertThatThrownBy(() ->
+				chatDomainService.createChatRoom(auctionProduct, buyer, seller))
+				.isInstanceOf(ProductException.class)
+				.extracting("errorCode")
+				.isEqualTo(ProductErrorCode.INVALID_PRODUCT_TYPE);
 
 			verify(chatRoomRepository, never()).save(any(ChatRoom.class));
 		}
@@ -404,9 +377,11 @@ class ChatDomainServiceTest {
 				.willReturn(Optional.empty());
 
 			// when & then
-			assertChatException(() ->
-					chatDomainService.deleteUserFromChatRoom(BUYER_ID, CHAT_ROOM_ID),
-				ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+			assertThatThrownBy(() ->
+				chatDomainService.deleteUserFromChatRoom(BUYER_ID, CHAT_ROOM_ID))
+				.isInstanceOf(ChatException.class)
+				.extracting("errorCode")
+				.isEqualTo(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 
 			verify(chatRoomUserRepository).findByIdUserIdAndIdChatRoomId(BUYER_ID, CHAT_ROOM_ID);
 			verify(chatRoomUserRepository, never()).delete(any(ChatRoomUser.class));
@@ -421,7 +396,11 @@ class ChatDomainServiceTest {
 		@DisplayName("채팅 기록 저장 성공")
 		void success_saveChatHistories() {
 			// given
-			List<ChatMessageInfo> messagesFromRedis = createChatMessageInfoList();
+			List<ChatMessageInfo> messagesFromRedis = List.of(
+				ChatMessageInfo.of(CHAT_ROOM_ID, SELLER_ID, SELLER_EMAIL, "안녕하세요", MessageType.TEXT,
+					LocalDateTime.now()),
+				ChatMessageInfo.of(CHAT_ROOM_ID, BUYER_ID, BUYER_EMAIL, "반갑습니다", MessageType.TEXT, LocalDateTime.now())
+			);
 			given(chatRoomRepository.findById(CHAT_ROOM_ID)).willReturn(Optional.of(chatRoom));
 			given(chatRoomHistoryRepository.saveAll(any(List.class))).willReturn(List.of());
 
@@ -437,13 +416,19 @@ class ChatDomainServiceTest {
 		@DisplayName("채팅 기록 저장 실패 - 채팅방 없음")
 		void fail_saveChatHistories_chatRoomNotFound() {
 			// given
-			List<ChatMessageInfo> messagesFromRedis = createChatMessageInfoList();
+			List<ChatMessageInfo> messagesFromRedis = List.of(
+				ChatMessageInfo.of(CHAT_ROOM_ID, SELLER_ID, SELLER_EMAIL, "안녕하세요", MessageType.TEXT,
+					LocalDateTime.now()),
+				ChatMessageInfo.of(CHAT_ROOM_ID, BUYER_ID, BUYER_EMAIL, "반갑습니다", MessageType.TEXT, LocalDateTime.now())
+			);
 			given(chatRoomRepository.findById(CHAT_ROOM_ID)).willReturn(Optional.empty());
 
 			// when & then
-			assertChatException(() ->
-					chatDomainService.saveChatHistories(CHAT_ROOM_ID, messagesFromRedis),
-				ChatErrorCode.CHAT_ROOM_NOT_FOUND);
+			assertThatThrownBy(() ->
+				chatDomainService.saveChatHistories(CHAT_ROOM_ID, messagesFromRedis))
+				.isInstanceOf(ChatException.class)
+				.extracting("errorCode")
+				.isEqualTo(ChatErrorCode.CHAT_ROOM_NOT_FOUND);
 
 			verify(chatRoomRepository).findById(CHAT_ROOM_ID);
 			verify(chatRoomHistoryRepository, never()).saveAll(any(List.class));
@@ -476,9 +461,11 @@ class ChatDomainServiceTest {
 			given(chatRoomRepository.findById(CHAT_ROOM_ID)).willReturn(Optional.empty());
 
 			// when & then
-			assertChatException(() ->
-					chatDomainService.findChatRoom(CHAT_ROOM_ID),
-				ChatErrorCode.CHAT_ROOM_NOT_FOUND);
+			assertThatThrownBy(() ->
+				chatDomainService.findChatRoom(CHAT_ROOM_ID))
+				.isInstanceOf(ChatException.class)
+				.extracting("errorCode")
+				.isEqualTo(ChatErrorCode.CHAT_ROOM_NOT_FOUND);
 
 			verify(chatRoomRepository).findById(CHAT_ROOM_ID);
 		}

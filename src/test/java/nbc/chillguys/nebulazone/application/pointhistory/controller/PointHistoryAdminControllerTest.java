@@ -24,8 +24,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import nbc.chillguys.nebulazone.application.pointhistory.dto.request.PointHistoryAdminRequest;
 import nbc.chillguys.nebulazone.application.pointhistory.dto.response.AdminPointHistoryResponse;
 import nbc.chillguys.nebulazone.application.pointhistory.service.PointHistoryAdminService;
@@ -34,7 +32,7 @@ import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
+import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("포인트 히스토리 어드민 컨트롤러 테스트")
@@ -51,9 +49,6 @@ class PointHistoryAdminControllerTest {
 
 	@Autowired
 	private MockMvc mockMvc;
-
-	@Autowired
-	private ObjectMapper objectMapper;
 
 	@MockitoBean
 	private PointHistoryAdminService pointHistoryAdminService;

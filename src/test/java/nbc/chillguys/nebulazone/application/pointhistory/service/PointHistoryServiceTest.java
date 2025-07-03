@@ -27,15 +27,12 @@ import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryStatus;
 import nbc.chillguys.nebulazone.domain.pointhistory.entity.PointHistoryType;
 import nbc.chillguys.nebulazone.domain.pointhistory.service.PointHistoryDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
-import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
 
 @ExtendWith(MockitoExtension.class)
 class PointHistoryServiceTest {
 
 	@Mock
 	private PointHistoryDomainService pointHistoryDomainService;
-	@Mock
-	private UserDomainService userDomainService;
 	@InjectMocks
 	private PointHistoryService pointHistoryService;
 
@@ -65,25 +62,6 @@ class PointHistoryServiceTest {
 			// then
 			assertThat(response.price()).isEqualTo(1000);
 			assertThat(response.type()).isEqualTo(PointHistoryType.CHARGE);
-		}
-
-		@Test
-		@DisplayName("EXCHANGE 타입은 포인트 검증 호출")
-		void createExchangePointHistory_validatesPoint() {
-			// given
-			User mockUser = mock(User.class);
-			PointRequest req = new PointRequest(3000L, PointHistoryType.EXCHANGE, "321-654-987");
-			PointHistory mockPointHistory = mock(PointHistory.class);
-
-			given(pointHistoryDomainService.createPointHistory(any(PointHistoryCommand.class),
-				any(PointHistoryStatus.class))).willReturn(
-				mockPointHistory);
-
-			// when
-			pointHistoryService.createPointHistory(req, mockUser);
-
-			// then
-			verify(userDomainService).validEnoughPoint(mockUser, 3000L);
 		}
 	}
 

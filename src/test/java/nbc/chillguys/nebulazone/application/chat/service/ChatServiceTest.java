@@ -2,7 +2,6 @@ package nbc.chillguys.nebulazone.application.chat.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.times;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +23,10 @@ import nbc.chillguys.nebulazone.application.chat.dto.request.CreateChatRoomReque
 import nbc.chillguys.nebulazone.application.chat.dto.response.CreateChatRoomResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryResponse;
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponses;
+import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
 import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
+import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
+import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 import nbc.chillguys.nebulazone.domain.chat.entity.MessageType;
@@ -39,9 +41,6 @@ import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.domain.user.service.UserDomainService;
-import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
-import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
-import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
 
 @DisplayName("채팅 애플리케이션 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -75,17 +74,9 @@ class ChatServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		seller = createUser(SELLER_ID, SELLER_EMAIL, "판매자");
-		buyer = createUser(BUYER_ID, BUYER_EMAIL, "구매자");
-		product = createProduct(PRODUCT_ID, PRODUCT_NAME, seller);
-		chatRoom = createChatRoom(CHAT_ROOM_ID, product);
-	}
-
-	// 팩토리 메서드들
-	private User createUser(Long id, String email, String nickname) {
-		User user = User.builder()
-			.email(email)
-			.nickname(nickname)
+		seller = User.builder()
+			.email(SELLER_EMAIL)
+			.nickname("판매자")
 			.oAuthType(OAuthType.KAKAO)
 			.roles(Set.of(UserRole.ROLE_USER))
 			.addresses(List.of(Address.builder()
@@ -95,62 +86,41 @@ class ChatServiceTest {
 				.build()))
 			.point(0)
 			.build();
-		ReflectionTestUtils.setField(user, "id", id);
-		return user;
-	}
+		ReflectionTestUtils.setField(seller, "id", SELLER_ID);
 
-	private Product createProduct(Long id, String name, User seller) {
-		Catalog catalog = createCatalog(1L, "테스트 카탈로그");
-		Product product = Product.builder()
-			.name(name)
+		buyer = User.builder()
+			.email(BUYER_EMAIL)
+			.nickname("구매자")
+			.oAuthType(OAuthType.KAKAO)
+			.roles(Set.of(UserRole.ROLE_USER))
+			.addresses(List.of(Address.builder()
+				.addressNickname("테스트주소")
+				.roadAddress("테스트도로명")
+				.detailAddress("테스트상세주소")
+				.build()))
+			.point(0)
+			.build();
+		ReflectionTestUtils.setField(buyer, "id", BUYER_ID);
+
+		Catalog catalog = Catalog.builder()
+			.name("테스트 카탈로그")
+			.description("테스트 카탈로그 설명")
+			.type(CatalogType.CPU)
+			.build();
+		ReflectionTestUtils.setField(catalog, "id", 1L);
+
+		product = Product.builder()
+			.name(PRODUCT_NAME)
 			.txMethod(ProductTxMethod.DIRECT)
 			.seller(seller)
 			.catalog(catalog)
 			.build();
-		ReflectionTestUtils.setField(product, "id", id);
-		return product;
-	}
+		ReflectionTestUtils.setField(product, "id", PRODUCT_ID);
 
-	private ChatRoom createChatRoom(Long id, Product product) {
-		ChatRoom chatRoom = ChatRoom.builder()
+		chatRoom = ChatRoom.builder()
 			.product(product)
 			.build();
-		ReflectionTestUtils.setField(chatRoom, "id", id);
-		return chatRoom;
-	}
-
-	private List<ChatRoomInfo> createChatRoomInfoList() {
-		ChatRoomInfo chatRoomInfo1 = new ChatRoomInfo(
-			PRODUCT_NAME, "판매자", CHAT_ROOM_ID, 1L, PRODUCT_ID, 100000L, false, "test-image-url-1");
-		ChatRoomInfo chatRoomInfo2 = new ChatRoomInfo(
-			"다른 상품", "판매자", 2L, 1L, 2L, 200000L, false, "test-image-url-2");
-		return List.of(chatRoomInfo1, chatRoomInfo2);
-	}
-
-	private List<FindChatHistoryResponse> createFindChatHistoryResponseList() {
-		FindChatHistoryResponse response1 = new FindChatHistoryResponse(
-			1L, "안녕하세요", LocalDateTime.now(), MessageType.TEXT);
-		FindChatHistoryResponse response2 = new FindChatHistoryResponse(
-			2L, "반갑습니다", LocalDateTime.now(), MessageType.TEXT);
-		return List.of(response1, response2);
-	}
-
-	private Catalog createCatalog(Long id, String name) {
-		Catalog catalog = Catalog.builder()
-			.name(name)
-			.description("테스트 카탈로그 설명")
-			.type(CatalogType.CPU)
-			.build();
-		ReflectionTestUtils.setField(catalog, "id", id);
-		return catalog;
-	}
-
-	// 예외 검증 헬퍼 메서드
-	private void assertChatException(Runnable executable, ChatErrorCode expectedErrorCode) {
-		assertThatThrownBy(executable::run)
-			.isInstanceOf(ChatException.class)
-			.extracting("errorCode")
-			.isEqualTo(expectedErrorCode);
+		ReflectionTestUtils.setField(chatRoom, "id", CHAT_ROOM_ID);
 	}
 
 	@Nested
@@ -210,8 +180,10 @@ class ChatServiceTest {
 			given(productDomainService.findAvailableProductById(PRODUCT_ID)).willReturn(product);
 
 			// when & then
-			assertChatException(() -> chatService.getOrCreate(seller, request),
-				ChatErrorCode.CANNOT_CHAT_WITH_SELF);
+			assertThatThrownBy(() -> chatService.getOrCreate(seller, request))
+				.isInstanceOf(ChatException.class)
+				.extracting("errorCode")
+				.isEqualTo(ChatErrorCode.CANNOT_CHAT_WITH_SELF);
 
 			verify(productDomainService).findAvailableProductById(PRODUCT_ID);
 			verify(chatDomainService, never()).findExistingChatRoom(any(), any());
@@ -255,7 +227,11 @@ class ChatServiceTest {
 		@DisplayName("참여중인 채팅방 목록 조회 성공")
 		void success_findChatRooms() {
 			// given
-			List<ChatRoomInfo> chatRoomInfos = createChatRoomInfoList();
+			ChatRoomInfo chatRoomInfo1 = new ChatRoomInfo(
+				PRODUCT_NAME, "판매자", CHAT_ROOM_ID, 1L, PRODUCT_ID, 100000L, false, "test-image-url-1");
+			ChatRoomInfo chatRoomInfo2 = new ChatRoomInfo(
+				"다른 상품", "판매자", 2L, 1L, 2L, 200000L, false, "test-image-url-2");
+			List<ChatRoomInfo> chatRoomInfos = List.of(chatRoomInfo1, chatRoomInfo2);
 			given(chatDomainService.findChatRooms(buyer)).willReturn(chatRoomInfos);
 
 			// when
@@ -263,7 +239,7 @@ class ChatServiceTest {
 
 			// then
 			assertThat(result.chatRooms()).hasSize(2);
-			assertThat(result.chatRooms().get(0).chatRoomId()).isEqualTo(CHAT_ROOM_ID);
+			assertThat(result.chatRooms().getFirst().chatRoomId()).isEqualTo(CHAT_ROOM_ID);
 			verify(chatDomainService).findChatRooms(buyer);
 		}
 
@@ -290,22 +266,25 @@ class ChatServiceTest {
 		@DisplayName("채팅 기록 조회 성공")
 		void success_findChatHistories() {
 			// given
-			Long lastId = null;
 			int size = 30;
-			List<FindChatHistoryResponse> responses = createFindChatHistoryResponseList();
+			FindChatHistoryResponse response1 = new FindChatHistoryResponse(
+				1L, "안녕하세요", LocalDateTime.now(), MessageType.TEXT);
+			FindChatHistoryResponse response2 = new FindChatHistoryResponse(
+				2L, "반갑습니다", LocalDateTime.now(), MessageType.TEXT);
+			List<FindChatHistoryResponse> responses = List.of(response1, response2);
 
 			willDoNothing().given(chatDomainService).validateUserAccessToChatRoom(buyer, CHAT_ROOM_ID);
-			given(chatDomainService.findChatHistoryResponses(CHAT_ROOM_ID, lastId, size)).willReturn(responses);
+			given(chatDomainService.findChatHistoryResponses(CHAT_ROOM_ID, null, size)).willReturn(responses);
 
 			// when
-			List<FindChatHistoryResponse> result = chatService.findChatHistories(buyer, CHAT_ROOM_ID, lastId, size);
+			List<FindChatHistoryResponse> result = chatService.findChatHistories(buyer, CHAT_ROOM_ID, null, size);
 
 			// then
 			assertThat(result).hasSize(2);
 			assertThat(result.get(0).message()).isEqualTo("안녕하세요");
 			assertThat(result.get(1).message()).isEqualTo("반갑습니다");
 			verify(chatDomainService).validateUserAccessToChatRoom(buyer, CHAT_ROOM_ID);
-			verify(chatDomainService).findChatHistoryResponses(CHAT_ROOM_ID, lastId, size);
+			verify(chatDomainService).findChatHistoryResponses(CHAT_ROOM_ID, null, size);
 		}
 
 		@Test
@@ -319,9 +298,11 @@ class ChatServiceTest {
 				.given(chatDomainService).validateUserAccessToChatRoom(buyer, CHAT_ROOM_ID);
 
 			// when & then
-			assertChatException(() ->
-					chatService.findChatHistories(buyer, CHAT_ROOM_ID, lastId, size),
-				ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+			assertThatThrownBy(() ->
+				chatService.findChatHistories(buyer, CHAT_ROOM_ID, lastId, size))
+				.isInstanceOf(ChatException.class)
+				.extracting("errorCode")
+				.isEqualTo(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 
 			verify(chatDomainService).validateUserAccessToChatRoom(buyer, CHAT_ROOM_ID);
 			verify(chatDomainService, never()).findChatHistoryResponses(any(), any(), anyInt());
@@ -360,9 +341,11 @@ class ChatServiceTest {
 				.willThrow(new ChatException(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED));
 
 			// when & then
-			assertChatException(() ->
-					chatService.exitChatRoom(buyer, CHAT_ROOM_ID),
-				ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
+			assertThatThrownBy(() ->
+				chatService.exitChatRoom(buyer, CHAT_ROOM_ID))
+				.isInstanceOf(ChatException.class)
+				.extracting("errorCode")
+				.isEqualTo(ChatErrorCode.CHAT_ROOM_ACCESS_DENIED);
 
 			verify(chatDomainService).deleteUserFromChatRoom(BUYER_ID, CHAT_ROOM_ID);
 			verify(messagingTemplate, never()).convertAndSend(anyString(), anyString());

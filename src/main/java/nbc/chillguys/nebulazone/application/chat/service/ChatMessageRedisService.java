@@ -16,9 +16,9 @@ import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 @RequiredArgsConstructor
 public class ChatMessageRedisService {
 
+	private static final String CHAT_MESSAGE_KEY_PREFIX = "chat:message:";
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ObjectMapper objectMapper;
-	private static final String CHAT_MESSAGE_KEY_PREFIX = "chat:message:";
 
 	/**
 	 * 채팅 메시지를 Redis에 비동기로 저장
