@@ -133,6 +133,7 @@ public class AuthenticationChannelInterceptor implements ChannelInterceptor {
 
 		} catch (Exception e) {
 			log.warn("JWT 파싱 또는 Principal 세팅 예외");
+			throw e;
 		}
 	}
 }

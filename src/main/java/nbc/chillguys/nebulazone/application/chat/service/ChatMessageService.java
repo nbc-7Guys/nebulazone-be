@@ -65,9 +65,8 @@ public class ChatMessageService {
 	 * 메세지 전송(이미지).
 	 *
 	 * @param user 접속한 유저의 인증 객체
-	 * @param multipartFile 전송할 이미지 파일
+	 * @param request 전송할 이미지 파일 및 타입
 	 * @param roomId 메시지를 보낼 방ID
-	 * @param type 타입
 	 */
 	public void sendImageMessage(User user, Long roomId, ImageMessageRequest request) {
 		SessionUser sessionUser = SessionUser.from(user);
