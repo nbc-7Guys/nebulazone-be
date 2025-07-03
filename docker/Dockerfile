@@ -10,8 +10,11 @@ FROM openjdk:21-jdk-slim
 WORKDIR /app
 
 ENV TZ=Asia/Seoul
-RUN apt-get update && apt-get install -y tzdata \
-    && ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+RUN apt-get update \
+    && apt-get install -y tzdata \
+    && ln -sf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/build/libs/nebulazone-0.0.1-SNAPSHOT.jar .
 
