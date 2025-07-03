@@ -30,7 +30,7 @@ public class NotificationController {
 	@PatchMapping("/notification/{notificationId}/read")
 	public ResponseEntity<Void> markNotificationAsRead(
 		@AuthenticationPrincipal User user,
-		@PathVariable("notificationId") @NotBlank(message = "notificationId를 입력해 주세요") Long notificationId
+		@PathVariable("notificationId") Long notificationId
 	) {
 		notificationService.markNotificationAsRead(user, notificationId);
 		return ResponseEntity.ok().build();
