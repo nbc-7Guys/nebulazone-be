@@ -120,24 +120,6 @@ class ChatDomainServiceTest {
 
 	}
 
-	private User createUser(Long id, String email, String nickname) {
-		User user = User.builder()
-			.email(email)
-			.nickname(nickname)
-			.oAuthType(OAuthType.KAKAO)
-			.roles(Set.of(UserRole.ROLE_USER))
-			.addresses(List.of(Address.builder()
-				.addressNickname("테스트주소")
-				.roadAddress("테스트도로명")
-				.detailAddress("테스트상세주소")
-				.build()))
-			.point(0)
-			.build();
-		ReflectionTestUtils.setField(user, "id", id);
-		return user;
-	}
-
-
 	@Nested
 	@DisplayName("기존 채팅방 조회")
 	class FindExistingChatRoomTest {
@@ -346,7 +328,7 @@ class ChatDomainServiceTest {
 				.txMethod(ProductTxMethod.AUCTION)
 				.seller(seller)
 				.build();
-			ReflectionTestUtils.setField(product, "id", PRODUCT_ID);
+			ReflectionTestUtils.setField(auctionProduct, "id", PRODUCT_ID);
 
 			Product product = Product.builder()
 				.name(PRODUCT_NAME)
