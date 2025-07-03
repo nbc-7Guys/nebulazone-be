@@ -39,7 +39,7 @@ import nbc.chillguys.nebulazone.application.user.service.UserService;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
+import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("유저 컨트롤러 단위 테스트")
@@ -53,17 +53,7 @@ import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 	}
 )
 class UserControllerTest {
-	@MockitoBean
-	private UserService userService;
-
-	@Autowired
-	private MockMvc mockMvc;
-
-	@Autowired
-	private ObjectMapper objectMapper;
-
 	private final LocalDateTime now = LocalDateTime.now();
-
 	private final UserResponse userResponse = new UserResponse(
 		1L,
 		"test@test.com",
@@ -81,6 +71,12 @@ class UserControllerTest {
 		now,
 		now
 	);
+	@MockitoBean
+	private UserService userService;
+	@Autowired
+	private MockMvc mockMvc;
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Test
 	@DisplayName("회원 가입 성공")

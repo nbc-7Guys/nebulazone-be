@@ -1,6 +1,6 @@
 package nbc.chillguys.nebulazone.domain.pointhistory.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
 
 import java.util.Optional;
@@ -19,54 +19,54 @@ import nbc.chillguys.nebulazone.domain.pointhistory.repository.PointHistoryRepos
 @ExtendWith(MockitoExtension.class)
 class PointHistoryAdminDomainServiceTest {
 
-    @Mock
-    private PointHistoryRepository pointHistoryRepository;
+	@Mock
+	private PointHistoryRepository pointHistoryRepository;
 
-    @InjectMocks
-    private PointHistoryAdminDomainService pointHistoryAdminDomainService;
+	@InjectMocks
+	private PointHistoryAdminDomainService pointHistoryAdminDomainService;
 
-    @Nested
-    @DisplayName("포인트 요청 승인")
-    class ApprovePointHistoryTest {
+	@Nested
+	@DisplayName("포인트 요청 승인")
+	class ApprovePointHistoryTest {
 
-        @Test
-        @DisplayName("성공: 포인트 요청 승인 시 상태 변경")
-        void success_approvePointHistory() {
-            // given
-            Long pointHistoryId = 1L;
-            PointHistory pointHistory = mock(PointHistory.class);
+		@Test
+		@DisplayName("성공: 포인트 요청 승인 시 상태 변경")
+		void success_approvePointHistory() {
+			// given
+			Long pointHistoryId = 1L;
+			PointHistory pointHistory = mock(PointHistory.class);
 
-            given(pointHistoryRepository.findActivePointHistoryById(pointHistoryId))
-                .willReturn(Optional.of(pointHistory));
+			given(pointHistoryRepository.findActivePointHistoryById(pointHistoryId))
+				.willReturn(Optional.of(pointHistory));
 
-            // when
-            PointHistory result = pointHistoryAdminDomainService.approvePointHistory(pointHistoryId);
+			// when
+			PointHistory result = pointHistoryAdminDomainService.approvePointHistory(pointHistoryId);
 
-            // then
-            verify(pointHistory).approve();
-            assertThat(result).isEqualTo(pointHistory);
-        }
-    }
+			// then
+			verify(pointHistory).approve();
+			assertThat(result).isEqualTo(pointHistory);
+		}
+	}
 
-    @Nested
-    @DisplayName("포인트 요청 거절")
-    class RejectPointHistoryTest {
+	@Nested
+	@DisplayName("포인트 요청 거절")
+	class RejectPointHistoryTest {
 
-        @Test
-        @DisplayName("성공: 포인트 요청 거절 시 상태 변경")
-        void success_rejectPointHistory() {
-            // given
-            Long pointHistoryId = 1L;
-            PointHistory pointHistory = mock(PointHistory.class);
+		@Test
+		@DisplayName("성공: 포인트 요청 거절 시 상태 변경")
+		void success_rejectPointHistory() {
+			// given
+			Long pointHistoryId = 1L;
+			PointHistory pointHistory = mock(PointHistory.class);
 
-            given(pointHistoryRepository.findActivePointHistoryById(pointHistoryId))
-                .willReturn(Optional.of(pointHistory));
+			given(pointHistoryRepository.findActivePointHistoryById(pointHistoryId))
+				.willReturn(Optional.of(pointHistory));
 
-            // when
-            pointHistoryAdminDomainService.rejectPointHistory(pointHistoryId);
+			// when
+			pointHistoryAdminDomainService.rejectPointHistory(pointHistoryId);
 
-            // then
-            verify(pointHistory).reject();
-        }
-    }
+			// then
+			verify(pointHistory).reject();
+		}
+	}
 }

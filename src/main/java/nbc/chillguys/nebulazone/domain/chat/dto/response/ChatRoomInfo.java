@@ -1,7 +1,6 @@
 package nbc.chillguys.nebulazone.domain.chat.dto.response;
 
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
-import nbc.chillguys.nebulazone.domain.product.entity.ProductImage;
 
 public record ChatRoomInfo(
 	String productName,

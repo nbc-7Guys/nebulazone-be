@@ -44,7 +44,8 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 				)
 				.setLockMode(LockModeType.PESSIMISTIC_WRITE)
 				.fetchOne()
-		);	}
+		);
+	}
 
 	@Override
 	public Optional<Product> findActiveProductByIdWithUserAndImages(Long productId) {

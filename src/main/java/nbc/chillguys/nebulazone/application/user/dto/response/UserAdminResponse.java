@@ -30,20 +30,6 @@ public record UserAdminResponse(
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime modifiedAt
 ) {
-	public record AddressResponse(
-		String roadAddress,
-		String detailAddress,
-		String addressNickname
-	) {
-		public static AddressResponse from(Address address) {
-			return new AddressResponse(
-				address.getRoadAddress(),
-				address.getDetailAddress(),
-				address.getAddressNickname()
-			);
-		}
-	}
-
 	public static UserAdminResponse from(UserAdminInfo info) {
 		return new UserAdminResponse(
 			info.userId(),
@@ -62,5 +48,19 @@ public record UserAdminResponse(
 			info.createdAt(),
 			info.modifiedAt()
 		);
+	}
+
+	public record AddressResponse(
+		String roadAddress,
+		String detailAddress,
+		String addressNickname
+	) {
+		public static AddressResponse from(Address address) {
+			return new AddressResponse(
+				address.getRoadAddress(),
+				address.getDetailAddress(),
+				address.getAddressNickname()
+			);
+		}
 	}
 }

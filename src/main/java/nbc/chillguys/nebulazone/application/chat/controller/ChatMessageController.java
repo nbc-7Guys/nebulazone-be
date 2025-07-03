@@ -9,12 +9,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import nbc.chillguys.nebulazone.application.chat.dto.request.ImageMessageRequest;
 import nbc.chillguys.nebulazone.application.chat.service.ChatMessageService;
@@ -61,8 +58,6 @@ public class ChatMessageController {
 	 *
 	 * @param user 인증된 사용자 정보
 	 * @param roomId 메시지를 전송할 채팅방 ID
-	 * @param multipartFile 업로드할 이미지 파일
-	 * @param type 이미지 메타데이터 (타입 정보)
 	 * @author 박형우
 	 */
 	@PostMapping(value = "/send/image/{roomId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

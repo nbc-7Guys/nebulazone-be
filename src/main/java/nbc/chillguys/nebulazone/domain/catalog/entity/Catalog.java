@@ -44,7 +44,7 @@ public class Catalog extends BaseEntity {
 	private CatalogType type;
 
 	@OneToMany(mappedBy = "catalog")
-	private List<Review> reviews = new ArrayList<>();
+	private final List<Review> reviews = new ArrayList<>();
 
 	@Builder
 	public Catalog(String name, String description, CatalogType type) {

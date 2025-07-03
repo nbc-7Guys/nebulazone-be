@@ -23,8 +23,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import nbc.chillguys.nebulazone.application.product.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.application.product.dto.response.SearchProductResponse;
 import nbc.chillguys.nebulazone.application.product.service.ProductService;
@@ -32,7 +30,7 @@ import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.MockMvc.TestMockConfig;
+import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})
@@ -52,9 +50,6 @@ class ProductControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-	@Autowired
-	private ObjectMapper objectMapper;
-
 	@Nested
 	@DisplayName("상품 생성")
 	class CreateProductTest {
@@ -62,14 +57,14 @@ class ProductControllerTest {
 		@Test
 		@DisplayName("상품 생성 성공 - 경매")
 		@WithCustomMockUser
-		void success_createProduct_auction() throws Exception {
+		void success_createProduct_auction() {
 			// 다시 해야함
 		}
 
 		@Test
 		@DisplayName("상품 생성 성공 - 즉시거래")
 		@WithCustomMockUser
-		void success_createProduct_direct() throws Exception {
+		void success_createProduct_direct() {
 			// 다시 만들어야함
 		}
 	}

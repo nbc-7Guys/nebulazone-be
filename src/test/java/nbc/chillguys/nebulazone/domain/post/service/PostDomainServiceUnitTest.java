@@ -53,6 +53,7 @@ class PostDomainServiceUnitTest {
 	private PostDomainService postDomainService;
 
 	private Post post;
+	private User user;
 
 	@BeforeEach
 	void init() {
@@ -89,8 +90,6 @@ class PostDomainServiceUnitTest {
 			.build();
 		ReflectionTestUtils.setField(post, "id", 1L);
 	}
-
-	private User user;
 
 	@Nested
 	@DisplayName("게시글 생성 테스트")
