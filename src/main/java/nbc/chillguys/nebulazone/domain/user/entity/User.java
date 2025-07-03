@@ -127,16 +127,12 @@ public class User extends BaseEntity {
 		this.password = password;
 	}
 
-	public void usePoint(long usePoint) {
+	public void minusPoint(long usePoint) {
 		if (this.point < usePoint) {
 			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
 		}
 
-		this.point -= usePoint;
-	}
-
-	public boolean hasNotEnoughPoint(Long price) {
-		return this.point < price;
+		this.point = Math.max(0, this.point - usePoint);
 	}
 
 	public void changeStatus(UserStatus status) {
@@ -157,12 +153,8 @@ public class User extends BaseEntity {
 		this.roles.addAll(roles);
 	}
 
-	public void addPoint(Long point) {
-		this.point += point;
-	}
-
-	public void decreasePoint(Long point) {
-		this.point -= point;
+	public void plusPoint(long gainedPoint) {
+		this.point = Math.min(Long.MAX_VALUE, this.point + gainedPoint);
 	}
 
 	public Collection<? extends GrantedAuthority> getAuthorities() {

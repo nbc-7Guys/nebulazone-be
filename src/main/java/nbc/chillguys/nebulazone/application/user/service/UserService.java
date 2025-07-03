@@ -39,12 +39,6 @@ public class UserService {
 		return UserResponse.from(user);
 	}
 
-	public UserResponse getUser(Long userId) {
-		User targetUser = userDomainService.findActiveUserById(userId);
-
-		return UserResponse.from(targetUser);
-	}
-
 	public UserResponse updateUserNicknameOrPassword(UpdateUserRequest updateUserRequest, User loggedInUser) {
 		User user = userDomainService.updateUserNicknameOrPassword(
 			UserUpdateCommand.of(updateUserRequest, loggedInUser)

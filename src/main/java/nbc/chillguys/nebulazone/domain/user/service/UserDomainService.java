@@ -176,20 +176,6 @@ public class UserDomainService {
 	}
 
 	/**
-	 * 포인 환전시 포인트가 충분한지 조회
-	 *
-	 * @param user 유저
-	 * @param price 요청 포인트
-	 * @author 정석현
-	 */
-	public void validEnoughPoint(User user, Long price) {
-		User targetUser = findActiveUserById(user.getId());
-		if (targetUser.hasNotEnoughPoint(price)) {
-			throw new UserException(UserErrorCode.INSUFFICIENT_BALANCE);
-		}
-	}
-
-	/**
 	 * 닉네임 또는 비밀번호 수정
 	 * @param userUpdateCommand 유저 수정(userId, nickname, oldPassword, newPassword)
 	 * @return user
@@ -242,12 +228,18 @@ public class UserDomainService {
 	 */
 	public void chargeUserPoint(UserPointChargeCommand command) {
 		User user = findActiveUserById(command.userId());
-		user.addPoint(command.point());
+		user.plusPoint(command.point());
 	}
 
+	/**
+	 * 유저 포인트 환전
+	 *
+	 * @param command 포인트충전DTO
+	 * @author 정석현
+	 */
 	public void exchangeUserPoint(UserPointChargeCommand command) {
 		User user = findActiveUserById(command.userId());
-		user.decreasePoint(command.point());
+		user.minusPoint(command.point());
 	}
 
 	/**

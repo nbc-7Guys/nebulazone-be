@@ -134,14 +134,13 @@ class UserControllerTest {
 	}
 
 	@Test
-	@DisplayName("유저 조회 성공")
-	void success_getUser() throws Exception {
+	@DisplayName("내 정보 조회 성공")
+	@WithCustomMockUser
+	void success_getMyInfo() throws Exception {
 		// Given
-		given(userService.getUser(anyLong()))
-			.willReturn(userResponse);
 
 		// When
-		ResultActions perform = mockMvc.perform(get("/users/{userId}", 1L));
+		ResultActions perform = mockMvc.perform(get("/users/me"));
 
 		// Then
 		perform.andDo(print())
@@ -156,25 +155,18 @@ class UserControllerTest {
 				jsonPath("$.nickname")
 					.value("test"),
 				jsonPath("$.profileImageUrl")
-					.value("test_profile_image_url"),
+					.value("test.jpg"),
 				jsonPath("$.point")
 					.value(0),
 				jsonPath("$.oAuthType")
 					.value("DOMAIN"),
 				jsonPath("$.addresses[0].addressNickname")
-					.value("address_nickname"),
+					.value("test_address_nickname"),
 				jsonPath("$.addresses[0].roadAddress")
 					.value("test_road_address"),
 				jsonPath("$.addresses[0].detailAddress")
-					.value("test_detail_address"),
-				jsonPath("$.createdAt")
-					.value(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))),
-				jsonPath("$.modifiedAt")
-					.value(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+					.value("test_detail_address")
 			);
-
-		verify(userService, times(1)).getUser(anyLong());
-
 	}
 
 	@Test

@@ -47,6 +47,7 @@ import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
 import nbc.chillguys.nebulazone.infra.redis.dto.FindAllAuctionsDto;
 import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
+import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
@@ -64,7 +65,7 @@ public class AuctionRedisService {
 	private final BidDomainService bidDomainService;
 	private final TransactionDomainService transactionDomainService;
 	private final ProductDomainService productDomainService;
-
+	private final UserCacheService userCacheService;
 	private final RedisMessagePublisher redisMessagePublisher;
 
 	/**
@@ -126,7 +127,8 @@ public class AuctionRedisService {
 		}
 
 		User seller = wonAuctionProduct.getSeller();
-		seller.addPoint(auction.getCurrentPrice());
+		seller.plusPoint(auction.getCurrentPrice());
+		userCacheService.deleteUserById(seller.getId());
 
 		Set<Object> objects = redisTemplate.opsForZSet().range(BidConstants.BID_PREFIX + auctionId, 0, -1);
 
@@ -173,7 +175,8 @@ public class AuctionRedisService {
 					transactionDomainService.createTransaction(buyerTxCreateCommand);
 
 				} else if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
-					bidUser.addPoint(bidVo.getBidPrice());
+					bidUser.plusPoint(bidVo.getBidPrice());
+					userCacheService.deleteUserById(bidUser.getId());
 				}
 			});
 
@@ -252,7 +255,8 @@ public class AuctionRedisService {
 				.forEach(bidVo -> {
 					if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
 						User bidUser = userMap.get(bidVo.getBidUserId());
-						bidUser.addPoint(bidVo.getBidPrice());
+						bidUser.plusPoint(bidVo.getBidPrice());
+						userCacheService.deleteUserById(bidUser.getId());
 					}
 				});
 
@@ -474,7 +478,8 @@ public class AuctionRedisService {
 				.forEach(bidVo -> {
 					if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
 						User bidUser = userMap.get(bidVo.getBidUserId());
-						bidUser.addPoint(bidVo.getBidPrice());
+						bidUser.plusPoint(bidVo.getBidPrice());
+						userCacheService.deleteUserById(bidUser.getId());
 					}
 				});
 

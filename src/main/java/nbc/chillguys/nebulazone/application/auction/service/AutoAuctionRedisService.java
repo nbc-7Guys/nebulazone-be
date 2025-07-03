@@ -31,6 +31,7 @@ import nbc.chillguys.nebulazone.infra.redis.constant.AuctionConstants;
 import nbc.chillguys.nebulazone.infra.redis.constant.BidConstants;
 import nbc.chillguys.nebulazone.infra.redis.lock.DistributedLock;
 import nbc.chillguys.nebulazone.infra.redis.publisher.RedisMessagePublisher;
+import nbc.chillguys.nebulazone.infra.redis.service.UserCacheService;
 import nbc.chillguys.nebulazone.infra.redis.vo.AuctionVo;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
@@ -47,7 +48,7 @@ public class AutoAuctionRedisService {
 	private final UserDomainService userDomainService;
 	private final TransactionDomainService transactionDomainService;
 	private final ProductDomainService productDomainService;
-
+	private final UserCacheService userCacheService;
 	private final RedisMessagePublisher redisMessagePublisher;
 
 	/**
@@ -93,7 +94,8 @@ public class AutoAuctionRedisService {
 			}
 
 			User seller = wonAuctionProduct.getSeller();
-			seller.addPoint(auction.getCurrentPrice());
+			seller.plusPoint(auction.getCurrentPrice());
+			userCacheService.deleteUserById(seller.getId());
 
 			List<BidVo> bidVoList = Optional.ofNullable(objects)
 				.orElse(Set.of())
@@ -131,7 +133,8 @@ public class AutoAuctionRedisService {
 						transactionDomainService.createTransaction(buyerTxCreateCommand);
 
 					} else if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
-						bidUser.addPoint(bidVo.getBidPrice());
+						bidUser.plusPoint(bidVo.getBidPrice());
+						userCacheService.deleteUserById(bidUser.getId());
 					}
 				});
 
@@ -165,8 +168,6 @@ public class AutoAuctionRedisService {
 			try {
 				EndAuctionResponse response = EndAuctionResponse.of(auction, null, wonAuctionProduct);
 				redisMessagePublisher.publishAuctionUpdate(auctionId, "failed", response);
-
-				// 입찰 상태 업데이트를 위한 추가 WebSocket 메시지 발행
 				redisMessagePublisher.publishAuctionUpdate(auctionId, "bid", response);
 				log.info("유찰 입찰 상태 업데이트 WebSocket 메시지 발행 성공 - auctionId: {}", auctionId);
 			} catch (Exception e) {
