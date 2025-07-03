@@ -7,6 +7,7 @@ import com.querydsl.core.annotations.QueryProjection;
 import nbc.chillguys.nebulazone.domain.bid.entity.BidStatus;
 
 public record FindBidsByAuctionInfo(
+	Long bidUserId,
 	Long bidPrice,
 	LocalDateTime bidTime,
 	BidStatus bidStatus,

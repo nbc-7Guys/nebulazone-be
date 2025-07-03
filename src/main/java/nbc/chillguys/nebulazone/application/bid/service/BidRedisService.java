@@ -201,11 +201,15 @@ public class BidRedisService {
 		String bidKey = BidConstants.BID_PREFIX + auctionId;
 		Long totalElements = redisTemplate.opsForZSet().zCard(bidKey);
 
-		if (totalElements == null) {
-			return new PageImpl<>(List.of());
+		if (totalElements == null || totalElements == 0) {
+			return new PageImpl<>(List.of(), PageRequest.of(page, size), 0);
 		}
 
-		Set<Object> objects = redisTemplate.opsForZSet().reverseRange(bidKey, 0, -1);
+		long start = (long)page * size;
+		long end = start + size - 1;
+
+		Set<Object> objects = redisTemplate.opsForZSet().reverseRange(bidKey, start, end);
+
 		List<BidVo> bidVoList = Optional.ofNullable(objects)
 			.orElse(Set.of())
 			.stream()
@@ -213,8 +217,6 @@ public class BidRedisService {
 			.sorted(Comparator
 				.comparing(BidVo::getBidCreatedAt).reversed()
 				.thenComparing(BidVo::getBidPrice).reversed())
-			.skip((long)page * size)
-			.limit(size)
 			.toList();
 
 		Pageable pageable = PageRequest.of(page, size);
