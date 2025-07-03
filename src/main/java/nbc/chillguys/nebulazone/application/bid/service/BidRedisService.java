@@ -292,7 +292,7 @@ public class BidRedisService {
 	 * @author 정석현
 	 */
 	@DistributedLock(key = "'bid:lock:auction:' + #auctionId")
-	public void updateBidStatusByAdmin(Long auctionId, Long userId, Long price, LocalDateTime bidCreatedAt,
+	public void updateBidByAdmin(Long auctionId, Long userId, Long price, LocalDateTime bidCreatedAt,
 		String status) {
 
 		String bidKey = BidConstants.BID_PREFIX + auctionId;
@@ -325,7 +325,7 @@ public class BidRedisService {
 	 * @author 정석현
 	 */
 	@DistributedLock(key = "'bid:lock:auction:' + #auctionId")
-	public void cancelStatusBidBidByAdmin(Long auctionId, Long userId, Long price, LocalDateTime bidCreatedAt) {
+	public void cancelBidByAdmin(Long auctionId, Long userId, Long price, LocalDateTime bidCreatedAt) {
 
 		String bidKey = BidConstants.BID_PREFIX + auctionId;
 		Set<Object> allBids = redisTemplate.opsForZSet().range(bidKey, 0, -1);

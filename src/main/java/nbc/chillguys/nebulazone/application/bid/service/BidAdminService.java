@@ -57,7 +57,7 @@ public class BidAdminService {
 		Bid bid = bidAdminDomainService.findByBidId(bidId);
 		bidAdminDomainService.updateBidStatus(bidId, status);
 
-		bidRedisService.updateBidStatusByAdmin(
+		bidRedisService.updateBidByAdmin(
 			bid.getAuction().getId(),
 			bid.getUser().getId(),
 			bid.getPrice(),
@@ -70,7 +70,7 @@ public class BidAdminService {
 		Bid bid = bidAdminDomainService.findByBidId(bidId);
 		bidAdminDomainService.cancelStatusBid(bidId);
 
-		bidRedisService.cancelStatusBidBidByAdmin(
+		bidRedisService.cancelBidByAdmin(
 			bid.getAuction().getId(),
 			bid.getUser().getId(),
 			bid.getPrice(),
