@@ -190,10 +190,35 @@ class ProductServiceTest {
 		}
 	}
 
-	// @Nested
-	// @DisplayName("상품 생성 테스트")
-	// class CreateProductTest {
-	// 	// 작성 해야함
-	// }
+	@Nested
+	@DisplayName("상품 생성 테스트")
+	class CreateProductTest {
 
+		@DisplayName("상품 생성 성공")
+		@Test
+		void success_createProduct() {
+			// given
+
+			// when
+
+			// then
+		}
+
+	}
+
+	@Nested
+	@DisplayName("상품 이미지 수정 테스트")
+	class UpdateProductImagesTest {
+
+		@DisplayName("상품 이미지 수정 성공")
+		@Test
+		void success_updateProductImages() {
+			// given
+
+			// when
+
+			// then
+		}
+
+	}
 }
