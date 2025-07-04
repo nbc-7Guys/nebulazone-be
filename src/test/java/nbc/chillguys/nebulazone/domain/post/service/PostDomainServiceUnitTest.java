@@ -25,6 +25,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
+import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
@@ -98,7 +100,20 @@ class PostDomainServiceUnitTest {
 		@Test
 		@DisplayName("게시글 생성 성공")
 		void success_createPost() {
-			// 다시 짜야함
+			// given
+			CreatePostRequest createPostRequest = new CreatePostRequest("테스트 제목1", "테스트 본문1", "free");
+			PostCreateCommand command = PostCreateCommand.of(user, createPostRequest);
+
+			given(postRepository.save(any(Post.class))).willReturn(post);
+
+			// when
+			Post createdPost = postDomainService.createPost(command);
+
+			// then
+			assertThat(createdPost.getTitle()).isEqualTo(command.title());
+			assertThat(createdPost.getContent()).isEqualTo(command.content());
+			assertThat(createdPost.getType()).isEqualTo(command.type());
+			assertThat(createdPost.getUser()).isEqualTo(user);
 		}
 	}
 
