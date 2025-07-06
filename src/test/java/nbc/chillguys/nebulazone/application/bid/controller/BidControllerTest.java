@@ -21,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -94,10 +93,10 @@ class BidControllerTest {
 
 			// when & then
 			mockMvc.perform(
-				post("/auctions/{auctionId}/bids", auctionId)
-					.contentType(MediaType.APPLICATION_JSON)
-					.content(requestBody)
-			)
+					post("/auctions/{auctionId}/bids", auctionId)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(requestBody)
+				)
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.auctionId").value(auctionId))
 				.andExpect(jsonPath("$.bidPrice").value(request.price()))
@@ -130,10 +129,10 @@ class BidControllerTest {
 
 			// when & then
 			mockMvc.perform(
-				get("/auctions/{auctionId}/bids", auctionId)
-					.param("page", String.valueOf(page))
-					.param("size", String.valueOf(size))
-			)
+					get("/auctions/{auctionId}/bids", auctionId)
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(size))
+				)
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content[0].bidUserId").value(100L))
 				.andExpect(jsonPath("$.content[0].bidUserNickname").value("testUser"))
@@ -154,7 +153,6 @@ class BidControllerTest {
 		@WithCustomMockUser
 		void success_findMyBids() throws Exception {
 			// given
-			Long userId = 1L;
 			int page = 0;
 			int size = 10;
 
@@ -167,10 +165,10 @@ class BidControllerTest {
 
 			// when & then
 			mockMvc.perform(
-				get("/bids/me")
-					.param("page", String.valueOf(page))
-					.param("size", String.valueOf(size))
-			)
+					get("/bids/me")
+						.param("page", String.valueOf(page))
+						.param("size", String.valueOf(size))
+				)
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content[0].bidUserId").value(100L))
 				.andExpect(jsonPath("$.content[0].bidUserNickname").value("testUser"))
@@ -196,8 +194,8 @@ class BidControllerTest {
 
 			// when & then
 			mockMvc.perform(
-				delete("/auctions/{auctionId}/bids/{bidPrice}", auctionId, bidPrice)
-			)
+					delete("/auctions/{auctionId}/bids/{bidPrice}", auctionId, bidPrice)
+				)
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.bidUuid").value("test-uuid"))
 				.andExpect(jsonPath("$.bidPrice").value(1000L))

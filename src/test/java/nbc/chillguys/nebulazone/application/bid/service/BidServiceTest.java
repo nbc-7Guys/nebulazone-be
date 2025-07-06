@@ -80,7 +80,7 @@ class BidServiceTest {
 			assertThat(result.page()).isEqualTo(page + 1);
 			assertThat(result.size()).isEqualTo(size);
 
-			FindBidResponse responseContent = result.content().get(0);
+			FindBidResponse responseContent = result.content().getFirst();
 			assertThat(responseContent.bidUserId()).isEqualTo(100L);
 			assertThat(responseContent.bidUserNickname()).isEqualTo("testUser");
 			assertThat(responseContent.bidStatus()).isEqualTo("BID");
@@ -128,7 +128,7 @@ class BidServiceTest {
 			assertThat(result.page()).isEqualTo(page + 1);
 			assertThat(result.size()).isEqualTo(size);
 
-			FindBidResponse responseContent = result.content().get(0);
+			FindBidResponse responseContent = result.content().getFirst();
 			assertThat(responseContent.bidUserId()).isEqualTo(100L);
 			assertThat(responseContent.bidUserNickname()).isEqualTo("testUser");
 			assertThat(responseContent.bidStatus()).isEqualTo("BID");

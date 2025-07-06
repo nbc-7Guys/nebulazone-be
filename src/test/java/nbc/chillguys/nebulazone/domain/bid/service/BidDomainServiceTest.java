@@ -133,7 +133,7 @@ class BidDomainServiceTest {
 			// then
 			assertThat(actualPage).isEqualTo(expectedPage);
 			assertThat(actualPage.getContent()).hasSize(2);
-			assertThat(actualPage.getContent().get(0).bidPrice()).isEqualTo(1000L);
+			assertThat(actualPage.getContent().getFirst().bidPrice()).isEqualTo(1000L);
 			assertThat(actualPage.getTotalElements()).isEqualTo(2L);
 			verify(bidRepository, times(1)).findBidsWithUserByAuctionId(auctionId, page, size);
 		}
