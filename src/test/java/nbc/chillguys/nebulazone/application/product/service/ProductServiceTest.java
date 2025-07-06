@@ -317,7 +317,7 @@ class ProductServiceTest {
 
 			assertThat(result.productImageUrls())
 				.containsExactly("old_image_url1", "new_image_url1", "new_image_url2");
-			assertThat(result.productImageUrls()).doesNotContain("old_image_Url2");
+			assertThat(result.productImageUrls()).doesNotContain("old_image_url2");
 		}
 
 	}

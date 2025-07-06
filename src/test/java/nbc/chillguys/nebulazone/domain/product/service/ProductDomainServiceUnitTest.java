@@ -619,7 +619,7 @@ class ProductDomainServiceUnitTest {
 		}
 
 		@Test
-		@DisplayName("상품 이미지 수정 실패 - 소유주가 아님")
+		@DisplayName("상품 이미지 수정 실패 - 상품 작성자가 아님")
 		void fail_updateProductImages_notOwner() {
 			// given
 			Long notOwnerId = 99L;
