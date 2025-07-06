@@ -217,7 +217,7 @@ class ProductServiceTest {
 			given(productDomainService.createProduct(any(ProductCreateCommand.class))).willReturn(auctionProduct);
 			given(auctionDomainService.createAuction(any(AuctionCreateCommand.class))).willReturn(auction);
 			willDoNothing().given(auctionRedisService).createAuction(any(CreateRedisAuctionDto.class));
-			
+
 			// when
 			ProductResponse result = productService.createProduct(user, catalogId, request);
 
@@ -315,10 +315,9 @@ class ProductServiceTest {
 			verify(productDomainService, times(1))
 				.updateProductImages(any(Product.class), anyList(), anyLong());
 
-			assertThat(result.productImageUrls().getFirst()).isEqualTo("old_image_url1");
-			assertThat(result.productImageUrls().get(1)).isEqualTo("new_image_url1");
-			assertThat(result.productImageUrls().get(2)).isEqualTo("new_image_url2");
-			assertThat(result.productImageUrls().contains("old_image_url2")).isNotNull();
+			assertThat(result.productImageUrls())
+				.containsExactly("old_image_url1", "new_image_url1", "new_image_url2");
+			assertThat(result.productImageUrls()).doesNotContain("old_image_Url2");
 		}
 
 	}

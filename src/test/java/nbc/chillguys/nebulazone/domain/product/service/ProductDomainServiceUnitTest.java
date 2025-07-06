@@ -35,6 +35,7 @@ import nbc.chillguys.nebulazone.domain.product.dto.ProductSearchCommand;
 import nbc.chillguys.nebulazone.domain.product.dto.ProductUpdateCommand;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
+import nbc.chillguys.nebulazone.domain.product.entity.ProductImage;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.product.exception.ProductErrorCode;
 import nbc.chillguys.nebulazone.domain.product.exception.ProductException;
@@ -593,4 +594,44 @@ class ProductDomainServiceUnitTest {
 			verify(mockProduct, times(1)).validBelongsToCatalog(catalogId);
 		}
 	}
+
+	@Nested
+	@DisplayName("상품 이미지 수정 테스트")
+	class UpdateProductImagesTest {
+
+		@Test
+		@DisplayName("상품 이미지 수정 성공")
+		void success_updateProductImages() {
+			// given
+
+			product.updateProductImage(List.of("old_url"));
+
+			List<String> newImageUrls = List.of("new_url_1", "new_url_2");
+
+			// when
+			Product updatedProduct = productDomainService.updateProductImages(product, newImageUrls, user.getId());
+
+			// then
+			assertThat(updatedProduct.getProductImages())
+				.extracting(ProductImage::getUrl)
+				.containsExactlyInAnyOrder("new_url_1", "new_url_2");
+
+		}
+
+		@Test
+		@DisplayName("상품 이미지 수정 실패 - 소유주가 아님")
+		void fail_updateProductImages_notOwner() {
+			// given
+			Long notOwnerId = 99L;
+			List<String> newImageUrls = List.of("new_url_1");
+
+			// when & then
+			assertThatThrownBy(
+				() -> productDomainService.updateProductImages(product, newImageUrls, notOwnerId))
+				.isInstanceOf(ProductException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ProductErrorCode.NOT_PRODUCT_OWNER);
+
+		}
+	}
+
 }
