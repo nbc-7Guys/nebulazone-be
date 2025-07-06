@@ -26,11 +26,11 @@ import org.springframework.test.web.servlet.ResultActions;
 import nbc.chillguys.nebulazone.application.product.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.application.product.dto.response.SearchProductResponse;
 import nbc.chillguys.nebulazone.application.product.service.ProductService;
+import nbc.chillguys.nebulazone.config.TestMockConfig;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})

@@ -26,9 +26,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.SearchPostResponse;
 import nbc.chillguys.nebulazone.application.post.service.PostService;
+import nbc.chillguys.nebulazone.config.TestMockConfig;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})

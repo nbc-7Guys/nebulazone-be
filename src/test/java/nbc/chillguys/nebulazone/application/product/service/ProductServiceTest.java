@@ -20,26 +20,33 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import nbc.chillguys.nebulazone.application.auction.service.AuctionRedisService;
+import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.application.product.dto.response.SearchProductResponse;
+import nbc.chillguys.nebulazone.domain.auction.dto.AuctionCreateCommand;
 import nbc.chillguys.nebulazone.domain.auction.entity.Auction;
 import nbc.chillguys.nebulazone.domain.auction.service.AuctionDomainService;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.catalog.service.CatalogDomainService;
+import nbc.chillguys.nebulazone.domain.product.dto.ProductCreateCommand;
 import nbc.chillguys.nebulazone.domain.product.dto.ProductFindQuery;
 import nbc.chillguys.nebulazone.domain.product.dto.ProductSearchCommand;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
+import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
-import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.domain.user.entity.UserRole;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
+import nbc.chillguys.nebulazone.infra.redis.dto.CreateRedisAuctionDto;
 
 @DisplayName("상품 애플리케이션 서비스 단위 테스트")
 @ExtendWith(MockitoExtension.class)
@@ -52,10 +59,10 @@ class ProductServiceTest {
 	private AuctionDomainService auctionDomainService;
 
 	@Mock
-	private TransactionDomainService transactionDomainService;
+	private CatalogDomainService catalogDomainService;
 
 	@Mock
-	private CatalogDomainService catalogDomainService;
+	private AuctionRedisService auctionRedisService;
 
 	@Mock
 	private GcsClient gcsClient;
@@ -125,8 +132,8 @@ class ProductServiceTest {
 
 		auction = Auction.builder()
 			.product(auctionProduct)
-			.startPrice(30000L)
-			.currentPrice(30000L)
+			.startPrice(2_000_000L)
+			.currentPrice(0L)
 			.endTime(LocalDateTime.now().plusHours(12))
 			.isWon(false)
 			.build();
@@ -194,16 +201,65 @@ class ProductServiceTest {
 	@DisplayName("상품 생성 테스트")
 	class CreateProductTest {
 
-		@DisplayName("상품 생성 성공")
+		@DisplayName("상품 생성 성공 - 경매")
 		@Test
-		void success_createProduct() {
+		void success_createProduct_auctionProduct() {
 			// given
+			Long catalogId = 1L;
+			CreateProductRequest request = new CreateProductRequest(
+				"경매 판매글 제목1",
+				"경매 판매글 내용1",
+				"auction",
+				2_000_000L,
+				"hour_12");
 
+			given(catalogDomainService.getCatalogById(catalogId)).willReturn(catalog);
+			given(productDomainService.createProduct(any(ProductCreateCommand.class))).willReturn(auctionProduct);
+			given(auctionDomainService.createAuction(any(AuctionCreateCommand.class))).willReturn(auction);
+			willDoNothing().given(auctionRedisService).createAuction(any(CreateRedisAuctionDto.class));
+			
 			// when
+			ProductResponse result = productService.createProduct(user, catalogId, request);
 
 			// then
+
+			verify(catalogDomainService, times(1)).getCatalogById(catalogId);
+			verify(productDomainService, times(1)).createProduct(any(ProductCreateCommand.class));
+			verify(auctionDomainService, times(1)).createAuction(any(AuctionCreateCommand.class));
+
+			assertThat(result.productName()).isEqualTo(auctionProduct.getName());
+			assertThat(result.productPrice()).isEqualTo(auctionProduct.getPrice());
+			assertThat(result.productTxMethod()).isEqualTo(auctionProduct.getTxMethod());
+			assertThat(result.endTime()).isEqualTo(ProductEndTime.from(request.endTime()));
 		}
 
+		@DisplayName("상품 생성 성공 - 즉시구매")
+		@Test
+		void success_createProduct_direct() {
+			// given
+			Long catalogId = 1L;
+			CreateProductRequest request = new CreateProductRequest(
+				"일반 판매글 제목1",
+				"일반 판매글 내용1",
+				"direct",
+				2_000_000L,
+				null);
+
+			given(catalogDomainService.getCatalogById(catalogId)).willReturn(catalog);
+			given(productDomainService.createProduct(any(ProductCreateCommand.class))).willReturn(product);
+
+			// when
+			ProductResponse result = productService.createProduct(user, catalogId, request);
+
+			// then
+			verify(catalogDomainService, times(1)).getCatalogById(catalogId);
+			verify(productDomainService, times(1)).createProduct(any(ProductCreateCommand.class));
+
+			assertThat(result.productName()).isEqualTo(product.getName());
+			assertThat(result.productPrice()).isEqualTo(product.getPrice());
+			assertThat(result.productTxMethod()).isEqualTo(product.getTxMethod());
+			assertThat(result.endTime()).isNull();
+		}
 	}
 
 	@Nested
@@ -215,9 +271,54 @@ class ProductServiceTest {
 		void success_updateProductImages() {
 			// given
 
+			Long updateProductId = 1L;
+			product.updateProductImage(List.of("old_image_url1", "old_image_url2"));
+
+			List<String> remainImageUrls = List.of("old_image_url1");
+
+			List<MultipartFile> newImageFiles = List.of(
+				new MockMultipartFile(
+					"new_image1",
+					"new_image1.jpg",
+					"image/jpeg",
+					"new_image1_content"
+						.getBytes()),
+
+				new MockMultipartFile(
+					"new_image2",
+					"new_image2.jpg",
+					"image/jpeg",
+					"new_image2_content"
+						.getBytes()));
+
+			given(gcsClient.uploadFile(any(MultipartFile.class)))
+				.willReturn("new_image_url1", "new_image_url2");
+
+			List<String> updatedImageUrls = List.of(
+				"old_image_url1",
+				"new_image_url1",
+				"new_image_url2"
+			);
+			product.updateProductImage(updatedImageUrls);
+
+			given(productDomainService.findActiveProductById(updateProductId)).willReturn(product);
+			given(productDomainService.updateProductImages(any(Product.class), eq(updatedImageUrls), eq(user.getId())))
+				.willReturn(product);
+
 			// when
+			ProductResponse result = productService.updateProductImages(updateProductId, newImageFiles, user,
+				remainImageUrls);
 
 			// then
+			verify(gcsClient, times(2)).uploadFile(any(MultipartFile.class));
+			verify(productDomainService, times(1)).findActiveProductById(updateProductId);
+			verify(productDomainService, times(1))
+				.updateProductImages(any(Product.class), anyList(), anyLong());
+
+			assertThat(result.productImageUrls().getFirst()).isEqualTo("old_image_url1");
+			assertThat(result.productImageUrls().get(1)).isEqualTo("new_image_url1");
+			assertThat(result.productImageUrls().get(2)).isEqualTo("new_image_url2");
+			assertThat(result.productImageUrls().contains("old_image_url2")).isNotNull();
 		}
 
 	}

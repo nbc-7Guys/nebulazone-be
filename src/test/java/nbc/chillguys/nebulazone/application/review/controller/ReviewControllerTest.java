@@ -20,9 +20,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import nbc.chillguys.nebulazone.application.review.dto.response.ReviewResponse;
 import nbc.chillguys.nebulazone.application.review.service.ReviewService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
+import nbc.chillguys.nebulazone.config.TestMockConfig;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 
 @WebMvcTest(
 	controllers = ReviewController.class,

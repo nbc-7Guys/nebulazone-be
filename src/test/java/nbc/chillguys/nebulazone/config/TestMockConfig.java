@@ -1,4 +1,4 @@
-package nbc.chillguys.nebulazone.support.mock;
+package nbc.chillguys.nebulazone.config;
 
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;

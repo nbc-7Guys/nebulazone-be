@@ -8,9 +8,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 
+import nbc.chillguys.nebulazone.config.TestMockConfig;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 
 @DisplayName("경매 컨트롤러 단위 테스트")
 @Import({TestSecurityConfig.class, TestMockConfig.class})
