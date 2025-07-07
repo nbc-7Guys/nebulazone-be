@@ -3,7 +3,7 @@ package nbc.chillguys.nebulazone.application.bid.dto.response;
 import nbc.chillguys.nebulazone.infra.redis.vo.BidVo;
 
 public record DeleteBidResponse(
-	String BidUuid,
+	String bidUuid,
 	Long bidPrice,
 	Long auctionId,
 	String bidStatus

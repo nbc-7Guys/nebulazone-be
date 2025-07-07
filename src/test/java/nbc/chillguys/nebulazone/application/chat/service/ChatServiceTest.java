@@ -27,6 +27,7 @@ import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage
 import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
 import nbc.chillguys.nebulazone.domain.catalog.entity.Catalog;
 import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
+import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 import nbc.chillguys.nebulazone.domain.chat.entity.MessageType;
@@ -64,6 +65,8 @@ class ChatServiceTest {
 	private NotificationService notificationService;
 	@Mock
 	private SimpMessagingTemplate messagingTemplate;
+	@Mock
+	private ChatMessageRedisService chatMessageRedisService;
 	@InjectMocks
 	private ChatService chatService;
 	// 공통 테스트 픽스처
@@ -275,6 +278,7 @@ class ChatServiceTest {
 
 			willDoNothing().given(chatDomainService).validateUserAccessToChatRoom(buyer, CHAT_ROOM_ID);
 			given(chatDomainService.findChatHistoryResponses(CHAT_ROOM_ID, null, size)).willReturn(responses);
+			given(chatMessageRedisService.getMessagesFromRedis(CHAT_ROOM_ID)).willReturn(List.of());
 
 			// when
 			List<FindChatHistoryResponse> result = chatService.findChatHistories(buyer, CHAT_ROOM_ID, null, size);
@@ -285,6 +289,7 @@ class ChatServiceTest {
 			assertThat(result.get(1).message()).isEqualTo("반갑습니다");
 			verify(chatDomainService).validateUserAccessToChatRoom(buyer, CHAT_ROOM_ID);
 			verify(chatDomainService).findChatHistoryResponses(CHAT_ROOM_ID, null, size);
+			verify(chatMessageRedisService).getMessagesFromRedis(CHAT_ROOM_ID);
 		}
 
 		@Test

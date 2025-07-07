@@ -19,10 +19,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
+import nbc.chillguys.nebulazone.application.post.dto.response.CreatePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.SearchPostResponse;
+import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
@@ -139,9 +144,85 @@ class PostServiceTest {
 	class CreatePostTest {
 
 		@Test
-		@DisplayName("게시글 생성 성공")
+		@DisplayName("게시글 생성 성공 - 자유게시판")
 		void success_createPost() {
-			// 다시짜야함
+			// given
+			CreatePostRequest request = new CreatePostRequest(
+				"자유게시판 제목",
+				"자유게시판 내용",
+				"FREE");
+
+			given(postDomainService.createPost(any(PostCreateCommand.class))).willReturn(post);
+			willDoNothing().given(postDomainService).savePostToEs(post);
+
+			// when
+			CreatePostResponse response = postService.createPost(user, request);
+
+			// then
+			verify(postDomainService, times(1)).createPost(any(PostCreateCommand.class));
+			verify(postDomainService, times(1)).savePostToEs(post);
+
+			assertThat(response.postId()).isEqualTo(post.getId());
+			assertThat(response.title()).isEqualTo(post.getTitle());
+		}
+	}
+
+	@Nested
+	@DisplayName("게시글 이미지 수정 테스트")
+	class UpdatePostImagesTest {
+
+		@DisplayName("게시글 이미지 수정 성공")
+		@Test
+		void success_updatePostImages() {
+			// given
+			Long updatePostId = 1L;
+			post.updatePostImages(List.of("old_image_url1", "old_image_url2"));
+
+			List<String> remainImageUrls = List.of("old_image_url1");
+
+			List<MultipartFile> newImageFiles = List.of(
+				new MockMultipartFile(
+					"new_image1",
+					"new_image1.jpg",
+					"image/jpeg",
+					"new_image1_content"
+						.getBytes()),
+
+				new MockMultipartFile(
+					"new_image2",
+					"new_image2.jpg",
+					"image/jpeg",
+					"new_image2_content"
+						.getBytes()));
+
+			given(gcsClient.uploadFile(any(MultipartFile.class)))
+				.willReturn("new_image_url1", "new_image_url2");
+
+			List<String> updatedImageUrls = List.of(
+				"old_image_url1",
+				"new_image_url1",
+				"new_image_url2"
+			);
+
+			post.updatePostImages(updatedImageUrls);
+
+			given(postDomainService.findActivePost(updatePostId)).willReturn(post);
+			given(postDomainService.updatePostImages(any(Post.class), eq(updatedImageUrls), eq(user.getId())))
+				.willReturn(post);
+
+			// when
+			GetPostResponse result = postService.updatePostImages(updatePostId, newImageFiles, user,
+				remainImageUrls);
+
+			// then
+			verify(gcsClient, times(2)).uploadFile(any(MultipartFile.class));
+			verify(postDomainService, times(1)).findActivePost(updatePostId);
+			verify(postDomainService, times(1))
+				.updatePostImages(any(Post.class), anyList(), anyLong());
+
+			assertThat(result.imageUrls())
+				.containsExactly("old_image_url1", "new_image_url1", "new_image_url2");
+			assertThat(result.imageUrls()).doesNotContain("old_image_url2");
 		}
 	}
 

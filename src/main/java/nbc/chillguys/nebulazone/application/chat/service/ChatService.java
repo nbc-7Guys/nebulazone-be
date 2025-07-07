@@ -1,7 +1,11 @@
 package nbc.chillguys.nebulazone.application.chat.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -15,6 +19,7 @@ import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatHistoryRes
 import nbc.chillguys.nebulazone.application.chat.dto.response.FindChatRoomResponses;
 import nbc.chillguys.nebulazone.application.notification.dto.NotificationMessage;
 import nbc.chillguys.nebulazone.application.notification.service.NotificationService;
+import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatMessageInfo;
 import nbc.chillguys.nebulazone.domain.chat.dto.response.ChatRoomInfo;
 import nbc.chillguys.nebulazone.domain.chat.entity.ChatRoom;
 import nbc.chillguys.nebulazone.domain.chat.exception.ChatErrorCode;
@@ -36,6 +41,7 @@ public class ChatService {
 	private final ProductDomainService productDomainService;
 	private final UserDomainService userDomainService;
 	private final NotificationService notificationService;
+	private final ChatMessageRedisService chatMessageRedisService;
 
 	/**
 	 * 채팅방 생성 또는 기존에 채팅방 조회.<br/>
@@ -92,22 +98,13 @@ public class ChatService {
 		User buyer = userDomainService.findActiveUserByEmail(user.getEmail());
 		User seller = product.getSeller();
 
-		NotificationMessage notificationMessage = NotificationMessage.of(
-			NotificationType.CHAT_ROOM_CREATED,
-			"'" + buyer.getNickname() + " 님이 거래 요청을 하였습니다.'",
-			"'" + product.getName() + " 제품에 대한 거래를 요청하였습니다.'",
-			"/chat/rooms",
-			seller.getId(),
-			LocalDateTime.now(),
-			false
-		);
+		NotificationMessage notificationMessage = NotificationMessage.of(NotificationType.CHAT_ROOM_CREATED,
+			"'" + buyer.getNickname() + " 님이 거래 요청을 하였습니다.'", "'" + product.getName() + " 제품에 대한 거래를 요청하였습니다.'",
+			"/chat/rooms", seller.getId(), LocalDateTime.now(), false);
 
 		// 채팅방 및 참가자 save
 		ChatRoom chatRoom = chatDomainService.createChatRoom(product, buyer, seller);
-		notificationService.sendNotificationToUser(
-			seller.getId(),
-			notificationMessage
-		);
+		notificationService.sendNotificationToUser(seller.getId(), notificationMessage);
 
 		return chatRoom;
 	}
@@ -136,7 +133,13 @@ public class ChatService {
 
 		chatDomainService.validateUserAccessToChatRoom(user, roomId);
 
-		return chatDomainService.findChatHistoryResponses(roomId, lastId, size);
+		// DB에서 조회
+		List<FindChatHistoryResponse> messagesFromDB = chatDomainService.findChatHistoryResponses(roomId, lastId, size);
+
+		// redis에서 조회
+		List<ChatMessageInfo> messagesFromRedis = chatMessageRedisService.getMessagesFromRedis(roomId);
+
+		return mergeAndSortMessages(messagesFromDB, messagesFromRedis, size);
 	}
 
 	/**
@@ -155,6 +158,57 @@ public class ChatService {
 		String message = leftUser + " 님이 채팅방을 나갔습니다.";
 
 		messagingTemplate.convertAndSend("/topic/chat/" + roomId, message);
+	}
+
+	/**
+	 * DB 메시지와 Redis 메시지를 병합하여 시간순으로 정렬
+	 *
+	 * @param dbMessages DB에서 조회한 메시지 목록
+	 * @param redisMessages Redis에서 조회한 메시지 목록
+	 * @param size 최대 반환할 메시지 개수
+	 * @return 병합 및 정렬된 메시지 목록
+	 */
+	private List<FindChatHistoryResponse> mergeAndSortMessages(List<FindChatHistoryResponse> dbMessages,
+		List<ChatMessageInfo> redisMessages, int size) {
+
+		List<FindChatHistoryResponse> mergedMessages = new ArrayList<>(dbMessages);
+
+		for (ChatMessageInfo redisMessage : redisMessages) {
+			FindChatHistoryResponse redisResponse = new FindChatHistoryResponse(redisMessage.senderId(),
+				redisMessage.message(), redisMessage.sendTime(), redisMessage.type());
+
+			mergedMessages.add(redisResponse);
+		}
+
+		mergedMessages.sort(Comparator.comparing(FindChatHistoryResponse::sendTime));
+
+		mergedMessages = removeDuplicates(mergedMessages);
+
+		if (mergedMessages.size() > size) {
+			mergedMessages = mergedMessages.subList(Math.max(0, mergedMessages.size() - size), mergedMessages.size());
+		}
+
+		return mergedMessages;
+	}
+
+	/**
+	 * 중복된 메시지 제거
+	 * 같은 시간, 발신자, 메시지 내용이 동일한 경우 중복으로 간주
+	 */
+	private List<FindChatHistoryResponse> removeDuplicates(List<FindChatHistoryResponse> messages) {
+		Set<String> seen = new HashSet<>();
+		List<FindChatHistoryResponse> uniqueMessages = new ArrayList<>();
+
+		for (FindChatHistoryResponse message : messages) {
+			String key = message.senderId() + "|" + message.message() + "|" + message.sendTime().toString();
+
+			if (!seen.contains(key)) {
+				seen.add(key);
+				uniqueMessages.add(message);
+			}
+		}
+
+		return uniqueMessages;
 	}
 
 }

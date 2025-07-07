@@ -27,10 +27,10 @@ import nbc.chillguys.nebulazone.application.catalog.dto.response.CatalogResponse
 import nbc.chillguys.nebulazone.application.catalog.dto.response.SearchCatalogResponse;
 import nbc.chillguys.nebulazone.application.catalog.service.CatalogService;
 import nbc.chillguys.nebulazone.application.review.dto.response.ReviewResponse;
+import nbc.chillguys.nebulazone.config.TestMockConfig;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.catalog.entity.CatalogType;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})
 @DisplayName("카탈로그 컨트롤러 단위 테스트")

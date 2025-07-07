@@ -70,7 +70,7 @@ public class BidDomainService {
 	 * @return 조회된 Bid
 	 * @author 전나겸
 	 */
-	public Bid findHighBidByAuction(Long auctionId) {
+	public Bid findWonBidByAuctionId(Long auctionId) {
 		return bidRepository.findHighestPriceBidByAuctionWithUser(auctionId);
 	}
 

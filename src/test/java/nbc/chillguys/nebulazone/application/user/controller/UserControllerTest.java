@@ -36,10 +36,10 @@ import nbc.chillguys.nebulazone.application.user.dto.request.WithdrawUserRequest
 import nbc.chillguys.nebulazone.application.user.dto.response.UserResponse;
 import nbc.chillguys.nebulazone.application.user.dto.response.WithdrawUserResponse;
 import nbc.chillguys.nebulazone.application.user.service.UserService;
+import nbc.chillguys.nebulazone.config.TestMockConfig;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.user.entity.OAuthType;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("유저 컨트롤러 단위 테스트")
