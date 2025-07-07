@@ -1,6 +1,7 @@
 package nbc.chillguys.nebulazone.application.auction.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -95,7 +96,9 @@ public class AutoAuctionRedisService {
 
 			User seller = wonAuctionProduct.getSeller();
 			seller.plusPoint(auction.getCurrentPrice());
-			userCacheService.deleteUserById(seller.getId());
+
+			List<Long> userIdsToInvalidate = new ArrayList<>();
+			userIdsToInvalidate.add(seller.getId());
 
 			List<BidVo> bidVoList = Optional.ofNullable(objects)
 				.orElse(Set.of())
@@ -134,7 +137,7 @@ public class AutoAuctionRedisService {
 
 					} else if (BidStatus.BID.name().equals(bidVo.getBidStatus())) {
 						bidUser.plusPoint(bidVo.getBidPrice());
-						userCacheService.deleteUserById(bidUser.getId());
+						userIdsToInvalidate.add(bidUser.getId());
 					}
 				});
 
@@ -145,6 +148,10 @@ public class AutoAuctionRedisService {
 				auction.getCurrentPrice(), LocalDateTime.now());
 
 			transactionDomainService.createTransaction(sellerTxCreateCommand);
+
+			for (Long userId : userIdsToInvalidate) {
+				userCacheService.deleteUserById(userId);
+			}
 
 			try {
 				BidVo wonBidVo = bidVoList.stream()

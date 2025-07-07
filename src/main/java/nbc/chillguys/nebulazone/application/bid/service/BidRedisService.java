@@ -84,10 +84,11 @@ public class BidRedisService {
 			.filter(bv -> bv.getBidStatus().equals(BidStatus.BID.name()))
 			.findFirst()
 			.map(bv -> {
+				loginUser.minusPoint(bidPrice - bv.getBidPrice());
+
 				redisTemplate.opsForZSet().remove(bidKey, bv);
 				bv.cancelBid();
 				redisTemplate.opsForZSet().add(bidKey, bv, bv.getBidPrice());
-				loginUser.minusPoint(bidPrice - bv.getBidPrice());
 
 				BidVo newBidVo = BidVo.of(auctionId, user, bidPrice);
 				redisTemplate.opsForZSet().add(bidKey, newBidVo, bidPrice);
@@ -95,19 +96,17 @@ public class BidRedisService {
 				return newBidVo;
 			})
 			.orElseGet(() -> {
-				BidVo newBidVo = BidVo.of(auctionId, user, bidPrice);
-				redisTemplate.opsForZSet().add(bidKey, newBidVo, bidPrice);
-
 				loginUser.minusPoint(bidPrice);
 
+				BidVo newBidVo = BidVo.of(auctionId, user, bidPrice);
+				redisTemplate.opsForZSet().add(bidKey, newBidVo, bidPrice);
 				return newBidVo;
 			});
 
-		userCacheService.deleteUserById(loginUser.getId());
-
 		auctionRedisService.updateAuctionCurrentPrice(auctionId, bidPrice);
-
 		CreateBidResponse response = CreateBidResponse.from(bidVo);
+
+		userCacheService.deleteUserById(loginUser.getId());
 
 		try {
 			redisMessagePublisher.publishAuctionUpdate(auctionId, "bid", response);
@@ -170,11 +169,12 @@ public class BidRedisService {
 			.map(BidVo::getBidPrice)
 			.orElse(0L);
 
-		auctionRedisService.updateAuctionCurrentPrice(auctionId, newCurrentPrice);
 		loginUser.plusPoint(bidPrice);
-		userCacheService.deleteUserById(loginUser.getId());
 
+		auctionRedisService.updateAuctionCurrentPrice(auctionId, newCurrentPrice);
 		DeleteBidResponse response = DeleteBidResponse.from(findBidVo);
+
+		userCacheService.deleteUserById(loginUser.getId());
 
 		try {
 			redisMessagePublisher.publishAuctionUpdate(auctionId, "bid", response);
