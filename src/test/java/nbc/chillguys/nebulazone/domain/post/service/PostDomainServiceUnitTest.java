@@ -25,9 +25,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
+import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
+import nbc.chillguys.nebulazone.domain.post.entity.PostImage;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 import nbc.chillguys.nebulazone.domain.post.exception.PostErrorCode;
 import nbc.chillguys.nebulazone.domain.post.exception.PostException;
@@ -98,7 +101,20 @@ class PostDomainServiceUnitTest {
 		@Test
 		@DisplayName("게시글 생성 성공")
 		void success_createPost() {
-			// 다시 짜야함
+			// given
+			CreatePostRequest createPostRequest = new CreatePostRequest("테스트 제목1", "테스트 본문1", "free");
+			PostCreateCommand command = PostCreateCommand.of(user, createPostRequest);
+
+			given(postRepository.save(any(Post.class))).willReturn(post);
+
+			// when
+			Post createdPost = postDomainService.createPost(command);
+
+			// then
+			assertThat(createdPost.getTitle()).isEqualTo(command.title());
+			assertThat(createdPost.getContent()).isEqualTo(command.content());
+			assertThat(createdPost.getType()).isEqualTo(command.type());
+			assertThat(createdPost.getUser()).isEqualTo(user);
 		}
 	}
 
@@ -329,4 +345,41 @@ class PostDomainServiceUnitTest {
 		}
 	}
 
+	@Nested
+	@DisplayName("게시글 이미지 수정 테스트")
+	class UpdateProductImagesTest {
+
+		@Test
+		@DisplayName("게시글 이미지 수정 성공")
+		void success_updateProductImages() {
+			// given
+			post.updatePostImages(List.of("old_url"));
+
+			List<String> newImageUrls = List.of("new_url_1", "new_url_2");
+
+			// when
+			Post updatedPost = postDomainService.updatePostImages(post, newImageUrls, user.getId());
+
+			// then
+			assertThat(updatedPost.getPostImages())
+				.extracting(PostImage::getUrl)
+				.containsExactlyInAnyOrder("new_url_1", "new_url_2");
+
+		}
+
+		@Test
+		@DisplayName("게시글 이미지 수정 실패 - 게시글 작성자 아님")
+		void fail_updateProductImages_notOwner() {
+			// given
+			Long notOwnerId = 99L;
+			List<String> newImageUrls = List.of("new_url_1");
+
+			// when & then
+			assertThatThrownBy(
+				() -> postDomainService.updatePostImages(post, newImageUrls, notOwnerId))
+				.isInstanceOf(PostException.class)
+				.hasFieldOrPropertyWithValue("errorCode", PostErrorCode.NOT_POST_OWNER);
+
+		}
+	}
 }

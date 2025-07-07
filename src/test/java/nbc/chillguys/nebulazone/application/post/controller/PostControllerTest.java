@@ -19,16 +19,22 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import nbc.chillguys.nebulazone.application.post.dto.request.CreatePostRequest;
+import nbc.chillguys.nebulazone.application.post.dto.response.CreatePostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.GetPostResponse;
 import nbc.chillguys.nebulazone.application.post.dto.response.SearchPostResponse;
 import nbc.chillguys.nebulazone.application.post.service.PostService;
+import nbc.chillguys.nebulazone.config.TestMockConfig;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
+import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})
@@ -48,6 +54,9 @@ class PostControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	@Nested
 	@DisplayName("게시글 생성")
 	class CreatePostTest {
@@ -55,8 +64,32 @@ class PostControllerTest {
 		@Test
 		@DisplayName("게시글 생성 성공")
 		@WithCustomMockUser
-		void success_createPost() {
-			// 다시 짜야함
+		void success_createPost() throws Exception {
+			// given
+			CreatePostRequest request = new CreatePostRequest("title", "content", "free");
+			CreatePostResponse response = new CreatePostResponse(
+				1L,
+				"title",
+				"content",
+				PostType.FREE,
+				LocalDateTime.now());
+
+			given(postService.createPost(any(), any(CreatePostRequest.class))).willReturn(response);
+
+			// when
+			ResultActions perform = mockMvc.perform(
+				post("/posts")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request)));
+
+			// then
+			perform.andDo(print())
+				.andExpectAll(
+					status().isCreated(),
+					jsonPath("$.postId").value(1L),
+					jsonPath("$.title").value("title"),
+					jsonPath("$.content").value("content"),
+					jsonPath("$.type").value("FREE"));
 		}
 	}
 
@@ -76,11 +109,16 @@ class PostControllerTest {
 
 			// When
 			ResultActions perform = mockMvc.perform(
-				get("/posts").param("keyword", "test").param("type", "FREE").param("page", "1").param("size", "10"));
+				get("/posts")
+					.param("keyword", "test")
+					.param("type", "FREE")
+					.param("page", "1")
+					.param("size", "10"));
 
 			// Then
 			perform.andDo(print())
-				.andExpectAll(status().isOk(), jsonPath("$.content[0].postId").value(1L),
+				.andExpectAll(status().isOk(),
+					jsonPath("$.content[0].postId").value(1L),
 					jsonPath("$.content[0].title").value("title"),
 					jsonPath("$.content[0].content").value("content"),
 					jsonPath("$.content[0].type").value("FREE"),

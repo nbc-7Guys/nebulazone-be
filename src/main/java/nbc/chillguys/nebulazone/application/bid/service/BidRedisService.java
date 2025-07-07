@@ -129,7 +129,7 @@ public class BidRedisService {
 	 */
 	@Transactional
 	@DistributedLock(key = "'bid:deleteLock:' + #auctionId")
-	public DeleteBidResponse statusBid(User user, Long auctionId, Long bidPrice) {
+	public DeleteBidResponse cancelBid(User user, Long auctionId, Long bidPrice) {
 		User loginUser = userDomainService.findActiveUserById(user.getId());
 
 		AuctionVo auctionVo = auctionRedisService.getAuctionVoElseThrow(auctionId);

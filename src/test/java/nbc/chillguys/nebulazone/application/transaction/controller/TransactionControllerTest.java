@@ -28,12 +28,12 @@ import nbc.chillguys.nebulazone.application.transaction.dto.response.FindDetailT
 import nbc.chillguys.nebulazone.application.transaction.dto.response.FindTransactionResponse;
 import nbc.chillguys.nebulazone.application.transaction.service.TransactionService;
 import nbc.chillguys.nebulazone.common.response.CommonPageResponse;
+import nbc.chillguys.nebulazone.config.TestMockConfig;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.transaction.entity.TransactionMethod;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @DisplayName("거래 내역 컨트롤러 단위 테스트")

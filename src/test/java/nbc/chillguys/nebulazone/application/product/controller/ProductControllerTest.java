@@ -19,18 +19,22 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import nbc.chillguys.nebulazone.application.product.dto.request.CreateProductRequest;
 import nbc.chillguys.nebulazone.application.product.dto.response.ProductResponse;
 import nbc.chillguys.nebulazone.application.product.dto.response.SearchProductResponse;
 import nbc.chillguys.nebulazone.application.product.service.ProductService;
+import nbc.chillguys.nebulazone.config.TestMockConfig;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})
@@ -50,6 +54,9 @@ class ProductControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	@Nested
 	@DisplayName("상품 생성")
 	class CreateProductTest {
@@ -57,15 +64,77 @@ class ProductControllerTest {
 		@Test
 		@DisplayName("상품 생성 성공 - 경매")
 		@WithCustomMockUser
-		void success_createProduct_auction() {
-			// 다시 해야함
+		void success_createProduct_auction() throws Exception {
+			// given
+			Long catalogId = 1L;
+			CreateProductRequest request = new CreateProductRequest(
+				"testProduct",
+				"testDescription",
+				"auction",
+				1000L,
+				"hour_24");
+
+			ProductResponse response = new ProductResponse(
+				1L, "testProduct", "testDescription", 1000L,
+				ProductTxMethod.AUCTION, false, ProductEndTime.HOUR_24,
+				LocalDateTime.now(), LocalDateTime.now(), List.of());
+
+			given(productService.createProduct(any(), eq(catalogId), any(CreateProductRequest.class)))
+				.willReturn(response);
+
+			// when
+			ResultActions perform = mockMvc.perform(
+				post("/catalogs/{catalogId}/products", catalogId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request)));
+
+			// then
+			perform.andDo(print())
+				.andExpectAll(
+					status().isCreated(),
+					jsonPath("$.productId").value(1L),
+					jsonPath("$.productName").value("testProduct"),
+					jsonPath("$.productDescription").value("testDescription"),
+					jsonPath("$.productPrice").value(1000L),
+					jsonPath("$.productTxMethod").value("AUCTION"));
 		}
 
 		@Test
 		@DisplayName("상품 생성 성공 - 즉시거래")
 		@WithCustomMockUser
-		void success_createProduct_direct() {
-			// 다시 만들어야함
+		void success_createProduct_direct() throws Exception {
+			// given
+			Long catalogId = 1L;
+			CreateProductRequest request = new CreateProductRequest(
+				"directProduct",
+				"directDescription",
+				"direct",
+				2000L,
+				null);
+
+			ProductResponse response = new ProductResponse(
+				2L, "directProduct", "directDescription", 2000L,
+				ProductTxMethod.DIRECT, false, null,
+				LocalDateTime.now(), LocalDateTime.now(), List.of());
+
+			given(productService.createProduct(any(), eq(catalogId), any(CreateProductRequest.class)))
+				.willReturn(response);
+
+			// when
+			ResultActions perform = mockMvc.perform(
+				post("/catalogs/{catalogId}/products", catalogId)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(request)));
+
+			// then
+			perform.andDo(print())
+				.andExpectAll(
+					status().isCreated(),
+					jsonPath("$.productId").value(2L),
+					jsonPath("$.productName").value("directProduct"),
+					jsonPath("$.productDescription").value("directDescription"),
+					jsonPath("$.productPrice").value(2000L),
+					jsonPath("$.productTxMethod").value("DIRECT"));
 		}
 	}
 
@@ -130,7 +199,8 @@ class ProductControllerTest {
 			Long catalogId = 1L;
 			Long productId = 1L;
 			ProductResponse response = new ProductResponse(productId, "testProduct", "testDescription",
-				1000L, ProductTxMethod.DIRECT, false, ProductEndTime.HOUR_12, LocalDateTime.now(), LocalDateTime.now(),
+				1000L, ProductTxMethod.DIRECT, false, ProductEndTime.HOUR_12, LocalDateTime.now(),
+				LocalDateTime.now(),
 				List.of());
 
 			given(productService.getProduct(catalogId, productId)).willReturn(response);

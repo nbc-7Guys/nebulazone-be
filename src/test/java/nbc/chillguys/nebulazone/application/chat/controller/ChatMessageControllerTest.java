@@ -20,10 +20,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import nbc.chillguys.nebulazone.application.chat.dto.request.ImageMessageRequest;
 import nbc.chillguys.nebulazone.application.chat.service.ChatMessageService;
+import nbc.chillguys.nebulazone.config.TestMockConfig;
 import nbc.chillguys.nebulazone.config.TestSecurityConfig;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
 import nbc.chillguys.nebulazone.infra.security.filter.JwtAuthenticationFilter;
-import nbc.chillguys.nebulazone.support.mock.TestMockConfig;
 import nbc.chillguys.nebulazone.support.mockuser.WithCustomMockUser;
 
 @Import({TestSecurityConfig.class, TestMockConfig.class})

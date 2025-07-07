@@ -132,7 +132,7 @@ public class AuctionDomainService {
 	}
 
 	/**
-	 * redis 경매들을 데이터베이스에 백업
+	 * redis 경매의 현재가를 데이터베이스에 백업
 	 *
 	 * @param auctionId 백업 대상 경매
 	 * @param currentPrice 현재 가격

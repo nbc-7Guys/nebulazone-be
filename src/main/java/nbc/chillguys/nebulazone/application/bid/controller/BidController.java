@@ -64,13 +64,13 @@ public class BidController {
 	}
 
 	@DeleteMapping("/auctions/{auctionId}/bids/{bidPrice}")
-	public ResponseEntity<DeleteBidResponse> statusBid(
+	public ResponseEntity<DeleteBidResponse> cancelBid(
 		@AuthenticationPrincipal User user,
 		@PathVariable("auctionId") Long auctionId,
 		@PathVariable("bidPrice") Long bidPrice
 	) {
 
-		DeleteBidResponse response = bidRedisService.statusBid(user, auctionId, bidPrice);
+		DeleteBidResponse response = bidRedisService.cancelBid(user, auctionId, bidPrice);
 
 		return ResponseEntity.ok(response);
 	}

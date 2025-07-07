@@ -435,6 +435,19 @@ public class AuctionRedisService {
 	}
 
 	/**
+	 * 특졍 경매의 이미지 url 수정
+	 *
+	 * @param auctionId 대상 경매 id
+	 * @param productImages 경매 상품 url 리스트
+	 * @author 전나겸
+	 */
+	public void updateAuctionProductImages(Long auctionId, List<String> productImages) {
+		String auctionKey = AuctionConstants.AUCTION_PREFIX + auctionId;
+
+		redisTemplate.opsForHash().put(auctionKey, "productImageUrls", productImages);
+	}
+
+	/**
 	 * 어드민 경매 삭제 처리
 	 *
 	 * <p>
@@ -536,19 +549,6 @@ public class AuctionRedisService {
 		}
 
 		auctionAdminDomainService.updateAuction(auctionId, command);
-	}
-
-	/**
-	 * 특졍 경매의 이미지 url 수정
-	 *
-	 * @param auctionId 대상 경매 id
-	 * @param productImages 경매 상품 url 리스트
-	 * @author 전나겸
-	 */
-	public void updateAuctionProductImages(Long auctionId, List<String> productImages) {
-		String auctionKey = AuctionConstants.AUCTION_PREFIX + auctionId;
-
-		redisTemplate.opsForHash().put(auctionKey, "productImageUrls", productImages);
 	}
 
 }

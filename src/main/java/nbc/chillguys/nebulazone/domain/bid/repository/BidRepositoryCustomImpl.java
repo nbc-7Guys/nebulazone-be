@@ -105,7 +105,7 @@ public class BidRepositoryCustomImpl implements BidRepositoryCustom {
 			.fetchJoin()
 			.where(
 				bid.auction.id.eq(auctionId),
-				bid.status.eq(BidStatus.BID))
+				bid.status.eq(BidStatus.WON))
 			.orderBy(bid.price.desc())
 			.limit(1)
 			.fetchOne();
