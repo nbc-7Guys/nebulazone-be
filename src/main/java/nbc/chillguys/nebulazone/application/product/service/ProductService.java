@@ -140,13 +140,13 @@ public class ProductService {
 		product.validBelongsToCatalog(catalogId);
 
 		user.minusPoint(product.getPrice());
-		userCacheService.deleteUserById(userId);
+		User seller = product.getSeller();
+		seller.plusPoint(product.getPrice());
 
 		ProductPurchaseCommand command = ProductPurchaseCommand.of(productId, userId, catalogId);
 		productDomainService.purchaseProduct(command);
 
-		User seller = product.getSeller();
-		seller.plusPoint(product.getPrice());
+		userCacheService.deleteUserById(userId);
 		userCacheService.deleteUserById(seller.getId());
 
 		LocalDateTime purchasedAt = LocalDateTime.now();

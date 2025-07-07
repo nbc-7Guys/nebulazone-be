@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +31,7 @@ public class ChatMessageService {
 	private final RedisMessagePublisher redisMessagePublisher;
 	private final ChatDomainService chatDomainService;
 	private final WebSocketSessionRedisService webSocketSessionRedisService;
+	private final ChatTransactionService chatTransactionService;
 
 	/**
 	 * 현재 접속한 유저가 방에 참여중인지 확인
@@ -107,7 +107,6 @@ public class ChatMessageService {
 	 * @param roomId 채팅방 id
 	 */
 	@DistributedLock(key = "'chat:save:' + #roomId")
-	@Transactional
 	public void saveMessagesToDb(Long roomId) {
 		// 채팅방Id를 기준으로 레디스에 있는 채팅기록들 불러오기
 		List<ChatMessageInfo> messagesFromRedis = chatMessageRedisService.getMessagesFromRedis(roomId);
@@ -115,11 +114,10 @@ public class ChatMessageService {
 			return;
 		}
 
-		// 레디스에서 가져온 메시지들 db에 저장
-		chatDomainService.saveChatHistories(roomId, messagesFromRedis);
+		// 별도 서비스의 트랜잭션 메서드 호출
+		chatTransactionService.saveMessagesTransaction(roomId, messagesFromRedis);
 
-		// db에 저장이 끝난 레디스 데이터 삭제
+		// db에 저장이 끝난 레디스 데이터 삭제 (트랜잭션 커밋 후)
 		chatMessageRedisService.deleteMessagesInRedis(roomId);
 	}
-
 }

@@ -56,6 +56,8 @@ class ChatMessageServiceTest {
 	private ChatDomainService chatDomainService;
 	@Mock
 	private WebSocketSessionRedisService webSocketSessionRedisService;
+	@Mock
+	private ChatTransactionService chatTransactionService;
 	@InjectMocks
 	private ChatMessageService chatMessageService;
 	// 공통 테스트 픽스처
@@ -213,7 +215,7 @@ class ChatMessageServiceTest {
 				ChatMessageInfo.of(ROOM_ID, USER_ID, USER_EMAIL, "두 번째 메시지", MessageType.TEXT, LocalDateTime.now())
 			);
 			given(chatMessageRedisService.getMessagesFromRedis(ROOM_ID)).willReturn(messagesFromRedis);
-			willDoNothing().given(chatDomainService).saveChatHistories(ROOM_ID, messagesFromRedis);
+			willDoNothing().given(chatTransactionService).saveMessagesTransaction(ROOM_ID, messagesFromRedis);
 			willDoNothing().given(chatMessageRedisService).deleteMessagesInRedis(ROOM_ID);
 
 			// when
@@ -221,7 +223,7 @@ class ChatMessageServiceTest {
 
 			// then
 			verify(chatMessageRedisService).getMessagesFromRedis(ROOM_ID);
-			verify(chatDomainService).saveChatHistories(ROOM_ID, messagesFromRedis);
+			verify(chatTransactionService).saveMessagesTransaction(ROOM_ID, messagesFromRedis);
 			verify(chatMessageRedisService).deleteMessagesInRedis(ROOM_ID);
 		}
 
@@ -236,7 +238,7 @@ class ChatMessageServiceTest {
 
 			// then
 			verify(chatMessageRedisService).getMessagesFromRedis(ROOM_ID);
-			verify(chatDomainService, never()).saveChatHistories(any(), any());
+			verify(chatTransactionService, never()).saveMessagesTransaction(any(), any());
 			verify(chatMessageRedisService, never()).deleteMessagesInRedis(any());
 		}
 	}
