@@ -403,7 +403,7 @@ class AuctionRedisServiceTest {
 
 		@DisplayName("정렬 기반 경매 조회 성공 - 마감 임박순")
 		@Test
-		void success_findAuctionsBySortType_closing() throws Exception {
+		void success_findAuctionsBySortType_closing() {
 			// given
 			given(redisTemplate.opsForValue()).willReturn(valueOperations);
 			given(valueOperations.get("auction:sorted:CLOSING"))
@@ -425,7 +425,7 @@ class AuctionRedisServiceTest {
 
 		@DisplayName("정렬 기반 경매 조회 성공 - 인기순(입찰개수)")
 		@Test
-		void success_findAuctionsBySortType_popular() throws Exception {
+		void success_findAuctionsBySortType_popular() {
 			// given
 			given(redisTemplate.opsForValue()).willReturn(valueOperations);
 			given(valueOperations.get("auction:sorted:POPULAR"))

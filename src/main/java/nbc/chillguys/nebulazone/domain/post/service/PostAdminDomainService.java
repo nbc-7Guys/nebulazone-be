@@ -15,7 +15,6 @@ import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 import nbc.chillguys.nebulazone.domain.post.exception.PostErrorCode;
 import nbc.chillguys.nebulazone.domain.post.exception.PostException;
-import nbc.chillguys.nebulazone.domain.post.repository.PostEsRepository;
 import nbc.chillguys.nebulazone.domain.post.repository.PostRepository;
 
 @Service
@@ -23,7 +22,6 @@ import nbc.chillguys.nebulazone.domain.post.repository.PostRepository;
 public class PostAdminDomainService {
 
 	private final PostRepository postRepository;
-	private final PostEsRepository postEsRepository;
 
 	/**
 	 * 검색 조건과 페이징 정보에 따라 게시글 목록을 조회합니다.

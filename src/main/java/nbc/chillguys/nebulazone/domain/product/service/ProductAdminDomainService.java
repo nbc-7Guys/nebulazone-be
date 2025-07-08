@@ -21,7 +21,6 @@ import nbc.chillguys.nebulazone.domain.product.repository.ProductRepository;
 public class ProductAdminDomainService {
 
 	private final ProductRepository productRepository;
-	private final ProductDomainService productDomainService;
 
 	/**
 	 * 검색 조건과 페이징 정보에 따라 상품 목록을 조회합니다.
