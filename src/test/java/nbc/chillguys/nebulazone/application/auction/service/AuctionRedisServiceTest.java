@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -42,6 +43,7 @@ import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.event.ProductDeletedEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -68,6 +70,9 @@ class AuctionRedisServiceTest {
 
 	@Mock
 	private ZSetOperations<String, Object> zSetOperations;
+
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
 
 	@Mock
 	private ObjectMapper objectMapper;
@@ -102,7 +107,6 @@ class AuctionRedisServiceTest {
 	private AuctionVo wonAuctionVo;
 	private BidVo bidVo;
 	private CreateRedisAuctionDto createRedisAuctionDto;
-	private Product product;
 	private Auction auction;
 
 	@BeforeEach
@@ -135,7 +139,7 @@ class AuctionRedisServiceTest {
 			BidStatus.WON.name(),
 			LocalDateTime.now());
 
-		product = Product.builder()
+		Product product = Product.builder()
 			.name("테스트 상품")
 			.description("테스트 상품 설명")
 			.price(100000L)
@@ -161,6 +165,7 @@ class AuctionRedisServiceTest {
 
 		@DisplayName("레디스 경매 생성 성공")
 		@Test
+		@SuppressWarnings("unchecked")
 		void success_createAuction() {
 			// given
 			given(redisTemplate.opsForHash()).willReturn(hashOperations);
@@ -215,7 +220,14 @@ class AuctionRedisServiceTest {
 
 			given(zSetOperations.range(anyString(), anyLong(), anyLong())).willReturn(Set.of(bidData));
 			given(objectMapper.convertValue(eq(bidData), eq(BidVo.class))).willReturn(bidVo);
-			given(userDomainService.findActiveUserByIds(anyList())).willReturn(List.of());
+
+			User bidder = User.builder()
+				.email("bidder@test.com")
+				.nickname("입찰자닉네임")
+				.build();
+			ReflectionTestUtils.setField(bidder, "id", 2L);
+			given(userDomainService.findActiveUserByIds(anyList())).willReturn(List.of(bidder));
+
 			willDoNothing().given(bidDomainService).createAllBid(any(), anyList(), anyMap());
 			given(transactionDomainService.createTransaction(any())).willReturn(null);
 			willDoNothing().given(productDomainService).markProductAsPurchased(anyLong());
@@ -349,10 +361,10 @@ class AuctionRedisServiceTest {
 			given(zSetOperations.range(anyString(), anyLong(), anyLong())).willReturn(Set.of());
 			given(userDomainService.findActiveUserByIds(anyList())).willReturn(List.of());
 			willDoNothing().given(bidDomainService).createAllBid(any(), anyList(), anyMap());
-			willDoNothing().given(productDomainService).deleteProductFromEs(anyLong());
 			given(zSetOperations.remove(anyString(), any())).willReturn(1L);
 			given(redisTemplate.delete(anyString())).willReturn(true);
 			willDoNothing().given(redisMessagePublisher).publishAuctionUpdate(anyLong(), anyString(), any());
+			willDoNothing().given(eventPublisher).publishEvent(any(ProductDeletedEvent.class));
 
 			// when
 			DeleteAuctionResponse result = auctionRedisService.deleteAuction(auctionId, user);
@@ -391,7 +403,7 @@ class AuctionRedisServiceTest {
 
 		@DisplayName("정렬 기반 경매 조회 성공 - 마감 임박순")
 		@Test
-		void success_findAuctionsBySortType_closing() throws Exception {
+		void success_findAuctionsBySortType_closing() {
 			// given
 			given(redisTemplate.opsForValue()).willReturn(valueOperations);
 			given(valueOperations.get("auction:sorted:CLOSING"))
@@ -413,7 +425,7 @@ class AuctionRedisServiceTest {
 
 		@DisplayName("정렬 기반 경매 조회 성공 - 인기순(입찰개수)")
 		@Test
-		void success_findAuctionsBySortType_popular() throws Exception {
+		void success_findAuctionsBySortType_popular() {
 			// given
 			given(redisTemplate.opsForValue()).willReturn(valueOperations);
 			given(valueOperations.get("auction:sorted:POPULAR"))

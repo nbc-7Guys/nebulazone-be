@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,8 @@ import nbc.chillguys.nebulazone.domain.bid.exception.BidException;
 import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
+import nbc.chillguys.nebulazone.domain.product.event.ProductDeletedEvent;
+import nbc.chillguys.nebulazone.domain.product.event.ProductUpdatedEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.dto.TransactionCreateCommand;
 import nbc.chillguys.nebulazone.domain.transaction.entity.UserType;
@@ -67,6 +70,8 @@ public class AuctionRedisService {
 	private final ProductDomainService productDomainService;
 	private final UserCacheService userCacheService;
 	private final RedisMessagePublisher redisMessagePublisher;
+
+	private final ApplicationEventPublisher eventPublisher;
 
 	/**
 	 * redis 경매 생성<br>
@@ -265,8 +270,7 @@ public class AuctionRedisService {
 
 		Product product = deletedAuction.getProduct();
 		product.delete();
-
-		productDomainService.deleteProductFromEs(product.getId());
+		eventPublisher.publishEvent(new ProductDeletedEvent(product.getId()));
 
 		redisTemplate.opsForZSet().remove(AuctionConstants.AUCTION_ENDING_PREFIX, auctionId);
 		redisTemplate.delete(AuctionConstants.AUCTION_PREFIX + auctionId);
@@ -501,7 +505,7 @@ public class AuctionRedisService {
 
 		Product product = deletedAuction.getProduct();
 		product.delete();
-		productDomainService.deleteProductFromEs(product.getId());
+		eventPublisher.publishEvent(new ProductDeletedEvent(product.getId()));
 
 		redisTemplate.opsForZSet().remove(AuctionConstants.AUCTION_ENDING_PREFIX, auctionId);
 		redisTemplate.delete(AuctionConstants.AUCTION_PREFIX + auctionId);
@@ -548,7 +552,8 @@ public class AuctionRedisService {
 			redisTemplate.opsForZSet().add(AuctionConstants.AUCTION_ENDING_PREFIX, auctionId, score);
 		}
 
-		auctionAdminDomainService.updateAuction(auctionId, command);
+		Product product = auctionAdminDomainService.updateAuction(auctionId, command);
+		eventPublisher.publishEvent(new ProductUpdatedEvent(product));
 	}
 
 }
