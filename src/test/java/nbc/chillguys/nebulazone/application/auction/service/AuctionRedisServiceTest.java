@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -68,6 +69,9 @@ class AuctionRedisServiceTest {
 
 	@Mock
 	private ZSetOperations<String, Object> zSetOperations;
+
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
 
 	@Mock
 	private ObjectMapper objectMapper;
@@ -223,6 +227,8 @@ class AuctionRedisServiceTest {
 			given(zSetOperations.remove(anyString(), any())).willReturn(1L);
 			given(redisTemplate.delete(anyString())).willReturn(true);
 			willDoNothing().given(redisMessagePublisher).publishAuctionUpdate(anyLong(), anyString(), any());
+			willDoNothing().given(eventPublisher).publishEvent(anyLong());
+			willDoNothing().given(eventPublisher).publishEvent(anyLong());
 
 			// when
 			EndAuctionResponse result = auctionRedisService.manualEndAuction(auctionId, user, request);
@@ -349,10 +355,10 @@ class AuctionRedisServiceTest {
 			given(zSetOperations.range(anyString(), anyLong(), anyLong())).willReturn(Set.of());
 			given(userDomainService.findActiveUserByIds(anyList())).willReturn(List.of());
 			willDoNothing().given(bidDomainService).createAllBid(any(), anyList(), anyMap());
-			willDoNothing().given(productDomainService).deleteProductFromEs(anyLong());
 			given(zSetOperations.remove(anyString(), any())).willReturn(1L);
 			given(redisTemplate.delete(anyString())).willReturn(true);
 			willDoNothing().given(redisMessagePublisher).publishAuctionUpdate(anyLong(), anyString(), any());
+			willDoNothing().given(eventPublisher).publishEvent(anyLong());
 
 			// when
 			DeleteAuctionResponse result = auctionRedisService.deleteAuction(auctionId, user);

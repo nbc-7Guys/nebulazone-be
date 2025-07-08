@@ -6,7 +6,7 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import lombok.RequiredArgsConstructor;
-import nbc.chillguys.nebulazone.domain.post.event.UpdatePostEvent;
+import nbc.chillguys.nebulazone.domain.post.event.CreatePostEvent;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
 
 @RequiredArgsConstructor
@@ -17,7 +17,7 @@ public class CreatePostEventListener {
 
 	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void handleUpdatePost(UpdatePostEvent event) {
+	public void handleUpdatePost(CreatePostEvent event) {
 		postDomainService.savePostToEs(event.post());
 	}
 }
