@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.application.product.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,10 @@ import nbc.chillguys.nebulazone.domain.product.dto.ProductAdminInfo;
 import nbc.chillguys.nebulazone.domain.product.dto.ProductAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.event.ProductCreatedEvent;
+import nbc.chillguys.nebulazone.domain.product.event.ProductDeletedEvent;
+import nbc.chillguys.nebulazone.domain.product.event.ProductUpdatedEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductAdminDomainService;
-import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 
 @Service
@@ -29,9 +32,9 @@ import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 public class ProductAdminService {
 
 	private final ProductAdminDomainService productAdminDomainService;
-	private final ProductDomainService productDomainService;
 	private final AuctionRedisService auctionRedisService;
 	private final GcsClient gcsClient;
+	private final ApplicationEventPublisher eventPublisher;
 
 	public CommonPageResponse<ProductAdminResponse> findProducts(ProductAdminSearchRequest request, Pageable pageable) {
 		ProductAdminSearchQueryCommand command = new ProductAdminSearchQueryCommand(
@@ -49,15 +52,21 @@ public class ProductAdminService {
 	}
 
 	public void updateProduct(Long productId, ProductAdminUpdateRequest request) {
-		productAdminDomainService.updateProduct(productId, request);
+		Product product = productAdminDomainService.updateProduct(productId, request);
+		eventPublisher.publishEvent(new ProductUpdatedEvent(product));
+
 	}
 
 	public void deleteProduct(Long productId) {
-		productAdminDomainService.deleteProduct(productId);
+		Long deletedProductId = productAdminDomainService.deleteProduct(productId);
+		eventPublisher.publishEvent(new ProductDeletedEvent(deletedProductId));
+
 	}
 
 	public void restoreProduct(Long productId) {
-		productAdminDomainService.restoreProduct(productId);
+		Product product = productAdminDomainService.restoreProduct(productId);
+		eventPublisher.publishEvent(new ProductCreatedEvent(product));
+
 	}
 
 	@Transactional
@@ -87,7 +96,8 @@ public class ProductAdminService {
 			auctionRedisService.updateAuctionProductImages(updatedProduct.getAuctionId(), productImageUrs);
 		}
 
-		productDomainService.saveProductToEs(updatedProduct);
+		// productDomainService.saveProductToEs(updatedProduct);
+		eventPublisher.publishEvent(new ProductUpdatedEvent(updatedProduct));
 
 		return ProductResponse.from(updatedProduct);
 

@@ -81,10 +81,10 @@ public class PostAdminDomainService {
 	 * @author 정석현
 	 */
 	@Transactional
-	public void updatePostType(Long postId, PostType type) {
+	public Post updatePostType(Long postId, PostType type) {
 		Post post = findActivePost(postId);
 		post.updateType(type);
-		savePostToEs(post);
+		return post;
 	}
 
 	/**
@@ -96,13 +96,13 @@ public class PostAdminDomainService {
 	 * @author 정석현
 	 */
 	@Transactional
-	public void deletePost(Long postId) {
+	public Long deletePost(Long postId) {
 		Post post = findDeletedPost(postId);
 
 		post.validatePostOwner(postId);
 
 		post.delete();
-		deletePostFromEs(postId);
+		return post.getId();
 	}
 
 	/**
@@ -113,10 +113,10 @@ public class PostAdminDomainService {
 	 * @author 정석현
 	 */
 	@Transactional
-	public void restorePost(Long postId) {
+	public Post restorePost(Long postId) {
 		Post post = findActivePost(postId);
 		post.restore();
-		savePostToEs(post);
+		return post;
 	}
 
 	/**
