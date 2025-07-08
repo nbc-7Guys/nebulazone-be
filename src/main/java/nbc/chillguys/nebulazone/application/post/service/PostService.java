@@ -22,6 +22,7 @@ import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
+import nbc.chillguys.nebulazone.domain.post.event.CreatePostEvent;
 import nbc.chillguys.nebulazone.domain.post.event.DeletePostEvent;
 import nbc.chillguys.nebulazone.domain.post.event.UpdatePostEvent;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
@@ -43,7 +44,7 @@ public class PostService {
 
 		Post createdPost = postDomainService.createPost(postCreateDto);
 
-		postDomainService.savePostToEs(createdPost);
+		eventPublisher.publishEvent(new CreatePostEvent(createdPost));
 
 		return CreatePostResponse.from(createdPost);
 
@@ -109,7 +110,7 @@ public class PostService {
 
 		Post updatedPost = postDomainService.updatePostImages(post, postImageUrls, user.getId());
 
-		postDomainService.savePostToEs(updatedPost);
+		eventPublisher.publishEvent(new UpdatePostEvent(updatedPost));
 
 		return GetPostResponse.from(updatedPost);
 	}

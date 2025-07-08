@@ -46,11 +46,10 @@ public class AuctionAdminDomainService {
 	 * @author 정석현
 	 */
 	@Transactional
-	public void updateAuction(Long auctionId, AuctionAdminUpdateCommand command) {
+	public Product updateAuction(Long auctionId, AuctionAdminUpdateCommand command) {
 		Auction auction = findByAuctionById(auctionId);
 		auction.update(command.startPrice(), command.currentPrice(), command.endTime(), command.isWon());
-		Product product = auction.getProduct();
-		productDomainService.saveProductToEs(product);
+		return auction.getProduct();
 	}
 
 	/**
@@ -64,8 +63,7 @@ public class AuctionAdminDomainService {
 	@Transactional
 	public void deleteAuction(Long auctionId) {
 		Auction auction = findByAuctionById(auctionId);
-		auction.delete(); // 소프트 딜리트: deleted=true, deletedAt=now
-		productDomainService.deleteProductFromEs(auction.getProduct().getId());
+		auction.delete();
 	}
 
 	/**

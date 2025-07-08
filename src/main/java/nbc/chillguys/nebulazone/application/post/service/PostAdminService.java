@@ -3,6 +3,7 @@ package nbc.chillguys.nebulazone.application.post.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,9 @@ import nbc.chillguys.nebulazone.domain.post.dto.PostAdminInfo;
 import nbc.chillguys.nebulazone.domain.post.dto.PostAdminSearchQueryCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostAdminUpdateCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
+import nbc.chillguys.nebulazone.domain.post.event.CreatePostEvent;
+import nbc.chillguys.nebulazone.domain.post.event.DeletePostEvent;
+import nbc.chillguys.nebulazone.domain.post.event.UpdatePostEvent;
 import nbc.chillguys.nebulazone.domain.post.service.PostAdminDomainService;
 import nbc.chillguys.nebulazone.infra.gcs.client.GcsClient;
 
@@ -31,6 +35,7 @@ public class PostAdminService {
 
 	private final PostAdminDomainService postsAdminDomainService;
 	private final GcsClient gcsClient;
+	private final ApplicationEventPublisher eventPublisher;
 
 	public CommonPageResponse<PostAdminResponse> findPosts(PostAdminSearchRequest request, Pageable pageable) {
 		PostAdminSearchQueryCommand command = new PostAdminSearchQueryCommand(
@@ -53,25 +58,29 @@ public class PostAdminService {
 
 		Post updatedPost = postsAdminDomainService.updatePost(command);
 
-		postsAdminDomainService.savePostToEs(updatedPost);
+		eventPublisher.publishEvent(new UpdatePostEvent(updatedPost));
 
 		return UpdatePostResponse.from(updatedPost);
 	}
 
 	public void updatePostType(Long postId, PostAdminUpdateTypeRequest request) {
-		postsAdminDomainService.updatePostType(postId, request.type());
+		Post post = postsAdminDomainService.updatePostType(postId, request.type());
+		eventPublisher.publishEvent(new UpdatePostEvent(post));
+
 	}
 
 	public DeletePostResponse deleteAdminPost(Long postId) {
-		postsAdminDomainService.deletePost(postId);
+		Long deletedPostId = postsAdminDomainService.deletePost(postId);
 
-		postsAdminDomainService.deletePostFromEs(postId);
+		eventPublisher.publishEvent(new DeletePostEvent(deletedPostId));
 
 		return DeletePostResponse.from(postId);
 	}
 
 	public void restorePost(Long postId) {
-		postsAdminDomainService.restorePost(postId);
+		Post post = postsAdminDomainService.restorePost(postId);
+		eventPublisher.publishEvent(new CreatePostEvent(post));
+
 	}
 
 	@Transactional
@@ -96,7 +105,7 @@ public class PostAdminService {
 
 		Post updatedPost = postsAdminDomainService.updatePostImages(post, postImageUrls);
 
-		postsAdminDomainService.savePostToEs(updatedPost);
+		eventPublisher.publishEvent(new UpdatePostEvent(updatedPost));
 
 		return GetPostResponse.from(updatedPost);
 	}

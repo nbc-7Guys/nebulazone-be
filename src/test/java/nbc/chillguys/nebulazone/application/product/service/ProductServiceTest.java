@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +40,8 @@ import nbc.chillguys.nebulazone.domain.product.dto.ProductSearchCommand;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.event.ProductCreatedEvent;
+import nbc.chillguys.nebulazone.domain.product.event.ProductUpdatedEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.product.vo.ProductDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
@@ -66,6 +69,9 @@ class ProductServiceTest {
 
 	@Mock
 	private GcsClient gcsClient;
+
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
 
 	@InjectMocks
 	private ProductService productService;
@@ -217,6 +223,7 @@ class ProductServiceTest {
 			given(productDomainService.createProduct(any(ProductCreateCommand.class))).willReturn(auctionProduct);
 			given(auctionDomainService.createAuction(any(AuctionCreateCommand.class))).willReturn(auction);
 			willDoNothing().given(auctionRedisService).createAuction(any(CreateRedisAuctionDto.class));
+			willDoNothing().given(eventPublisher).publishEvent(any(ProductCreatedEvent.class));
 
 			// when
 			ProductResponse result = productService.createProduct(user, catalogId, request);
@@ -247,6 +254,7 @@ class ProductServiceTest {
 
 			given(catalogDomainService.getCatalogById(catalogId)).willReturn(catalog);
 			given(productDomainService.createProduct(any(ProductCreateCommand.class))).willReturn(product);
+			willDoNothing().given(eventPublisher).publishEvent(any(ProductCreatedEvent.class));
 
 			// when
 			ProductResponse result = productService.createProduct(user, catalogId, request);
@@ -304,6 +312,7 @@ class ProductServiceTest {
 			given(productDomainService.findActiveProductById(updateProductId)).willReturn(product);
 			given(productDomainService.updateProductImages(any(Product.class), eq(updatedImageUrls), eq(user.getId())))
 				.willReturn(product);
+			willDoNothing().given(eventPublisher).publishEvent(any(ProductUpdatedEvent.class));
 
 			// when
 			ProductResponse result = productService.updateProductImages(updateProductId, newImageFiles, user,

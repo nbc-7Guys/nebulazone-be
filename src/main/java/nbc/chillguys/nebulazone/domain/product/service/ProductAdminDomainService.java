@@ -21,7 +21,6 @@ import nbc.chillguys.nebulazone.domain.product.repository.ProductRepository;
 public class ProductAdminDomainService {
 
 	private final ProductRepository productRepository;
-	private final ProductDomainService productDomainService;
 
 	/**
 	 * 검색 조건과 페이징 정보에 따라 상품 목록을 조회합니다.
@@ -60,7 +59,7 @@ public class ProductAdminDomainService {
 	 * @author 정석현
 	 */
 	@Transactional
-	public void updateProduct(Long productId, ProductAdminUpdateRequest request) {
+	public Product updateProduct(Long productId, ProductAdminUpdateRequest request) {
 
 		Product product = findByIdWithJoin(productId);
 
@@ -75,7 +74,8 @@ public class ProductAdminDomainService {
 		} else if (request.price() != null && !request.price().equals(product.getPrice())) {
 			product.changePrice(request.price());
 		}
-		productDomainService.saveProductToEs(product);
+
+		return product;
 	}
 
 	/**
@@ -86,10 +86,10 @@ public class ProductAdminDomainService {
 	 * @author 정석현
 	 */
 	@Transactional
-	public void deleteProduct(Long productId) {
+	public Long deleteProduct(Long productId) {
 		Product product = findByIdWithJoin(productId);
 		product.delete();
-		productDomainService.deleteProductFromEs(productId);
+		return product.getId();
 	}
 
 	/**
@@ -99,10 +99,10 @@ public class ProductAdminDomainService {
 	 * @param productId 복원할 상품 ID
 	 * @author 정석현
 	 */
-	public void restoreProduct(Long productId) {
+	public Product restoreProduct(Long productId) {
 		Product product = findByIdWithJoin(productId);
 		product.restore();
-		productDomainService.saveProductToEs(product);
+		return product;
 	}
 
 	/**

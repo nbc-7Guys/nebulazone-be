@@ -15,16 +15,13 @@ import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
 import nbc.chillguys.nebulazone.domain.post.exception.PostErrorCode;
 import nbc.chillguys.nebulazone.domain.post.exception.PostException;
-import nbc.chillguys.nebulazone.domain.post.repository.PostEsRepository;
 import nbc.chillguys.nebulazone.domain.post.repository.PostRepository;
-import nbc.chillguys.nebulazone.domain.post.vo.PostDocument;
 
 @Service
 @RequiredArgsConstructor
 public class PostAdminDomainService {
 
 	private final PostRepository postRepository;
-	private final PostEsRepository postEsRepository;
 
 	/**
 	 * 검색 조건과 페이징 정보에 따라 게시글 목록을 조회합니다.
@@ -54,8 +51,6 @@ public class PostAdminDomainService {
 		Post post = findActivePost(command.postId());
 
 		post.update(command.title(), command.content());
-		savePostToEs(post);
-
 		return post;
 	}
 
@@ -81,10 +76,10 @@ public class PostAdminDomainService {
 	 * @author 정석현
 	 */
 	@Transactional
-	public void updatePostType(Long postId, PostType type) {
+	public Post updatePostType(Long postId, PostType type) {
 		Post post = findActivePost(postId);
 		post.updateType(type);
-		savePostToEs(post);
+		return post;
 	}
 
 	/**
@@ -96,13 +91,13 @@ public class PostAdminDomainService {
 	 * @author 정석현
 	 */
 	@Transactional
-	public void deletePost(Long postId) {
+	public Long deletePost(Long postId) {
 		Post post = findDeletedPost(postId);
 
 		post.validatePostOwner(postId);
 
 		post.delete();
-		deletePostFromEs(postId);
+		return post.getId();
 	}
 
 	/**
@@ -113,10 +108,10 @@ public class PostAdminDomainService {
 	 * @author 정석현
 	 */
 	@Transactional
-	public void restorePost(Long postId) {
+	public Post restorePost(Long postId) {
 		Post post = findActivePost(postId);
 		post.restore();
-		savePostToEs(post);
+		return post;
 	}
 
 	/**
@@ -132,18 +127,6 @@ public class PostAdminDomainService {
 	}
 
 	/**
-	 * 활성 상태의 게시글을 ID로 조회합니다.
-	 *
-	 * @param postId 게시글 ID
-	 * @return 게시글 엔티티
-	 * @author 정석현
-	 */
-	public Post findMyActivePost(Long postId) {
-
-		return findActivePost(postId);
-	}
-
-	/**
 	 * 삭제된 게시글을 ID로 조회합니다.
 	 *
 	 * @param postId 게시글 ID
@@ -153,28 +136,6 @@ public class PostAdminDomainService {
 	public Post findDeletedPost(Long postId) {
 		return postRepository.findDeletedPostById(postId)
 			.orElseThrow(() -> new PostException(PostErrorCode.POST_NOT_FOUND));
-	}
-
-	/**
-	 * 게시글을 ES(검색엔진)에 저장(업데이트)합니다.
-	 *
-	 * @param post 게시글 엔티티
-	 * @author 정석현
-	 */
-	@Transactional
-	public void savePostToEs(Post post) {
-		postEsRepository.save(PostDocument.from(post));
-	}
-
-	/**
-	 * 게시글을 ES(검색엔진)에서 삭제합니다.
-	 *
-	 * @param postId 게시글 ID
-	 * @author 정석현
-	 */
-	@Transactional
-	public void deletePostFromEs(Long postId) {
-		postEsRepository.deleteById(postId);
 	}
 
 	/**
