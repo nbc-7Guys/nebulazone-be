@@ -36,6 +36,7 @@ import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
 import nbc.chillguys.nebulazone.domain.product.event.ChangeToAuctionTypeEvent;
+import nbc.chillguys.nebulazone.domain.product.event.ProductCreatedEvent;
 import nbc.chillguys.nebulazone.domain.product.event.ProductDeletedEvent;
 import nbc.chillguys.nebulazone.domain.product.event.ProductPurchasedEvent;
 import nbc.chillguys.nebulazone.domain.product.event.ProductUpdatedEvent;
@@ -83,7 +84,7 @@ public class ProductService {
 			createdProduct.updateAuctionId(createdAuction.getId());
 		}
 
-		productDomainService.saveProductToEs(createdProduct);
+		eventPublisher.publishEvent(new ProductCreatedEvent(createdProduct));
 
 		return ProductResponse.from(createdProduct, productEndTime);
 	}
@@ -207,7 +208,7 @@ public class ProductService {
 			auctionRedisService.updateAuctionProductImages(updatedProduct.getAuctionId(), productImageUrs);
 		}
 
-		productDomainService.saveProductToEs(updatedProduct);
+		eventPublisher.publishEvent(new ProductUpdatedEvent(updatedProduct));
 
 		return ProductResponse.from(updatedProduct);
 	}
