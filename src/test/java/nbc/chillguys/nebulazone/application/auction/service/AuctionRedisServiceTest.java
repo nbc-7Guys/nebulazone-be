@@ -43,6 +43,7 @@ import nbc.chillguys.nebulazone.domain.bid.service.BidDomainService;
 import nbc.chillguys.nebulazone.domain.product.entity.Product;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductEndTime;
 import nbc.chillguys.nebulazone.domain.product.entity.ProductTxMethod;
+import nbc.chillguys.nebulazone.domain.product.event.ProductDeletedEvent;
 import nbc.chillguys.nebulazone.domain.product.service.ProductDomainService;
 import nbc.chillguys.nebulazone.domain.transaction.service.TransactionDomainService;
 import nbc.chillguys.nebulazone.domain.user.entity.User;
@@ -219,7 +220,14 @@ class AuctionRedisServiceTest {
 
 			given(zSetOperations.range(anyString(), anyLong(), anyLong())).willReturn(Set.of(bidData));
 			given(objectMapper.convertValue(eq(bidData), eq(BidVo.class))).willReturn(bidVo);
-			given(userDomainService.findActiveUserByIds(anyList())).willReturn(List.of());
+
+			User bidder = User.builder()
+				.email("bidder@test.com")
+				.nickname("입찰자닉네임")
+				.build();
+			ReflectionTestUtils.setField(bidder, "id", 2L);
+			given(userDomainService.findActiveUserByIds(anyList())).willReturn(List.of(bidder));
+
 			willDoNothing().given(bidDomainService).createAllBid(any(), anyList(), anyMap());
 			given(transactionDomainService.createTransaction(any())).willReturn(null);
 			willDoNothing().given(productDomainService).markProductAsPurchased(anyLong());
@@ -227,8 +235,6 @@ class AuctionRedisServiceTest {
 			given(zSetOperations.remove(anyString(), any())).willReturn(1L);
 			given(redisTemplate.delete(anyString())).willReturn(true);
 			willDoNothing().given(redisMessagePublisher).publishAuctionUpdate(anyLong(), anyString(), any());
-			willDoNothing().given(eventPublisher).publishEvent(anyLong());
-			willDoNothing().given(eventPublisher).publishEvent(anyLong());
 
 			// when
 			EndAuctionResponse result = auctionRedisService.manualEndAuction(auctionId, user, request);
@@ -358,7 +364,7 @@ class AuctionRedisServiceTest {
 			given(zSetOperations.remove(anyString(), any())).willReturn(1L);
 			given(redisTemplate.delete(anyString())).willReturn(true);
 			willDoNothing().given(redisMessagePublisher).publishAuctionUpdate(anyLong(), anyString(), any());
-			willDoNothing().given(eventPublisher).publishEvent(anyLong());
+			willDoNothing().given(eventPublisher).publishEvent(any(ProductDeletedEvent.class));
 
 			// when
 			DeleteAuctionResponse result = auctionRedisService.deleteAuction(auctionId, user);

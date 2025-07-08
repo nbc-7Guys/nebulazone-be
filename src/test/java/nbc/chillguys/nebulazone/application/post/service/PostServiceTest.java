@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +32,8 @@ import nbc.chillguys.nebulazone.domain.post.dto.PostCreateCommand;
 import nbc.chillguys.nebulazone.domain.post.dto.PostSearchCommand;
 import nbc.chillguys.nebulazone.domain.post.entity.Post;
 import nbc.chillguys.nebulazone.domain.post.entity.PostType;
+import nbc.chillguys.nebulazone.domain.post.event.CreatePostEvent;
+import nbc.chillguys.nebulazone.domain.post.event.UpdatePostEvent;
 import nbc.chillguys.nebulazone.domain.post.service.PostDomainService;
 import nbc.chillguys.nebulazone.domain.post.vo.PostDocument;
 import nbc.chillguys.nebulazone.domain.user.entity.Address;
@@ -48,6 +51,9 @@ class PostServiceTest {
 
 	@Mock
 	private GcsClient gcsClient;
+
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
 
 	@InjectMocks
 	private PostService postService;
@@ -153,14 +159,14 @@ class PostServiceTest {
 				"FREE");
 
 			given(postDomainService.createPost(any(PostCreateCommand.class))).willReturn(post);
-			willDoNothing().given(postDomainService).savePostToEs(post);
+			willDoNothing().given(eventPublisher).publishEvent(any(CreatePostEvent.class));
 
 			// when
 			CreatePostResponse response = postService.createPost(user, request);
 
 			// then
 			verify(postDomainService, times(1)).createPost(any(PostCreateCommand.class));
-			verify(postDomainService, times(1)).savePostToEs(post);
+			verify(eventPublisher, times(1)).publishEvent(any(CreatePostEvent.class));
 
 			assertThat(response.postId()).isEqualTo(post.getId());
 			assertThat(response.title()).isEqualTo(post.getTitle());
@@ -209,6 +215,7 @@ class PostServiceTest {
 			given(postDomainService.findActivePost(updatePostId)).willReturn(post);
 			given(postDomainService.updatePostImages(any(Post.class), eq(updatedImageUrls), eq(user.getId())))
 				.willReturn(post);
+			willDoNothing().given(eventPublisher).publishEvent(any(UpdatePostEvent.class));
 
 			// when
 			GetPostResponse result = postService.updatePostImages(updatePostId, newImageFiles, user,
@@ -219,6 +226,7 @@ class PostServiceTest {
 			verify(postDomainService, times(1)).findActivePost(updatePostId);
 			verify(postDomainService, times(1))
 				.updatePostImages(any(Post.class), anyList(), anyLong());
+			verify(eventPublisher, times(1)).publishEvent(any(UpdatePostEvent.class));
 
 			assertThat(result.imageUrls())
 				.containsExactly("old_image_url1", "new_image_url1", "new_image_url2");
