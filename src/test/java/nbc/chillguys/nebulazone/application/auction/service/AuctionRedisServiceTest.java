@@ -107,7 +107,6 @@ class AuctionRedisServiceTest {
 	private AuctionVo wonAuctionVo;
 	private BidVo bidVo;
 	private CreateRedisAuctionDto createRedisAuctionDto;
-	private Product product;
 	private Auction auction;
 
 	@BeforeEach
@@ -140,7 +139,7 @@ class AuctionRedisServiceTest {
 			BidStatus.WON.name(),
 			LocalDateTime.now());
 
-		product = Product.builder()
+		Product product = Product.builder()
 			.name("테스트 상품")
 			.description("테스트 상품 설명")
 			.price(100000L)
@@ -166,6 +165,7 @@ class AuctionRedisServiceTest {
 
 		@DisplayName("레디스 경매 생성 성공")
 		@Test
+		@SuppressWarnings("unchecked")
 		void success_createAuction() {
 			// given
 			given(redisTemplate.opsForHash()).willReturn(hashOperations);
