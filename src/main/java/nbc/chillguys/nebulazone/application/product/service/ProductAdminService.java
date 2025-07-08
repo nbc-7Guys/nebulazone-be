@@ -96,7 +96,6 @@ public class ProductAdminService {
 			auctionRedisService.updateAuctionProductImages(updatedProduct.getAuctionId(), productImageUrs);
 		}
 
-		// productDomainService.saveProductToEs(updatedProduct);
 		eventPublisher.publishEvent(new ProductUpdatedEvent(updatedProduct));
 
 		return ProductResponse.from(updatedProduct);

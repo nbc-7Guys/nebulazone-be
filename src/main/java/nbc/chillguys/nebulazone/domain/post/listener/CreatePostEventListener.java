@@ -17,7 +17,7 @@ public class CreatePostEventListener {
 
 	@Async
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-	public void handleUpdatePost(CreatePostEvent event) {
+	public void handleSavePost(CreatePostEvent event) {
 		postDomainService.savePostToEs(event.post());
 	}
 }
